@@ -1032,11 +1032,11 @@ if(sessionStorage.getItem('rs_auth')==='1'){
     <div class="filters fade-in fade-in-1">
       <div class="filter-group">
         <label class="filter-label">From</label>
-        <input type="date" class="filter-input" id="filter-from">
+        <input type="date" class="filter-input" id="filter-from" autocomplete="off">
       </div>
       <div class="filter-group">
         <label class="filter-label">To</label>
-        <input type="date" class="filter-input" id="filter-to">
+        <input type="date" class="filter-input" id="filter-to" autocomplete="off">
       </div>
       <div class="filter-group">
         <label class="filter-label">Website</label>
@@ -1240,11 +1240,11 @@ if(sessionStorage.getItem('rs_auth')==='1'){
       <div class="lv-filters fade-in" style="margin-bottom:16px">
         <div class="filter-group">
           <label class="filter-label">From</label>
-          <input type="date" class="filter-input" id="lv-from">
+          <input type="date" class="filter-input" id="lv-from" autocomplete="off">
         </div>
         <div class="filter-group">
           <label class="filter-label">To</label>
-          <input type="date" class="filter-input" id="lv-to">
+          <input type="date" class="filter-input" id="lv-to" autocomplete="off">
         </div>
         <div class="filter-group">
           <label class="filter-label">Location</label>
@@ -2059,12 +2059,21 @@ function mapLead(row, i) {
 }
 
 async function fetchLeads() {
-  var result = await sb.from('leads').select('*').order('created_at', { ascending: false });
+  var result = await sb.from('leads').select('*').order('created_at', { ascending: false }).limit(10000);
   if (result.error) { console.error('Supabase error:', result.error); return []; }
   return (result.data || []).map(mapLead);
 }
 
 async function initDashboard() {
+  // Clear any browser-autocompleted or leftover filter values
+  ['filter-from','filter-to','filter-search','table-search','lv-from','lv-to','lv-search'].forEach(id => {
+    var el = document.getElementById(id);
+    if (el) el.value = '';
+  });
+  ['filter-form','filter-location','filter-gender','lv-location','lv-gender','lv-quality','lv-form'].forEach(id => {
+    var el = document.getElementById(id);
+    if (el) el.selectedIndex = 0;
+  });
   ALL_LEADS = await fetchLeads();
   filtered = [...ALL_LEADS];
   renderTable();
