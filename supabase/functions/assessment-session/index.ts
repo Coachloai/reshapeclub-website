@@ -93,18 +93,26 @@ Deno.serve(async (req) => {
       const session_id = body.session_id as string | undefined;
       const name       = ((body.name as string) || "").trim();
       const email      = ((body.email as string) || "").trim().toLowerCase();
+      const phoneRaw   = ((body.phone as string) || "").trim();
+      // Strip whitespace/dashes/parens; accept +intl, UK 0-prefixed, or 44-prefixed.
+      const phoneCleaned = phoneRaw.replace(/[\s\-()]/g, "");
+      const phoneOk = !phoneCleaned ||
+        /^(\+\d{10,15}|0[1-9]\d{8,10}|44\d{10,11})$/.test(phoneCleaned);
       if (!session_id || !email) {
         return jsonResponse({ error: "session_id and email required" }, 400);
       }
       if (!/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(email)) {
         return jsonResponse({ error: "invalid email" }, 400);
       }
+      if (!phoneOk) {
+        return jsonResponse({ error: "invalid phone" }, 400);
+      }
 
       // Upsert into leads. The existing leads table has first_name + last_name
       // NOT NULL, so we always preserve richer data and only fill blanks.
       const { data: existing } = await supabase
         .from("leads")
-        .select("id, first_name, last_name")
+        .select("id, first_name, last_name, phone")
         .eq("email", email)
         .order("created_at", { ascending: false })
         .limit(1)
@@ -115,6 +123,7 @@ Deno.serve(async (req) => {
         lead_id = existing.id;
         const patch: Record<string, string> = {};
         if (!existing.first_name && name) patch.first_name = name;
+        if (!existing.phone && phoneCleaned) patch.phone = phoneCleaned;
         if (Object.keys(patch).length) {
           await supabase.from("leads").update(patch).eq("id", lead_id);
         }
@@ -126,6 +135,7 @@ Deno.serve(async (req) => {
             first_name: name || "Friend",
             last_name:  "-",
             email,
+            phone:      phoneCleaned || null,
           })
           .select("id")
           .single();

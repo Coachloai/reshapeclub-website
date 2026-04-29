@@ -225,7 +225,8 @@
       selectedSlotId: null,
       lead: {
         name: sessionStorage.getItem('reshape_hormonal_name') || '',
-        email: sessionStorage.getItem('reshape_hormonal_email') || ''
+        email: sessionStorage.getItem('reshape_hormonal_email') || '',
+        phone: sessionStorage.getItem('reshape_hormonal_phone') || ''
       }
     };
 
@@ -355,8 +356,10 @@
     var slot = ctx.slots.find(function(x){ return x.id === ctx.selectedSlotId; });
     if (!slot) return;
 
-    if (!ctx.lead.email){
-      // Fall back to the standalone /booking/ page so we collect contact details there.
+    if (!ctx.lead.email || !ctx.lead.phone){
+      // Fall back to the standalone /booking/ page so we collect missing
+      // contact details (email or phone) there. Older sessions without phone
+      // captured at the gate land here on first booking attempt.
       window.location.href = '/booking/';
       return;
     }
@@ -366,12 +369,14 @@
     var firstName = (ctx.lead.name || '').split(' ')[0] || ctx.lead.name || '';
     var lastName = (ctx.lead.name || '').split(' ').slice(1).join(' ') || '-';
 
+    var phone = ctx.lead.phone || null;
+
     ctx.sb.from('bookings').insert([{
       slot_id: ctx.selectedSlotId,
       first_name: firstName,
       last_name: lastName,
       email: ctx.lead.email,
-      phone: null,
+      phone: phone,
       location: ctx.loc
     }]).then(function(){
       return ctx.sb.from('booking_slots').update({ booked_count: slot.booked_count + 1 }).eq('id', slot.id);
@@ -384,7 +389,7 @@
       // Queue booking_confirmed sequence via the existing browser helper.
       if (typeof queueSequence === 'function'){
         queueSequence('booking_confirmed', {
-          first_name: firstName, last_name: lastName, email: ctx.lead.email, phone: null
+          first_name: firstName, last_name: lastName, email: ctx.lead.email, phone: phone
         }, {
           date: when, time: slot.start_time.substring(0,5), location: ctx.loc,
           datetime: ctx.selectedDate + 'T' + slot.start_time.substring(0,5) + ':00'

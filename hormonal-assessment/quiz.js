@@ -175,6 +175,7 @@
       +     '<div class="gate-fields">'
       +       '<input type="text" id="gate-name" placeholder="First name" autocomplete="given-name">'
       +       '<input type="email" id="gate-email" placeholder="you@example.com" autocomplete="email">'
+      +       '<input type="tel" id="gate-phone" placeholder="07700 000000" autocomplete="tel">'
       +     '</div>'
       +     '<button class="cal-confirm" id="gate-submit" style="background:var(--terracotta)">Continue</button>'
       +     '<label class="gate-consent"><input type="checkbox" id="gate-consent" checked><span>I\'d like Coach Jaime to send me my pattern report and follow-up emails. Unsubscribe anytime.</span></label>'
@@ -186,14 +187,27 @@
     var root = $('#screen-root');
     root.innerHTML = html;
 
+    // Pre-fill if the user is resuming a session.
+    var savedName  = sessionStorage.getItem('reshape_hormonal_name');
+    var savedEmail = sessionStorage.getItem('reshape_hormonal_email');
+    var savedPhone = sessionStorage.getItem('reshape_hormonal_phone');
+    if (savedName)  $('#gate-name').value  = savedName;
+    if (savedEmail) $('#gate-email').value = savedEmail;
+    if (savedPhone) $('#gate-phone').value = savedPhone;
+
     $('#gate-submit').addEventListener('click', function(){
       var name = ($('#gate-name').value || '').trim();
       var email = ($('#gate-email').value || '').trim().toLowerCase();
+      var phoneRaw = ($('#gate-phone').value || '').trim();
+      var phoneCleaned = phoneRaw.replace(/[\s\-\(\)]/g, '');
       var consent = $('#gate-consent').checked;
       var err = $('#gate-error');
       err.textContent = '';
       if (!name) return err.textContent = 'Please enter your first name.';
       if (!/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(email)) return err.textContent = 'Please enter a valid email address.';
+      if (!phoneCleaned || !/^(\+\d{10,15}|0[1-9]\d{8,10}|44\d{10,11})$/.test(phoneCleaned)) {
+        return err.textContent = 'Please enter a valid phone number (e.g. 07700 000000).';
+      }
       if (!consent) return err.textContent = 'Please tick the consent box to continue.';
 
       var btn = $('#gate-submit');
@@ -201,7 +215,7 @@
       fetchEdge(SESSION_FN, {
         action: 'capture_email',
         session_id: state.sessionId,
-        name: name, email: email, consent_marketing: consent
+        name: name, email: email, phone: phoneCleaned, consent_marketing: consent
       }).then(function(r){
         btn.disabled = false; btn.textContent = 'Continue';
         if (r.status !== 200){
@@ -211,6 +225,7 @@
         state.emailCaptured = true;
         sessionStorage.setItem('reshape_hormonal_email', email);
         sessionStorage.setItem('reshape_hormonal_name', name);
+        sessionStorage.setItem('reshape_hormonal_phone', phoneCleaned);
         renderQuestion();
       }).catch(function(){
         btn.disabled = false; btn.textContent = 'Continue';
