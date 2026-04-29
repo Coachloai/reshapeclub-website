@@ -99,17 +99,24 @@
     $('#result-state').style.display = 'block';
 
     var primary   = data.primary_archetype;
-    var copy      = (data.readout && !data.readout.stub) ? data.readout : ARCHETYPE_COPY[primary];
-    var label     = ARCHETYPE_LABEL[primary];
+    // Server returns the assembled readout. Old cached sessions may still
+    // come back with { stub: true } — fall back to the static archetype
+    // scripts so the page still renders rather than blanking out.
+    var serverReadout = (data.readout && !data.readout.stub) ? data.readout : null;
+    var copy          = serverReadout || ARCHETYPE_COPY[primary];
+    var label         = ARCHETYPE_LABEL[primary];
 
     var headline  = (copy && copy.headline) || ("You're a " + label + ".");
     // Wrap the archetype name in <em> for the italic terracotta accent.
     var headlineHtml = headline.replace(label, '<em>' + label + '</em>');
     $('#result-headline').innerHTML = headlineHtml;
 
-    var secondary = data.secondary_archetype;
-    if (secondary && secondary !== primary){
-      $('#result-secondary').textContent = 'With notable signals from the ' + ARCHETYPE_LABEL[secondary] + '.';
+    // Secondary line. Server-built readout puts the full sentence in
+    // copy.secondary; fall back to deriving it from secondary_archetype.
+    if (copy && copy.secondary){
+      $('#result-secondary').textContent = copy.secondary;
+    } else if (data.secondary_archetype && data.secondary_archetype !== primary){
+      $('#result-secondary').textContent = 'With notable signals from the ' + ARCHETYPE_LABEL[data.secondary_archetype] + '.';
     }
 
     $('#result-mirror').innerHTML = (copy && (copy.mirror_back || copy.mirror)) || '';
@@ -125,6 +132,11 @@
         +   '</div>'
         + '</div>';
     }).join('');
+
+    // Q14-driven 1-liner above the booking block (only set on server readouts).
+    if (copy && copy.closer){
+      $('#result-closer').textContent = copy.closer;
+    }
 
     renderRadar(data.hormone_scores || {});
     initBooking(data);

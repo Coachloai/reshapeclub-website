@@ -6,6 +6,7 @@
 
 import { createClient } from "https://esm.sh/@supabase/supabase-js@2";
 import { isScoringError, scoreAssessment } from "./scoring.ts";
+import { buildReadout } from "./readout.ts";
 
 const corsHeaders = {
   "Access-Control-Allow-Origin": "*",
@@ -143,7 +144,7 @@ Deno.serve(async (req) => {
 
     const { data: assessment, error: aErr } = await supabase
       .from("assessments")
-      .select("session_id, completed_at, lead_id, primary_archetype, secondary_archetype, hormone_scores, cluster_scores, flags")
+      .select("session_id, completed_at, lead_id, primary_archetype, secondary_archetype, hormone_scores, cluster_scores, flags, readout")
       .eq("session_id", session_id)
       .maybeSingle();
     if (aErr)        return jsonResponse({ error: aErr.message }, 500);
@@ -159,7 +160,7 @@ Deno.serve(async (req) => {
         hormone_scores:      assessment.hormone_scores,
         cluster_scores:      assessment.cluster_scores,
         flags:               assessment.flags,
-        readout:             { stub: true },
+        readout:             assessment.readout || { stub: true },
       });
     }
 
@@ -177,6 +178,8 @@ Deno.serve(async (req) => {
       return jsonResponse(result, 400);
     }
 
+    const readout = buildReadout(result, answers);
+
     const { error: updErr } = await supabase
       .from("assessments")
       .update({
@@ -185,6 +188,7 @@ Deno.serve(async (req) => {
         hormone_scores:      result.hormone_scores,
         cluster_scores:      result.cluster_scores,
         flags:               result.flags,
+        readout:             readout,
         completed_at:        new Date().toISOString(),
       })
       .eq("session_id", session_id);
@@ -209,7 +213,6 @@ Deno.serve(async (req) => {
       await fireSequence(supabase, TRIGGER_MAP[result.primary_archetype], assessment.lead_id);
     }
 
-    // Pass 1 stub readout. Pass 4 will render the personalised mirror-back.
     return jsonResponse({
       ok: true,
       primary_archetype:   result.primary_archetype,
@@ -217,7 +220,7 @@ Deno.serve(async (req) => {
       hormone_scores:      result.hormone_scores,
       cluster_scores:      result.cluster_scores,
       flags:               result.flags,
-      readout:             { stub: true },
+      readout:             readout,
     });
   } catch (err) {
     return jsonResponse({ error: (err as Error).message }, 500);

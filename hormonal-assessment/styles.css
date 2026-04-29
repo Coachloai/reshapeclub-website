@@ -616,6 +616,14 @@ footer {
 .result-readout p:last-child { margin-bottom: 0; }
 .result-readout strong { color: var(--charcoal); font-weight: 500; }
 
+.result-closer {
+  max-width: 800px; margin: 2.5rem auto 1rem; padding: 0 .25rem;
+  font-family: 'Fraunces', serif; font-size: 1.25rem; font-weight: 400;
+  line-height: 1.45; color: var(--charcoal); font-style: italic;
+  text-align: left;
+}
+.result-closer:empty { display: none; }
+
 .result-section {
   max-width: 800px; margin: 4rem auto 0; padding: 0 1.5rem;
 }
