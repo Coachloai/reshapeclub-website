@@ -287,7 +287,51 @@ img { max-width: 100%; display: block; }
   margin: 0 auto 1.5rem;
 }
 .success h2 { font-size: clamp(1.875rem, 4vw, 2.5rem); margin-bottom: .75rem; }
-.success p { color: var(--body); max-width: 480px; margin: 0 auto 1rem; }
+.success p { color: var(--body); max-width: 520px; margin: 0 auto 1rem; }
+.success p strong { color: var(--charcoal); font-weight: 600; }
+
+.cal-row {
+  display: flex; gap: .75rem; justify-content: center; flex-wrap: wrap;
+  margin-top: 1.5rem;
+}
+.btn-cal {
+  display: inline-flex; align-items: center; gap: .5rem;
+  background: var(--charcoal); color: var(--cream);
+  padding: .85rem 1.4rem; border-radius: 999px;
+  font-size: .9375rem; font-weight: 500;
+  transition: all .2s; font-family: inherit;
+}
+.btn-cal:hover { background: var(--terracotta); transform: translateY(-1px); }
+.btn-cal-ghost {
+  background: var(--white); color: var(--charcoal);
+  border: 1.5px solid var(--line);
+}
+.btn-cal-ghost:hover { background: var(--soft-peach); border-color: var(--terracotta); color: var(--terracotta); }
+
+.perk {
+  background: var(--soft-peach);
+  border: 1px dashed var(--terracotta);
+  border-radius: 12px;
+  padding: 1.5rem 1.5rem 1.25rem;
+  margin: 1.75rem auto 0;
+  max-width: 520px;
+  text-align: left;
+}
+.perk-eyebrow {
+  font-size: .6875rem; text-transform: uppercase; letter-spacing: .14em;
+  color: var(--terracotta); font-weight: 600; margin-bottom: .5rem;
+}
+.perk-title {
+  font-family: 'Fraunces', serif;
+  font-size: 1.375rem; line-height: 1.2;
+  color: var(--charcoal); margin-bottom: .625rem;
+  letter-spacing: -0.01em;
+}
+.perk-body {
+  font-size: .9375rem; color: var(--charcoal); opacity: .85;
+  margin: 0 !important; max-width: none !important;
+  line-height: 1.55;
+}
 
 /* === FOOTER (matches /hormonal-assessment) === */
 footer { background: var(--charcoal); color: var(--muted); padding: 4rem 0 2rem; }
