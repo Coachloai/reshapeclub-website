@@ -56,6 +56,66 @@ function buildBigGoal(p: {
   return parts.join("\n\n");
 }
 
+// ── Email templates (terracotta + charcoal, matches site brand) ──
+const ICS_URL = "https://reshape.fit/seminar-application/reshape-seminar-jun-5.ics";
+const GCAL_URL = "https://www.google.com/calendar/render?action=TEMPLATE&text=ReShape%20Seminar&dates=20260605T174500Z/20260605T191500Z&details=Your%20seat%20at%20the%20ReShape%20seminar%20with%20Coach%20Loai.&location=ReShape%20Colchester";
+
+function emailShell(bodyHtml: string): string {
+  return `<!doctype html><html><body style="margin:0;padding:0;background:#FAF7F2;font-family:-apple-system,BlinkMacSystemFont,'Segoe UI',Roboto,sans-serif;color:#5A5550;line-height:1.6">
+<table width="100%" cellpadding="0" cellspacing="0" style="background:#FAF7F2;padding:32px 0">
+  <tr><td align="center">
+    <table width="560" cellpadding="0" cellspacing="0" style="background:#fff;border:1px solid #E5DFD5;border-radius:12px;max-width:560px">
+      <tr><td style="padding:32px 36px">
+        <div style="font-family:Georgia,serif;font-size:22px;font-weight:500;color:#2A2724;letter-spacing:-0.01em;margin-bottom:24px">ReShape</div>
+        ${bodyHtml}
+      </td></tr>
+    </table>
+    <div style="font-size:12px;color:#B8B2A8;padding:20px 16px 0;max-width:520px">ReShape · Ipswich · Colchester · <a href="mailto:coach@reshape.fit" style="color:#B8B2A8">coach@reshape.fit</a></div>
+  </td></tr>
+</table></body></html>`;
+}
+
+function confirmationEmail(name: string): string {
+  return emailShell(`
+    <h1 style="font-family:Georgia,serif;font-size:28px;font-weight:400;color:#2A2724;line-height:1.2;margin:0 0 16px">Your seat is booked, ${name}.</h1>
+    <p style="font-size:16px;margin:0 0 16px">See you on <strong style="color:#2A2724">Friday 5 June 2026 at 6:45pm</strong>, at <strong style="color:#2A2724">ReShape Colchester</strong>.</p>
+
+    <table cellpadding="0" cellspacing="0" style="margin:8px 0 24px"><tr>
+      <td style="padding-right:8px"><a href="${ICS_URL}" style="display:inline-block;background:#2A2724;color:#FAF7F2;padding:12px 22px;border-radius:999px;font-weight:500;text-decoration:none;font-size:14px">Add to calendar</a></td>
+      <td><a href="${GCAL_URL}" style="display:inline-block;background:#fff;color:#2A2724;padding:11px 21px;border-radius:999px;font-weight:500;text-decoration:none;font-size:14px;border:1.5px solid #E5DFD5">Google Calendar</a></td>
+    </tr></table>
+
+    <div style="background:#FFF0E5;border:1px dashed #ED5C25;border-radius:10px;padding:18px 20px;margin:0 0 24px">
+      <div style="font-size:11px;text-transform:uppercase;letter-spacing:.14em;color:#ED5C25;font-weight:600;margin-bottom:6px">Your seminar bonus</div>
+      <div style="font-family:Georgia,serif;font-size:18px;color:#2A2724;margin-bottom:6px">Free metabolic &amp; body composition assessment</div>
+      <div style="font-size:14px;color:#2A2724;opacity:.85">Show up on the night and claim a complimentary in-studio metabolic and body composition assessment — your real numbers, mapped against your goals, no charge.</div>
+    </div>
+
+    <p style="font-size:15px;margin:0 0 8px"><strong style="color:#2A2724">What to expect</strong></p>
+    <p style="font-size:15px;margin:0 0 16px">An hour or so on the hormonal patterns behind plateaus, then Q&amp;A — Coach Loai will have read your application before the night, so the talk is shaped around the room.</p>
+
+    <p style="font-size:14px;color:#B8B2A8;margin:24px 0 0">Need to change anything? Just reply to this email.</p>
+  `);
+}
+
+function reminderEmail(name: string): string {
+  return emailShell(`
+    <h1 style="font-family:Georgia,serif;font-size:28px;font-weight:400;color:#2A2724;line-height:1.2;margin:0 0 16px">Tomorrow at 6:45pm.</h1>
+    <p style="font-size:16px;margin:0 0 16px">${name}, just a quick reminder — the ReShape seminar is <strong style="color:#2A2724">tomorrow, 5 June, at 6:45pm</strong> at <strong style="color:#2A2724">ReShape Colchester</strong>.</p>
+
+    <p style="font-size:15px;margin:0 0 24px">Doors open 15 minutes before. Bring yourself, bring questions — that's it.</p>
+
+    <div style="background:#FFF0E5;border:1px dashed #ED5C25;border-radius:10px;padding:16px 20px;margin:0 0 24px">
+      <div style="font-size:11px;text-transform:uppercase;letter-spacing:.14em;color:#ED5C25;font-weight:600;margin-bottom:4px">Don't forget</div>
+      <div style="font-size:14px;color:#2A2724">Your free metabolic &amp; body composition assessment is yours to claim on arrival — just ask any coach on the night.</div>
+    </div>
+
+    <p style="font-size:14px;color:#B8B2A8;margin:0">Can't make it after all? Reply to this email and we'll free your seat for someone on the waitlist.</p>
+  `);
+}
+
+const SEMINAR_REMINDER_AT = "2026-06-04T10:00:00Z";
+
 Deno.serve(async (req) => {
   if (req.method === "OPTIONS") {
     return new Response(null, { status: 204, headers: corsHeaders });
@@ -126,6 +186,34 @@ Deno.serve(async (req) => {
     if (error || !inserted) {
       return jsonResponse({ error: error?.message || "insert failed" }, 500);
     }
+
+    // Queue the confirmation (immediate) and reminder (day before) emails.
+    // process-queue picks these up on its cron and sends via Resend.
+    const nowIso = new Date().toISOString();
+    await supabase.from("message_queue").insert([
+      {
+        lead_email: email,
+        lead_name:  first_name,
+        sequence:   "seminar_confirmation",
+        step_index: 0,
+        channel:    "email",
+        subject:    "You're in — see you at the ReShape seminar, 5 June",
+        body:       confirmationEmail(first_name),
+        send_at:    nowIso,
+        status:     "queued",
+      },
+      {
+        lead_email: email,
+        lead_name:  first_name,
+        sequence:   "seminar_reminder",
+        step_index: 1,
+        channel:    "email",
+        subject:    "Tomorrow at 6:45pm — your ReShape seminar seat",
+        body:       reminderEmail(first_name),
+        send_at:    SEMINAR_REMINDER_AT,
+        status:     "queued",
+      },
+    ]);
 
     return jsonResponse({ ok: true, lead_id: inserted.id });
   } catch (err) {
