@@ -1,0 +1,364 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>ReShape Seminar — Application</title>
+<meta name="description" content="Apply for the next ReShape seminar. Tell us where you are right now so we can shape the day around the room.">
+<link rel="icon" type="image/png" sizes="32x32" href="/favicon-32.png">
+<link rel="icon" type="image/png" href="/favicon.png">
+<link rel="apple-touch-icon" href="/apple-touch-icon.png">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Fraunces:opsz,wght@9..144,300;9..144,400;9..144,500;9..144,600;9..144,700&family=Inter:wght@300;400;500;600&display=swap" rel="stylesheet">
+<link rel="stylesheet" href="./styles.css?v=1">
+</head>
+<body>
+
+<nav class="nav">
+  <div class="nav-inner">
+    <a href="/" class="logo"><span class="logo-mark"></span>ReShape</a>
+    <div class="nav-links">
+      <a href="#what-youll-get">What you'll get</a>
+      <a href="#apply">Apply</a>
+      <a href="/hormonal-assessment/">Assessment</a>
+    </div>
+    <a href="#apply" class="nav-cta">Apply now</a>
+  </div>
+</nav>
+
+<section class="hero">
+  <div class="hero-inner">
+    <div class="eyebrow fade-up">Seminar Application</div>
+    <h1 class="fade-up delay-1">Apply for the next <em>ReShape</em> seminar.</h1>
+    <p class="lead fade-up delay-2">A small-room session for women navigating the 30s/40s shift. Tell us where you are right now and what's stuck — your answers shape the talk and the Q&amp;A.</p>
+
+    <div class="event-meta fade-up delay-2">
+      <div class="event-meta-cell">
+        <div class="event-meta-label">Date</div>
+        <div class="event-meta-value" id="meta-date">05 June 2026</div>
+      </div>
+      <div class="event-meta-cell">
+        <div class="event-meta-label">Venue</div>
+        <div class="event-meta-value" id="meta-venue">ReShape Colchester</div>
+      </div>
+      <div class="event-meta-cell">
+        <div class="event-meta-label">Speaker</div>
+        <div class="event-meta-value" id="meta-speaker">Coach Loai</div>
+      </div>
+    </div>
+
+    <a href="#apply" class="btn-primary fade-up delay-3">
+      Start application
+      <svg width="18" height="18" viewBox="0 0 24 24" fill="none"><path d="M5 12h14M13 6l6 6-6 6" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/></svg>
+    </a>
+  </div>
+</section>
+
+<section class="pillars" id="what-youll-get">
+  <div class="section-head">
+    <h2>What you'll walk away with</h2>
+    <p>Three concrete things — built around the answers in this room, not a generic deck.</p>
+  </div>
+  <div class="pillar-grid">
+    <div class="pillar">
+      <div class="pillar-num">01</div>
+      <h3>The pattern behind your plateau</h3>
+      <p>The hormonal shift driving your specific stuck point — and why what worked at 28 stops working in your 40s.</p>
+    </div>
+    <div class="pillar">
+      <div class="pillar-num">02</div>
+      <h3>What to stop doing</h3>
+      <p>The three habits most women keep doing that quietly cancel out the work — and the swap for each one.</p>
+    </div>
+    <div class="pillar">
+      <div class="pillar-num">03</div>
+      <h3>A 4-week starting protocol</h3>
+      <p>Nutrition, training, recovery — sized to a real life. You'll leave with the first month mapped, not theory.</p>
+    </div>
+  </div>
+</section>
+
+<section class="apply" id="apply">
+  <div class="apply-inner">
+    <div class="section-head" style="margin-bottom: 2rem;">
+      <h2>Tell us about you</h2>
+      <p>Six short questions. Takes about two minutes.</p>
+    </div>
+
+    <form class="form-card" id="apply-form" novalidate>
+      <div class="form-section">
+        <span class="form-section-label">Contact</span>
+        <p class="form-section-help">So we can confirm your seat and send the address.</p>
+
+        <div class="form-row">
+          <div class="field">
+            <label for="first_name">First name <span class="req">*</span></label>
+            <input type="text" id="first_name" name="first_name" autocomplete="given-name" placeholder="Jane">
+            <div class="field-error" data-error-for="first_name"></div>
+          </div>
+          <div class="field">
+            <label for="last_name">Last name</label>
+            <input type="text" id="last_name" name="last_name" autocomplete="family-name" placeholder="Smith">
+            <div class="field-error" data-error-for="last_name"></div>
+          </div>
+        </div>
+
+        <div class="form-row">
+          <div class="field">
+            <label for="email">Email <span class="req">*</span></label>
+            <input type="email" id="email" name="email" autocomplete="email" placeholder="you@example.com">
+            <div class="field-error" data-error-for="email"></div>
+          </div>
+          <div class="field">
+            <label for="phone">Phone</label>
+            <input type="tel" id="phone" name="phone" autocomplete="tel" placeholder="07700 000000">
+            <div class="field-error" data-error-for="phone"></div>
+          </div>
+        </div>
+      </div>
+
+      <div class="form-section">
+        <span class="form-section-label">Where are you in life right now? <span class="req" style="color:var(--terracotta);">*</span></span>
+        <p class="form-section-help">This sets the hormonal baseline we'll talk to.</p>
+        <div class="opt-grid" data-question="life_stage" role="radiogroup" aria-label="Life stage">
+          <button type="button" class="opt" data-value="20s"><span class="opt-marker"></span><span class="opt-title">In my 20s</span></button>
+          <button type="button" class="opt" data-value="30s"><span class="opt-marker"></span><span class="opt-title">In my 30s</span></button>
+          <button type="button" class="opt" data-value="40s"><span class="opt-marker"></span><span class="opt-title">In my 40s</span></button>
+          <button type="button" class="opt" data-value="perimenopausal"><span class="opt-marker"></span><span class="opt-title">Perimenopausal</span></button>
+          <button type="button" class="opt" data-value="menopausal"><span class="opt-marker"></span><span class="opt-title">Menopausal / post-menopausal</span></button>
+        </div>
+        <div class="field-error" data-error-for="life_stage"></div>
+      </div>
+
+      <div class="form-section">
+        <span class="form-section-label">What's the #1 thing stuck right now? <span class="req" style="color:var(--terracotta);">*</span></span>
+        <p class="form-section-help">Pick the one that feels loudest — not the one that sounds best.</p>
+        <div class="opt-grid" data-question="top_struggle" role="radiogroup" aria-label="Top struggle">
+          <button type="button" class="opt" data-value="weight_body"><span class="opt-marker"></span><span class="opt-title">Weight &amp; body composition</span></button>
+          <button type="button" class="opt" data-value="energy"><span class="opt-marker"></span><span class="opt-title">Low energy / fatigue</span></button>
+          <button type="button" class="opt" data-value="sleep"><span class="opt-marker"></span><span class="opt-title">Sleep — falling asleep, staying asleep, or both</span></button>
+          <button type="button" class="opt" data-value="mood"><span class="opt-marker"></span><span class="opt-title">Mood, stress, or overwhelm</span></button>
+          <button type="button" class="opt" data-value="hormonal"><span class="opt-marker"></span><span class="opt-title">Hormonal symptoms (cycle, peri, menopause)</span></button>
+          <button type="button" class="opt" data-value="other"><span class="opt-marker"></span><span class="opt-title">Something else</span></button>
+        </div>
+        <div class="field-error" data-error-for="top_struggle"></div>
+      </div>
+
+      <div class="form-section">
+        <div class="field">
+          <label for="tried">What have you already tried that didn't stick?</label>
+          <textarea id="tried" name="tried" rows="3" placeholder="Diets, programs, gyms, supplements — what you've cycled through and where it broke."></textarea>
+        </div>
+        <div class="field">
+          <label for="wants">What's the #1 thing you want to walk away with?</label>
+          <textarea id="wants" name="wants" rows="3" placeholder="One sentence is fine. Be specific — the speaker reads these before the talk."></textarea>
+        </div>
+        <div class="field">
+          <label for="extra">Anything else the speaker should know?</label>
+          <textarea id="extra" name="extra" rows="2" placeholder="Optional — injuries, conditions, schedule constraints, or a question you'd like answered."></textarea>
+        </div>
+      </div>
+
+      <label class="consent" id="consent-row">
+        <input type="checkbox" id="consent" name="consent_marketing">
+        <span>I'm happy for ReShape to email me about this seminar and follow up afterwards. We don't share your details. <span class="req">*</span></span>
+      </label>
+
+      <div class="submit-row">
+        <div class="submit-note">We review every application within 48 hours.</div>
+        <button type="submit" class="btn-primary" id="submit-btn">
+          <span class="btn-label">Submit application</span>
+          <svg width="18" height="18" viewBox="0 0 24 24" fill="none"><path d="M5 12h14M13 6l6 6-6 6" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/></svg>
+        </button>
+      </div>
+      <div class="submit-error" id="submit-error" role="alert"></div>
+    </form>
+
+    <div class="success" id="success-card" hidden>
+      <div class="success-icon">
+        <svg width="32" height="32" viewBox="0 0 24 24" fill="none"><path d="M5 13l4 4L19 7" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"/></svg>
+      </div>
+      <h2>Thanks — application received.</h2>
+      <p>We review every application personally and will be in touch within 48 hours to confirm your seat. Keep an eye on your inbox (and spam folder, just in case).</p>
+      <p style="font-size:.875rem; color: var(--muted);">In the meantime, the <a href="/hormonal-assessment/" style="color: var(--terracotta); font-weight: 500;">3-minute hormonal assessment</a> is a useful warm-up.</p>
+    </div>
+  </div>
+</section>
+
+<footer>
+  <div class="foot-grid">
+    <div class="foot-brand">
+      <a href="/" class="logo"><span class="logo-mark"></span>ReShape</a>
+      <p>Hormone-aware nutrition coaching for women 30+. Studios in Ipswich and Colchester. Members across the UK.</p>
+    </div>
+    <div>
+      <h5>Program</h5>
+      <ul>
+        <li><a href="/hormonal-assessment/">Take assessment</a></li>
+        <li><a href="#apply">Apply for seminar</a></li>
+        <li><a href="/">Main site</a></li>
+      </ul>
+    </div>
+    <div>
+      <h5>Learn</h5>
+      <ul>
+        <li><a href="#what-youll-get">What you'll get</a></li>
+        <li><a href="/hormonal-assessment/">The science</a></li>
+      </ul>
+    </div>
+    <div>
+      <h5>Company</h5>
+      <ul>
+        <li><a href="/">About</a></li>
+        <li><a href="mailto:coach@reshape.fit">Contact</a></li>
+        <li><a href="/">Privacy</a></li>
+      </ul>
+    </div>
+  </div>
+  <div class="foot-bottom">
+    © 2026 ReShape · Ipswich · Colchester. Seminar seats are limited and allocated by application.
+  </div>
+</footer>
+
+<script>
+(function () {
+  // Submission target — Supabase Edge Function at /functions/v1/seminar-application.
+  // The endpoint accepts this JSON shape and returns { ok: true, lead_id }.
+  var SUBMIT_URL = 'https://lvizldmdficsfpgegehp.supabase.co/functions/v1/seminar-application';
+  var ANON_KEY   = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6Imx2aXpsZG1kZmljc2ZwZ2VnZWhwIiwicm9sZSI6ImFub24iLCJpYXQiOjE3NzM2OTk4NDQsImV4cCI6MjA4OTI3NTg0NH0.72wHbZaTvqNzW6DTb6Ae1vi9QpOg_-KiEO-Jjm9mn0k';
+
+  var form = document.getElementById('apply-form');
+  var submitBtn = document.getElementById('submit-btn');
+  var submitError = document.getElementById('submit-error');
+  var successCard = document.getElementById('success-card');
+  var consentRow = document.getElementById('consent-row');
+
+  var selections = { life_stage: null, top_struggle: null };
+
+  // Single-select pill behavior
+  document.querySelectorAll('.opt-grid').forEach(function (group) {
+    var key = group.getAttribute('data-question');
+    group.addEventListener('click', function (e) {
+      var btn = e.target.closest('.opt');
+      if (!btn) return;
+      group.querySelectorAll('.opt').forEach(function (b) { b.classList.remove('selected'); });
+      btn.classList.add('selected');
+      selections[key] = btn.getAttribute('data-value');
+      clearError(key);
+    });
+  });
+
+  function setError(name, msg) {
+    var slot = document.querySelector('[data-error-for="' + name + '"]');
+    if (slot) slot.textContent = msg || '';
+    var input = document.getElementById(name);
+    if (input) input.closest('.field') && input.closest('.field').classList.toggle('has-error', !!msg);
+  }
+  function clearError(name) { setError(name, ''); }
+
+  function validate() {
+    var ok = true;
+    var first = document.getElementById('first_name').value.trim();
+    var email = document.getElementById('email').value.trim();
+    var phone = document.getElementById('phone').value.trim();
+    var consent = document.getElementById('consent').checked;
+
+    if (!first) { setError('first_name', 'Please enter your first name.'); ok = false; } else clearError('first_name');
+
+    if (!email) { setError('email', 'Email is required.'); ok = false; }
+    else if (!/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(email)) { setError('email', 'That email doesn\u2019t look right.'); ok = false; }
+    else clearError('email');
+
+    if (phone && phone.replace(/\D/g, '').length < 7) {
+      setError('phone', 'That phone number looks too short.'); ok = false;
+    } else clearError('phone');
+
+    if (!selections.life_stage) { setError('life_stage', 'Pick the one that fits best.'); ok = false; }
+    else clearError('life_stage');
+
+    if (!selections.top_struggle) { setError('top_struggle', 'Pick the one that\u2019s loudest.'); ok = false; }
+    else clearError('top_struggle');
+
+    consentRow.classList.toggle('has-error', !consent);
+    if (!consent) ok = false;
+
+    return ok;
+  }
+
+  function setLoading(loading) {
+    submitBtn.disabled = loading;
+    var label = submitBtn.querySelector('.btn-label');
+    if (loading) {
+      label.textContent = 'Sending\u2026';
+      var spin = submitBtn.querySelector('.btn-spinner');
+      if (!spin) {
+        spin = document.createElement('span');
+        spin.className = 'btn-spinner';
+        submitBtn.insertBefore(spin, submitBtn.querySelector('svg'));
+      }
+    } else {
+      label.textContent = 'Submit application';
+      var s = submitBtn.querySelector('.btn-spinner');
+      if (s) s.remove();
+    }
+  }
+
+  form.addEventListener('submit', function (e) {
+    e.preventDefault();
+    submitError.textContent = '';
+    if (!validate()) {
+      submitError.textContent = 'Please fix the highlighted fields above.';
+      var firstErr = document.querySelector('.has-error');
+      if (firstErr && firstErr.scrollIntoView) firstErr.scrollIntoView({ behavior: 'smooth', block: 'center' });
+      return;
+    }
+
+    var payload = {
+      first_name: document.getElementById('first_name').value.trim(),
+      last_name: document.getElementById('last_name').value.trim(),
+      email: document.getElementById('email').value.trim(),
+      phone: document.getElementById('phone').value.trim(),
+      life_stage: selections.life_stage,
+      top_struggle: selections.top_struggle,
+      tried: document.getElementById('tried').value.trim(),
+      wants: document.getElementById('wants').value.trim(),
+      extra: document.getElementById('extra').value.trim(),
+      consent_marketing: document.getElementById('consent').checked,
+      submitted_at: new Date().toISOString(),
+      source: 'seminar-application',
+      form_name: 'Seminar Application'
+    };
+
+    setLoading(true);
+
+    fetch(SUBMIT_URL, {
+      method: 'POST',
+      headers: {
+        'Content-Type': 'application/json',
+        'Authorization': 'Bearer ' + ANON_KEY,
+        'apikey': ANON_KEY
+      },
+      body: JSON.stringify(payload)
+    }).then(function (r) {
+      if (!r.ok) throw new Error('Server returned ' + r.status);
+      return r.json().catch(function () { return {}; });
+    }).then(function () {
+      form.style.display = 'none';
+      successCard.hidden = false;
+      successCard.scrollIntoView({ behavior: 'smooth', block: 'center' });
+      if (window.gtag) window.gtag('event', 'submit_seminar_application');
+      if (window.fbq) window.fbq('track', 'Lead', { source: 'seminar-application' });
+    }).catch(function (err) {
+      setLoading(false);
+      submitError.textContent = 'Sorry — something went wrong sending your application. Please try again, or email coach@reshape.fit directly.';
+      console.error('seminar-application submit failed', err);
+    });
+  });
+
+  if (window.gtag) window.gtag('event', 'view_seminar_application');
+})();
+</script>
+
+</body>
+</html>

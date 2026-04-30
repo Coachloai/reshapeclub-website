@@ -1048,6 +1048,7 @@ if(sessionStorage.getItem('rs_auth')==='1'){
           <option value="Main Landing Page">reshape.fit</option>
           <option value="Men Landing Page">reshape.fit/men</option>
           <option value="Women Landing Page">reshape.fit/women</option>
+          <option value="Seminar Application">reshape.fit/seminar-application</option>
           <option value="ReShape Club">reshapeclub.com</option>
         </select>
       </div>
@@ -1281,6 +1282,7 @@ if(sessionStorage.getItem('rs_auth')==='1'){
             <option value="Main Landing Page">reshape.fit</option>
             <option value="Men Landing Page">reshape.fit/men</option>
             <option value="Women Landing Page">reshape.fit/women</option>
+            <option value="Seminar Application">reshape.fit/seminar-application</option>
             <option value="ReShape Club">reshapeclub.com</option>
           </select>
         </div>
@@ -2147,7 +2149,7 @@ function mapLead(row, i) {
     phone: row.phone || '',
     location: row.location || 'Unknown',
     form: row.form_name || 'Intake',
-    formLabel: ({'Main Landing Page':'reshape.fit','Men Landing Page':'reshape.fit/men','Women Landing Page':'reshape.fit/women','ReShape Club':'reshapeclub.com'})[row.form_name] || row.form_name || 'Unknown',
+    formLabel: ({'Main Landing Page':'reshape.fit','Men Landing Page':'reshape.fit/men','Women Landing Page':'reshape.fit/women','Seminar Application':'reshape.fit/seminar-application','ReShape Club':'reshapeclub.com'})[row.form_name] || row.form_name || 'Unknown',
     quality: quality,
     age: parseInt(row.age) || 0,
     gender: row.gender || 'Unknown',
