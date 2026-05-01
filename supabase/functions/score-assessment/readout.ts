@@ -79,7 +79,7 @@ function benignReadout(answers: Record<string, string>): Readout {
       },
       {
         title: "Generic plans still won't get you there",
-        body: "A clear screen doesn't mean a clear plan. The 30-minute call is where we'd dial in the small things that actually move the needle for you.",
+        body: "A clear screen doesn't mean a clear plan. The 45-minute call is where we'd dial in the small things that actually move the needle for you.",
       },
     ],
     closer: buildCloser(answers),

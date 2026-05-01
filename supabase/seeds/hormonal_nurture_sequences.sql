@@ -64,7 +64,7 @@ In short: your body isn''t holding fat because you''re eating too much. It''s ho
 
 The single biggest shift you can make this week isn''t in your kitchen. It''s in your sleep. The next time you wake at 3 AM, don''t reach for your phone — that single habit drops cortisol fastest.
 
-When you''re ready, the free 30-minute strategy call is where we map your full protocol — sleep, training, eating — to your specific score:
+When you''re ready, the free 45-minute strategy call is where we map your full protocol — sleep, training, eating — to your specific score:
 
 https://reshape.fit/hormonal-assessment/result.html
 
@@ -98,7 +98,7 @@ Weeks 9–12: tighten the eating window, add deliberate recovery, check sleep ma
 
 This is the protocol shape. Your version of it gets dialled in on the call.
 
-Book your free 30-minute strategy call here — we''ll go through your full pattern, agree the first 3 shifts, and tell you straight whether we''re a fit:
+Book your free 45-minute strategy call here — we''ll go through your full pattern, agree the first 3 shifts, and tell you straight whether we''re a fit:
 
 https://reshape.fit/hormonal-assessment/result.html
 
@@ -130,7 +130,7 @@ This isn''t a smaller version of the same problem. It''s a different problem wit
 
 The first lever is muscle. Not cardio, not fasting, not a smaller plate. Strength training is the one intervention that consistently flips this pattern — because muscle is what your shifting hormones are quietly demanding more of.
 
-When you''re ready, the free 30-minute strategy call is where we map your full pattern + protocol:
+When you''re ready, the free 45-minute strategy call is where we map your full pattern + protocol:
 
 https://reshape.fit/hormonal-assessment/result.html
 
@@ -164,7 +164,7 @@ Weeks 9–12: refine training stimulus, refine eating windows, look at HRT/peri-
 
 That''s the shape. Your version gets dialled to your scores on the call.
 
-Book your free 30-minute strategy call here:
+Book your free 45-minute strategy call here:
 
 https://reshape.fit/hormonal-assessment/result.html
 
@@ -196,7 +196,7 @@ This isn''t willpower. It''s a signalling problem. And willpower is the wrong to
 
 The first shift is to stop dieting harder. We need to feed the system back into communication before we ask it to change shape.
 
-When you''re ready, the free 30-minute strategy call is where we map your specific way out:
+When you''re ready, the free 45-minute strategy call is where we map your specific way out:
 
 https://reshape.fit/hormonal-assessment/result.html
 
@@ -230,7 +230,7 @@ Weeks 9–12: introduce a small, sustainable deficit. By now leptin and insulin 
 
 This is the protocol shape. Your version gets dialled on the call.
 
-Book your free 30-minute strategy call here:
+Book your free 45-minute strategy call here:
 
 https://reshape.fit/hormonal-assessment/result.html
 
@@ -262,7 +262,7 @@ This isn''t a "do more, harder" problem. It''s an order problem. When all three 
 
 This is also the one pattern where a basic bloodwork panel almost always pays for itself before we set the plan. We''d talk through that on the call.
 
-When you''re ready, book your free 30-minute strategy call here:
+When you''re ready, book your free 45-minute strategy call here:
 
 https://reshape.fit/hormonal-assessment/result.html
 
@@ -300,7 +300,7 @@ Weeks 9–12 (hormonal): refine training, refine eating window, layer in any per
 
 That''s the shape. The order, dialled to your scores, is what gets agreed on the call.
 
-Book your free 30-minute strategy call here — we''ll review your assessment + any panel together:
+Book your free 45-minute strategy call here — we''ll review your assessment + any panel together:
 
 https://reshape.fit/hormonal-assessment/result.html
 
