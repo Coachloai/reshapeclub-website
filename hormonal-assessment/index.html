@@ -11,7 +11,7 @@
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
 <link href="https://fonts.googleapis.com/css2?family=Fraunces:opsz,wght@9..144,300;9..144,400;9..144,500;9..144,600;9..144,700&family=Inter:wght@300;400;500;600&display=swap" rel="stylesheet">
-<link rel="stylesheet" href="./styles.css?v=2">
+<link rel="stylesheet" href="./styles.css?v=5">
 </head>
 <body>
 
@@ -43,9 +43,33 @@
       </div>
     </div>
     <div class="hero-visual fade-up delay-2">
-      <div class="hero-tag">
-        <div class="hero-tag-dot"></div>
-        <div class="hero-tag-text"><strong>Maria, 41</strong> — Stress-Driven Plateau · 18 lbs in 14 weeks</div>
+      <div class="hero-marquee" aria-label="Real ReShape transformations">
+        <div class="hero-marquee-track" data-marquee>
+          <a href="./quiz.html" class="hero-slide">
+            <img src="./images/hero/annabel.jpg" alt="Annabel, 30s — Stress-Driven Hypothyroidism, reshaped in six months" loading="eager">
+            <div class="hero-slide-cap">
+              <div class="hero-slide-name">Annabel, 30s · Stress-Driven Hypothyroidism</div>
+              <div class="hero-slide-arc">Stressed. → <em>Balanced.</em></div>
+              <div class="hero-slide-sub">Reshaped around her hormones — in six months.</div>
+            </div>
+          </a>
+          <a href="./quiz.html" class="hero-slide">
+            <img src="./images/hero/jaime.jpg" alt="Jaime, 40s — Post-thyroidectomy, from a UK 16 to a UK 6" loading="eager">
+            <div class="hero-slide-cap">
+              <div class="hero-slide-name">Jaime, 40s · Post-thyroidectomy</div>
+              <div class="hero-slide-arc">UK 16 → <em>UK 6</em></div>
+              <div class="hero-slide-sub">Reshaped around her hormones — even after thyroid surgery.</div>
+            </div>
+          </a>
+          <a href="./quiz.html" class="hero-slide">
+            <img src="./images/hero/jess.jpg" alt="Jessica — Vegetarian, lifelong plateau, reshaped after years of trying everything" loading="lazy">
+            <div class="hero-slide-cap">
+              <div class="hero-slide-name">Jessica · Vegetarian, Lifelong Plateau</div>
+              <div class="hero-slide-arc">Lifelong plateau. → <em>Reshaped.</em></div>
+              <div class="hero-slide-sub">Hormone-aware coaching — after years of trying everything.</div>
+            </div>
+          </a>
+        </div>
       </div>
     </div>
   </div>
@@ -298,6 +322,17 @@
     © 2026 ReShape · Ipswich · Colchester. The ReShape Assessment is a screening tool, not a medical diagnostic. Always consult your healthcare provider before changing nutrition protocols.
   </div>
 </footer>
+
+<script>
+  // Duplicate marquee children once so the CSS animation loops seamlessly.
+  document.querySelectorAll('[data-marquee]').forEach(function(track){
+    Array.from(track.children).forEach(function(child){
+      var clone = child.cloneNode(true);
+      clone.setAttribute('aria-hidden', 'true');
+      track.appendChild(clone);
+    });
+  });
+</script>
 
 </body>
 </html>

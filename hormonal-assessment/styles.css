@@ -135,30 +135,52 @@ img { max-width: 100%; display: block; }
 
 .hero-visual {
   position: relative;
-  aspect-ratio: 4/5;
-  border-radius: 8px; overflow: hidden;
-  background: linear-gradient(135deg, var(--soft-peach) 0%, var(--peach) 100%);
+  aspect-ratio: 1/1;
+  border-radius: 12px; overflow: hidden;
+  background: var(--soft-cream);
+  box-shadow: 0 24px 64px rgba(42,39,36,.08);
 }
-.hero-visual::after {
-  content: ''; position: absolute; inset: 0;
-  background-image: url('/women/images/banner-group.jpg');
-  background-size: cover; background-position: 50% 35%;
-  mix-blend-mode: normal;
+
+/* === HERO MARQUEE — auto-scrolling transformation strip ===
+   Source images are pre-composed before/after cards with captions baked in.
+   The slot is a 1:1 square so each card fills the viewport cleanly. */
+.hero-marquee { width: 100%; height: 100%; overflow: hidden; position: relative; }
+.hero-marquee-track {
+  /* Grid auto-flow keeps each slide at exactly 100% of the marquee container,
+     no matter how many slides we add. The track overflows horizontally and the
+     animation translates by -50% (a full lap of the duplicated set). */
+  display: grid;
+  grid-auto-flow: column;
+  grid-auto-columns: 100%;
+  height: 100%;
+  animation: hero-marquee-scroll 24s linear infinite;
 }
-.hero-tag {
-  position: absolute; bottom: 1.5rem; left: 1.5rem; right: 1.5rem;
-  background: rgba(250,247,242,.94); backdrop-filter: blur(10px);
-  padding: 1rem 1.25rem; border-radius: 6px;
-  display: flex; align-items: center; gap: .875rem; z-index: 2;
-  box-shadow: 0 4px 24px rgba(42,39,36,.08);
+.hero-marquee:hover .hero-marquee-track,
+.hero-marquee:focus-within .hero-marquee-track { animation-play-state: paused; }
+@media (prefers-reduced-motion: reduce) {
+  .hero-marquee-track { animation: none; }
 }
-.hero-tag-dot {
-  width: 8px; height: 8px; border-radius: 50%;
-  background: var(--terracotta);
-  box-shadow: 0 0 0 4px rgba(200,103,74,.18);
+@keyframes hero-marquee-scroll {
+  from { transform: translateX(0); }
+  to   { transform: translateX(-50%); }
 }
-.hero-tag-text { font-size: .875rem; color: var(--charcoal); }
-.hero-tag-text strong { font-weight: 600; }
+.hero-slide {
+  position: relative; display: block;
+  text-decoration: none; color: inherit;
+  background: var(--soft-cream);
+  min-width: 0; height: 100%;
+}
+.hero-slide img {
+  width: 100%; height: 100%;
+  display: block;
+  object-fit: cover; object-position: center center;
+}
+/* Captions are baked into the source images, so the in-DOM caption
+   stays in the markup for screen readers but is hidden visually. */
+.hero-slide-cap {
+  position: absolute; clip: rect(0 0 0 0); width: 1px; height: 1px;
+  overflow: hidden; white-space: nowrap;
+}
 
 @media (max-width: 900px) {
   .hero-grid { grid-template-columns: 1fr; gap: 2.5rem; }
