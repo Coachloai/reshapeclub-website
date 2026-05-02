@@ -11,7 +11,7 @@
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
 <link href="https://fonts.googleapis.com/css2?family=Fraunces:opsz,wght@9..144,300;9..144,400;9..144,500;9..144,600;9..144,700&family=Inter:wght@300;400;500;600&display=swap" rel="stylesheet">
-<link rel="stylesheet" href="./styles.css?v=5">
+<link rel="stylesheet" href="./styles.css?v=7">
 </head>
 <body>
 
@@ -43,8 +43,8 @@
       </div>
     </div>
     <div class="hero-visual fade-up delay-2">
-      <div class="hero-marquee" aria-label="Real ReShape transformations">
-        <div class="hero-marquee-track" data-marquee>
+      <div class="hero-carousel" aria-roledescription="carousel" aria-label="Real ReShape transformations">
+        <div class="hero-carousel-track" data-carousel>
           <a href="./quiz.html" class="hero-slide">
             <img src="./images/hero/annabel.jpg" alt="Annabel, 30s — Stress-Driven Hypothyroidism, reshaped in six months" loading="eager">
             <div class="hero-slide-cap">
@@ -70,6 +70,11 @@
             </div>
           </a>
         </div>
+      </div>
+      <div class="hero-dots" role="tablist" aria-label="Choose a transformation">
+        <button class="hero-dot active" type="button" data-i="0" role="tab" aria-label="Show Annabel"></button>
+        <button class="hero-dot"        type="button" data-i="1" role="tab" aria-label="Show Jaime"></button>
+        <button class="hero-dot"        type="button" data-i="2" role="tab" aria-label="Show Jessica"></button>
       </div>
     </div>
   </div>
@@ -324,14 +329,63 @@
 </footer>
 
 <script>
-  // Duplicate marquee children once so the CSS animation loops seamlessly.
-  document.querySelectorAll('[data-marquee]').forEach(function(track){
-    Array.from(track.children).forEach(function(child){
-      var clone = child.cloneNode(true);
-      clone.setAttribute('aria-hidden', 'true');
-      track.appendChild(clone);
+  // Slide-and-pause carousel with pagination dots, auto-advance, hover pause,
+  // and touch swipe. Only enables auto-advance if the user hasn't asked for
+  // reduced motion.
+  (function(){
+    var track = document.querySelector('[data-carousel]');
+    if (!track) return;
+    var slides = track.querySelectorAll('.hero-slide');
+    var dots = document.querySelectorAll('.hero-dot');
+    var n = slides.length;
+    if (n <= 1) return;
+
+    var INTERVAL = 3500;
+    var i = 0;
+    var timer = null;
+    var prefersReduced = window.matchMedia('(prefers-reduced-motion: reduce)').matches;
+
+    function go(target){
+      i = ((target % n) + n) % n;
+      track.style.transform = 'translateX(-' + (i * 100) + '%)';
+      dots.forEach(function(d, idx){ d.classList.toggle('active', idx === i); });
+    }
+    function next(){ go(i + 1); }
+    function start(){
+      if (prefersReduced) return;
+      stop();
+      timer = setInterval(next, INTERVAL);
+    }
+    function stop(){ if (timer){ clearInterval(timer); timer = null; } }
+
+    dots.forEach(function(d){
+      d.addEventListener('click', function(){ go(parseInt(d.dataset.i, 10) || 0); start(); });
     });
-  });
+
+    var carousel = track.parentElement;
+    carousel.addEventListener('mouseenter', stop);
+    carousel.addEventListener('mouseleave', start);
+    carousel.addEventListener('focusin', stop);
+    carousel.addEventListener('focusout', start);
+
+    // Touch swipe.
+    var startX = 0, dx = 0, dragging = false;
+    carousel.addEventListener('touchstart', function(e){
+      if (!e.touches || !e.touches.length) return;
+      startX = e.touches[0].clientX; dx = 0; dragging = true; stop();
+    }, { passive: true });
+    carousel.addEventListener('touchmove', function(e){
+      if (!dragging || !e.touches || !e.touches.length) return;
+      dx = e.touches[0].clientX - startX;
+    }, { passive: true });
+    carousel.addEventListener('touchend', function(){
+      if (!dragging) return; dragging = false;
+      if (Math.abs(dx) > 40) go(i + (dx < 0 ? 1 : -1));
+      start();
+    });
+
+    start();
+  })();
 </script>
 
 </body>
