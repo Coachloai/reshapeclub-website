@@ -402,7 +402,7 @@ img { max-width: 100%; display: block; }
 .coach-photo {
   aspect-ratio: 4/5; border-radius: 8px; overflow: hidden;
   background: var(--peach);
-  background-image: url('/images/coach-about.jpg');
+  background-image: url('/images/coach-about.jpg?v=2');
   background-size: cover; background-position: center;
 }
 .coach-creds {
