@@ -121,6 +121,22 @@
 
     $('#result-mirror').innerHTML = (copy && (copy.mirror_back || copy.mirror)) || '';
 
+    // Overall hormonal load: average of the 7 hormone scores (each 0–10).
+    var scores = data.hormone_scores || {};
+    var keys = ['cortisol','ghrelin','insulin','leptin','testosterone','estrogen','progesterone'];
+    var sum = 0, count = 0;
+    keys.forEach(function(k){
+      var v = Number(scores[k]);
+      if (!isNaN(v)){ sum += v; count++; }
+    });
+    var avg = count > 0 ? sum / count : 0;
+    var fillEl = $('#health-meter-fill');
+    if (fillEl){
+      var pct = Math.max(0, Math.min(100, (avg / 10) * 100));
+      // Defer one frame so the 0 → pct transition reliably animates.
+      requestAnimationFrame(function(){ fillEl.style.width = pct + '%'; });
+    }
+
     var objs = (copy && copy.objections) || [];
     $('#result-objections').innerHTML = objs.map(function(o){
       return ''
@@ -377,7 +393,8 @@
       last_name: lastName,
       email: ctx.lead.email,
       phone: phone,
-      location: ctx.loc
+      location: ctx.loc,
+      assessment_session_id: getSessionId()
     }]).then(function(){
       return ctx.sb.from('booking_slots').update({ booked_count: slot.booked_count + 1 }).eq('id', slot.id);
     }).then(function(){

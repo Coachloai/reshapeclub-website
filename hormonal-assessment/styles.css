@@ -639,7 +639,7 @@ footer {
 
 .result-readout {
   background: var(--white); border-radius: 16px;
-  max-width: 800px; margin: -2rem auto 0; padding: 3rem;
+  max-width: 800px; margin: 4rem auto 0; padding: 3rem;
   box-shadow: 0 24px 60px rgba(42,39,36,.08);
   border: 1px solid var(--line); position: relative;
 }
@@ -649,6 +649,28 @@ footer {
 }
 .result-readout p:last-child { margin-bottom: 0; }
 .result-readout strong { color: var(--charcoal); font-weight: 500; }
+
+.health-meter {
+  margin-bottom: 2rem; padding-bottom: 2rem;
+  border-bottom: 1px solid var(--line);
+}
+.health-meter-title {
+  font-size: .8125rem; text-transform: uppercase; letter-spacing: .14em;
+  color: var(--terracotta); font-weight: 500; margin-bottom: .875rem;
+}
+.health-meter-bar {
+  height: 8px; background: var(--soft-peach);
+  border-radius: 999px; overflow: hidden;
+}
+.health-meter-fill {
+  height: 100%; width: 0%;
+  background: var(--terracotta);
+  border-radius: 999px;
+}
+.health-meter-scale {
+  display: flex; justify-content: space-between;
+  font-size: .75rem; color: var(--muted); margin-top: .625rem;
+}
 
 .result-closer {
   max-width: 800px; margin: 2.5rem auto 1rem; padding: 0 .25rem;

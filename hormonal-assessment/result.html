@@ -10,7 +10,7 @@
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
 <link href="https://fonts.googleapis.com/css2?family=Fraunces:opsz,wght@9..144,300;9..144,400;9..144,500;9..144,600;9..144,700&family=Inter:wght@300;400;500;600&display=swap" rel="stylesheet">
-<link rel="stylesheet" href="./styles.css?v=2">
+<link rel="stylesheet" href="./styles.css?v=4">
 </head>
 <body>
 
@@ -58,7 +58,17 @@
   </div>
 
   <div class="narrow">
-    <div class="result-readout fade-up delay-2" id="result-mirror">
+    <div class="result-readout fade-up delay-2">
+      <div class="health-meter">
+        <div class="health-meter-title">Overall hormonal load</div>
+        <div class="health-meter-bar">
+          <div class="health-meter-fill" id="health-meter-fill"></div>
+        </div>
+        <div class="health-meter-scale">
+          <span>Low</span><span>Moderate</span><span>High</span>
+        </div>
+      </div>
+      <div id="result-mirror"></div>
     </div>
   </div>
 
@@ -138,6 +148,6 @@
 </div>
 
 <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
-<script src="./result.js?v=2"></script>
+<script src="./result.js?v=4"></script>
 </body>
 </html>
