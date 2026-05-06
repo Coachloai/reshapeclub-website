@@ -11,7 +11,7 @@
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
 <link href="https://fonts.googleapis.com/css2?family=Fraunces:opsz,wght@9..144,300;9..144,400;9..144,500;9..144,600;9..144,700&family=Inter:wght@300;400;500;600&display=swap" rel="stylesheet">
-<link rel="stylesheet" href="./styles.css?v=3">
+<link rel="stylesheet" href="./styles.css?v=4">
 </head>
 <body>
 
@@ -19,6 +19,7 @@
   <div class="nav-inner">
     <a href="/" class="logo"><span class="logo-mark"></span>ReShape</a>
     <div class="nav-links">
+      <a href="#transformations">Transformations</a>
       <a href="#what-youll-get">What you'll get</a>
       <a href="#seven-hormones">The 7 hormones</a>
       <a href="#apply">Apply</a>
@@ -52,6 +53,75 @@
       Start application
       <svg width="18" height="18" viewBox="0 0 24 24" fill="none"><path d="M5 12h14M13 6l6 6-6 6" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/></svg>
     </a>
+  </div>
+</section>
+
+<section class="transformations" id="transformations">
+  <div class="section-head">
+    <h2>Real women. Real <em>ReShape</em> results.</h2>
+    <p>The room you'll be sitting in next month — these are the transformations sitting next to you. Real members. Real numbers. Real years of stuck before they reshaped.</p>
+  </div>
+
+  <div class="transformations-stage">
+    <div class="hero-carousel" aria-roledescription="carousel" aria-label="Real ReShape transformations">
+      <div class="hero-carousel-track" data-tx-carousel>
+        <a href="#apply" class="hero-slide">
+          <img src="/hormonal-assessment/images/hero/annabel.jpg" alt="Annabel, 30s — Stress-Driven Hypothyroidism, reshaped in six months" loading="eager">
+          <div class="hero-slide-cap">
+            <div class="hero-slide-name">Annabel, 30s · Stress-Driven Hypothyroidism</div>
+            <div class="hero-slide-arc">Stressed. → <em>Balanced.</em></div>
+            <div class="hero-slide-sub">Reshaped around her hormones — in six months.</div>
+          </div>
+        </a>
+        <a href="#apply" class="hero-slide">
+          <img src="/hormonal-assessment/images/hero/jaime.jpg" alt="Jaime, 40s — Post-thyroidectomy, from a UK 16 to a UK 6" loading="eager">
+          <div class="hero-slide-cap">
+            <div class="hero-slide-name">Jaime, 40s · Post-thyroidectomy</div>
+            <div class="hero-slide-arc">UK 16 → <em>UK 6</em></div>
+            <div class="hero-slide-sub">Reshaped around her hormones — even after thyroid surgery.</div>
+          </div>
+        </a>
+        <a href="#apply" class="hero-slide">
+          <img src="/hormonal-assessment/images/hero/jess.jpg" alt="Jessica — Vegetarian, lifelong plateau, reshaped after years of trying everything" loading="lazy">
+          <div class="hero-slide-cap">
+            <div class="hero-slide-name">Jessica · Vegetarian, Lifelong Plateau</div>
+            <div class="hero-slide-arc">Lifelong plateau. → <em>Reshaped.</em></div>
+            <div class="hero-slide-sub">Hormone-aware coaching — after years of trying everything.</div>
+          </div>
+        </a>
+        <a href="#apply" class="hero-slide">
+          <img src="/hormonal-assessment/images/hero/carolyn.jpg" alt="Carolyn — ReShape transformation" loading="lazy">
+          <div class="hero-slide-cap"><div class="hero-slide-name">Carolyn</div></div>
+        </a>
+        <a href="#apply" class="hero-slide">
+          <img src="/hormonal-assessment/images/hero/julija.jpg" alt="Julija — ReShape transformation" loading="lazy">
+          <div class="hero-slide-cap"><div class="hero-slide-name">Julija</div></div>
+        </a>
+        <a href="#apply" class="hero-slide">
+          <img src="/hormonal-assessment/images/hero/sara.jpg" alt="Sara — ReShape transformation" loading="lazy">
+          <div class="hero-slide-cap"><div class="hero-slide-name">Sara</div></div>
+        </a>
+        <a href="#apply" class="hero-slide">
+          <img src="/hormonal-assessment/images/hero/teresa.jpg" alt="Teresa — ReShape transformation" loading="lazy">
+          <div class="hero-slide-cap"><div class="hero-slide-name">Teresa</div></div>
+        </a>
+        <a href="#apply" class="hero-slide">
+          <img src="/hormonal-assessment/images/hero/lubova.jpg" alt="Lubova — ReShape transformation" loading="lazy">
+          <div class="hero-slide-cap"><div class="hero-slide-name">Lubova</div></div>
+        </a>
+      </div>
+    </div>
+
+    <div class="hero-dots" role="tablist" aria-label="Choose a transformation">
+      <button class="hero-dot active" type="button" data-i="0" role="tab" aria-label="Show Annabel"></button>
+      <button class="hero-dot"        type="button" data-i="1" role="tab" aria-label="Show Jaime"></button>
+      <button class="hero-dot"        type="button" data-i="2" role="tab" aria-label="Show Jessica"></button>
+      <button class="hero-dot"        type="button" data-i="3" role="tab" aria-label="Show Carolyn"></button>
+      <button class="hero-dot"        type="button" data-i="4" role="tab" aria-label="Show Julija"></button>
+      <button class="hero-dot"        type="button" data-i="5" role="tab" aria-label="Show Sara"></button>
+      <button class="hero-dot"        type="button" data-i="6" role="tab" aria-label="Show Teresa"></button>
+      <button class="hero-dot"        type="button" data-i="7" role="tab" aria-label="Show Lubova"></button>
+    </div>
   </div>
 </section>
 
@@ -305,6 +375,58 @@
     © 2026 ReShape · Ipswich · Colchester. Seminar seats are limited and allocated by application.
   </div>
 </footer>
+
+<script>
+(function(){
+  var track = document.querySelector('[data-tx-carousel]');
+  if (!track) return;
+  var slides = track.querySelectorAll('.hero-slide');
+  var dots = document.querySelectorAll('#transformations .hero-dot');
+  var n = slides.length;
+  if (n <= 1) return;
+
+  var INTERVAL = 3500;
+  var i = 0;
+  var timer = null;
+  var prefersReduced = window.matchMedia('(prefers-reduced-motion: reduce)').matches;
+
+  function go(target){
+    i = ((target % n) + n) % n;
+    track.style.transform = 'translateX(-' + (i * 100) + '%)';
+    dots.forEach(function(d, idx){ d.classList.toggle('active', idx === i); });
+  }
+  function next(){ go(i + 1); }
+  function start(){ if (prefersReduced) return; stop(); timer = setInterval(next, INTERVAL); }
+  function stop(){ if (timer){ clearInterval(timer); timer = null; } }
+
+  dots.forEach(function(d){
+    d.addEventListener('click', function(){ go(parseInt(d.dataset.i, 10) || 0); start(); });
+  });
+
+  var carousel = track.parentElement;
+  carousel.addEventListener('mouseenter', stop);
+  carousel.addEventListener('mouseleave', start);
+  carousel.addEventListener('focusin', stop);
+  carousel.addEventListener('focusout', start);
+
+  var startX = 0, dx = 0, dragging = false;
+  carousel.addEventListener('touchstart', function(e){
+    if (!e.touches || !e.touches.length) return;
+    startX = e.touches[0].clientX; dx = 0; dragging = true; stop();
+  }, { passive: true });
+  carousel.addEventListener('touchmove', function(e){
+    if (!dragging || !e.touches || !e.touches.length) return;
+    dx = e.touches[0].clientX - startX;
+  }, { passive: true });
+  carousel.addEventListener('touchend', function(){
+    if (!dragging) return; dragging = false;
+    if (Math.abs(dx) > 40) go(i + (dx < 0 ? 1 : -1));
+    start();
+  });
+
+  start();
+})();
+</script>
 
 <script>
 (function(){
