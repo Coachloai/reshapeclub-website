@@ -34,15 +34,20 @@ CREATE INDEX IF NOT EXISTS idx_auto_steps_order ON automation_steps(sequence_id,
 ALTER TABLE automation_sequences ENABLE ROW LEVEL SECURITY;
 ALTER TABLE automation_steps ENABLE ROW LEVEL SECURITY;
 
-CREATE POLICY IF NOT EXISTS "auto_seq_read" ON automation_sequences FOR SELECT USING (true);
-CREATE POLICY IF NOT EXISTS "auto_seq_insert" ON automation_sequences FOR INSERT WITH CHECK (true);
-CREATE POLICY IF NOT EXISTS "auto_seq_update" ON automation_sequences FOR UPDATE USING (true);
-CREATE POLICY IF NOT EXISTS "auto_seq_delete" ON automation_sequences FOR DELETE USING (true);
-
-CREATE POLICY IF NOT EXISTS "auto_steps_read" ON automation_steps FOR SELECT USING (true);
-CREATE POLICY IF NOT EXISTS "auto_steps_insert" ON automation_steps FOR INSERT WITH CHECK (true);
-CREATE POLICY IF NOT EXISTS "auto_steps_update" ON automation_steps FOR UPDATE USING (true);
-CREATE POLICY IF NOT EXISTS "auto_steps_delete" ON automation_steps FOR DELETE USING (true);
+DO $$ BEGIN
+  IF NOT EXISTS (SELECT 1 FROM pg_policies WHERE tablename='automation_sequences' AND policyname='auto_seq_read') THEN
+    CREATE POLICY "auto_seq_read" ON automation_sequences FOR SELECT USING (true);
+  END IF;
+  IF NOT EXISTS (SELECT 1 FROM pg_policies WHERE tablename='automation_sequences' AND policyname='auto_seq_all') THEN
+    CREATE POLICY "auto_seq_all" ON automation_sequences FOR ALL USING (true) WITH CHECK (true);
+  END IF;
+  IF NOT EXISTS (SELECT 1 FROM pg_policies WHERE tablename='automation_steps' AND policyname='auto_steps_read') THEN
+    CREATE POLICY "auto_steps_read" ON automation_steps FOR SELECT USING (true);
+  END IF;
+  IF NOT EXISTS (SELECT 1 FROM pg_policies WHERE tablename='automation_steps' AND policyname='auto_steps_all') THEN
+    CREATE POLICY "auto_steps_all" ON automation_steps FOR ALL USING (true) WITH CHECK (true);
+  END IF;
+END $$;
 
 
 -- ============================================================
