@@ -368,11 +368,11 @@ function wrapEmailBody(subject, bodyText, ctaText, ctaUrl) {
 async function queueSequenceFromDB(sequenceName, lead, booking, supabaseClient) {
   if (!supabaseClient) return false;
 
-  // 1. Look up the sequence by name
+  // 1. Look up the sequence by trigger_type (machine-readable name)
   var seqRes = await supabaseClient
     .from('automation_sequences')
-    .select('id, name, is_active')
-    .eq('name', sequenceName)
+    .select('id, name, trigger_type, is_active')
+    .eq('trigger_type', sequenceName)
     .eq('is_active', true)
     .single();
 
