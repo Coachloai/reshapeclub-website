@@ -1,6 +1,6 @@
 /* ══════════════════════════════════════
    ReShape — Nurture Automation Engine
-   Email (Resend) + SMS (Twilio)
+   Email (Resend) + SMS (Twilio) + WhatsApp (Twilio)
 ══════════════════════════════════════ */
 
 // Config loaded from api/config.js (not committed to git)
@@ -9,6 +9,7 @@ var AUTOMATION_CONFIG = window.__AUTOMATION_CONFIG || {
   twilio_sid: '',
   twilio_auth: '',
   twilio_phone: '',
+  whatsapp_phone: '',
   coach_email: 'coach@reshape.fit',
   google_calendar_id: '',
   google_client_id: '',
@@ -118,6 +119,25 @@ async function sendSMS(to, body) {
       params.append('From', AUTOMATION_CONFIG.twilio_phone);
     }
     params.append('To', to);
+    params.append('Body', body);
+    var res = await fetch(url, {
+      method: 'POST',
+      headers: { 'Authorization': 'Basic ' + auth, 'Content-Type': 'application/x-www-form-urlencoded' },
+      body: params.toString()
+    });
+    var data = await res.json();
+    return data.sid ? { success: true, sid: data.sid } : { success: false, error: data.message || 'Failed' };
+  } catch (e) { return { success: false, error: e.message }; }
+}
+
+/* ── SEND WHATSAPP via Twilio ── */
+async function sendWhatsApp(to, body) {
+  try {
+    var url = 'https://api.twilio.com/2010-04-01/Accounts/' + AUTOMATION_CONFIG.twilio_sid + '/Messages.json';
+    var auth = btoa(AUTOMATION_CONFIG.twilio_sid + ':' + AUTOMATION_CONFIG.twilio_auth);
+    var params = new URLSearchParams();
+    params.append('From', 'whatsapp:' + AUTOMATION_CONFIG.twilio_phone);
+    params.append('To', 'whatsapp:' + to);
     params.append('Body', body);
     var res = await fetch(url, {
       method: 'POST',
@@ -285,12 +305,18 @@ var SEQUENCES = {
     { delay: 3600,     channel: 'sms',
       body: function(lead) { return 'Hey ' + lead.first_name + ', it\'s Jaime from ReShape. We got your application! Book your in-person visit before spots fill up: ' + AUTOMATION_CONFIG.booking_url; }
     },
+    { delay: 7200,     channel: 'whatsapp',
+      body: function(lead) { return 'Hey ' + lead.first_name + '! 👋 It\'s Coach Jaime from ReShape. Just seen your application come through — love that you\'re taking the first step! Fancy popping in for a visit? I\'d love to chat about your goals in person. Book here: ' + AUTOMATION_CONFIG.booking_url; }
+    },
     { delay: 86400,    channel: 'email',    subject: 'People like you are getting results',
       body: function(lead) { return emailTemplate(
         lead.first_name + ', people just like you are transforming',
         '<p>Since you applied, 3 more people have started their journey with us.</p><p>Our members lose an average of 8\u201312kg in 12 weeks. And if they don\'t? We coach them for free until they do.</p><p>Don\'t let this opportunity pass \u2014 book your visit now.</p>',
         'Book Your Visit', AUTOMATION_CONFIG.booking_url
       ); }
+    },
+    { delay: 172800,   channel: 'whatsapp',
+      body: function(lead) { return 'Hey ' + lead.first_name + ', quick one from Coach Jaime 💪 I had a look at your application and I genuinely think we can help you hit your goals. Spots are filling up though — grab yours here: ' + AUTOMATION_CONFIG.booking_url; }
     },
     { delay: 259200,   channel: 'sms',
       body: function(lead) { return 'Hi ' + lead.first_name + ', just checking in! Have you had a chance to book your ReShape visit yet? We\'d love to show you around: ' + AUTOMATION_CONFIG.booking_url; }
@@ -322,6 +348,9 @@ var SEQUENCES = {
     },
     { delay: 0,        channel: 'sms',
       body: function(lead, booking) { return 'You\'re booked, ' + lead.first_name + '! ' + (booking.date || '') + ' at ' + (booking.time || '') + ', ' + (booking.location || '') + '. Wear something comfortable - see you there!'; }
+    },
+    { delay: 60,       channel: 'whatsapp',
+      body: function(lead, booking) { return 'Hey ' + lead.first_name + '! 🎉 Coach Jaime here — just saw your booking come through for ' + (booking.date || '') + ' at ' + (booking.time || '') + ', ' + (booking.location || '') + '. Buzzing to meet you! Wear something comfy and bring a water bottle. See you there! 💪'; }
     },
     { delay: -86400,   channel: 'sms',      is_reminder: true,
       body: function(lead, booking) { return 'Hey ' + lead.first_name + '! Quick reminder: your ReShape visit is TOMORROW at ' + (booking.time || '') + ' at ' + (booking.location || '') + '. See you there! \uD83D\uDCAA'; }
@@ -410,6 +439,8 @@ async function processMessage(msg, supabaseClient, icsContent) {
     result = await sendEmail(msg.lead_email, msg.subject, msg.body, attachments);
   } else if (msg.channel === 'sms' && msg.lead_phone) {
     result = await sendSMS(msg.lead_phone, msg.body);
+  } else if (msg.channel === 'whatsapp' && msg.lead_phone) {
+    result = await sendWhatsApp(msg.lead_phone, msg.body);
   } else {
     result = { success: false, error: 'No phone number for ' + msg.channel };
   }
