@@ -330,11 +330,147 @@ var SEQUENCES = {
 };
 
 /* ══════════════════════════════════════
+   DB SEQUENCE SUPPORT — variable substitution & template wrapping
+══════════════════════════════════════ */
+
+// Replace {variable} placeholders in a text string with actual values
+function replaceVars(text, lead, booking) {
+  if (!text) return '';
+  var b = booking || {};
+  var vars = {
+    first_name: (lead && lead.first_name) || '',
+    pattern:    (lead && lead.hormonal_pattern) || 'your hormonal pattern',
+    book_link:  AUTOMATION_CONFIG.booking_url || '',
+    coach:      'Loai',
+    studio:     (lead && lead.location) || 'Ipswich & Colchester',
+    date:       b.date || '',
+    time:       b.time || '',
+    location:   b.location || ''
+  };
+  return text.replace(/\{(\w+)\}/g, function(match, key) {
+    return vars.hasOwnProperty(key) ? vars[key] : match;
+  });
+}
+
+// Convert plain text body (from database) into HTML email via emailTemplate()
+// bodyText uses \n\n to separate paragraphs; ctaText/ctaUrl are optional
+function wrapEmailBody(subject, bodyText, ctaText, ctaUrl) {
+  var paragraphs = bodyText.split(/\n\n/);
+  var html = '';
+  for (var i = 0; i < paragraphs.length; i++) {
+    var p = paragraphs[i].trim();
+    if (p) html += '<p>' + p + '</p>';
+  }
+  return emailTemplate(subject, html, ctaText || '', ctaUrl || '');
+}
+
+// Queue a nurture sequence by reading steps from the Supabase database
+async function queueSequenceFromDB(sequenceName, lead, booking, supabaseClient) {
+  if (!supabaseClient) return false;
+
+  // 1. Look up the sequence by name
+  var seqRes = await supabaseClient
+    .from('automation_sequences')
+    .select('id, name, is_active')
+    .eq('name', sequenceName)
+    .eq('is_active', true)
+    .single();
+
+  if (!seqRes.data) return false; // not found in DB — caller will fall back
+
+  var sequenceId = seqRes.data.id;
+
+  // 2. Fetch all active steps ordered by step_order
+  var stepsRes = await supabaseClient
+    .from('automation_steps')
+    .select('id, step_order, channel, delay_seconds, subject, body, is_active')
+    .eq('sequence_id', sequenceId)
+    .eq('is_active', true)
+    .order('step_order', { ascending: true });
+
+  var steps = stepsRes.data || [];
+  if (steps.length === 0) return false;
+
+  // 3. Cancel any existing pending messages for this lead + sequence (deduplication)
+  await supabaseClient
+    .from('message_queue')
+    .update({ status: 'cancelled' })
+    .eq('lead_email', lead.email)
+    .eq('sequence', sequenceName)
+    .in('status', ['queued', 'sending']);
+
+  // 4. Build messages from DB steps
+  var now = Date.now();
+  var messages = [];
+
+  for (var i = 0; i < steps.length; i++) {
+    var step = steps[i];
+    var sendAt = new Date(now + (step.delay_seconds * 1000)).toISOString();
+
+    // Apply variable substitution
+    var bodyText = replaceVars(step.body || '', lead, booking);
+    var subjectText = replaceVars(step.subject || '', lead, booking);
+
+    // Wrap email bodies in HTML template
+    var finalBody;
+    if (step.channel === 'email') {
+      finalBody = wrapEmailBody(subjectText, bodyText, '', '');
+    } else {
+      finalBody = bodyText;
+    }
+
+    messages.push({
+      lead_email: lead.email,
+      lead_phone: lead.phone || null,
+      lead_name: lead.first_name + ' ' + (lead.last_name || ''),
+      sequence: sequenceName,
+      step_index: step.step_order,
+      channel: step.channel,
+      subject: subjectText,
+      body: finalBody,
+      send_at: sendAt,
+      status: step.delay_seconds === 0 ? 'sending' : 'queued',
+    });
+  }
+
+  // 5. Insert into message_queue
+  if (messages.length > 0) {
+    var insertRes = await supabaseClient.from('message_queue').insert(messages).select();
+    var inserted = insertRes.data || [];
+
+    // 6. For delay=0 messages, call the Edge Function to send immediately
+    for (var j = 0; j < inserted.length; j++) {
+      if (inserted[j].status === 'sending') {
+        await processMessage(inserted[j], supabaseClient, null);
+      }
+    }
+  }
+
+  return true; // successfully queued from DB
+}
+
+/* ══════════════════════════════════════
    QUEUE MANAGER
 ══════════════════════════════════════ */
 
 // Queue a full nurture sequence for a lead
+// Tries the database first, then falls back to hardcoded SEQUENCES
 async function queueSequence(sequenceName, lead, booking, supabaseClient) {
+  // Try database-driven sequences first
+  try {
+    var dbResult = await queueSequenceFromDB(sequenceName, lead, booking, supabaseClient);
+    if (dbResult) {
+      // Successfully queued from DB — still send coach calendar invite if needed
+      if (sequenceName === 'booking_confirmed' && booking && booking.datetime) {
+        sendCoachCalendarInvite(lead, booking);
+      }
+      return;
+    }
+  } catch (e) {
+    console.warn('DB sequence lookup failed for "' + sequenceName + '", falling back to hardcoded:', e.message);
+  }
+
+  // Fall back to hardcoded SEQUENCES
   var seq = SEQUENCES[sequenceName];
   if (!seq) return;
   var now = Date.now();
