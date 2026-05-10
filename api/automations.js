@@ -1,15 +1,11 @@
 /* ══════════════════════════════════════
    ReShape — Nurture Automation Engine
    Email (Resend) + SMS (Twilio) + WhatsApp (Twilio)
+   All API calls routed through Supabase Edge Function
 ══════════════════════════════════════ */
 
-// Config loaded from api/config.js (not committed to git)
+// Config loaded from api/config.js (public settings only — no API keys)
 var AUTOMATION_CONFIG = window.__AUTOMATION_CONFIG || {
-  resend_key: '',
-  twilio_sid: '',
-  twilio_auth: '',
-  twilio_phone: '',
-  whatsapp_phone: '',
   coach_email: 'coach@reshape.fit',
   google_calendar_id: '',
   google_client_id: '',
@@ -17,9 +13,11 @@ var AUTOMATION_CONFIG = window.__AUTOMATION_CONFIG || {
   google_refresh_token: '',
   from_email: 'coach@reshape.fit',
   from_name: 'Coach Jaime | ReShape',
-  fallback_email: 'onboarding@resend.dev',
-  booking_url: 'https://reshape.fit/#apply',
+  booking_url: 'https://reshape.fit/booking',
 };
+
+// Edge Function URL
+var EDGE_FUNCTION_URL = 'https://lvizldmdficsfpgegehp.supabase.co/functions/v1/process-queue';
 
 /* ── VERIFY PHONE (format + auto-convert UK numbers) ── */
 async function verifyPhone(phone, inputEl) {
@@ -71,82 +69,48 @@ async function verifyEmail(email) {
   } catch (e) { return { valid: true }; } // On error, don't block
 }
 
-/* ── SEND EMAIL via Resend ── */
-async function sendEmail(to, subject, htmlBody, attachments) {
+/* ── CALL EDGE FUNCTION (all API calls go through server) ── */
+async function callEdgeFunction(payload) {
   try {
-    var payload = {
-      from: AUTOMATION_CONFIG.from_name + ' <' + AUTOMATION_CONFIG.from_email + '>',
-      to: [to],
-      subject: subject,
-      html: htmlBody
-    };
-    if (attachments && attachments.length > 0) payload.attachments = attachments;
-    var res = await fetch('https://api.resend.com/emails', {
+    var res = await fetch(EDGE_FUNCTION_URL, {
       method: 'POST',
-      headers: { 'Authorization': 'Bearer ' + AUTOMATION_CONFIG.resend_key, 'Content-Type': 'application/json' },
+      headers: { 'Content-Type': 'application/json' },
       body: JSON.stringify(payload)
     });
-    var data = await res.json();
-    if (data.id) return { success: true, id: data.id };
-    // Fallback to resend.dev domain if domain not verified
-    if (data.statusCode === 403 || (data.message && data.message.includes('domain'))) {
-      var fallbackPayload = {
-        from: AUTOMATION_CONFIG.from_name + ' <' + AUTOMATION_CONFIG.fallback_email + '>',
-        to: [to], subject: subject, html: htmlBody
-      };
-      if (attachments && attachments.length > 0) fallbackPayload.attachments = attachments;
-      var res2 = await fetch('https://api.resend.com/emails', {
-        method: 'POST',
-        headers: { 'Authorization': 'Bearer ' + AUTOMATION_CONFIG.resend_key, 'Content-Type': 'application/json' },
-        body: JSON.stringify(fallbackPayload)
-      });
-      var data2 = await res2.json();
-      return data2.id ? { success: true, id: data2.id } : { success: false, error: data2.message };
-    }
-    return { success: false, error: data.message || 'Unknown error' };
+    return await res.json();
   } catch (e) { return { success: false, error: e.message }; }
 }
 
-/* ── SEND SMS via Twilio Messaging Service ── */
+/* ── SEND EMAIL via Edge Function ── */
+async function sendEmail(to, subject, htmlBody, attachments) {
+  return callEdgeFunction({
+    action: 'send_message',
+    channel: 'email',
+    to_email: to,
+    subject: subject,
+    html_body: htmlBody,
+    attachments: attachments || null
+  });
+}
+
+/* ── SEND SMS via Edge Function ── */
 async function sendSMS(to, body) {
-  try {
-    var url = 'https://api.twilio.com/2010-04-01/Accounts/' + AUTOMATION_CONFIG.twilio_sid + '/Messages.json';
-    var auth = btoa(AUTOMATION_CONFIG.twilio_sid + ':' + AUTOMATION_CONFIG.twilio_auth);
-    var params = new URLSearchParams();
-    if (AUTOMATION_CONFIG.messaging_service_sid) {
-      params.append('MessagingServiceSid', AUTOMATION_CONFIG.messaging_service_sid);
-    } else {
-      params.append('From', AUTOMATION_CONFIG.twilio_phone);
-    }
-    params.append('To', to);
-    params.append('Body', body);
-    var res = await fetch(url, {
-      method: 'POST',
-      headers: { 'Authorization': 'Basic ' + auth, 'Content-Type': 'application/x-www-form-urlencoded' },
-      body: params.toString()
-    });
-    var data = await res.json();
-    return data.sid ? { success: true, sid: data.sid } : { success: false, error: data.message || 'Failed' };
-  } catch (e) { return { success: false, error: e.message }; }
+  return callEdgeFunction({
+    action: 'send_message',
+    channel: 'sms',
+    to_phone: to,
+    text_body: body
+  });
 }
 
-/* ── SEND WHATSAPP via Twilio ── */
+/* ── SEND WHATSAPP via Edge Function ── */
 async function sendWhatsApp(to, body) {
-  try {
-    var url = 'https://api.twilio.com/2010-04-01/Accounts/' + AUTOMATION_CONFIG.twilio_sid + '/Messages.json';
-    var auth = btoa(AUTOMATION_CONFIG.twilio_sid + ':' + AUTOMATION_CONFIG.twilio_auth);
-    var params = new URLSearchParams();
-    params.append('From', 'whatsapp:' + AUTOMATION_CONFIG.twilio_phone);
-    params.append('To', 'whatsapp:' + to);
-    params.append('Body', body);
-    var res = await fetch(url, {
-      method: 'POST',
-      headers: { 'Authorization': 'Basic ' + auth, 'Content-Type': 'application/x-www-form-urlencoded' },
-      body: params.toString()
-    });
-    var data = await res.json();
-    return data.sid ? { success: true, sid: data.sid } : { success: false, error: data.message || 'Failed' };
-  } catch (e) { return { success: false, error: e.message }; }
+  return callEdgeFunction({
+    action: 'send_message',
+    channel: 'whatsapp',
+    to_phone: to,
+    text_body: body
+  });
 }
 
 /* ── GENERATE .ICS CALENDAR FILE ── */
