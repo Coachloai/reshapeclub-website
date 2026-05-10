@@ -185,7 +185,7 @@ VALUES (
   'whatsapp',
   259200,
   NULL,
-  E'Hey {first_name}, it''s Loai from ReShape. Had a look at your assessment — wanted to say one quick thing because {pattern} is one we see a lot, and there''s a piece of it that almost nobody gets right. Your body isn''t broken. It''s protecting itself. And the fix isn''t more discipline — it''s a different sequence. If you want me to walk you through what that means for you specifically, the consultation''s the place. Either way, hope that''s useful. \U0001F44B',
+  E'Hey {first_name}, it''s Loai from ReShape. Had a look at your assessment — wanted to say one quick thing because {pattern} is one we see a lot, and there''s a piece of it that almost nobody gets right. Your body isn''t broken. It''s protecting itself. And the fix isn''t more discipline — it''s a different sequence. If you want me to walk you through what that means for you specifically, the consultation''s the place. Either way, hope that''s useful. 👋',
   true
 );
 
@@ -254,7 +254,7 @@ VALUES (
   'email',
   1123200,
   'What {pattern} actually does to your body',
-  E'Pure primer. No story, no pitch.\n\nYour assessment flagged {pattern}. Here''s what that means physiologically.\n\nThe pattern involves a cascade: when one hormone is chronically elevated or suppressed, it pulls others with it. Think of it as a chain reaction — cortisol affects thyroid, thyroid affects metabolism, disrupted metabolism affects insulin, insulin affects fat storage, and fat storage produces oestrogen, which feeds back into the loop.\n\nStandard advice fails because it targets one link in the chain. Cut calories — metabolism drops further. Add cardio — cortisol rises. Take a supplement — one hormone shifts while the rest compensate.\n\nAn actual fix sequence looks like this: first, identify which hormones are primary drivers (that''s what the assessment maps). Second, regulate the nervous system and sleep architecture. Third, restructure nutrition around the pattern, not against it. Fourth, build from a stable base.\n\nWhat you can do this week regardless of whether you book: get morning sunlight in the first hour after waking. Hit 30g protein at breakfast within 60 minutes of getting up. No caffeine until you''ve eaten.\n\nThese help. They won''t fix the underlying pattern. If you want this applied to your specific report, that''s what the consultation is for.\n\nBook your free consultation \U2192 {book_link}',
+  E'Pure primer. No story, no pitch.\n\nYour assessment flagged {pattern}. Here''s what that means physiologically.\n\nThe pattern involves a cascade: when one hormone is chronically elevated or suppressed, it pulls others with it. Think of it as a chain reaction — cortisol affects thyroid, thyroid affects metabolism, disrupted metabolism affects insulin, insulin affects fat storage, and fat storage produces oestrogen, which feeds back into the loop.\n\nStandard advice fails because it targets one link in the chain. Cut calories — metabolism drops further. Add cardio — cortisol rises. Take a supplement — one hormone shifts while the rest compensate.\n\nAn actual fix sequence looks like this: first, identify which hormones are primary drivers (that''s what the assessment maps). Second, regulate the nervous system and sleep architecture. Third, restructure nutrition around the pattern, not against it. Fourth, build from a stable base.\n\nWhat you can do this week regardless of whether you book: get morning sunlight in the first hour after waking. Hit 30g protein at breakfast within 60 minutes of getting up. No caffeine until you''ve eaten.\n\nThese help. They won''t fix the underlying pattern. If you want this applied to your specific report, that''s what the consultation is for.\n\nBook your free consultation → {book_link}',
   true
 );
 
@@ -319,7 +319,7 @@ VALUES (
   'email',
   2160000,
   'The seven hormones we map — and why it''s seven, not three',
-  E'Most "hormone reset" content focuses on 2-3 hormones — usually oestrogen and cortisol. The complete picture is seven, and they interact.\n\nHere''s what the ReShape assessment maps:\n\n1. Oestrogen — drives fat distribution, especially post-35. Dominance creates a specific storage pattern.\n2. Progesterone — the calming hormone. When it drops, anxiety, bloating, and sleep disruption follow.\n3. Testosterone — not just for men. Low testosterone in women means muscle loss, fatigue, and low drive.\n4. Cortisol — the stress hormone. Chronically elevated cortisol overrides everything else.\n5. Insulin — regulates blood sugar. Resistance drives fat storage even on a "clean" diet.\n6. Leptin — the satiety signal. Resistance means your brain never gets the "full" message.\n7. Ghrelin — the hunger hormone. Dysregulated sleep sends it through the roof.\n\nSingle-hormone fixes fail because they ignore the system. Fix cortisol but ignore insulin — the pattern shifts, it doesn''t resolve. That''s why generic plans keep failing.\n\nYour assessment maps all seven. The consultation is where we look at which two or three are doing the most damage in your specific case.\n\nBook your free consultation \U2192 {book_link}',
+  E'Most "hormone reset" content focuses on 2-3 hormones — usually oestrogen and cortisol. The complete picture is seven, and they interact.\n\nHere''s what the ReShape assessment maps:\n\n1. Oestrogen — drives fat distribution, especially post-35. Dominance creates a specific storage pattern.\n2. Progesterone — the calming hormone. When it drops, anxiety, bloating, and sleep disruption follow.\n3. Testosterone — not just for men. Low testosterone in women means muscle loss, fatigue, and low drive.\n4. Cortisol — the stress hormone. Chronically elevated cortisol overrides everything else.\n5. Insulin — regulates blood sugar. Resistance drives fat storage even on a "clean" diet.\n6. Leptin — the satiety signal. Resistance means your brain never gets the "full" message.\n7. Ghrelin — the hunger hormone. Dysregulated sleep sends it through the roof.\n\nSingle-hormone fixes fail because they ignore the system. Fix cortisol but ignore insulin — the pattern shifts, it doesn''t resolve. That''s why generic plans keep failing.\n\nYour assessment maps all seven. The consultation is where we look at which two or three are doing the most damage in your specific case.\n\nBook your free consultation → {book_link}',
   true
 );
 
@@ -362,7 +362,7 @@ VALUES (
   'email',
   3456000,
   'Why your bloods came back "normal" but you feel like rubbish',
-  E'This one hits a nerve for most women over 30.\n\nYou go to your GP. You list the symptoms — exhaustion, weight gain, brain fog, disrupted sleep, low mood. They run bloods. Everything comes back "within normal range". You''re told you''re fine.\n\nBut you''re not fine. You know you''re not fine.\n\nHere''s what''s happening: NHS blood panels use reference ranges designed to catch disease. They''re not designed to catch dysfunction. The gap between "clinically ill" and "optimally functioning" is enormous — and that''s where most women in their 30s and 40s are sitting.\n\nYour cortisol might be "normal" — but normal for a stressed, sleep-deprived 40-year-old, which is a very different thing from optimal. Your thyroid might be "fine" — but fine at the bottom of a range that spans a huge functional spectrum.\n\nThe ReShape assessment isn''t a blood panel — we said that on the homepage and we''ll say it again. But the symptom patterns it picks up are usually the same patterns you''d find on labs if anyone bothered to look at them properly.\n\nThe consultation is where we decide if labs make sense for you.\n\nBook your free consultation \U2192 {book_link}',
+  E'This one hits a nerve for most women over 30.\n\nYou go to your GP. You list the symptoms — exhaustion, weight gain, brain fog, disrupted sleep, low mood. They run bloods. Everything comes back "within normal range". You''re told you''re fine.\n\nBut you''re not fine. You know you''re not fine.\n\nHere''s what''s happening: NHS blood panels use reference ranges designed to catch disease. They''re not designed to catch dysfunction. The gap between "clinically ill" and "optimally functioning" is enormous — and that''s where most women in their 30s and 40s are sitting.\n\nYour cortisol might be "normal" — but normal for a stressed, sleep-deprived 40-year-old, which is a very different thing from optimal. Your thyroid might be "fine" — but fine at the bottom of a range that spans a huge functional spectrum.\n\nThe ReShape assessment isn''t a blood panel — we said that on the homepage and we''ll say it again. But the symptom patterns it picks up are usually the same patterns you''d find on labs if anyone bothered to look at them properly.\n\nThe consultation is where we decide if labs make sense for you.\n\nBook your free consultation → {book_link}',
   true
 );
 
@@ -431,7 +431,7 @@ VALUES (
   'email',
   5616000,
   'Are you still in?',
-  E'{first_name} — straight question.\n\nTwo months ago you took the assessment. Since then I''ve been sending things based on your pattern report. Some you''ve opened, some you haven''t.\n\nIs this still on your radar?\n\nIf yes — let''s stop the dance. Book the consultation.\n\nBook your free consultation \U2192 {book_link}\n\nIf no — that''s fine. Tell me and I''ll take you off the active list.\n\n— Loai',
+  E'{first_name} — straight question.\n\nTwo months ago you took the assessment. Since then I''ve been sending things based on your pattern report. Some you''ve opened, some you haven''t.\n\nIs this still on your radar?\n\nIf yes — let''s stop the dance. Book the consultation.\n\nBook your free consultation → {book_link}\n\nIf no — that''s fine. Tell me and I''ll take you off the active list.\n\n— Loai',
   true
 );
 
@@ -457,7 +457,7 @@ VALUES (
   'email',
   7084800,
   'One last thing, regardless of what you decide',
-  E'The single most important habit for {pattern}.\n\nRegardless of whether you ever book a consultation, do this one thing: restructure your morning.\n\nGet outside within 60 minutes of waking. No phone first. Sunlight on your face — even on an overcast UK day, outdoor light intensity is 10-50x what you get indoors. This resets your circadian cortisol rhythm, which is the master switch for everything downstream — thyroid function, insulin sensitivity, sleep architecture, appetite regulation.\n\nThen eat. 30g protein minimum. Eggs, Greek yoghurt, whatever works. Before caffeine. Caffeine on an empty stomach spikes cortisol and undoes the reset you just did.\n\nThese two things — morning light and a protein-first breakfast — are free, evidence-based, and effective for any hormonal pattern. They won''t fix everything. But they''re the foundation that everything else sits on.\n\nIf any of this has been useful, you know where we are.\n\nBook your free consultation \U2192 {book_link}\n\n— Loai & Sean',
+  E'The single most important habit for {pattern}.\n\nRegardless of whether you ever book a consultation, do this one thing: restructure your morning.\n\nGet outside within 60 minutes of waking. No phone first. Sunlight on your face — even on an overcast UK day, outdoor light intensity is 10-50x what you get indoors. This resets your circadian cortisol rhythm, which is the master switch for everything downstream — thyroid function, insulin sensitivity, sleep architecture, appetite regulation.\n\nThen eat. 30g protein minimum. Eggs, Greek yoghurt, whatever works. Before caffeine. Caffeine on an empty stomach spikes cortisol and undoes the reset you just did.\n\nThese two things — morning light and a protein-first breakfast — are free, evidence-based, and effective for any hormonal pattern. They won''t fix everything. But they''re the foundation that everything else sits on.\n\nIf any of this has been useful, you know where we are.\n\nBook your free consultation → {book_link}\n\n— Loai & Sean',
   true
 );
 
@@ -483,7 +483,7 @@ VALUES (
   'email',
   7689600,
   'I''m going to stop emailing you now',
-  E'{first_name},\n\nI''ve sent you about 20 emails over the last three months. You''ve opened some, ignored some — that''s normal.\n\nWhat I don''t want is to keep arriving in your inbox if it''s no longer welcome. So I''m taking you off this sequence at the end of the week.\n\nTwo doors:\n\n1. You''re still considering it. Book the consultation. I''ll personally make sure it''s a good use of your time.\n\nBook your free consultation \U2192 {book_link}\n\n2. You''re not, and that''s fine. Do nothing. You''ll come off the active list and only get our occasional newsletter — which you can opt out of any time.\n\nEither way: thanks for trusting us with your assessment. Hope something in these emails was useful.\n\n— Loai',
+  E'{first_name},\n\nI''ve sent you about 20 emails over the last three months. You''ve opened some, ignored some — that''s normal.\n\nWhat I don''t want is to keep arriving in your inbox if it''s no longer welcome. So I''m taking you off this sequence at the end of the week.\n\nTwo doors:\n\n1. You''re still considering it. Book the consultation. I''ll personally make sure it''s a good use of your time.\n\nBook your free consultation → {book_link}\n\n2. You''re not, and that''s fine. Do nothing. You''ll come off the active list and only get our occasional newsletter — which you can opt out of any time.\n\nEither way: thanks for trusting us with your assessment. Hope something in these emails was useful.\n\n— Loai',
   true
 );
 
@@ -590,7 +590,7 @@ VALUES (
   'whatsapp',
   -3600,
   NULL,
-  E'Hey {first_name}, see you in an hour at {location}! \U0001F4AA — {coach}',
+  E'Hey {first_name}, see you in an hour at {location}! 💪 — {coach}',
   true
 );
 
@@ -645,7 +645,7 @@ VALUES (
   'email',
   259200,
   'Still on the cards?',
-  E'{first_name} — quick check-in. No pressure.\n\nYour consultation slot was cancelled but your assessment and pattern report are still on file.\n\nTwo options:\n\n1. Rebook now \U2192 {book_link}\n2. Not the right time — reply "later" and I''ll check back in 30 days.\n\nEither way, no hard feelings.\n\n— {coach}',
+  E'{first_name} — quick check-in. No pressure.\n\nYour consultation slot was cancelled but your assessment and pattern report are still on file.\n\nTwo options:\n\n1. Rebook now → {book_link}\n2. Not the right time — reply "later" and I''ll check back in 30 days.\n\nEither way, no hard feelings.\n\n— {coach}',
   true
 );
 
@@ -713,7 +713,7 @@ VALUES (
   'email',
   86400,
   'Three slots for you this week',
-  E'{first_name}, no rush — but if you''d like to rebook this week, here are three options.\n\nThe easiest way is to pick whatever works.\n\nBook your free consultation \U2192 {book_link}\n\nYour assessment and pattern report are still on file. {coach} will have reviewed everything before you arrive.\n\nIf now''s not the right month, just reply "later" and I''ll check back in 30 days.\n\n— {coach}',
+  E'{first_name}, no rush — but if you''d like to rebook this week, here are three options.\n\nThe easiest way is to pick whatever works.\n\nBook your free consultation → {book_link}\n\nYour assessment and pattern report are still on file. {coach} will have reviewed everything before you arrive.\n\nIf now''s not the right month, just reply "later" and I''ll check back in 30 days.\n\n— {coach}',
   true
 );
 
@@ -739,7 +739,7 @@ VALUES (
   'email',
   604800,
   'Last note about the missed consultation',
-  E'{first_name} — final message about this.\n\nYour assessment is on file. Your pattern report is valid. When you''re ready, the consultation is still free and {coach} will have read your results before you arrive.\n\nAfter today, you''ll continue receiving the educational emails based on your {pattern} results. They''re useful regardless.\n\nWhenever you''re ready.\n\nBook your free consultation \U2192 {book_link}\n\n— {coach}',
+  E'{first_name} — final message about this.\n\nYour assessment is on file. Your pattern report is valid. When you''re ready, the consultation is still free and {coach} will have read your results before you arrive.\n\nAfter today, you''ll continue receiving the educational emails based on your {pattern} results. They''re useful regardless.\n\nWhenever you''re ready.\n\nBook your free consultation → {book_link}\n\n— {coach}',
   true
 );
 
