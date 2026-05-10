@@ -1187,8 +1187,8 @@ if(sessionStorage.getItem('rs_auth')==='1'){
           <input type="text" class="filter-input" style="width:200px;padding:7px 12px" placeholder="Quick search…" id="table-search" oninput="quickSearch(this.value)">
         </div>
       </div>
-      <div id="bulk-bar" style="display:none;padding:10px 16px;background:rgba(231,76,60,0.08);border:1px solid rgba(231,76,60,0.2);border-radius:10px;margin-bottom:12px;display:none;align-items:center;gap:12px">
-        <span style="font-size:13px;font-weight:600;color:var(--text)" id="bulk-count">0 selected</span>
+      <div class="bulk-bar" style="display:none;padding:10px 16px;background:rgba(231,76,60,0.08);border:1px solid rgba(231,76,60,0.2);border-radius:10px;margin-bottom:12px;align-items:center;gap:12px">
+        <span class="bulk-count" style="font-size:13px;font-weight:600;color:var(--text)">0 selected</span>
         <button class="btn btn-ghost btn-sm" style="color:var(--red);border-color:rgba(231,76,60,.3);padding:6px 14px;font-size:12px" onclick="deleteSelectedLeads()">Delete Selected</button>
         <button class="btn btn-ghost btn-sm" style="padding:6px 14px;font-size:12px" onclick="clearSelection()">Cancel</button>
       </div>
@@ -1307,6 +1307,11 @@ if(sessionStorage.getItem('rs_auth')==='1'){
           <div class="table-header-right">
             <input type="text" class="filter-input" style="width:220px;padding:7px 12px" placeholder="Search name or email…" oninput="quickSearch(this.value)">
           </div>
+        </div>
+        <div class="bulk-bar" style="display:none;padding:10px 16px;background:rgba(231,76,60,0.08);border:1px solid rgba(231,76,60,0.2);border-radius:10px;margin-bottom:12px;align-items:center;gap:12px">
+          <span class="bulk-count" style="font-size:13px;font-weight:600;color:var(--text)">0 selected</span>
+          <button class="btn btn-ghost btn-sm" style="color:var(--red);border-color:rgba(231,76,60,.3);padding:6px 14px;font-size:12px" onclick="deleteSelectedLeads()">Delete Selected</button>
+          <button class="btn btn-ghost btn-sm" style="padding:6px 14px;font-size:12px" onclick="clearSelection()">Cancel</button>
         </div>
         <div style="overflow-x:auto">
           <table class="data-table">
@@ -4396,14 +4401,15 @@ function toggleAllLeads(masterCheckbox, tbodyId) {
   updateBulkBar();
 }
 function updateBulkBar() {
+  // De-duplicate by id since each lead appears in two tables (overview + leads tab).
   var checked = document.querySelectorAll('.lead-check:checked');
-  var bar = document.getElementById('bulk-bar');
-  if (checked.length > 0) {
-    bar.style.display = 'flex';
-    document.getElementById('bulk-count').textContent = checked.length + ' selected';
-  } else {
-    bar.style.display = 'none';
-  }
+  var ids = new Set();
+  checked.forEach(function(cb) { if (cb.dataset.id) ids.add(cb.dataset.id); });
+  var count = ids.size;
+  var bars = document.querySelectorAll('.bulk-bar');
+  var counts = document.querySelectorAll('.bulk-count');
+  bars.forEach(function(bar) { bar.style.display = count > 0 ? 'flex' : 'none'; });
+  counts.forEach(function(el) { el.textContent = count + ' selected'; });
 }
 function clearSelection() {
   document.querySelectorAll('.lead-check').forEach(function(cb) { cb.checked = false; });
@@ -4412,8 +4418,9 @@ function clearSelection() {
 }
 async function deleteSelectedLeads() {
   var checked = document.querySelectorAll('.lead-check:checked');
-  var ids = [];
-  checked.forEach(function(cb) { ids.push(cb.dataset.id); });
+  var idSet = new Set();
+  checked.forEach(function(cb) { if (cb.dataset.id) idSet.add(cb.dataset.id); });
+  var ids = Array.from(idSet);
   if (ids.length === 0) return;
   if (!confirm('Delete ' + ids.length + ' lead' + (ids.length > 1 ? 's' : '') + ' permanently? This cannot be undone.')) return;
   try {
