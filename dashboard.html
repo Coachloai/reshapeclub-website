@@ -11,8 +11,8 @@
 <link href="https://fonts.googleapis.com/css2?family=DM+Sans:wght@300;400;500;600&display=swap" rel="stylesheet">
 <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
 <script src="https://cdnjs.cloudflare.com/ajax/libs/Chart.js/4.4.1/chart.umd.min.js"></script>
-<script src="api/config.js"></script>
-<script src="api/automations.js"></script>
+<script src="api/config.js?v=2"></script>
+<script src="api/automations.js?v=9"></script>
 <style>
 *,*::before,*::after{box-sizing:border-box;margin:0;padding:0}
 :root{
@@ -997,6 +997,9 @@ if(sessionStorage.getItem('rs_auth')==='1'){
     <button class="sb-btn" data-view="bookings" title="Bookings" onclick="switchView('bookings', this)">
       <svg width="16" height="16" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><rect x="3" y="4" width="18" height="18" rx="2" ry="2"/><line x1="16" y1="2" x2="16" y2="6"/><line x1="8" y1="2" x2="8" y2="6"/><line x1="3" y1="10" x2="21" y2="10"/></svg>
     </button>
+    <button class="sb-btn" data-view="hormonal" title="Hormonal Assessments" onclick="switchView('hormonal', this)">
+      <svg width="16" height="16" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><path d="M3 12h4l3-9 4 18 3-9h4"/></svg>
+    </button>
     <button class="sb-btn" data-view="automations" title="Automations" onclick="switchView('automations', this)">
       <svg width="16" height="16" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><path d="M22 12h-4l-3 9L9 3l-3 9H2"/></svg>
     </button>
@@ -1032,11 +1035,11 @@ if(sessionStorage.getItem('rs_auth')==='1'){
     <div class="filters fade-in fade-in-1">
       <div class="filter-group">
         <label class="filter-label">From</label>
-        <input type="date" class="filter-input" id="filter-from">
+        <input type="date" class="filter-input" id="filter-from" autocomplete="off">
       </div>
       <div class="filter-group">
         <label class="filter-label">To</label>
-        <input type="date" class="filter-input" id="filter-to">
+        <input type="date" class="filter-input" id="filter-to" autocomplete="off">
       </div>
       <div class="filter-group">
         <label class="filter-label">Website</label>
@@ -1045,6 +1048,7 @@ if(sessionStorage.getItem('rs_auth')==='1'){
           <option value="Main Landing Page">reshape.fit</option>
           <option value="Men Landing Page">reshape.fit/men</option>
           <option value="Women Landing Page">reshape.fit/women</option>
+          <option value="Seminar Application">reshape.fit/seminar-application</option>
           <option value="ReShape Club">reshapeclub.com</option>
         </select>
       </div>
@@ -1183,10 +1187,16 @@ if(sessionStorage.getItem('rs_auth')==='1'){
           <input type="text" class="filter-input" style="width:200px;padding:7px 12px" placeholder="Quick search…" id="table-search" oninput="quickSearch(this.value)">
         </div>
       </div>
+      <div class="bulk-bar" style="display:none;padding:10px 16px;background:rgba(231,76,60,0.08);border:1px solid rgba(231,76,60,0.2);border-radius:10px;margin-bottom:12px;align-items:center;gap:12px">
+        <span class="bulk-count" style="font-size:13px;font-weight:600;color:var(--text)">0 selected</span>
+        <button class="btn btn-ghost btn-sm" style="color:var(--red);border-color:rgba(231,76,60,.3);padding:6px 14px;font-size:12px" onclick="deleteSelectedLeads()">Delete Selected</button>
+        <button class="btn btn-ghost btn-sm" style="padding:6px 14px;font-size:12px" onclick="clearSelection()">Cancel</button>
+      </div>
       <div style="overflow-x:auto">
         <table class="data-table" id="leads-table">
           <thead>
             <tr>
+              <th style="width:36px"><input type="checkbox" class="lead-check-all" onchange="toggleAllLeads(this,'leads-tbody')"></th>
               <th onclick="sortTable('#')" data-col="#"><div class="th-inner">#<span class="sort-icon">↕</span></div></th>
               <th onclick="sortTable('name')" data-col="name"><div class="th-inner">Name<span class="sort-icon">↕</span></div></th>
               <th onclick="sortTable('email')" data-col="email"><div class="th-inner">Email<span class="sort-icon">↕</span></div></th>
@@ -1234,11 +1244,11 @@ if(sessionStorage.getItem('rs_auth')==='1'){
       <div class="lv-filters fade-in" style="margin-bottom:16px">
         <div class="filter-group">
           <label class="filter-label">From</label>
-          <input type="date" class="filter-input" id="lv-from">
+          <input type="date" class="filter-input" id="lv-from" autocomplete="off">
         </div>
         <div class="filter-group">
           <label class="filter-label">To</label>
-          <input type="date" class="filter-input" id="lv-to">
+          <input type="date" class="filter-input" id="lv-to" autocomplete="off">
         </div>
         <div class="filter-group">
           <label class="filter-label">Location</label>
@@ -1272,6 +1282,7 @@ if(sessionStorage.getItem('rs_auth')==='1'){
             <option value="Main Landing Page">reshape.fit</option>
             <option value="Men Landing Page">reshape.fit/men</option>
             <option value="Women Landing Page">reshape.fit/women</option>
+            <option value="Seminar Application">reshape.fit/seminar-application</option>
             <option value="ReShape Club">reshapeclub.com</option>
           </select>
         </div>
@@ -1297,10 +1308,16 @@ if(sessionStorage.getItem('rs_auth')==='1'){
             <input type="text" class="filter-input" style="width:220px;padding:7px 12px" placeholder="Search name or email…" oninput="quickSearch(this.value)">
           </div>
         </div>
+        <div class="bulk-bar" style="display:none;padding:10px 16px;background:rgba(231,76,60,0.08);border:1px solid rgba(231,76,60,0.2);border-radius:10px;margin-bottom:12px;align-items:center;gap:12px">
+          <span class="bulk-count" style="font-size:13px;font-weight:600;color:var(--text)">0 selected</span>
+          <button class="btn btn-ghost btn-sm" style="color:var(--red);border-color:rgba(231,76,60,.3);padding:6px 14px;font-size:12px" onclick="deleteSelectedLeads()">Delete Selected</button>
+          <button class="btn btn-ghost btn-sm" style="padding:6px 14px;font-size:12px" onclick="clearSelection()">Cancel</button>
+        </div>
         <div style="overflow-x:auto">
           <table class="data-table">
             <thead>
               <tr>
+                <th style="width:36px"><input type="checkbox" class="lead-check-all" onchange="toggleAllLeads(this,'leads-view-tbody')"></th>
                 <th onclick="sortTable('#')" data-col="#"><div class="th-inner">#<span class="sort-icon">↕</span></div></th>
                 <th onclick="sortTable('name')" data-col="name"><div class="th-inner">Name<span class="sort-icon">↕</span></div></th>
                 <th onclick="sortTable('email')" data-col="email"><div class="th-inner">Email<span class="sort-icon">↕</span></div></th>
@@ -1703,8 +1720,8 @@ if(sessionStorage.getItem('rs_auth')==='1'){
                 <label class="appt-form-label">Duration</label>
                 <select class="appt-form-input" id="appt-duration">
                   <option value="15">15 min</option>
-                  <option value="30" selected>30 min</option>
-                  <option value="45">45 min</option>
+                  <option value="30">30 min</option>
+                  <option value="45" selected>45 min</option>
                   <option value="60">60 min</option>
                   <option value="90">90 min</option>
                   <option value="120">120 min</option>
@@ -1850,9 +1867,15 @@ if(sessionStorage.getItem('rs_auth')==='1'){
       </div>
       <!-- BOOKINGS TABLE -->
       <div class="chart-card fade-in">
-        <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:16px">
+        <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:16px;flex-wrap:wrap;gap:12px">
           <div class="chart-title">Upcoming Bookings</div>
-          <span style="font-size:12px;color:var(--text3)" id="bookings-count">0 bookings</span>
+          <div style="display:flex;align-items:center;gap:14px">
+            <label style="display:flex;align-items:center;gap:6px;font-size:12px;color:var(--text2);cursor:pointer">
+              <input type="checkbox" id="bookings-filter-unconfirmed" style="margin:0">
+              Unconfirmed only
+            </label>
+            <span style="font-size:12px;color:var(--text3)" id="bookings-count">0 bookings</span>
+          </div>
         </div>
         <div style="overflow-x:auto">
           <table class="leads-table" style="width:100%">
@@ -1866,6 +1889,7 @@ if(sessionStorage.getItem('rs_auth')==='1'){
                 <th>Date</th>
                 <th>Time</th>
                 <th>Location</th>
+                <th>Confirmed</th>
                 <th>Status</th>
               </tr>
             </thead>
@@ -1873,6 +1897,112 @@ if(sessionStorage.getItem('rs_auth')==='1'){
           </table>
         </div>
         <div id="bookings-empty" style="display:none;text-align:center;padding:32px;color:var(--text3);font-size:14px">No bookings yet.</div>
+      </div>
+    </div>
+    <!-- ── VIEW: HORMONAL ASSESSMENTS ── -->
+    <div id="view-hormonal" class="view" style="display:none">
+      <div class="page-header fade-in" style="margin-bottom:20px">
+        <div>
+          <div class="page-title">Hormonal Assessments</div>
+          <div class="page-sub" id="horm-sub">Loading…</div>
+        </div>
+        <div class="header-actions">
+          <button class="btn btn-ghost" onclick="loadHormonalView()">Refresh</button>
+          <button class="btn btn-export btn-sm" onclick="exportHormonalCSV()">
+            <svg width="12" height="12" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><path d="M21 15v4a2 2 0 01-2 2H5a2 2 0 01-2-2v-4"/><polyline points="7 10 12 15 17 10"/><line x1="12" y1="15" x2="12" y2="3"/></svg>
+            Export CSV
+          </button>
+        </div>
+      </div>
+      <!-- STAT CARDS -->
+      <div class="stats-row fade-in">
+        <div class="stat-card primary">
+          <div class="stat-top">
+            <span class="stat-label">Total Assessments</span>
+          </div>
+          <div class="stat-num" id="horm-stat-total">0</div>
+          <div class="stat-sub" id="horm-stat-total-sub">All time</div>
+        </div>
+        <div class="stat-card">
+          <div class="stat-top"><span class="stat-label">Completion Rate</span></div>
+          <div class="stat-num" id="horm-stat-rate">—</div>
+          <div class="stat-sub">Finished vs started</div>
+        </div>
+        <div class="stat-card">
+          <div class="stat-top"><span class="stat-label">Top Archetype</span></div>
+          <div class="stat-num" id="horm-stat-top" style="font-size:22px;line-height:1.2">—</div>
+          <div class="stat-sub" id="horm-stat-top-sub">—</div>
+        </div>
+        <div class="stat-card">
+          <div class="stat-top"><span class="stat-label">Last 7 Days</span></div>
+          <div class="stat-num" id="horm-stat-week">0</div>
+          <div class="stat-sub">Completed in window</div>
+        </div>
+      </div>
+      <!-- FILTER -->
+      <div class="filters fade-in">
+        <div class="filter-group">
+          <label class="filter-label">Archetype</label>
+          <select class="filter-select" id="horm-filter-archetype" onchange="renderHormonalTable()">
+            <option value="">All archetypes</option>
+            <option value="stress_driven_plateau">Stress-Driven Plateau</option>
+            <option value="hormonal_shift">Hormonal Shift Pattern</option>
+            <option value="metabolic_resistance">Metabolic Resistance</option>
+            <option value="compound_pattern">Compound Pattern</option>
+          </select>
+        </div>
+        <div class="filter-group">
+          <label class="filter-label">Status</label>
+          <select class="filter-select" id="horm-filter-status" onchange="renderHormonalTable()">
+            <option value="">All</option>
+            <option value="completed">Completed</option>
+            <option value="abandoned">Abandoned (email captured, no completion)</option>
+            <option value="in_progress">In progress (no email yet)</option>
+          </select>
+        </div>
+        <div class="filter-divider"></div>
+        <div class="filter-group wide">
+          <label class="filter-label">Search</label>
+          <input type="text" class="filter-input" id="horm-filter-search" placeholder="Search name or email…" oninput="renderHormonalTable()">
+        </div>
+      </div>
+      <!-- TABLE -->
+      <div class="table-card fade-in">
+        <div class="table-header">
+          <div>
+            <div class="table-title">Submissions</div>
+            <div class="table-sub" id="horm-count">0 results</div>
+          </div>
+        </div>
+        <div class="table-wrap">
+          <table class="leads-table">
+            <thead>
+              <tr>
+                <th>#</th>
+                <th>Date</th>
+                <th>Name</th>
+                <th>Email</th>
+                <th>Archetype</th>
+                <th>Secondary</th>
+                <th>Flags</th>
+                <th>Status</th>
+                <th></th>
+              </tr>
+            </thead>
+            <tbody id="horm-tbody"></tbody>
+          </table>
+        </div>
+        <div id="horm-empty" style="display:none;text-align:center;padding:32px;color:var(--text3);font-size:14px">No hormonal assessments yet.</div>
+      </div>
+    </div>
+    <!-- HORMONAL DETAIL MODAL -->
+    <div class="drawer-overlay" id="horm-drawer" onclick="if(event.target===this)closeHormonalDetail()">
+      <div class="drawer-panel" style="max-width:640px">
+        <div class="drawer-header">
+          <div class="drawer-title" id="horm-detail-title">Assessment</div>
+          <button class="drawer-close" onclick="closeHormonalDetail()">&times;</button>
+        </div>
+        <div class="drawer-body" id="horm-detail-body" style="padding:20px"></div>
       </div>
     </div>
     <!-- ── VIEW: SETTINGS ── -->
@@ -1959,6 +2089,16 @@ if(sessionStorage.getItem('rs_auth')==='1'){
             <label class="appt-form-label">Calendar ID <span style="color:var(--text3);font-weight:400">(leave blank for primary)</span></label>
             <input type="text" class="appt-form-input" id="gcal-calendar-id" placeholder="primary" style="font-size:12px">
           </div>
+          <div class="appt-form-group">
+            <label class="appt-form-label">Appointment Duration</label>
+            <select class="appt-form-input" id="gcal-duration" style="font-size:12px">
+              <option value="30">30 minutes</option>
+              <option value="45">45 minutes</option>
+              <option value="60" selected>1 hour</option>
+              <option value="90">1.5 hours</option>
+              <option value="120">2 hours</option>
+            </select>
+          </div>
           <div id="gcal-auth-section" style="display:none">
             <div class="appt-form-group">
               <label class="appt-form-label">Authorization Code</label>
@@ -1975,6 +2115,7 @@ if(sessionStorage.getItem('rs_auth')==='1'){
           <div style="display:flex;gap:8px;margin-top:4px">
             <button class="btn btn-primary btn-sm" onclick="startGCalAuth()">Connect Google Calendar</button>
             <button class="btn btn-ghost btn-sm" onclick="testGCalConnection()">Test Connection</button>
+            <button class="btn btn-ghost btn-sm" onclick="sendTestCalEvent()">Send Test Event</button>
             <button class="btn btn-ghost btn-sm" onclick="saveGCalSettings()">Save</button>
           </div>
         </div>
@@ -2021,7 +2162,7 @@ function mapLead(row, i) {
     phone: row.phone || '',
     location: row.location || 'Unknown',
     form: row.form_name || 'Intake',
-    formLabel: ({'Main Landing Page':'reshape.fit','Men Landing Page':'reshape.fit/men','Women Landing Page':'reshape.fit/women','ReShape Club':'reshapeclub.com'})[row.form_name] || row.form_name || 'Unknown',
+    formLabel: ({'Main Landing Page':'reshape.fit','Men Landing Page':'reshape.fit/men','Women Landing Page':'reshape.fit/women','Seminar Application':'reshape.fit/seminar-application','ReShape Club':'reshapeclub.com'})[row.form_name] || row.form_name || 'Unknown',
     quality: quality,
     age: parseInt(row.age) || 0,
     gender: row.gender || 'Unknown',
@@ -2042,12 +2183,21 @@ function mapLead(row, i) {
 }
 
 async function fetchLeads() {
-  var result = await sb.from('leads').select('*').order('created_at', { ascending: false });
+  var result = await sb.from('leads').select('*').order('created_at', { ascending: false }).limit(10000);
   if (result.error) { console.error('Supabase error:', result.error); return []; }
   return (result.data || []).map(mapLead);
 }
 
 async function initDashboard() {
+  // Clear any browser-autocompleted or leftover filter values
+  ['filter-from','filter-to','filter-search','table-search','lv-from','lv-to','lv-search'].forEach(id => {
+    var el = document.getElementById(id);
+    if (el) el.value = '';
+  });
+  ['filter-form','filter-location','filter-gender','lv-location','lv-gender','lv-quality','lv-form'].forEach(id => {
+    var el = document.getElementById(id);
+    if (el) el.selectedIndex = 0;
+  });
   ALL_LEADS = await fetchLeads();
   filtered = [...ALL_LEADS];
   renderTable();
@@ -2116,6 +2266,7 @@ function renderTable() {
     const d = new Date(l.date).toLocaleDateString('en-GB',{day:'numeric',month:'short',year:'numeric'});
     return `
       <tr>
+        <td><input type="checkbox" class="lead-check" data-id="${l.id}" onchange="updateBulkBar()"></td>
         <td style="color:var(--text3)">${start + i + 1}</td>
         <td class="td-name">${l.name}</td>
         <td class="td-email">${l.email}</td>
@@ -2519,6 +2670,7 @@ function switchView(view, btn) {
   if (view === 'bookings') initBookingsView();
   if (view === 'automations') initAutomationsView();
   if (view === 'content') initContentView();
+  if (view === 'hormonal') loadHormonalView();
 }
 /* ── LEADS VIEW ── */
 function renderLeadsView() {
@@ -2530,6 +2682,7 @@ function renderLeadsView() {
     const d = new Date(l.date).toLocaleDateString('en-GB',{day:'numeric',month:'short',year:'numeric'});
     return `
       <tr>
+        <td><input type="checkbox" class="lead-check" data-id="${l.id}" onchange="updateBulkBar()"></td>
         <td style="color:var(--text3)">${i+1}</td>
         <td class="td-name">${l.name}</td>
         <td class="td-email">${l.email}</td>
@@ -2915,7 +3068,14 @@ async function fetchSlots() {
 async function fetchBookings() {
   try { var r = await sb.from('bookings').select('*, booking_slots(date, start_time, end_time, location, appointment_type_id)').eq('status', 'confirmed').order('created_at', { ascending: false }); ALL_BOOKINGS = r.data || []; }
   catch (e) { ALL_BOOKINGS = []; }
+  try {
+    var rm = await sb.from('transformation_members').select('id, name');
+    TRANSFORMATION_MEMBERS_BY_ID = {};
+    (rm.data || []).forEach(function(m){ TRANSFORMATION_MEMBERS_BY_ID[m.id] = m.name; });
+  } catch (e) { TRANSFORMATION_MEMBERS_BY_ID = {}; }
 }
+var TRANSFORMATION_MEMBERS_BY_ID = {};
+var BOOKINGS_FILTER_UNCONFIRMED = false;
 
 function updateBookingStats() {
   var today = new Date().toISOString().split('T')[0];
@@ -2975,20 +3135,63 @@ function renderApptCards() {
   }).join('');
 }
 
+function bookingConfirmStatus(b) {
+  // Returns { label, cls } based on confirmed_at + slot time.
+  if (b.confirmed_at) return { label: 'Confirmed', cls: 'tag-high' };
+  var slot = b.booking_slots || {};
+  if (slot.date && slot.start_time) {
+    var slotDt = new Date(slot.date + 'T' + slot.start_time);
+    if (slotDt.getTime() < Date.now()) return { label: 'Missed (no confirm)', cls: 'tag-low' };
+  }
+  return { label: 'Unconfirmed', cls: 'tag-medium' };
+}
+function escapeHtmlDash(s) {
+  return String(s == null ? '' : s).replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;').replace(/"/g,'&quot;').replace(/'/g,'&#39;');
+}
+function toggleBookingDetail(idx) {
+  var detail = document.getElementById('booking-detail-' + idx);
+  if (!detail) return;
+  detail.style.display = (detail.style.display === 'table-row') ? 'none' : 'table-row';
+}
 function renderBookings() {
   var tbody = document.getElementById('bookings-tbody');
   var empty = document.getElementById('bookings-empty');
   var countEl = document.getElementById('bookings-count');
-  countEl.textContent = ALL_BOOKINGS.length + ' booking' + (ALL_BOOKINGS.length !== 1 ? 's' : '');
-  if (ALL_BOOKINGS.length === 0) { tbody.innerHTML = ''; empty.style.display = 'block'; return; }
+  var rows = BOOKINGS_FILTER_UNCONFIRMED
+    ? ALL_BOOKINGS.filter(function(b){ return !b.confirmed_at; })
+    : ALL_BOOKINGS;
+  countEl.textContent = rows.length + ' booking' + (rows.length !== 1 ? 's' : '');
+  if (rows.length === 0) { tbody.innerHTML = ''; empty.style.display = 'block'; return; }
   empty.style.display = 'none';
-  tbody.innerHTML = ALL_BOOKINGS.map(function(b, i) {
+  tbody.innerHTML = rows.map(function(b, i) {
     var slot = b.booking_slots || {};
     var appt = ALL_APPT_TYPES.find(function(a) { return a.id === slot.appointment_type_id; });
     var dateStr = slot.date ? new Date(slot.date + 'T00:00:00').toLocaleDateString('en-GB', { weekday: 'short', day: 'numeric', month: 'short' }) : '-';
     var timeStr = slot.start_time ? slot.start_time.substring(0, 5) + ' - ' + slot.end_time.substring(0, 5) : '-';
-    return '<tr>' +
-      '<td style="color:var(--text3)">' + (i + 1) + '</td>' +
+    var conf = bookingConfirmStatus(b);
+    var hasDetail = !!(b.confirmed_at || (b.relate_to_members && b.relate_to_members.length) || b.pre_consult_note);
+    var caret = hasDetail ? '<span style="color:var(--text3);font-size:11px;margin-right:6px">▸</span>' : '';
+    var rowClick = hasDetail ? ' onclick="toggleBookingDetail(' + i + ')" style="cursor:pointer"' : '';
+
+    var memberNames = (b.relate_to_members || []).map(function(id){
+      return TRANSFORMATION_MEMBERS_BY_ID[id] || id;
+    });
+    var detailHtml = hasDetail
+      ? '<tr id="booking-detail-' + i + '" style="display:none;background:var(--s2)">' +
+          '<td colspan="10" style="padding:14px 18px">' +
+            (b.confirmed_at ? '<div style="font-size:12px;color:var(--text3);margin-bottom:8px">Confirmed ' + new Date(b.confirmed_at).toLocaleString('en-GB') + '</div>' : '') +
+            (memberNames.length
+              ? '<div style="margin-bottom:10px"><div style="font-size:11px;color:var(--text3);text-transform:uppercase;letter-spacing:.08em;margin-bottom:4px">Related to</div><div style="font-size:13px;color:var(--text2)">' + memberNames.map(escapeHtmlDash).join(' · ') + '</div></div>'
+              : '') +
+            (b.pre_consult_note
+              ? '<div><div style="font-size:11px;color:var(--text3);text-transform:uppercase;letter-spacing:.08em;margin-bottom:4px">Pre-consult note</div><div style="font-size:13px;color:var(--text);white-space:pre-wrap;background:var(--s3);border:1px solid var(--border2);border-radius:8px;padding:10px 12px">' + escapeHtmlDash(b.pre_consult_note) + '</div></div>'
+              : '') +
+          '</td>' +
+        '</tr>'
+      : '';
+
+    return '<tr' + rowClick + '>' +
+      '<td style="color:var(--text3)">' + caret + (i + 1) + '</td>' +
       '<td class="td-name">' + (b.first_name || '') + ' ' + (b.last_name || '') + '</td>' +
       '<td class="td-email">' + (b.email || '') + '</td>' +
       '<td class="td-phone">' + (b.phone || '') + '</td>' +
@@ -2996,8 +3199,19 @@ function renderBookings() {
       '<td style="white-space:nowrap">' + dateStr + '</td>' +
       '<td>' + timeStr + '</td>' +
       '<td><span class="tag tag-location">' + (b.location || slot.location || '') + '</span></td>' +
-      '<td><span class="tag tag-quality tag-high">' + b.status + '</span></td></tr>';
+      '<td><span class="tag tag-quality ' + conf.cls + '">' + conf.label + '</span></td>' +
+      '<td><span class="tag tag-quality tag-high">' + b.status + '</span></td></tr>' +
+      detailHtml;
   }).join('');
+
+  var filterEl = document.getElementById('bookings-filter-unconfirmed');
+  if (filterEl && !filterEl._wired) {
+    filterEl._wired = true;
+    filterEl.addEventListener('change', function(){
+      BOOKINGS_FILTER_UNCONFIRMED = filterEl.checked;
+      renderBookings();
+    });
+  }
 }
 
 /* ── APPOINTMENT DRAWER ── */
@@ -3540,7 +3754,7 @@ function renderAutoQueue() {
 
 async function processQueueNow() {
   showToast('Processing queue...');
-  var count = await processQueue(sb);
+  var count = await processQueue();
   showToast(count + ' message' + (count !== 1 ? 's' : '') + ' processed');
   await initAutomationsView();
 }
@@ -3683,7 +3897,7 @@ async function deleteSequence(id) {
 // Auto-process queue every 60 seconds when dashboard is open
 setInterval(async function() {
   if (document.querySelector('#view-automations.active-view')) {
-    var count = await processQueue(sb);
+    var count = await processQueue();
     if (count > 0) { await initAutomationsView(); }
   }
 }, 60000);
@@ -4076,6 +4290,7 @@ document.addEventListener('keydown', function(e) {
     <div class="modal-body" id="modal-body"></div>
     <div class="modal-foot">
       <button class="btn btn-ghost btn-sm" onclick="closeModal()">Close</button>
+      <button class="btn btn-ghost btn-sm" style="color:var(--red);border-color:rgba(231,76,60,.3)" onclick="deleteLead(document.getElementById('modal-name').dataset.leadId)">Delete Lead</button>
       <button class="btn btn-primary btn-sm" onclick="closeModal()">Mark as Contacted</button>
     </div>
   </div>
@@ -4087,6 +4302,7 @@ function openLeadModal(id) {
   if (!l) { console.error('Lead not found:', id, 'Total leads:', ALL_LEADS.length); return; }
   const a = l.answers || {};
   document.getElementById('modal-name').textContent = l.name;
+  document.getElementById('modal-name').dataset.leadId = l.id;
   document.getElementById('modal-id').textContent   =
     'Lead #' + l.id + ' \u00b7 ' + l.formLabel + ' \u00b7 ' +
     new Date(l.date).toLocaleDateString('en-GB',{day:'numeric',month:'long',year:'numeric'});
@@ -4179,6 +4395,62 @@ function openLeadModal(id) {
 function closeModal() {
   document.getElementById('modal-overlay').classList.remove('open');
   document.body.style.overflow = '';
+}
+function toggleAllLeads(masterCheckbox, tbodyId) {
+  var checks = document.getElementById(tbodyId).querySelectorAll('.lead-check');
+  checks.forEach(function(cb) { cb.checked = masterCheckbox.checked; });
+  updateBulkBar();
+}
+function updateBulkBar() {
+  // De-duplicate by id since each lead appears in two tables (overview + leads tab).
+  var checked = document.querySelectorAll('.lead-check:checked');
+  var ids = new Set();
+  checked.forEach(function(cb) { if (cb.dataset.id) ids.add(cb.dataset.id); });
+  var count = ids.size;
+  var bars = document.querySelectorAll('.bulk-bar');
+  var counts = document.querySelectorAll('.bulk-count');
+  bars.forEach(function(bar) { bar.style.display = count > 0 ? 'flex' : 'none'; });
+  counts.forEach(function(el) { el.textContent = count + ' selected'; });
+}
+function clearSelection() {
+  document.querySelectorAll('.lead-check').forEach(function(cb) { cb.checked = false; });
+  document.querySelectorAll('.lead-check-all').forEach(function(cb) { cb.checked = false; });
+  updateBulkBar();
+}
+async function deleteSelectedLeads() {
+  var checked = document.querySelectorAll('.lead-check:checked');
+  var idSet = new Set();
+  checked.forEach(function(cb) { if (cb.dataset.id) idSet.add(cb.dataset.id); });
+  var ids = Array.from(idSet);
+  if (ids.length === 0) return;
+  if (!confirm('Delete ' + ids.length + ' lead' + (ids.length > 1 ? 's' : '') + ' permanently? This cannot be undone.')) return;
+  try {
+    for (var i = 0; i < ids.length; i++) {
+      await sb.from('leads').delete().eq('id', ids[i]);
+    }
+    ALL_LEADS = ALL_LEADS.filter(function(l) { return ids.indexOf(String(l.id)) === -1; });
+    filtered = filtered.filter(function(l) { return ids.indexOf(String(l.id)) === -1; });
+    clearSelection();
+    renderTable();
+    renderLeadsView();
+    updateStats();
+    showToast(ids.length + ' lead' + (ids.length > 1 ? 's' : '') + ' deleted');
+  } catch (e) { showToast('Error deleting leads'); }
+}
+async function deleteLead(id) {
+  if (!id) return;
+  if (!confirm('Delete this lead permanently? This cannot be undone.')) return;
+  try {
+    var res = await sb.from('leads').delete().eq('id', id);
+    if (res.error) { showToast('Error: ' + res.error.message); return; }
+    ALL_LEADS = ALL_LEADS.filter(function(l) { return String(l.id) !== String(id); });
+    filtered = filtered.filter(function(l) { return String(l.id) !== String(id); });
+    closeModal();
+    renderTable();
+    renderLeadsView();
+    updateStats();
+    showToast('Lead deleted');
+  } catch (e) { showToast('Error deleting lead'); }
 }
 /* ══ DRAWERS ═════════════════════════ */
 let drawerCharts = {};
@@ -4394,6 +4666,7 @@ document.addEventListener('keydown', e=>{
   if (saved.client_id) document.getElementById('gcal-client-id').value = saved.client_id;
   if (saved.client_secret) document.getElementById('gcal-client-secret').value = saved.client_secret;
   if (saved.calendar_id) document.getElementById('gcal-calendar-id').value = saved.calendar_id;
+  if (saved.duration) document.getElementById('gcal-duration').value = saved.duration;
   if (saved.refresh_token) {
     document.getElementById('gcal-refresh-token').value = saved.refresh_token;
     document.getElementById('gcal-token-display').style.display = 'block';
@@ -4433,7 +4706,7 @@ function startGCalAuth() {
   var clientId = document.getElementById('gcal-client-id').value.trim();
   if (!clientId) { showToast('Enter a Client ID first'); return; }
   var redirect = window.location.origin + '/dashboard.html';
-  var scope = 'https://www.googleapis.com/auth/calendar.events';
+  var scope = 'https://www.googleapis.com/auth/calendar';
   var url = 'https://accounts.google.com/o/oauth2/v2/auth?' + new URLSearchParams({
     client_id: clientId,
     redirect_uri: redirect,
@@ -4520,7 +4793,8 @@ function saveGCalSettings() {
     client_id: document.getElementById('gcal-client-id').value.trim(),
     client_secret: document.getElementById('gcal-client-secret').value.trim(),
     calendar_id: document.getElementById('gcal-calendar-id').value.trim(),
-    refresh_token: document.getElementById('gcal-refresh-token').value.trim()
+    refresh_token: document.getElementById('gcal-refresh-token').value.trim(),
+    duration: document.getElementById('gcal-duration').value
   };
   localStorage.setItem('gcal_settings', JSON.stringify(settings));
   // Apply to config
@@ -4532,6 +4806,250 @@ function saveGCalSettings() {
   }
   updateGCalStatus();
   showToast('Google Calendar settings saved');
+}
+
+async function sendTestCalEvent() {
+  var saved = JSON.parse(localStorage.getItem('gcal_settings') || '{}');
+  if (!saved.refresh_token) { showToast('Connect Google Calendar first'); return; }
+  AUTOMATION_CONFIG.google_client_id = saved.client_id;
+  AUTOMATION_CONFIG.google_client_secret = saved.client_secret;
+  AUTOMATION_CONFIG.google_refresh_token = saved.refresh_token;
+  AUTOMATION_CONFIG.google_calendar_id = saved.calendar_id || 'primary';
+  var durationMins = parseInt(saved.duration || '60');
+  var testLead = { first_name: 'Test', last_name: 'Booking', email: 'test@example.com', phone: '+44 7700 000000' };
+  var now = new Date();
+  var tomorrow = new Date(now.getTime() + 86400000);
+  tomorrow.setHours(10, 0, 0, 0);
+  var testBooking = {
+    date: tomorrow.toLocaleDateString('en-GB', { weekday: 'long', day: 'numeric', month: 'long' }),
+    time: '10:00',
+    location: 'Ipswich',
+    datetime: tomorrow.toISOString().substring(0, 11) + '10:00:00'
+  };
+  try {
+    var result = await addToGoogleCalendar(testLead, testBooking, durationMins);
+    if (result.success) {
+      showToast('Test event added to your calendar for tomorrow at 10am!');
+    } else {
+      showToast('Error: ' + result.error);
+    }
+  } catch (e) { showToast('Error: ' + e.message); }
+}
+
+/* ── HORMONAL ASSESSMENTS ── */
+var HORMONAL_ASSESSMENTS = [];
+var HORMONAL_ANSWERS = {};
+
+var ARCHETYPE_LABELS = {
+  stress_driven_plateau: 'Stress-Driven Plateau',
+  hormonal_shift: 'Hormonal Shift',
+  metabolic_resistance: 'Metabolic Resistance',
+  compound_pattern: 'Compound Pattern'
+};
+var ARCHETYPE_COLORS = {
+  stress_driven_plateau: '#FF6B35',
+  hormonal_shift: '#9B59B6',
+  metabolic_resistance: '#E67E22',
+  compound_pattern: '#3498DB'
+};
+
+async function loadHormonalView() {
+  try {
+    var res = await sb.from('assessments').select('*').order('started_at', { ascending: false }).limit(500);
+    HORMONAL_ASSESSMENTS = res.data || [];
+  } catch (e) { HORMONAL_ASSESSMENTS = []; }
+  updateHormonalStats();
+  renderHormonalTable();
+}
+
+function hormonalStatusOf(a) {
+  if (a.completed_at) return 'completed';
+  if (a.email_captured_at) return 'abandoned';
+  return 'in_progress';
+}
+
+function updateHormonalStats() {
+  var all = HORMONAL_ASSESSMENTS;
+  var completed = all.filter(function(a){ return !!a.completed_at; });
+  var withEmail = all.filter(function(a){ return !!a.email_captured_at; });
+  var rate = withEmail.length > 0 ? Math.round((completed.length / withEmail.length) * 100) : 0;
+  document.getElementById('horm-stat-total').textContent = all.length;
+  document.getElementById('horm-stat-total-sub').textContent = completed.length + ' completed · ' + (all.length - withEmail.length) + ' anonymous';
+  document.getElementById('horm-stat-rate').textContent = withEmail.length > 0 ? rate + '%' : '—';
+  // Top archetype
+  var counts = {};
+  completed.forEach(function(a){ if (a.primary_archetype) counts[a.primary_archetype] = (counts[a.primary_archetype] || 0) + 1; });
+  var top = Object.keys(counts).sort(function(a,b){ return counts[b] - counts[a]; })[0];
+  document.getElementById('horm-stat-top').textContent = top ? ARCHETYPE_LABELS[top] : '—';
+  document.getElementById('horm-stat-top-sub').textContent = top ? counts[top] + ' women' : 'No completions yet';
+  // Last 7 days
+  var weekAgo = Date.now() - 7 * 24 * 60 * 60 * 1000;
+  var weekCount = completed.filter(function(a){ return new Date(a.completed_at).getTime() >= weekAgo; }).length;
+  document.getElementById('horm-stat-week').textContent = weekCount;
+  document.getElementById('horm-sub').textContent = all.length + ' total · ' + completed.length + ' completed · ' + withEmail.length + ' captured email';
+}
+
+function renderHormonalTable() {
+  var arch = document.getElementById('horm-filter-archetype').value;
+  var status = document.getElementById('horm-filter-status').value;
+  var search = (document.getElementById('horm-filter-search').value || '').toLowerCase().trim();
+
+  var rows = HORMONAL_ASSESSMENTS.filter(function(a){
+    if (arch && a.primary_archetype !== arch) return false;
+    if (status && hormonalStatusOf(a) !== status) return false;
+    if (search) {
+      // Search by email or name via the linked lead — we don't have leads loaded here
+      // but email is stored via the lead. For search we resolve lazily from ALL_LEADS.
+      var lead = (window.ALL_LEADS || []).find(function(l){ return l.id === a.lead_id; });
+      var hay = ((lead && lead.email) || '').toLowerCase() + ' ' + ((lead && lead.first_name) || '').toLowerCase();
+      if (hay.indexOf(search) < 0) return false;
+    }
+    return true;
+  });
+
+  var tbody = document.getElementById('horm-tbody');
+  var empty = document.getElementById('horm-empty');
+  document.getElementById('horm-count').textContent = rows.length + ' result' + (rows.length === 1 ? '' : 's');
+
+  if (rows.length === 0) { tbody.innerHTML = ''; empty.style.display = 'block'; return; }
+  empty.style.display = 'none';
+
+  tbody.innerHTML = rows.map(function(a, i){
+    var lead = (window.ALL_LEADS || []).find(function(l){ return l.id === a.lead_id; });
+    var name = lead ? ((lead.first_name || '') + ' ' + (lead.last_name || '')).trim() : '—';
+    var email = lead ? (lead.email || '') : '—';
+    var d = new Date(a.started_at).toLocaleDateString('en-GB', { day: 'numeric', month: 'short', year: 'numeric' });
+    var primaryLbl = a.primary_archetype ? ARCHETYPE_LABELS[a.primary_archetype] : '—';
+    var color = a.primary_archetype ? ARCHETYPE_COLORS[a.primary_archetype] : 'rgba(255,255,255,0.12)';
+    var secondaryLbl = a.secondary_archetype ? ARCHETYPE_LABELS[a.secondary_archetype] : '—';
+    var flagsArr = Array.isArray(a.flags) ? a.flags : [];
+    var flagsHtml = flagsArr.length === 0 ? '<span style="color:var(--text3)">—</span>' :
+      flagsArr.slice(0,2).map(function(f){ return '<span class="tag tag-form" style="margin-right:4px">' + f.replace(/_/g,' ') + '</span>'; }).join('') +
+      (flagsArr.length > 2 ? ' <span style="color:var(--text3);font-size:11px">+' + (flagsArr.length - 2) + '</span>' : '');
+    var st = hormonalStatusOf(a);
+    var stClass = st === 'completed' ? 'tag-high' : st === 'abandoned' ? 'tag-med' : 'tag-low';
+    var stLbl = st === 'completed' ? 'Completed' : st === 'abandoned' ? 'Abandoned' : 'In progress';
+
+    return '<tr>' +
+      '<td style="color:var(--text3)">' + (i + 1) + '</td>' +
+      '<td style="white-space:nowrap;color:var(--text3)">' + d + '</td>' +
+      '<td class="td-name">' + (name || '—') + '</td>' +
+      '<td class="td-email">' + email + '</td>' +
+      '<td><span class="tag" style="background:' + color + '20;color:' + color + ';border:1px solid ' + color + '40">' + primaryLbl + '</span></td>' +
+      '<td><span style="color:var(--text2);font-size:13px">' + secondaryLbl + '</span></td>' +
+      '<td>' + flagsHtml + '</td>' +
+      '<td><span class="tag tag-quality ' + stClass + '">' + stLbl + '</span></td>' +
+      '<td><button class="btn-view" onclick="openHormonalDetail(\'' + a.session_id + '\')">View →</button></td>' +
+    '</tr>';
+  }).join('');
+}
+
+async function openHormonalDetail(sessionId) {
+  var a = HORMONAL_ASSESSMENTS.find(function(x){ return x.session_id === sessionId; });
+  if (!a) return;
+  var lead = (window.ALL_LEADS || []).find(function(l){ return l.id === a.lead_id; });
+  var name = lead ? ((lead.first_name || '') + ' ' + (lead.last_name || '')).trim() : 'Anonymous';
+  var email = lead ? (lead.email || '') : '—';
+
+  // Fetch answers for this session
+  var ansRes = await sb.from('assessment_answers').select('question_id, answer_value, answered_at').eq('session_id', sessionId).order('answered_at', { ascending: true });
+  var answers = (ansRes.data || []).reduce(function(m, r){ m[r.question_id] = r.answer_value; return m; }, {});
+
+  document.getElementById('horm-detail-title').textContent = name + ' — ' + (a.primary_archetype ? ARCHETYPE_LABELS[a.primary_archetype] : 'Incomplete');
+
+  var hormonesHtml = '';
+  if (a.hormone_scores) {
+    var entries = Object.entries(a.hormone_scores).sort(function(x,y){ return y[1] - x[1]; });
+    hormonesHtml = '<div style="display:grid;grid-template-columns:repeat(2,1fr);gap:8px;margin-top:8px">' +
+      entries.map(function(e){
+        var pct = Math.min(100, (Number(e[1]) / 10) * 100);
+        return '<div style="background:var(--s3);border:1px solid var(--border);border-radius:8px;padding:10px 12px">' +
+          '<div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:6px"><span style="font-size:12px;color:var(--text2);text-transform:capitalize">' + e[0] + '</span><strong style="font-size:13px;color:var(--text)">' + e[1] + '/10</strong></div>' +
+          '<div style="height:4px;background:var(--s4);border-radius:2px;overflow:hidden"><div style="height:100%;width:' + pct + '%;background:var(--orange);border-radius:2px"></div></div>' +
+        '</div>';
+      }).join('') +
+    '</div>';
+  }
+
+  var clusterHtml = '';
+  if (a.cluster_scores) {
+    clusterHtml = '<div style="display:flex;gap:8px;margin-top:8px">' +
+      Object.entries(a.cluster_scores).map(function(e){
+        return '<div style="flex:1;background:var(--s3);border:1px solid var(--border);border-radius:8px;padding:10px 12px;text-align:center">' +
+          '<div style="font-size:11px;color:var(--text3);text-transform:uppercase;letter-spacing:0.1em;margin-bottom:4px">' + e[0].replace(/_/g,' ') + '</div>' +
+          '<div style="font-size:18px;font-weight:700;color:var(--text)">' + e[1] + '</div>' +
+        '</div>';
+      }).join('') +
+    '</div>';
+  }
+
+  var answersHtml = Object.keys(answers).sort(function(a,b){
+    var na = parseInt(a.replace('Q','')); var nb = parseInt(b.replace('Q','')); return na - nb;
+  }).map(function(qid){
+    return '<div style="padding:8px 0;border-bottom:1px solid var(--border2);display:flex;justify-content:space-between;gap:12px">' +
+      '<span style="color:var(--text3);font-size:13px;font-weight:600;min-width:36px">' + qid + '</span>' +
+      '<span style="color:var(--text2);font-size:13px;text-align:right">' + answers[qid] + '</span>' +
+    '</div>';
+  }).join('');
+
+  var flagsArr = Array.isArray(a.flags) ? a.flags : [];
+  var flagsHtml = flagsArr.length === 0 ? '<span style="color:var(--text3);font-size:13px">No flags.</span>' :
+    flagsArr.map(function(f){ return '<span class="tag tag-form" style="margin-right:4px">' + f.replace(/_/g,' ') + '</span>'; }).join('');
+
+  document.getElementById('horm-detail-body').innerHTML =
+    '<div style="margin-bottom:20px">' +
+      '<div style="font-size:12px;color:var(--text3);text-transform:uppercase;letter-spacing:0.12em;margin-bottom:4px">Contact</div>' +
+      '<div style="color:var(--text);font-size:15px;font-weight:600">' + name + '</div>' +
+      '<div style="color:var(--text2);font-size:14px">' + email + '</div>' +
+      '<div style="color:var(--text3);font-size:12px;margin-top:6px">Started ' + new Date(a.started_at).toLocaleString('en-GB') + (a.completed_at ? ' · Completed ' + new Date(a.completed_at).toLocaleString('en-GB') : ' · Not completed') + '</div>' +
+    '</div>' +
+    '<div style="margin-bottom:20px">' +
+      '<div style="font-size:12px;color:var(--text3);text-transform:uppercase;letter-spacing:0.12em;margin-bottom:8px">Pattern</div>' +
+      '<div style="color:var(--text);font-size:18px;font-weight:700">' + (a.primary_archetype ? ARCHETYPE_LABELS[a.primary_archetype] : 'Not scored') + '</div>' +
+      (a.secondary_archetype ? '<div style="color:var(--text2);font-size:13px;margin-top:2px">+ secondary: ' + ARCHETYPE_LABELS[a.secondary_archetype] + '</div>' : '') +
+    '</div>' +
+    (clusterHtml ? '<div style="margin-bottom:20px"><div style="font-size:12px;color:var(--text3);text-transform:uppercase;letter-spacing:0.12em;margin-bottom:6px">Cluster scores</div>' + clusterHtml + '</div>' : '') +
+    (hormonesHtml ? '<div style="margin-bottom:20px"><div style="font-size:12px;color:var(--text3);text-transform:uppercase;letter-spacing:0.12em;margin-bottom:6px">Hormone signals (0–10)</div>' + hormonesHtml + '</div>' : '') +
+    '<div style="margin-bottom:20px">' +
+      '<div style="font-size:12px;color:var(--text3);text-transform:uppercase;letter-spacing:0.12em;margin-bottom:6px">Flags</div>' +
+      flagsHtml +
+    '</div>' +
+    '<div>' +
+      '<div style="font-size:12px;color:var(--text3);text-transform:uppercase;letter-spacing:0.12em;margin-bottom:6px">Answers</div>' +
+      (answersHtml || '<span style="color:var(--text3);font-size:13px">No answers recorded.</span>') +
+    '</div>';
+
+  document.getElementById('horm-drawer').classList.add('open');
+}
+
+function closeHormonalDetail() {
+  document.getElementById('horm-drawer').classList.remove('open');
+}
+
+function exportHormonalCSV() {
+  if (HORMONAL_ASSESSMENTS.length === 0) { showToast('No assessments to export'); return; }
+  var rows = [['Started', 'Completed', 'Email', 'Name', 'Primary archetype', 'Secondary', 'Flags', 'Stress', 'Hormonal shift', 'Metabolic']];
+  HORMONAL_ASSESSMENTS.forEach(function(a){
+    var lead = (window.ALL_LEADS || []).find(function(l){ return l.id === a.lead_id; });
+    var name = lead ? ((lead.first_name || '') + ' ' + (lead.last_name || '')).trim() : '';
+    var email = lead ? (lead.email || '') : '';
+    var c = a.cluster_scores || {};
+    rows.push([
+      a.started_at,
+      a.completed_at || '',
+      email, name,
+      a.primary_archetype || '', a.secondary_archetype || '',
+      (Array.isArray(a.flags) ? a.flags.join('|') : ''),
+      c.stress != null ? c.stress : '', c.hormonal_shift != null ? c.hormonal_shift : '', c.metabolic != null ? c.metabolic : ''
+    ]);
+  });
+  var csv = rows.map(function(r){ return r.map(function(v){ return '"' + String(v).replace(/"/g,'""') + '"'; }).join(','); }).join('\n');
+  var blob = new Blob([csv], { type: 'text/csv;charset=utf-8' });
+  var url = URL.createObjectURL(blob);
+  var a = document.createElement('a');
+  a.href = url; a.download = 'hormonal-assessments-' + new Date().toISOString().slice(0,10) + '.csv';
+  document.body.appendChild(a); a.click(); a.remove();
+  URL.revokeObjectURL(url);
 }
 </script>
 </body>

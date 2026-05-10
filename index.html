@@ -1521,8 +1521,8 @@ textarea.form-input{min-height:100px;resize:vertical}
 @keyframes fadeUp{from{opacity:0;transform:translateY(24px)}to{opacity:1;transform:translateY(0)}}
 </style>
 <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
-<script src="api/config.js"></script>
-<script src="api/automations.js?v=10"></script>
+<script src="api/config.js?v=2"></script>
+<script src="api/automations.js?v=10?v=9"></script>
 <script>
 /* ── SUPABASE INIT ── */
 (function() {
@@ -2053,11 +2053,12 @@ async function confirmBooking() {
       }
       /* ── Cancel pending form_submitted reminders (they already booked) ── */
       if (window.__supabaseClient && lead.email) {
-        window.__supabaseClient.from('message_queue')
+        await window.__supabaseClient.from('message_queue')
           .update({ status: 'cancelled' })
           .eq('lead_email', lead.email)
           .eq('sequence', 'form_submitted')
           .eq('status', 'queued');
+        console.log('Cancelled form_submitted messages for', lead.email);
       }
       /* ── Queue booking confirmation sequence ── */
       if (typeof queueSequence === 'function' && window.__supabaseClient) {

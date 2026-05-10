@@ -153,8 +153,8 @@ footer{padding:20px;text-align:center;font-size:12px;color:var(--text4);border-t
 <footer>ReShape Body Transformation &middot; Ipswich &amp; Colchester</footer>
 
 <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
-<script src="../api/config.js"></script>
-<script src="../api/automations.js?v=10"></script>
+<script src="../api/config.js?v=2"></script>
+<script src="../api/automations.js?v=10?v=10?v=9"></script>
 <script>
 /* ── Supabase ── */
 (function(){
@@ -306,6 +306,8 @@ async function confirmBooking() {
   // Clear error highlights
   ['bk-fname','bk-lname','bk-email','bk-phone'].forEach(function(id) { document.getElementById(id).style.borderColor = ''; });
   btn.disabled = true; btn.textContent = 'Booking...';
+  // Re-read phone after verifyPhone may have cleaned it (e.g. 07... → +44...)
+  phone = document.getElementById('bk-phone').value.trim();
   var lead = { first_name: fname, last_name: lname, email: email, phone: phone };
 
   try {
@@ -331,12 +333,16 @@ async function confirmBooking() {
       '<div class="booking-done-row"><span>Location</span><span>' + __selectedLoc + '</span></div>';
     // Add to Calendar .ics download
     var bookingData = { date: dateStr, time: timeStr, location: __selectedLoc, datetime: __selectedDate + 'T' + (slot ? slot.start_time.substring(0,5) : '09:00') + ':00' };
-    if (typeof generateICS === 'function') {
-      var icsContent = generateICS(bookingData, lead.first_name || '');
-      var icsBlob = new Blob([icsContent], { type: 'text/calendar;charset=utf-8' });
-      var calBtn = document.getElementById('bookingCalBtn');
-      calBtn.href = URL.createObjectURL(icsBlob);
-      calBtn.style.display = 'inline-flex';
+    try {
+      if (typeof generateICS === 'function') {
+        var icsContent = generateICS(bookingData, lead.first_name || '');
+        var icsBlob = new Blob([icsContent], { type: 'text/calendar;charset=utf-8' });
+        var calBtn = document.getElementById('bookingCalBtn');
+        calBtn.href = URL.createObjectURL(icsBlob);
+        calBtn.style.display = 'inline-flex';
+      }
+    } catch (calErr) {
+      console.error('Calendar generation error:', calErr);
     }
     // Queue booking confirmation sequence
     if (typeof queueSequence === 'function') {

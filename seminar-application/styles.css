@@ -1,0 +1,525 @@
+:root {
+  --cream: #FAF7F2;
+  --soft-cream: #F0EBE3;
+  --white: #FFFFFF;
+  --charcoal: #2A2724;
+  --body: #5A5550;
+  --muted: #B8B2A8;
+  --line: #E5DFD5;
+  --terracotta: #ED5C25;
+  --rust: #C84A18;
+  --peach: #FDD9C2;
+  --soft-peach: #FFF0E5;
+}
+
+* { margin: 0; padding: 0; box-sizing: border-box; }
+html { scroll-behavior: smooth; }
+body {
+  font-family: 'Inter', -apple-system, sans-serif;
+  background: var(--cream);
+  color: var(--body);
+  line-height: 1.65;
+  font-size: 16px;
+  -webkit-font-smoothing: antialiased;
+}
+
+h1, h2, h3, h4, .serif {
+  font-family: 'Fraunces', Georgia, serif;
+  color: var(--charcoal);
+  font-weight: 400;
+  letter-spacing: -0.02em;
+  line-height: 1.1;
+  font-variation-settings: "opsz" 144;
+}
+h1 { font-size: clamp(2.5rem, 6vw, 4.5rem); font-weight: 400; }
+h2 { font-size: clamp(2rem, 4.5vw, 3.5rem); }
+h3 { font-size: clamp(1.5rem, 2.5vw, 2rem); }
+h4 { font-size: 1.25rem; font-weight: 500; }
+p { font-size: 1.0625rem; }
+a { color: inherit; text-decoration: none; }
+button { font-family: inherit; cursor: pointer; border: none; background: none; }
+img { max-width: 100%; display: block; }
+
+/* === NAV (matches /hormonal-assessment) === */
+.nav {
+  position: sticky; top: 0; background: rgba(250,247,242,.85);
+  backdrop-filter: blur(20px); -webkit-backdrop-filter: blur(20px);
+  border-bottom: 1px solid var(--line); z-index: 100;
+}
+.nav-inner {
+  display: flex; align-items: center; justify-content: space-between;
+  padding: 1.125rem 1.5rem; max-width: 1240px; margin: 0 auto;
+}
+.logo {
+  font-family: 'Fraunces', serif; font-size: 1.5rem; font-weight: 500;
+  color: var(--charcoal); letter-spacing: -0.02em;
+  display: flex; align-items: center; gap: .5rem;
+}
+.logo-mark {
+  width: 36px; height: 36px;
+  background-image: url('/favicon.png');
+  background-size: contain; background-repeat: no-repeat; background-position: center;
+  flex-shrink: 0;
+}
+.nav-links { display: flex; gap: 2rem; }
+.nav-links a {
+  font-size: .9375rem; color: var(--charcoal); font-weight: 500;
+  position: relative; padding: .25rem 0;
+}
+.nav-links a:hover { color: var(--terracotta); }
+.nav-cta {
+  background: var(--charcoal); color: var(--cream);
+  padding: .65rem 1.25rem; border-radius: 999px;
+  font-size: .875rem; font-weight: 500;
+  transition: background .2s;
+}
+.nav-cta:hover { background: var(--terracotta); }
+@media (max-width: 768px) { .nav-links { display: none; } }
+
+/* === HERO === */
+.hero { padding: 5rem 0 4rem; }
+.hero-inner { max-width: 880px; margin: 0 auto; padding: 0 1.5rem; text-align: center; }
+.eyebrow {
+  font-size: .8125rem; font-weight: 500;
+  text-transform: uppercase; letter-spacing: .12em;
+  color: var(--terracotta); margin-bottom: 1.5rem;
+  display: inline-flex; align-items: center; gap: .625rem;
+}
+.eyebrow::before { content: ''; width: 24px; height: 1px; background: var(--terracotta); }
+.eyebrow::after { content: ''; width: 24px; height: 1px; background: var(--terracotta); }
+.hero h1 { margin-bottom: 1.5rem; }
+.hero h1 em {
+  font-style: italic; color: var(--terracotta);
+  font-variation-settings: "opsz" 144, "SOFT" 100;
+}
+.hero .lead {
+  font-size: 1.1875rem; color: var(--body);
+  max-width: 620px; margin: 0 auto 2.5rem; line-height: 1.6;
+}
+
+.event-meta {
+  display: grid; grid-template-columns: repeat(3, 1fr);
+  gap: 1rem; max-width: 680px; margin: 0 auto 2.5rem;
+  background: var(--white); border: 1px solid var(--line);
+  border-radius: 12px; padding: 1.25rem 1.5rem;
+}
+.event-meta-cell {
+  text-align: left; padding: 0 .5rem;
+  border-right: 1px solid var(--line);
+}
+.event-meta-cell:last-child { border-right: none; }
+.event-meta-label {
+  font-size: .6875rem; text-transform: uppercase; letter-spacing: .14em;
+  color: var(--muted); font-weight: 500; margin-bottom: .375rem;
+}
+.event-meta-value {
+  font-family: 'Fraunces', serif; font-size: 1.0625rem;
+  color: var(--charcoal); line-height: 1.25;
+}
+@media (max-width: 600px) {
+  .event-meta { grid-template-columns: 1fr; gap: 1rem; }
+  .event-meta-cell { border-right: none; border-bottom: 1px solid var(--line); padding-bottom: 1rem; }
+  .event-meta-cell:last-child { border-bottom: none; padding-bottom: 0; }
+}
+
+.btn-primary {
+  background: var(--terracotta); color: var(--cream);
+  padding: 1.125rem 2rem; border-radius: 999px;
+  font-size: 1rem; font-weight: 500;
+  transition: all .25s; display: inline-flex; align-items: center; gap: .625rem;
+  box-shadow: 0 4px 14px rgba(200,103,74,.28);
+  border: none; cursor: pointer; font-family: inherit;
+}
+.btn-primary:hover {
+  background: var(--rust); transform: translateY(-1px);
+  box-shadow: 0 8px 22px rgba(200,103,74,.35);
+}
+.btn-primary svg { transition: transform .2s; }
+.btn-primary:hover svg { transform: translateX(3px); }
+.btn-primary:disabled { opacity: .65; cursor: not-allowed; transform: none; }
+
+/* === VALUE PILLARS === */
+.pillars { padding: 4rem 0 5rem; background: var(--soft-cream); }
+.section-head {
+  text-align: center; margin-bottom: 3rem; max-width: 720px;
+  margin-left: auto; margin-right: auto; padding: 0 1.5rem;
+}
+.section-head h2 { margin-bottom: .875rem; font-size: clamp(1.875rem, 3.75vw, 2.625rem); }
+.section-head p { font-size: 1.0625rem; color: var(--body); }
+.pillar-grid {
+  display: grid; grid-template-columns: repeat(3, 1fr); gap: 1.5rem;
+  max-width: 1100px; margin: 0 auto; padding: 0 1.5rem;
+}
+.pillar {
+  background: var(--white); border: 1px solid var(--line);
+  border-radius: 12px; padding: 2rem; transition: all .3s;
+}
+.pillar:hover {
+  transform: translateY(-3px);
+  border-color: var(--terracotta);
+  box-shadow: 0 16px 40px rgba(42,39,36,.06);
+}
+.pillar-num {
+  font-family: 'Fraunces', serif; font-size: 2.25rem;
+  color: var(--peach); font-weight: 400; line-height: 1;
+  margin-bottom: 1.25rem;
+}
+.pillar h3 { margin-bottom: .5rem; font-size: 1.375rem; }
+.pillar p { font-size: .9375rem; color: var(--body); }
+@media (max-width: 800px) { .pillar-grid { grid-template-columns: 1fr; } }
+
+/* === FORM === */
+.apply { padding: 5rem 0 6rem; }
+.apply-inner { max-width: 720px; margin: 0 auto; padding: 0 1.5rem; }
+
+.form-card {
+  background: var(--white); border: 1px solid var(--line);
+  border-radius: 16px; padding: clamp(1.75rem, 4vw, 3rem);
+  box-shadow: 0 12px 40px rgba(42,39,36,.04);
+}
+
+.form-section { margin-bottom: 2.25rem; }
+.form-section:last-of-type { margin-bottom: 1.5rem; }
+.form-section-label {
+  font-family: 'Fraunces', serif; font-size: 1.25rem;
+  color: var(--charcoal); margin-bottom: .375rem;
+  display: block;
+}
+.form-section-help {
+  font-size: .875rem; color: var(--muted); margin-bottom: 1rem;
+  font-style: italic;
+}
+
+.form-row { display: grid; grid-template-columns: 1fr 1fr; gap: .75rem; }
+@media (max-width: 540px) { .form-row { grid-template-columns: 1fr; } }
+
+.field { display: flex; flex-direction: column; gap: .375rem; margin-bottom: 1rem; }
+.field:last-child { margin-bottom: 0; }
+.field label {
+  font-size: .8125rem; text-transform: uppercase; letter-spacing: .1em;
+  color: var(--muted); font-weight: 500;
+}
+.field label .req { color: var(--terracotta); margin-left: .15em; }
+
+.field input,
+.field textarea {
+  background: var(--white); border: 1.5px solid var(--line);
+  padding: .9rem 1.1rem; border-radius: 8px;
+  font-size: 1rem; font-family: inherit; color: var(--charcoal);
+  transition: border-color .2s; width: 100%;
+  resize: vertical;
+}
+.field input::placeholder,
+.field textarea::placeholder { color: var(--muted); }
+.field input:focus,
+.field textarea:focus { outline: none; border-color: var(--terracotta); }
+.field textarea { min-height: 96px; line-height: 1.5; }
+
+.field.has-error input,
+.field.has-error textarea { border-color: var(--terracotta); }
+.field-error {
+  font-size: .8125rem; color: var(--terracotta);
+  min-height: 0; margin-top: .125rem;
+}
+
+/* Single-select pills (adapted from .q-opt) */
+.opt-grid { display: flex; flex-direction: column; gap: .5rem; }
+.opt {
+  background: var(--white); border: 1.5px solid var(--line);
+  padding: 1rem 1.25rem; border-radius: 10px;
+  text-align: left; font-size: .9375rem; color: var(--charcoal);
+  transition: all .15s; display: flex; align-items: center; gap: .875rem;
+  font-family: inherit; cursor: pointer; width: 100%;
+}
+.opt:hover {
+  border-color: var(--terracotta); background: var(--soft-peach);
+  transform: translateX(2px);
+}
+.opt-marker {
+  width: 20px; height: 20px; border: 1.5px solid var(--muted);
+  border-radius: 50%; flex-shrink: 0; transition: all .2s;
+}
+.opt:hover .opt-marker { border-color: var(--terracotta); }
+.opt.selected { border-color: var(--terracotta); background: var(--soft-peach); }
+.opt.selected .opt-marker {
+  border-color: var(--terracotta); background: var(--terracotta);
+  box-shadow: inset 0 0 0 3px var(--soft-peach);
+}
+.opt-title { font-weight: 500; color: var(--charcoal); }
+
+.consent {
+  font-size: .8125rem; color: var(--body);
+  display: flex; align-items: flex-start; gap: .5rem;
+  line-height: 1.5; margin-top: 1.25rem;
+}
+.consent input { width: auto; margin-top: 3px; padding: 0; flex-shrink: 0; }
+.consent.has-error { color: var(--terracotta); }
+
+.submit-row {
+  margin-top: 2rem; padding-top: 1.75rem;
+  border-top: 1px solid var(--line);
+  display: flex; align-items: center; justify-content: space-between;
+  gap: 1rem; flex-wrap: wrap;
+}
+.submit-note { font-size: .8125rem; color: var(--muted); }
+.submit-error {
+  font-size: .875rem; color: var(--terracotta);
+  margin-top: 1rem; min-height: 1.2em;
+}
+
+.btn-spinner {
+  width: 16px; height: 16px; border: 2px solid rgba(250,247,242,.4);
+  border-top-color: var(--cream); border-radius: 50%;
+  animation: spin .8s linear infinite;
+}
+@keyframes spin { to { transform: rotate(360deg); } }
+
+/* Success state */
+.success {
+  text-align: center; padding: 3rem 1.5rem;
+  background: var(--white); border: 1px solid var(--line);
+  border-radius: 16px; box-shadow: 0 12px 40px rgba(42,39,36,.04);
+}
+.success-icon {
+  width: 64px; height: 64px; border-radius: 50%;
+  background: var(--soft-peach); color: var(--terracotta);
+  display: flex; align-items: center; justify-content: center;
+  margin: 0 auto 1.5rem;
+}
+.success h2 { font-size: clamp(1.875rem, 4vw, 2.5rem); margin-bottom: .75rem; }
+.success p { color: var(--body); max-width: 520px; margin: 0 auto 1rem; }
+.success p strong { color: var(--charcoal); font-weight: 600; }
+
+.cal-row {
+  display: flex; gap: .75rem; justify-content: center; flex-wrap: wrap;
+  margin-top: 1.5rem;
+}
+.btn-cal {
+  display: inline-flex; align-items: center; gap: .5rem;
+  background: var(--charcoal); color: var(--cream);
+  padding: .85rem 1.4rem; border-radius: 999px;
+  font-size: .9375rem; font-weight: 500;
+  transition: all .2s; font-family: inherit;
+}
+.btn-cal:hover { background: var(--terracotta); transform: translateY(-1px); }
+.btn-cal-ghost {
+  background: var(--white); color: var(--charcoal);
+  border: 1.5px solid var(--line);
+}
+.btn-cal-ghost:hover { background: var(--soft-peach); border-color: var(--terracotta); color: var(--terracotta); }
+
+.perk {
+  background: var(--soft-peach);
+  border: 1px dashed var(--terracotta);
+  border-radius: 12px;
+  padding: 1.5rem 1.5rem 1.25rem;
+  margin: 1.75rem auto 0;
+  max-width: 520px;
+  text-align: left;
+}
+.perk-eyebrow {
+  font-size: .6875rem; text-transform: uppercase; letter-spacing: .14em;
+  color: var(--terracotta); font-weight: 600; margin-bottom: .5rem;
+}
+.perk-title {
+  font-family: 'Fraunces', serif;
+  font-size: 1.375rem; line-height: 1.2;
+  color: var(--charcoal); margin-bottom: .625rem;
+  letter-spacing: -0.01em;
+}
+.perk-body {
+  font-size: .9375rem; color: var(--charcoal); opacity: .85;
+  margin: 0 !important; max-width: none !important;
+  line-height: 1.55;
+}
+
+/* === FOOTER (matches /hormonal-assessment) === */
+footer { background: var(--charcoal); color: var(--muted); padding: 4rem 0 2rem; }
+.foot-grid {
+  display: grid; grid-template-columns: 1.5fr 1fr 1fr 1fr; gap: 3rem;
+  max-width: 1240px; margin: 0 auto 3rem; padding: 0 1.5rem;
+}
+.foot-grid h5 {
+  color: var(--cream); font-size: .8125rem; text-transform: uppercase;
+  letter-spacing: .12em; margin-bottom: 1.25rem;
+  font-family: 'Inter', sans-serif; font-weight: 500;
+}
+.foot-grid ul { list-style: none; display: flex; flex-direction: column; gap: .625rem; }
+.foot-grid a { font-size: .875rem; color: var(--muted); }
+.foot-grid a:hover { color: var(--cream); }
+.foot-brand .logo { color: var(--cream); margin-bottom: 1rem; }
+.foot-brand p { font-size: .875rem; color: var(--muted); max-width: 260px; }
+.foot-bottom {
+  border-top: 1px solid rgba(250,247,242,.1);
+  padding: 1.5rem; text-align: center;
+  font-size: .75rem; color: var(--muted); max-width: 1240px; margin: 0 auto;
+}
+@media (max-width: 800px) { .foot-grid { grid-template-columns: 1fr 1fr; } }
+
+/* Animations */
+.fade-up { opacity: 0; transform: translateY(16px); animation: fadeUp .6s ease forwards; }
+@keyframes fadeUp { to { opacity: 1; transform: none; } }
+.delay-1 { animation-delay: .1s; }
+.delay-2 { animation-delay: .2s; }
+.delay-3 { animation-delay: .3s; }
+
+/* === TRANSFORMATIONS CAROUSEL (ported from /hormonal-assessment hero) ===
+   Square cards with photos + baked-in captions, dots beneath. */
+.transformations {
+  padding: 4rem 0 5rem;
+  background: var(--cream);
+}
+.transformations .section-head h2 em {
+  font-style: italic; color: var(--terracotta);
+  font-variation-settings: "opsz" 144, "SOFT" 100;
+}
+.transformations-stage {
+  width: 100%;
+  max-width: 560px; margin: 0 auto; padding: 0 1.5rem;
+  display: flex; flex-direction: column; gap: 1rem;
+}
+.hero-carousel {
+  width: 100%;
+  aspect-ratio: 1/1;
+  overflow: hidden;
+  border-radius: 12px;
+  background: var(--soft-cream);
+  box-shadow: 0 24px 64px rgba(42,39,36,.08);
+  position: relative;
+}
+.hero-carousel-track {
+  display: grid;
+  grid-auto-flow: column;
+  grid-auto-columns: 100%;
+  height: 100%;
+  transform: translateX(0);
+  transition: transform .6s cubic-bezier(.7,.1,.3,1);
+  will-change: transform;
+}
+.hero-slide {
+  position: relative; display: block;
+  text-decoration: none; color: inherit;
+  background: var(--soft-cream);
+  min-width: 0; height: 100%;
+}
+.hero-slide img {
+  width: 100%; height: 100%;
+  display: block;
+  object-fit: cover; object-position: center center;
+}
+.hero-slide-cap {
+  position: absolute; clip: rect(0 0 0 0); width: 1px; height: 1px;
+  overflow: hidden; white-space: nowrap;
+}
+.hero-dots {
+  display: flex; gap: .55rem; justify-content: center;
+  padding: .25rem 0;
+}
+.hero-dot {
+  width: 28px; height: 4px; border-radius: 2px;
+  border: 0; padding: 0; cursor: pointer;
+  background: rgba(42,39,36,.18);
+  transition: background .25s ease, width .25s ease;
+}
+.hero-dot:hover { background: rgba(42,39,36,.4); }
+.hero-dot.active { background: var(--terracotta); width: 44px; }
+.hero-dot:focus-visible { outline: 2px solid var(--terracotta); outline-offset: 3px; }
+@media (prefers-reduced-motion: reduce) {
+  .hero-carousel-track { transition: none; }
+}
+
+/* === 7 HORMONES CAROUSEL ===
+   Layout/behavior ported from /hormonal-assessment hero-carousel.
+   Each slide is text-only (no photos), composed in DOM with kicker,
+   name, "decline → youth" arc, and one-line descriptor. */
+.hormones {
+  padding: 4rem 0 5rem;
+  background: var(--cream);
+  border-top: 1px solid var(--line);
+}
+.hormones .section-head h2 em {
+  font-style: italic; color: var(--terracotta);
+  font-variation-settings: "opsz" 144, "SOFT" 100;
+}
+.hormones-stage {
+  width: 100%;
+  max-width: 560px; margin: 0 auto; padding: 0 1.5rem;
+  display: flex; flex-direction: column; gap: 1rem;
+}
+.hormones-carousel {
+  width: 100%;
+  aspect-ratio: 1/1;
+  overflow: hidden;
+  border-radius: 12px;
+  background: var(--soft-cream);
+  box-shadow: 0 24px 64px rgba(42,39,36,.08);
+  position: relative;
+}
+.hormones-track {
+  display: grid;
+  grid-auto-flow: column;
+  grid-auto-columns: 100%;
+  height: 100%;
+  transform: translateX(0);
+  transition: transform .6s cubic-bezier(.7,.1,.3,1);
+  will-change: transform;
+}
+.hormone-slide {
+  min-width: 0; height: 100%;
+  display: flex; flex-direction: column; justify-content: center;
+  padding: clamp(2rem, 6vw, 3.5rem);
+  background:
+    radial-gradient(110% 80% at 0% 0%, var(--soft-peach) 0%, transparent 55%),
+    radial-gradient(120% 90% at 100% 100%, rgba(237,92,37,.08) 0%, transparent 60%),
+    var(--soft-cream);
+}
+.hormone-slide-num {
+  font-size: .8125rem; font-weight: 500;
+  text-transform: uppercase; letter-spacing: .12em;
+  color: var(--terracotta);
+  display: inline-flex; align-items: center; gap: .625rem;
+  margin-bottom: 1.25rem;
+}
+.hormone-slide-num::before {
+  content: ''; width: 24px; height: 1px; background: var(--terracotta);
+}
+.hormone-slide-name {
+  font-family: 'Fraunces', Georgia, serif;
+  font-size: clamp(1.75rem, 4vw, 2.375rem);
+  font-weight: 400;
+  color: var(--charcoal);
+  letter-spacing: -0.02em;
+  margin-bottom: .75rem;
+  line-height: 1.1;
+}
+.hormone-slide-arc {
+  font-family: 'Fraunces', Georgia, serif;
+  font-size: clamp(1.25rem, 2.5vw, 1.625rem);
+  color: var(--charcoal);
+  margin-bottom: 1.25rem;
+  line-height: 1.2;
+}
+.hormone-slide-arc em {
+  font-style: italic; color: var(--terracotta);
+  font-variation-settings: "opsz" 144, "SOFT" 100;
+}
+.hormone-slide-sub {
+  font-size: 1rem; color: var(--body); line-height: 1.55;
+  max-width: 38ch;
+}
+.hormones-dots {
+  display: flex; gap: .55rem; justify-content: center;
+  padding: .25rem 0;
+}
+.hormones-dot {
+  width: 28px; height: 4px; border-radius: 2px;
+  border: 0; padding: 0; cursor: pointer;
+  background: rgba(42,39,36,.18);
+  transition: background .25s ease, width .25s ease;
+}
+.hormones-dot:hover { background: rgba(42,39,36,.4); }
+.hormones-dot.active { background: var(--terracotta); width: 44px; }
+.hormones-dot:focus-visible { outline: 2px solid var(--terracotta); outline-offset: 3px; }
+@media (prefers-reduced-motion: reduce) {
+  .hormones-track { transition: none; }
+}

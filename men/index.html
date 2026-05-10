@@ -894,6 +894,212 @@ textarea.form-input{min-height:100px;resize:vertical}
     </div>
   </div>
 </section>
+<!-- ══════════════════════════════════════
+   APPLY
+══════════════════════════════════════ -->
+<section class="section section-alt" id="apply">
+  <div class="container">
+    <div class="apply-grid">
+      <!-- LEFT -->
+      <div class="rv">
+        <p class="eyebrow" style="margin-bottom:14px">Apply now</p>
+        <h2 class="h2" style="margin-bottom:16px">Apply for the next ReShape intake</h2>
+        <p style="font-size:17px;line-height:1.75;color:var(--text2);max-width:420px">
+          We only take a limited number of applicants each round to protect coaching quality and results. Complete the short form and we will review whether you are a fit.
+        </p>
+        <div class="apply-steps">
+          <div class="apply-step">
+            <div class="apply-step-icon">
+              <svg width="16" height="16" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><path d="M11 4H4a2 2 0 00-2 2v14a2 2 0 002 2h14a2 2 0 002-2v-7"/><path d="M18.5 2.5a2.121 2.121 0 013 3L12 15l-4 1 1-4 9.5-9.5z"/></svg>
+            </div>
+            <span class="apply-step-text">Short application — takes 2 minutes</span>
+          </div>
+          <div class="apply-step">
+            <div class="apply-step-icon">
+              <svg width="16" height="16" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><circle cx="11" cy="11" r="8"/><line x1="21" y1="21" x2="16.65" y2="16.65"/></svg>
+            </div>
+            <span class="apply-step-text">Quick review by the team within 24 hours</span>
+          </div>
+          <div class="apply-step">
+            <div class="apply-step-icon">
+              <svg width="16" height="16" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><path d="M22 16.92v3a2 2 0 01-2.18 2 19.79 19.79 0 01-8.63-3.07A19.5 19.5 0 013 9.09a19.79 19.79 0 01-3.07-8.67A2 2 0 011.72 0h3a2 2 0 012 1.72c.127.96.361 1.903.7 2.81a2 2 0 01-.45 2.11L5.3 8.09a16 16 0 006.29 6.29l1.46-1.95a2 2 0 012.11-.45c.907.339 1.85.573 2.81.7A2 2 0 0122 14.92z"/></svg>
+            </div>
+            <span class="apply-step-text">Next-step call for suitable applicants</span>
+          </div>
+        </div>
+      </div>
+      <!-- FORM: 8-Step Questionnaire -->
+      <div class="rv" style="transition-delay:.12s">
+        <div class="form-card">
+          <div class="form-progress" id="formProgress">
+            <div class="form-progress-bar active"></div>
+            <div class="form-progress-bar"></div>
+            <div class="form-progress-bar"></div>
+            <div class="form-progress-bar"></div>
+            <div class="form-progress-bar"></div>
+            <div class="form-progress-bar"></div>
+            <div class="form-progress-bar"></div>
+            <div class="form-progress-bar"></div>
+          </div>
+          <form id="leadForm" novalidate>
+            <!-- STEP 1: Gender -->
+            <div class="form-step active" data-step="1">
+              <div class="form-step-number">Step 1 of 8</div>
+              <div class="form-step-question">What is your gender?</div>
+              <div class="form-options" data-field="gender">
+                <label class="form-option"><input type="radio" name="gender" value="Female"><span class="form-option-icon">&#9792;</span><span class="form-option-label">Female</span><span class="form-option-check"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="3"><path d="M5 13l4 4L19 7"/></svg></span></label>
+                <label class="form-option"><input type="radio" name="gender" value="Male"><span class="form-option-icon">&#9794;</span><span class="form-option-label">Male</span><span class="form-option-check"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="3"><path d="M5 13l4 4L19 7"/></svg></span></label>
+              </div>
+              <div class="form-nav"><div></div><button type="button" class="form-btn-next" disabled>Next &rarr;</button></div>
+            </div>
+            <!-- STEP 2 -->
+            <div class="form-step" data-step="2">
+              <div class="form-step-number">Step 2 of 8</div>
+              <div class="form-step-question">Are you looking for...?</div>
+              <div class="form-options" data-field="looking_for">
+                <label class="form-option"><input type="radio" name="looking_for" value="Quick Fix"><span class="form-option-icon">&#9889;</span><span class="form-option-label">Quick Fix</span><span class="form-option-check"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="3"><path d="M5 13l4 4L19 7"/></svg></span></label>
+                <label class="form-option"><input type="radio" name="looking_for" value="Long Term Solution"><span class="form-option-icon">&#127942;</span><span class="form-option-label">Long Term Solution</span><span class="form-option-check"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="3"><path d="M5 13l4 4L19 7"/></svg></span></label>
+              </div>
+              <div class="form-nav"><button type="button" class="form-btn-back">&larr; Back</button><button type="button" class="form-btn-next" disabled>Next &rarr;</button></div>
+            </div>
+            <!-- STEP 3 -->
+            <div class="form-step" data-step="3">
+              <div class="form-step-number">Step 3 of 8</div>
+              <div class="form-step-question">You are interested in joining because?</div>
+              <div class="form-options" data-field="reason">
+                <label class="form-option"><input type="radio" name="reason" value="I Want A Membership Card"><span class="form-option-icon">&#128179;</span><span class="form-option-label">I Want A Membership Card</span><span class="form-option-check"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="3"><path d="M5 13l4 4L19 7"/></svg></span></label>
+                <label class="form-option"><input type="radio" name="reason" value="I Want Results"><span class="form-option-icon">&#128170;</span><span class="form-option-label">I Want Results</span><span class="form-option-check"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="3"><path d="M5 13l4 4L19 7"/></svg></span></label>
+              </div>
+              <div class="form-nav"><button type="button" class="form-btn-back">&larr; Back</button><button type="button" class="form-btn-next" disabled>Next &rarr;</button></div>
+            </div>
+            <!-- STEP 4 -->
+            <div class="form-step" data-step="4">
+              <div class="form-step-number">Step 4 of 8</div>
+              <div class="form-step-question">Which best describes you?</div>
+              <div class="form-options" data-field="coachability">
+                <label class="form-option"><input type="radio" name="coachability" value="I Am Coachable And Can Follow Instructions"><span class="form-option-icon">&#127919;</span><span class="form-option-label">I Am Coachable &amp; Can Follow Instructions</span><span class="form-option-check"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="3"><path d="M5 13l4 4L19 7"/></svg></span></label>
+                <label class="form-option"><input type="radio" name="coachability" value="I Feel I Have All The Answers"><span class="form-option-icon">&#129300;</span><span class="form-option-label">I Feel I Have All The Answers</span><span class="form-option-check"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="3"><path d="M5 13l4 4L19 7"/></svg></span></label>
+              </div>
+              <div class="form-nav"><button type="button" class="form-btn-back">&larr; Back</button><button type="button" class="form-btn-next" disabled>Next &rarr;</button></div>
+            </div>
+            <!-- STEP 5: Contact -->
+            <div class="form-step" data-step="5">
+              <div class="form-step-number">Step 5 of 8</div>
+              <div class="form-step-question">Tell us about yourself</div>
+              <div class="form-input-row">
+                <div class="form-input-group"><label class="form-label" for="firstName">First Name</label><input type="text" id="firstName" name="first_name" class="form-input" placeholder="John" required><div class="form-error-msg">Please enter your first name</div></div>
+                <div class="form-input-group"><label class="form-label" for="lastName">Last Name</label><input type="text" id="lastName" name="last_name" class="form-input" placeholder="Smith" required><div class="form-error-msg">Please enter your last name</div></div>
+              </div>
+              <div class="form-input-row">
+                <div class="form-input-group"><label class="form-label" for="age">Age</label><input type="number" id="age" name="age" class="form-input" placeholder="28" min="16" max="99" required><div class="form-error-msg">Please enter your age</div></div>
+                <div class="form-input-group"><label class="form-label" for="phone">Phone Number</label><input type="tel" id="phone" name="phone" class="form-input" placeholder="07700 000000" required><div class="form-error-msg">Please enter your phone number</div></div>
+              </div>
+              <div class="form-input-group"><label class="form-label" for="email">Email</label><input type="email" id="email" name="email" class="form-input" placeholder="john@example.com" required><div class="form-error-msg">Please enter a valid email</div></div>
+              <div class="form-nav"><button type="button" class="form-btn-back">&larr; Back</button><button type="button" class="form-btn-next">Next &rarr;</button></div>
+            </div>
+            <!-- STEP 6: Goal -->
+            <div class="form-step" data-step="6">
+              <div class="form-step-number">Step 6 of 8</div>
+              <div class="form-step-question">What is your BIG goal?</div>
+              <div class="form-input-group"><textarea name="big_goal" class="form-input" placeholder="Tell us what you want to achieve..." required></textarea><div class="form-error-msg">Please share your goal with us</div></div>
+              <div class="form-step-question" style="margin-top:32px;">How important is this goal to you?</div>
+              <div class="form-rating" data-field="importance">
+                <label class="form-rating-item"><input type="radio" name="importance" value="1"><span class="form-rating-number">1</span><span class="form-rating-label">Low</span></label>
+                <label class="form-rating-item"><input type="radio" name="importance" value="2"><span class="form-rating-number">2</span></label>
+                <label class="form-rating-item"><input type="radio" name="importance" value="3"><span class="form-rating-number">3</span><span class="form-rating-label">Medium</span></label>
+                <label class="form-rating-item"><input type="radio" name="importance" value="4"><span class="form-rating-number">4</span></label>
+                <label class="form-rating-item"><input type="radio" name="importance" value="5"><span class="form-rating-number">5</span><span class="form-rating-label">Critical</span></label>
+              </div>
+              <div class="form-nav"><button type="button" class="form-btn-back">&larr; Back</button><button type="button" class="form-btn-next">Next &rarr;</button></div>
+            </div>
+            <!-- STEP 7: Ready -->
+            <div class="form-step" data-step="7">
+              <div class="form-step-number">Step 7 of 8</div>
+              <div class="form-step-question">Please Read!</div>
+              <p style="color:var(--text2);margin-bottom:24px;font-size:16px;line-height:1.7;">This is a premium transformation programme with a dedicated coach who will be with you every step of the way. This is NOT a standard gym membership.</p>
+              <div class="form-options" data-field="ready_for_coach">
+                <label class="form-option"><input type="radio" name="ready_for_coach" value="Yes I'm ready to work with a transformation coach"><span class="form-option-icon">&#128640;</span><span class="form-option-label">Yes, I'm ready to work with a transformation coach</span><span class="form-option-check"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="3"><path d="M5 13l4 4L19 7"/></svg></span></label>
+                <label class="form-option"><input type="radio" name="ready_for_coach" value="No I'm looking for a standard gym"><span class="form-option-icon">&#127947;</span><span class="form-option-label">No, I'm looking for a standard gym</span><span class="form-option-check"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="3"><path d="M5 13l4 4L19 7"/></svg></span></label>
+              </div>
+              <div class="form-step-question">Would you achieve your goal in...?</div>
+              <div class="form-options multi-select" data-field="timeline" style="grid-template-columns:1fr 1fr 1fr;margin-bottom:32px;">
+                <label class="form-option"><input type="checkbox" name="timeline" value="3 months"><span class="form-option-icon">3</span><span class="form-option-label">3 months</span><span class="form-option-check"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="3"><path d="M5 13l4 4L19 7"/></svg></span></label>
+                <label class="form-option"><input type="checkbox" name="timeline" value="6 months"><span class="form-option-icon">6</span><span class="form-option-label">6 months</span><span class="form-option-check"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="3"><path d="M5 13l4 4L19 7"/></svg></span></label>
+                <label class="form-option"><input type="checkbox" name="timeline" value="12 months"><span class="form-option-icon">12</span><span class="form-option-label">12 months</span><span class="form-option-check"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="3"><path d="M5 13l4 4L19 7"/></svg></span></label>
+              </div>
+              <div class="form-step-question">Are you willing to invest in yourself?</div>
+              <div class="form-options" data-field="willing_to_invest">
+                <label class="form-option"><input type="radio" name="willing_to_invest" value="Yes"><span class="form-option-icon">&#10004;</span><span class="form-option-label">Yes</span><span class="form-option-check"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="3"><path d="M5 13l4 4L19 7"/></svg></span></label>
+                <label class="form-option"><input type="radio" name="willing_to_invest" value="No"><span class="form-option-icon">&#10060;</span><span class="form-option-label">No</span><span class="form-option-check"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="3"><path d="M5 13l4 4L19 7"/></svg></span></label>
+              </div>
+              <div class="form-nav"><button type="button" class="form-btn-back">&larr; Back</button><button type="button" class="form-btn-next" disabled>Next &rarr;</button></div>
+            </div>
+            <!-- STEP 8: Referral + Location -->
+            <div class="form-step" data-step="8">
+              <div class="form-step-number">Step 8 of 8</div>
+              <div class="form-step-question">How did you first hear about Re-Shape?</div>
+              <div class="form-options multi-select" data-field="referral">
+                <label class="form-option"><input type="checkbox" name="referral" value="Social Media"><span class="form-option-icon">&#128241;</span><span class="form-option-label">Social Media</span><span class="form-option-check"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="3"><path d="M5 13l4 4L19 7"/></svg></span></label>
+                <label class="form-option"><input type="checkbox" name="referral" value="From A Friend"><span class="form-option-icon">&#129309;</span><span class="form-option-label">From A Friend</span><span class="form-option-check"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="3"><path d="M5 13l4 4L19 7"/></svg></span></label>
+                <label class="form-option"><input type="checkbox" name="referral" value="Google Search"><span class="form-option-icon">&#128269;</span><span class="form-option-label">Google Search</span><span class="form-option-check"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="3"><path d="M5 13l4 4L19 7"/></svg></span></label>
+                <label class="form-option"><input type="checkbox" name="referral" value="Online Article"><span class="form-option-icon">&#128240;</span><span class="form-option-label">Online Article</span><span class="form-option-check"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="3"><path d="M5 13l4 4L19 7"/></svg></span></label>
+              </div>
+              <div class="form-step-question">Please choose your preferred location</div>
+              <div class="form-options" data-field="location">
+                <label class="form-option"><input type="radio" name="location" value="Colchester"><span class="form-option-icon">&#128205;</span><span class="form-option-label">Colchester</span><span class="form-option-check"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="3"><path d="M5 13l4 4L19 7"/></svg></span></label>
+                <label class="form-option"><input type="radio" name="location" value="Ipswich"><span class="form-option-icon">&#128205;</span><span class="form-option-label">Ipswich</span><span class="form-option-check"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="3"><path d="M5 13l4 4L19 7"/></svg></span></label>
+              </div>
+              <div class="form-nav"><button type="button" class="form-btn-back">&larr; Back</button><button type="submit" class="form-btn-next">Submit Application &#128640;</button></div>
+            </div>
+          </form>
+          <div class="form-success" id="formSuccess">
+            <!-- BOOKING CALENDAR -->
+            <div class="booking-wrap" id="bookingWrap">
+              <div class="booking-header">
+                <div class="form-success-icon" style="margin-bottom:16px"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M5 13l4 4L19 7"/></svg></div>
+                <h3>Application Submitted!</h3>
+                <p>Book your in-person visit below, or we'll be in touch within 24 hours.</p>
+              </div>
+              <!-- Location toggle -->
+              <div class="booking-loc-toggle" id="bookingLocToggle">
+                <button class="booking-loc-btn" data-loc="Ipswich" onclick="selectBookingLoc('Ipswich')">&#128205; Ipswich</button>
+                <button class="booking-loc-btn" data-loc="Colchester" onclick="selectBookingLoc('Colchester')">&#128205; Colchester</button>
+              </div>
+              <!-- Date cards -->
+              <div class="booking-week-nav">
+                <button class="booking-week-btn" id="bookingWeekPrev" onclick="changeBookingWeek(-1)">&larr;</button>
+                <span class="booking-week-label" id="bookingWeekLabel"></span>
+                <button class="booking-week-btn" id="bookingWeekNext" onclick="changeBookingWeek(1)">&rarr;</button>
+              </div>
+              <div class="booking-dates" id="bookingDates"></div>
+              <!-- Time slots -->
+              <div class="booking-times" id="bookingTimes">
+                <div class="booking-empty">Select a date to see available times</div>
+              </div>
+              <!-- Confirm -->
+              <button class="booking-confirm-btn" id="bookingConfirmBtn" disabled onclick="confirmBooking()">Book My Visit</button>
+              <button class="booking-skip" onclick="skipBooking()">I'll book later</button>
+            </div>
+            <!-- BOOKING CONFIRMED -->
+            <div class="booking-done" id="bookingDone" style="display:none">
+              <div class="booking-done-icon">&#127881;</div>
+              <h3>You're Booked!</h3>
+              <p>We look forward to seeing you. You'll receive a confirmation shortly.</p>
+              <div class="booking-done-detail" id="bookingDoneDetail"></div>
+              <a id="bookingCalBtn" class="booking-cal-btn" style="display:none" download="reshape-visit.ics"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="3" y="4" width="18" height="18" rx="2"/><line x1="16" y1="2" x2="16" y2="6"/><line x1="8" y1="2" x2="8" y2="6"/><line x1="3" y1="10" x2="21" y2="10"/></svg> Add to Calendar</a>
+            </div>
+            <!-- SKIP / FALLBACK -->
+            <div id="bookingSkipped" style="display:none;text-align:center;padding:40px 20px;animation:formFadeIn .5s ease">
+              <div class="form-success-icon"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M5 13l4 4L19 7"/></svg></div>
+              <h3>Application Submitted!</h3>
+              <p>We've received your application. We will review your details and be in touch within 24 hours.</p>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+</section>
 <!-- ── TICKER ─────────────────────────── -->
 <div class="ticker">
   <div class="ticker-track" id="ticker"></div>
@@ -1199,212 +1405,6 @@ textarea.form-input{min-height:100px;resize:vertical}
   </div>
 </section>
 <!-- ══════════════════════════════════════
-   APPLY
-══════════════════════════════════════ -->
-<section class="section section-alt" id="apply">
-  <div class="container">
-    <div class="apply-grid">
-      <!-- LEFT -->
-      <div class="rv">
-        <p class="eyebrow" style="margin-bottom:14px">Apply now</p>
-        <h2 class="h2" style="margin-bottom:16px">Apply for the next ReShape intake</h2>
-        <p style="font-size:17px;line-height:1.75;color:var(--text2);max-width:420px">
-          We only take a limited number of applicants each round to protect coaching quality and results. Complete the short form and we will review whether you are a fit.
-        </p>
-        <div class="apply-steps">
-          <div class="apply-step">
-            <div class="apply-step-icon">
-              <svg width="16" height="16" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><path d="M11 4H4a2 2 0 00-2 2v14a2 2 0 002 2h14a2 2 0 002-2v-7"/><path d="M18.5 2.5a2.121 2.121 0 013 3L12 15l-4 1 1-4 9.5-9.5z"/></svg>
-            </div>
-            <span class="apply-step-text">Short application — takes 2 minutes</span>
-          </div>
-          <div class="apply-step">
-            <div class="apply-step-icon">
-              <svg width="16" height="16" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><circle cx="11" cy="11" r="8"/><line x1="21" y1="21" x2="16.65" y2="16.65"/></svg>
-            </div>
-            <span class="apply-step-text">Quick review by the team within 24 hours</span>
-          </div>
-          <div class="apply-step">
-            <div class="apply-step-icon">
-              <svg width="16" height="16" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><path d="M22 16.92v3a2 2 0 01-2.18 2 19.79 19.79 0 01-8.63-3.07A19.5 19.5 0 013 9.09a19.79 19.79 0 01-3.07-8.67A2 2 0 011.72 0h3a2 2 0 012 1.72c.127.96.361 1.903.7 2.81a2 2 0 01-.45 2.11L5.3 8.09a16 16 0 006.29 6.29l1.46-1.95a2 2 0 012.11-.45c.907.339 1.85.573 2.81.7A2 2 0 0122 14.92z"/></svg>
-            </div>
-            <span class="apply-step-text">Next-step call for suitable applicants</span>
-          </div>
-        </div>
-      </div>
-      <!-- FORM: 8-Step Questionnaire -->
-      <div class="rv" style="transition-delay:.12s">
-        <div class="form-card">
-          <div class="form-progress" id="formProgress">
-            <div class="form-progress-bar active"></div>
-            <div class="form-progress-bar"></div>
-            <div class="form-progress-bar"></div>
-            <div class="form-progress-bar"></div>
-            <div class="form-progress-bar"></div>
-            <div class="form-progress-bar"></div>
-            <div class="form-progress-bar"></div>
-            <div class="form-progress-bar"></div>
-          </div>
-          <form id="leadForm" novalidate>
-            <!-- STEP 1: Gender -->
-            <div class="form-step active" data-step="1">
-              <div class="form-step-number">Step 1 of 8</div>
-              <div class="form-step-question">What is your gender?</div>
-              <div class="form-options" data-field="gender">
-                <label class="form-option"><input type="radio" name="gender" value="Female"><span class="form-option-icon">&#9792;</span><span class="form-option-label">Female</span><span class="form-option-check"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="3"><path d="M5 13l4 4L19 7"/></svg></span></label>
-                <label class="form-option"><input type="radio" name="gender" value="Male"><span class="form-option-icon">&#9794;</span><span class="form-option-label">Male</span><span class="form-option-check"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="3"><path d="M5 13l4 4L19 7"/></svg></span></label>
-              </div>
-              <div class="form-nav"><div></div><button type="button" class="form-btn-next" disabled>Next &rarr;</button></div>
-            </div>
-            <!-- STEP 2 -->
-            <div class="form-step" data-step="2">
-              <div class="form-step-number">Step 2 of 8</div>
-              <div class="form-step-question">Are you looking for...?</div>
-              <div class="form-options" data-field="looking_for">
-                <label class="form-option"><input type="radio" name="looking_for" value="Quick Fix"><span class="form-option-icon">&#9889;</span><span class="form-option-label">Quick Fix</span><span class="form-option-check"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="3"><path d="M5 13l4 4L19 7"/></svg></span></label>
-                <label class="form-option"><input type="radio" name="looking_for" value="Long Term Solution"><span class="form-option-icon">&#127942;</span><span class="form-option-label">Long Term Solution</span><span class="form-option-check"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="3"><path d="M5 13l4 4L19 7"/></svg></span></label>
-              </div>
-              <div class="form-nav"><button type="button" class="form-btn-back">&larr; Back</button><button type="button" class="form-btn-next" disabled>Next &rarr;</button></div>
-            </div>
-            <!-- STEP 3 -->
-            <div class="form-step" data-step="3">
-              <div class="form-step-number">Step 3 of 8</div>
-              <div class="form-step-question">You are interested in joining because?</div>
-              <div class="form-options" data-field="reason">
-                <label class="form-option"><input type="radio" name="reason" value="I Want A Membership Card"><span class="form-option-icon">&#128179;</span><span class="form-option-label">I Want A Membership Card</span><span class="form-option-check"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="3"><path d="M5 13l4 4L19 7"/></svg></span></label>
-                <label class="form-option"><input type="radio" name="reason" value="I Want Results"><span class="form-option-icon">&#128170;</span><span class="form-option-label">I Want Results</span><span class="form-option-check"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="3"><path d="M5 13l4 4L19 7"/></svg></span></label>
-              </div>
-              <div class="form-nav"><button type="button" class="form-btn-back">&larr; Back</button><button type="button" class="form-btn-next" disabled>Next &rarr;</button></div>
-            </div>
-            <!-- STEP 4 -->
-            <div class="form-step" data-step="4">
-              <div class="form-step-number">Step 4 of 8</div>
-              <div class="form-step-question">Which best describes you?</div>
-              <div class="form-options" data-field="coachability">
-                <label class="form-option"><input type="radio" name="coachability" value="I Am Coachable And Can Follow Instructions"><span class="form-option-icon">&#127919;</span><span class="form-option-label">I Am Coachable &amp; Can Follow Instructions</span><span class="form-option-check"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="3"><path d="M5 13l4 4L19 7"/></svg></span></label>
-                <label class="form-option"><input type="radio" name="coachability" value="I Feel I Have All The Answers"><span class="form-option-icon">&#129300;</span><span class="form-option-label">I Feel I Have All The Answers</span><span class="form-option-check"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="3"><path d="M5 13l4 4L19 7"/></svg></span></label>
-              </div>
-              <div class="form-nav"><button type="button" class="form-btn-back">&larr; Back</button><button type="button" class="form-btn-next" disabled>Next &rarr;</button></div>
-            </div>
-            <!-- STEP 5: Contact -->
-            <div class="form-step" data-step="5">
-              <div class="form-step-number">Step 5 of 8</div>
-              <div class="form-step-question">Tell us about yourself</div>
-              <div class="form-input-row">
-                <div class="form-input-group"><label class="form-label" for="firstName">First Name</label><input type="text" id="firstName" name="first_name" class="form-input" placeholder="John" required><div class="form-error-msg">Please enter your first name</div></div>
-                <div class="form-input-group"><label class="form-label" for="lastName">Last Name</label><input type="text" id="lastName" name="last_name" class="form-input" placeholder="Smith" required><div class="form-error-msg">Please enter your last name</div></div>
-              </div>
-              <div class="form-input-row">
-                <div class="form-input-group"><label class="form-label" for="age">Age</label><input type="number" id="age" name="age" class="form-input" placeholder="28" min="16" max="99" required><div class="form-error-msg">Please enter your age</div></div>
-                <div class="form-input-group"><label class="form-label" for="phone">Phone Number</label><input type="tel" id="phone" name="phone" class="form-input" placeholder="07700 000000" required><div class="form-error-msg">Please enter your phone number</div></div>
-              </div>
-              <div class="form-input-group"><label class="form-label" for="email">Email</label><input type="email" id="email" name="email" class="form-input" placeholder="john@example.com" required><div class="form-error-msg">Please enter a valid email</div></div>
-              <div class="form-nav"><button type="button" class="form-btn-back">&larr; Back</button><button type="button" class="form-btn-next">Next &rarr;</button></div>
-            </div>
-            <!-- STEP 6: Goal -->
-            <div class="form-step" data-step="6">
-              <div class="form-step-number">Step 6 of 8</div>
-              <div class="form-step-question">What is your BIG goal?</div>
-              <div class="form-input-group"><textarea name="big_goal" class="form-input" placeholder="Tell us what you want to achieve..." required></textarea><div class="form-error-msg">Please share your goal with us</div></div>
-              <div class="form-step-question" style="margin-top:32px;">How important is this goal to you?</div>
-              <div class="form-rating" data-field="importance">
-                <label class="form-rating-item"><input type="radio" name="importance" value="1"><span class="form-rating-number">1</span><span class="form-rating-label">Low</span></label>
-                <label class="form-rating-item"><input type="radio" name="importance" value="2"><span class="form-rating-number">2</span></label>
-                <label class="form-rating-item"><input type="radio" name="importance" value="3"><span class="form-rating-number">3</span><span class="form-rating-label">Medium</span></label>
-                <label class="form-rating-item"><input type="radio" name="importance" value="4"><span class="form-rating-number">4</span></label>
-                <label class="form-rating-item"><input type="radio" name="importance" value="5"><span class="form-rating-number">5</span><span class="form-rating-label">Critical</span></label>
-              </div>
-              <div class="form-nav"><button type="button" class="form-btn-back">&larr; Back</button><button type="button" class="form-btn-next">Next &rarr;</button></div>
-            </div>
-            <!-- STEP 7: Ready -->
-            <div class="form-step" data-step="7">
-              <div class="form-step-number">Step 7 of 8</div>
-              <div class="form-step-question">Please Read!</div>
-              <p style="color:var(--text2);margin-bottom:24px;font-size:16px;line-height:1.7;">This is a premium transformation programme with a dedicated coach who will be with you every step of the way. This is NOT a standard gym membership.</p>
-              <div class="form-options" data-field="ready_for_coach">
-                <label class="form-option"><input type="radio" name="ready_for_coach" value="Yes I'm ready to work with a transformation coach"><span class="form-option-icon">&#128640;</span><span class="form-option-label">Yes, I'm ready to work with a transformation coach</span><span class="form-option-check"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="3"><path d="M5 13l4 4L19 7"/></svg></span></label>
-                <label class="form-option"><input type="radio" name="ready_for_coach" value="No I'm looking for a standard gym"><span class="form-option-icon">&#127947;</span><span class="form-option-label">No, I'm looking for a standard gym</span><span class="form-option-check"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="3"><path d="M5 13l4 4L19 7"/></svg></span></label>
-              </div>
-              <div class="form-step-question">Would you achieve your goal in...?</div>
-              <div class="form-options multi-select" data-field="timeline" style="grid-template-columns:1fr 1fr 1fr;margin-bottom:32px;">
-                <label class="form-option"><input type="checkbox" name="timeline" value="3 months"><span class="form-option-icon">3</span><span class="form-option-label">3 months</span><span class="form-option-check"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="3"><path d="M5 13l4 4L19 7"/></svg></span></label>
-                <label class="form-option"><input type="checkbox" name="timeline" value="6 months"><span class="form-option-icon">6</span><span class="form-option-label">6 months</span><span class="form-option-check"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="3"><path d="M5 13l4 4L19 7"/></svg></span></label>
-                <label class="form-option"><input type="checkbox" name="timeline" value="12 months"><span class="form-option-icon">12</span><span class="form-option-label">12 months</span><span class="form-option-check"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="3"><path d="M5 13l4 4L19 7"/></svg></span></label>
-              </div>
-              <div class="form-step-question">Are you willing to invest in yourself?</div>
-              <div class="form-options" data-field="willing_to_invest">
-                <label class="form-option"><input type="radio" name="willing_to_invest" value="Yes"><span class="form-option-icon">&#10004;</span><span class="form-option-label">Yes</span><span class="form-option-check"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="3"><path d="M5 13l4 4L19 7"/></svg></span></label>
-                <label class="form-option"><input type="radio" name="willing_to_invest" value="No"><span class="form-option-icon">&#10060;</span><span class="form-option-label">No</span><span class="form-option-check"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="3"><path d="M5 13l4 4L19 7"/></svg></span></label>
-              </div>
-              <div class="form-nav"><button type="button" class="form-btn-back">&larr; Back</button><button type="button" class="form-btn-next" disabled>Next &rarr;</button></div>
-            </div>
-            <!-- STEP 8: Referral + Location -->
-            <div class="form-step" data-step="8">
-              <div class="form-step-number">Step 8 of 8</div>
-              <div class="form-step-question">How did you first hear about Re-Shape?</div>
-              <div class="form-options multi-select" data-field="referral">
-                <label class="form-option"><input type="checkbox" name="referral" value="Social Media"><span class="form-option-icon">&#128241;</span><span class="form-option-label">Social Media</span><span class="form-option-check"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="3"><path d="M5 13l4 4L19 7"/></svg></span></label>
-                <label class="form-option"><input type="checkbox" name="referral" value="From A Friend"><span class="form-option-icon">&#129309;</span><span class="form-option-label">From A Friend</span><span class="form-option-check"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="3"><path d="M5 13l4 4L19 7"/></svg></span></label>
-                <label class="form-option"><input type="checkbox" name="referral" value="Google Search"><span class="form-option-icon">&#128269;</span><span class="form-option-label">Google Search</span><span class="form-option-check"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="3"><path d="M5 13l4 4L19 7"/></svg></span></label>
-                <label class="form-option"><input type="checkbox" name="referral" value="Online Article"><span class="form-option-icon">&#128240;</span><span class="form-option-label">Online Article</span><span class="form-option-check"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="3"><path d="M5 13l4 4L19 7"/></svg></span></label>
-              </div>
-              <div class="form-step-question">Please choose your preferred location</div>
-              <div class="form-options" data-field="location">
-                <label class="form-option"><input type="radio" name="location" value="Colchester"><span class="form-option-icon">&#128205;</span><span class="form-option-label">Colchester</span><span class="form-option-check"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="3"><path d="M5 13l4 4L19 7"/></svg></span></label>
-                <label class="form-option"><input type="radio" name="location" value="Ipswich"><span class="form-option-icon">&#128205;</span><span class="form-option-label">Ipswich</span><span class="form-option-check"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="3"><path d="M5 13l4 4L19 7"/></svg></span></label>
-              </div>
-              <div class="form-nav"><button type="button" class="form-btn-back">&larr; Back</button><button type="submit" class="form-btn-next">Submit Application &#128640;</button></div>
-            </div>
-          </form>
-          <div class="form-success" id="formSuccess">
-            <!-- BOOKING CALENDAR -->
-            <div class="booking-wrap" id="bookingWrap">
-              <div class="booking-header">
-                <div class="form-success-icon" style="margin-bottom:16px"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M5 13l4 4L19 7"/></svg></div>
-                <h3>Application Submitted!</h3>
-                <p>Book your in-person visit below, or we'll be in touch within 24 hours.</p>
-              </div>
-              <!-- Location toggle -->
-              <div class="booking-loc-toggle" id="bookingLocToggle">
-                <button class="booking-loc-btn" data-loc="Ipswich" onclick="selectBookingLoc('Ipswich')">&#128205; Ipswich</button>
-                <button class="booking-loc-btn" data-loc="Colchester" onclick="selectBookingLoc('Colchester')">&#128205; Colchester</button>
-              </div>
-              <!-- Date cards -->
-              <div class="booking-week-nav">
-                <button class="booking-week-btn" id="bookingWeekPrev" onclick="changeBookingWeek(-1)">&larr;</button>
-                <span class="booking-week-label" id="bookingWeekLabel"></span>
-                <button class="booking-week-btn" id="bookingWeekNext" onclick="changeBookingWeek(1)">&rarr;</button>
-              </div>
-              <div class="booking-dates" id="bookingDates"></div>
-              <!-- Time slots -->
-              <div class="booking-times" id="bookingTimes">
-                <div class="booking-empty">Select a date to see available times</div>
-              </div>
-              <!-- Confirm -->
-              <button class="booking-confirm-btn" id="bookingConfirmBtn" disabled onclick="confirmBooking()">Book My Visit</button>
-              <button class="booking-skip" onclick="skipBooking()">I'll book later</button>
-            </div>
-            <!-- BOOKING CONFIRMED -->
-            <div class="booking-done" id="bookingDone" style="display:none">
-              <div class="booking-done-icon">&#127881;</div>
-              <h3>You're Booked!</h3>
-              <p>We look forward to seeing you. You'll receive a confirmation shortly.</p>
-              <div class="booking-done-detail" id="bookingDoneDetail"></div>
-              <a id="bookingCalBtn" class="booking-cal-btn" style="display:none" download="reshape-visit.ics"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="3" y="4" width="18" height="18" rx="2"/><line x1="16" y1="2" x2="16" y2="6"/><line x1="8" y1="2" x2="8" y2="6"/><line x1="3" y1="10" x2="21" y2="10"/></svg> Add to Calendar</a>
-            </div>
-            <!-- SKIP / FALLBACK -->
-            <div id="bookingSkipped" style="display:none;text-align:center;padding:40px 20px;animation:formFadeIn .5s ease">
-              <div class="form-success-icon"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M5 13l4 4L19 7"/></svg></div>
-              <h3>Application Submitted!</h3>
-              <p>We've received your application. We will review your details and be in touch within 24 hours.</p>
-            </div>
-          </div>
-        </div>
-      </div>
-    </div>
-  </div>
-</section>
-<!-- ══════════════════════════════════════
    FAQ
 ══════════════════════════════════════ -->
 <section class="section">
@@ -1477,8 +1477,8 @@ textarea.form-input{min-height:100px;resize:vertical}
 @keyframes fadeUp{from{opacity:0;transform:translateY(24px)}to{opacity:1;transform:translateY(0)}}
 </style>
 <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
-<script src="../api/config.js"></script>
-<script src="../api/automations.js?v=10"></script>
+<script src="../api/config.js?v=2"></script>
+<script src="../api/automations.js?v=10?v=10?v=9"></script>
 <script>
 /* ── SUPABASE INIT ── */
 (function() {
@@ -1987,11 +1987,12 @@ async function confirmBooking() {
       }
       /* ── Cancel pending form_submitted reminders (they already booked) ── */
       if (window.__supabaseClient && lead.email) {
-        window.__supabaseClient.from('message_queue')
+        await window.__supabaseClient.from('message_queue')
           .update({ status: 'cancelled' })
           .eq('lead_email', lead.email)
           .eq('sequence', 'form_submitted')
           .eq('status', 'queued');
+        console.log('Cancelled form_submitted messages for', lead.email);
       }
       /* ── Queue booking confirmation sequence ── */
       if (typeof queueSequence === 'function' && window.__supabaseClient) {
