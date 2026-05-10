@@ -1,4 +1,4 @@
-// Automation config (API keys now handled by Edge Function server-side)
+// Automation config — public settings only (API keys stored in Supabase Edge Function secrets)
 (function(){
   window.__AUTOMATION_CONFIG = {
     coach_email: 'coach@reshape.fit',
