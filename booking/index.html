@@ -312,10 +312,11 @@ async function confirmBooking() {
 
   try {
     // Insert booking
-    await window.__supabaseClient.from('bookings').insert([{
+    var __bookRes = await window.__supabaseClient.from('bookings').insert([{
       slot_id: __selectedSlotId, first_name: fname, last_name: lname,
       email: email, phone: phone, location: __selectedLoc
-    }]);
+    }]).select('id, confirm_token').single();
+    var __bookRow = (__bookRes && __bookRes.data) || {};
     // Increment booked_count
     var slot = __bookingSlots.find(function(s) { return s.id === __selectedSlotId; });
     if (slot) {
@@ -332,7 +333,7 @@ async function confirmBooking() {
       '<div class="booking-done-row"><span>Time</span><span>' + timeStr + '</span></div>' +
       '<div class="booking-done-row"><span>Location</span><span>' + __selectedLoc + '</span></div>';
     // Add to Calendar .ics download
-    var bookingData = { date: dateStr, time: timeStr, location: __selectedLoc, datetime: __selectedDate + 'T' + (slot ? slot.start_time.substring(0,5) : '09:00') + ':00' };
+    var bookingData = { id: __bookRow.id, confirm_token: __bookRow.confirm_token, date: dateStr, time: timeStr, location: __selectedLoc, datetime: __selectedDate + 'T' + (slot ? slot.start_time.substring(0,5) : '09:00') + ':00' };
     try {
       if (typeof generateICS === 'function') {
         var icsContent = generateICS(bookingData, lead.first_name || '');

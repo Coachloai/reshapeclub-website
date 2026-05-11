@@ -338,11 +338,14 @@ var SEQUENCES = {
     { delay: -86400,   channel: 'whatsapp', is_reminder: true,
       body: function(lead, booking) {
         var m = studioMeta(booking);
+        var resultsUrl = (booking.id && booking.confirm_token)
+          ? 'https://reshape.fit/results/?id=' + encodeURIComponent(booking.id) + '&token=' + encodeURIComponent(booking.confirm_token)
+          : 'https://reshape.fit/results';
         return 'Hey ' + (lead.first_name || '') + '\n\n' +
           'It\'s ' + m.coach + ' from Re-Shape :)\n\n' +
           'Just a quick message to let you know your consult tomorrow at ' + (booking.time || '') + ' will be with me. I\'ve looked through your application and I think this will be a great fit for you!\n\n' +
           'We only take confirmed appointments \u2014 please have a look at the page below and let me know if there\'s anyone on there you can relate to in terms of starting point and/or goal:\n\n' +
-          'https://reshape.fit/results\n\n' +
+          resultsUrl + '\n\n' +
           'This helps us understand where we\'re starting from and how we can best help you.\n\n' +
           'The address is: ' + m.address + '\n' +
           '\uD83D\uDCCD ' + m.mapsUrl + '\n\n' +
