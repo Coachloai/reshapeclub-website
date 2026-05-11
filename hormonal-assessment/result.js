@@ -387,6 +387,7 @@
 
     var phone = ctx.lead.phone || null;
 
+    var __bookRow = {};
     ctx.sb.from('bookings').insert([{
       slot_id: ctx.selectedSlotId,
       first_name: firstName,
@@ -395,7 +396,8 @@
       phone: phone,
       location: ctx.loc,
       assessment_session_id: getSessionId()
-    }]).then(function(){
+    }]).select('id, confirm_token').single().then(function(res){
+      __bookRow = (res && res.data) || {};
       return ctx.sb.from('booking_slots').update({ booked_count: slot.booked_count + 1 }).eq('id', slot.id);
     }).then(function(){
       btn.textContent = "✓ You're booked";
@@ -408,6 +410,7 @@
         queueSequence('booking_confirmed', {
           first_name: firstName, last_name: lastName, email: ctx.lead.email, phone: phone
         }, {
+          id: __bookRow.id, confirm_token: __bookRow.confirm_token,
           date: when, time: slot.start_time.substring(0,5), location: ctx.loc,
           datetime: ctx.selectedDate + 'T' + slot.start_time.substring(0,5) + ':00'
         }, ctx.sb);

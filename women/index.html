@@ -1908,7 +1908,8 @@ async function confirmBooking() {
   var lead = window.__bookingLead || {};
   try {
     if (typeof window.__supabaseClient !== 'undefined') {
-      await window.__supabaseClient.from('bookings').insert([{ slot_id: __selectedSlotId, first_name: lead.first_name || '', last_name: lead.last_name || '', email: lead.email || '', phone: lead.phone || '', location: __selectedLoc || '' }]);
+      var __bookRes = await window.__supabaseClient.from('bookings').insert([{ slot_id: __selectedSlotId, first_name: lead.first_name || '', last_name: lead.last_name || '', email: lead.email || '', phone: lead.phone || '', location: __selectedLoc || '' }]).select('id, confirm_token').single();
+      var __bookRow = (__bookRes && __bookRes.data) || {};
       var slot = __bookingSlots.find(function(s) { return s.id === __selectedSlotId; });
       if (slot) await window.__supabaseClient.from('booking_slots').update({ booked_count: slot.booked_count + 1 }).eq('id', __selectedSlotId);
       if (typeof gtag === 'function') gtag('event', 'booking_confirmed', { event_category: 'conversion', location: __selectedLoc, date: __selectedDate });
@@ -1922,7 +1923,7 @@ async function confirmBooking() {
         '<div class="booking-done-row"><span>Date</span><span>' + dateStr2 + '</span></div>' +
         '<div class="booking-done-row"><span>Time</span><span>' + timeStr2 + '</span></div>' +
         '<div class="booking-done-row"><span>Location</span><span>' + __selectedLoc + '</span></div>';
-      var bookingData = { date: dateStr2, time: timeStr2, location: __selectedLoc, datetime: __selectedDate + 'T' + (slot ? slot.start_time.substring(0,5) : '09:00') + ':00' };
+      var bookingData = { id: __bookRow.id, confirm_token: __bookRow.confirm_token, date: dateStr2, time: timeStr2, location: __selectedLoc, datetime: __selectedDate + 'T' + (slot ? slot.start_time.substring(0,5) : '09:00') + ':00' };
       if (typeof generateICS === 'function') {
         var icsContent = generateICS(bookingData, lead.first_name || '');
         var icsBlob = new Blob([icsContent], { type: 'text/calendar;charset=utf-8' });
