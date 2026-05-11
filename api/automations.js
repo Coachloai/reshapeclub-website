@@ -12,7 +12,7 @@ var AUTOMATION_CONFIG = window.__AUTOMATION_CONFIG || {
   google_client_secret: '',
   google_refresh_token: '',
   from_email: 'coach@reshape.fit',
-  from_name: 'Coach Jaime | ReShape',
+  from_name: 'Jaime | ReShape',
   booking_url: 'https://reshape.fit/booking',
 };
 
@@ -126,7 +126,7 @@ function generateICS(booking, leadName, opts) {
   var summary = isCoach ? 'Visit: ' + (leadName || 'New Lead') : 'ReShape Visit';
   var description = isCoach
     ? 'Booking visit with ' + (leadName || 'Lead') + (o.leadEmail ? ' (' + o.leadEmail + ')' : '') + (o.leadPhone ? ' | Phone: ' + o.leadPhone : '')
-    : 'Your in-person visit with Coach Jaime at ReShape. Wear something comfortable!';
+    : 'Your in-person visit with Jaime at ReShape. Wear something comfortable!';
   return 'BEGIN:VCALENDAR\r\n' +
     'VERSION:2.0\r\n' +
     'PRODID:-//ReShape//Booking//EN\r\n' +
@@ -254,6 +254,25 @@ function emailTemplate(title, body, ctaText, ctaUrl) {
 }
 
 /* ══════════════════════════════════════
+   STUDIO META — coach name, address, maps link per studio
+══════════════════════════════════════ */
+function studioMeta(booking) {
+  var loc = ((booking && booking.location) || '').toLowerCase();
+  if (loc.indexOf('ipswich') >= 0) {
+    return {
+      coach:   'Sara',
+      address: '12 Boss Hall Road, Ipswich, IP1 5BN',
+      mapsUrl: 'https://share.google/HvwtMaMqe5KoVJrSF'
+    };
+  }
+  return {
+    coach:   'Sean',
+    address: 'Unit 3 Building A, Chesterwell Mews, Colchester, CO4 6EE',
+    mapsUrl: 'https://share.google/ZyRUxiyJeD3Ro8isK'
+  };
+}
+
+/* ══════════════════════════════════════
    NURTURE SEQUENCES
 ══════════════════════════════════════ */
 var SEQUENCES = {
@@ -270,7 +289,7 @@ var SEQUENCES = {
       body: function(lead) { return 'Hey ' + lead.first_name + ', it\'s Jaime from ReShape. We got your application! Book your in-person visit before spots fill up: ' + AUTOMATION_CONFIG.booking_url; }
     },
     { delay: 7200,     channel: 'whatsapp',
-      body: function(lead) { return 'Hey ' + lead.first_name + '! 👋 It\'s Coach Jaime from ReShape. Just seen your application come through — love that you\'re taking the first step! Fancy popping in for a visit? I\'d love to chat about your goals in person. Book here: ' + AUTOMATION_CONFIG.booking_url; }
+      body: function(lead) { return 'Hey ' + lead.first_name + '! 👋 It\'s Jaime from ReShape. Just seen your application come through — love that you\'re taking the first step! Fancy popping in for a visit? I\'d love to chat about your goals in person. Book here: ' + AUTOMATION_CONFIG.booking_url; }
     },
     { delay: 86400,    channel: 'email',    subject: 'People like you are getting results',
       body: function(lead) { return emailTemplate(
@@ -280,7 +299,7 @@ var SEQUENCES = {
       ); }
     },
     { delay: 172800,   channel: 'whatsapp',
-      body: function(lead) { return 'Hey ' + lead.first_name + ', quick one from Coach Jaime 💪 I had a look at your application and I genuinely think we can help you hit your goals. Spots are filling up though — grab yours here: ' + AUTOMATION_CONFIG.booking_url; }
+      body: function(lead) { return 'Hey ' + lead.first_name + ', quick one from Jaime 💪 I had a look at your application and I genuinely think we can help you hit your goals. Spots are filling up though — grab yours here: ' + AUTOMATION_CONFIG.booking_url; }
     },
     { delay: 259200,   channel: 'sms',
       body: function(lead) { return 'Hi ' + lead.first_name + ', just checking in! Have you had a chance to book your ReShape visit yet? We\'d love to show you around: ' + AUTOMATION_CONFIG.booking_url; }
@@ -314,10 +333,28 @@ var SEQUENCES = {
       body: function(lead, booking) { return 'You\'re booked, ' + lead.first_name + '! ' + (booking.date || '') + ' at ' + (booking.time || '') + ', ' + (booking.location || '') + '. Wear something comfortable - see you there!'; }
     },
     { delay: 60,       channel: 'whatsapp',
-      body: function(lead, booking) { return 'Hey ' + lead.first_name + '! 🎉 Coach Jaime here — just saw your booking come through for ' + (booking.date || '') + ' at ' + (booking.time || '') + ', ' + (booking.location || '') + '. Buzzing to meet you! Wear something comfy and bring a water bottle. See you there! 💪'; }
+      body: function(lead, booking) { return 'Hey ' + lead.first_name + '! 🎉 Jaime here — just saw your booking come through for ' + (booking.date || '') + ' at ' + (booking.time || '') + ', ' + (booking.location || '') + '. Buzzing to meet you! Wear something comfy and bring a water bottle. See you there! 💪'; }
     },
-    { delay: -86400,   channel: 'sms',      is_reminder: true,
-      body: function(lead, booking) { return 'Hey ' + lead.first_name + '! Quick reminder: your ReShape visit is TOMORROW at ' + (booking.time || '') + ' at ' + (booking.location || '') + '. See you there! \uD83D\uDCAA'; }
+    { delay: -86400,   channel: 'whatsapp', is_reminder: true,
+      body: function(lead, booking) {
+        var m = studioMeta(booking);
+        return 'Hey ' + (lead.first_name || '') + '\n\n' +
+          'It\'s ' + m.coach + ' from Re-Shape :)\n\n' +
+          'Just a quick message to let you know your consult tomorrow at ' + (booking.time || '') + ' will be with me. I\'ve looked through your application and I think this will be a great fit for you!\n\n' +
+          'We only take confirmed appointments \u2014 please have a look at the page below and let me know if there\'s anyone on there you can relate to in terms of starting point and/or goal:\n\n' +
+          'https://reshape.fit/results\n\n' +
+          'This helps us understand where we\'re starting from and how we can best help you.\n\n' +
+          'The address is: ' + m.address + '\n' +
+          '\uD83D\uDCCD ' + m.mapsUrl + '\n\n' +
+          'Look forward to meeting you at ' + (booking.time || '') + ' :)\n' +
+          m.coach;
+      }
+    },
+    { delay: -7200,    channel: 'sms',      is_reminder: true,
+      body: function(lead, booking) {
+        var m = studioMeta(booking);
+        return 'Hey ' + (lead.first_name || '') + ', ' + m.coach + ' here — see you at ' + (booking.time || '') + ' for your consult. Address: ' + m.address + '. ' + m.mapsUrl;
+      }
     },
     { delay: -7200,    channel: 'email',    is_reminder: true, subject: 'Your ReShape visit is in 2 hours!',
       body: function(lead, booking) { return emailTemplate(
@@ -337,12 +374,14 @@ var SEQUENCES = {
 function replaceVars(text, lead, booking) {
   if (!text) return '';
   var b = booking || {};
+  var meta = studioMeta(b);
+  var hp = lead && lead.hormonal_pattern;
   var vars = {
     first_name: (lead && lead.first_name) || '',
-    pattern:    (lead && lead.hormonal_pattern) || 'your hormonal pattern',
+    pattern:    hp ? 'your ' + hp + ' results' : 'the goals you shared with us',
     book_link:  AUTOMATION_CONFIG.booking_url || '',
-    coach:      'Loai',
-    studio:     (lead && lead.location) || 'Ipswich & Colchester',
+    coach:      meta.coach,
+    studio:     (lead && lead.location) || b.location || 'Ipswich & Colchester',
     date:       b.date || '',
     time:       b.time || '',
     location:   b.location || ''

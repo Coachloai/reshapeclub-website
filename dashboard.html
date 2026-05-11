@@ -1891,6 +1891,7 @@ if(sessionStorage.getItem('rs_auth')==='1'){
                 <th>Location</th>
                 <th>Confirmed</th>
                 <th>Status</th>
+                <th>Actions</th>
               </tr>
             </thead>
             <tbody id="bookings-tbody"></tbody>
@@ -3178,7 +3179,7 @@ function renderBookings() {
     });
     var detailHtml = hasDetail
       ? '<tr id="booking-detail-' + i + '" style="display:none;background:var(--s2)">' +
-          '<td colspan="10" style="padding:14px 18px">' +
+          '<td colspan="11" style="padding:14px 18px">' +
             (b.confirmed_at ? '<div style="font-size:12px;color:var(--text3);margin-bottom:8px">Confirmed ' + new Date(b.confirmed_at).toLocaleString('en-GB') + '</div>' : '') +
             (memberNames.length
               ? '<div style="margin-bottom:10px"><div style="font-size:11px;color:var(--text3);text-transform:uppercase;letter-spacing:.08em;margin-bottom:4px">Related to</div><div style="font-size:13px;color:var(--text2)">' + memberNames.map(escapeHtmlDash).join(' · ') + '</div></div>'
@@ -3200,7 +3201,11 @@ function renderBookings() {
       '<td>' + timeStr + '</td>' +
       '<td><span class="tag tag-location">' + (b.location || slot.location || '') + '</span></td>' +
       '<td><span class="tag tag-quality ' + conf.cls + '">' + conf.label + '</span></td>' +
-      '<td><span class="tag tag-quality tag-high">' + b.status + '</span></td></tr>' +
+      '<td><span class="tag tag-quality tag-high">' + b.status + '</span></td>' +
+      '<td style="white-space:nowrap" onclick="event.stopPropagation()">' +
+        '<button class="btn btn-ghost btn-sm" style="padding:4px 8px;font-size:11px;margin-right:4px" onclick="markBookingNoShow(\'' + b.id + '\')">No-show</button>' +
+        '<button class="btn btn-ghost btn-sm" style="padding:4px 8px;font-size:11px;color:var(--red);border-color:rgba(231,76,60,.3)" onclick="cancelBookingFromDashboard(\'' + b.id + '\')">Cancel</button>' +
+      '</td></tr>' +
       detailHtml;
   }).join('');
 
@@ -3212,6 +3217,65 @@ function renderBookings() {
       renderBookings();
     });
   }
+}
+
+/* ── BOOKING LIFECYCLE (cancel / no-show) ── */
+async function applyBookingLifecycle(bookingId, newStatus, sequenceName, confirmMsg, successMsg) {
+  var b = ALL_BOOKINGS.find(function(x){ return x.id === bookingId; });
+  if (!b) { showToast('Booking not found'); return; }
+  if (!confirm(confirmMsg)) return;
+
+  var upd = await sb.from('bookings').update({ status: newStatus }).eq('id', bookingId);
+  if (upd.error) { showToast('Update failed: ' + upd.error.message); return; }
+
+  await sb.from('message_queue')
+    .update({ status: 'cancelled' })
+    .eq('lead_email', b.email)
+    .eq('sequence', 'booking_confirmed')
+    .eq('status', 'queued');
+
+  var pattern = null;
+  if (b.assessment_session_id) {
+    try {
+      var aRes = await sb.from('assessments').select('primary_archetype').eq('session_id', b.assessment_session_id).maybeSingle();
+      var arch = aRes && aRes.data && aRes.data.primary_archetype;
+      if (arch && ARCHETYPE_LABELS && ARCHETYPE_LABELS[arch]) pattern = ARCHETYPE_LABELS[arch];
+    } catch (_e) { /* fallback handled in replaceVars */ }
+  }
+
+  var slot = b.booking_slots || {};
+  var lead = {
+    first_name: b.first_name,
+    last_name:  b.last_name,
+    email:      b.email,
+    phone:      b.phone,
+    hormonal_pattern: pattern
+  };
+  var bookingCtx = {
+    location: b.location || slot.location,
+    date:     slot.date,
+    time:     slot.start_time ? slot.start_time.substring(0, 5) : ''
+  };
+
+  if (typeof queueSequence === 'function') {
+    try { await queueSequence(sequenceName, lead, bookingCtx, sb); }
+    catch (e) { console.warn('queueSequence failed:', e); }
+  }
+
+  showToast(successMsg);
+  await initBookingsView();
+}
+
+async function cancelBookingFromDashboard(id) {
+  return applyBookingLifecycle(id, 'cancelled', 'consultation_cancelled',
+    'Cancel this booking? The lead will receive the cancellation sequence.',
+    'Booking cancelled, sequence queued');
+}
+
+async function markBookingNoShow(id) {
+  return applyBookingLifecycle(id, 'noshow', 'consultation_noshow',
+    'Mark this booking as no-show? The lead will receive the no-show sequence.',
+    'Marked no-show, sequence queued');
 }
 
 /* ── APPOINTMENT DRAWER ── */
