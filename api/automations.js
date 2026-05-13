@@ -457,25 +457,26 @@ function replaceVars(text, lead, booking) {
   var b = booking || {};
   var meta = studioMeta(b);
   var hp = lead && lead.hormonal_pattern;
-  var confirmUrl = (b.id && b.confirm_token)
-    ? 'https://reshape.fit/confirm?id=' + encodeURIComponent(b.id) + '&token=' + encodeURIComponent(b.confirm_token)
-    : 'https://reshape.fit/confirm';
+  var resultsUrl = (b.id && b.confirm_token)
+    ? 'https://reshape.fit/results/?id=' + encodeURIComponent(b.id) + '&token=' + encodeURIComponent(b.confirm_token)
+    : 'https://reshape.fit/results';
   var vars = {
-    first_name:   (lead && lead.first_name) || '',
-    pattern:      hp ? 'your ' + hp + ' results' : 'the goals you shared with us',
-    book_link:    AUTOMATION_CONFIG.booking_url || '',
-    coach:        meta.coach,
-    studio:       (lead && lead.location) || b.location || 'Ipswich & Colchester',
-    date:         b.date || '',
-    time:         b.time || '',
-    location:     b.location || '',
-    booking_date: b.date || '',                  // alias used by some DB sequences
-    booking_time: b.time || '',                  // alias used by some DB sequences
-    confirm_url:  confirmUrl,
-    confirm_id:   b.id || '',
+    first_name:    (lead && lead.first_name) || '',
+    pattern:       hp ? 'your ' + hp + ' results' : 'the goals you shared with us',
+    book_link:     AUTOMATION_CONFIG.booking_url || '',
+    coach:         meta.coach,
+    studio:        (lead && lead.location) || b.location || 'Ipswich & Colchester',
+    date:          b.date || '',
+    time:          b.time || '',
+    location:      b.location || '',
+    booking_date:  b.date || '',  // alias used by some DB sequences
+    booking_time:  b.time || '',  // alias used by some DB sequences
+    results_url:   resultsUrl,    // preferred — personalised /results page
+    confirm_url:   resultsUrl,    // legacy alias (was /confirm — renamed to /results)
+    confirm_id:    b.id || '',
     confirm_token: b.confirm_token || '',
-    address:      meta.address || '',
-    maps_url:     meta.mapsUrl || ''
+    address:       meta.address || '',
+    maps_url:      meta.mapsUrl || ''
   };
   return text.replace(/\{(\w+)\}/g, function(match, key) {
     return vars.hasOwnProperty(key) ? vars[key] : match;
