@@ -126,11 +126,13 @@ Deno.serve(async (req) => {
 
     const ip = clientIp(req);
 
-    // 5 score requests per IP per hour. (Per Section 6 of the build spec.)
+    // 30 score requests per IP per hour. Matches the assessment-session
+    // function so a single user iterating (retake, fix, retake) isn't
+    // blocked; still well below abuse territory.
     const { data: rateOk } = await supabase.rpc("check_rate_limit", {
       p_ip: ip,
       p_bucket: "score_assessment",
-      p_limit: 5,
+      p_limit: 30,
       p_window_seconds: 3600,
     });
     if (rateOk === false) {
