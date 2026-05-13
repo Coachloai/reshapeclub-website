@@ -254,6 +254,66 @@ function emailTemplate(title, body, ctaText, ctaUrl) {
 }
 
 /* ══════════════════════════════════════
+   TEAM NOTIFICATIONS — booking lifecycle events
+══════════════════════════════════════ */
+var TEAM_NOTIFY_EMAIL = 'reshape.nurturing@gmail.com';
+
+// eventType: 'cancelled' | 'noshow' | 'rescheduled'
+// oldBooking + newBooking are { date, time, location } shape; newBooking only for rescheduled.
+async function notifyTeamBookingEvent(eventType, lead, oldBooking, newBooking) {
+  var leadName = ((lead.first_name || '') + ' ' + (lead.last_name || '')).trim() || 'Unknown lead';
+  var titles = {
+    cancelled:   'Booking cancelled: ' + leadName,
+    noshow:      'No-show: ' + leadName,
+    rescheduled: 'Booking rescheduled: ' + leadName
+  };
+  var labels = {
+    cancelled:   'was cancelled.',
+    noshow:      'was marked no-show.',
+    rescheduled: 'was rescheduled.'
+  };
+  var title = titles[eventType] || ('Booking event: ' + leadName);
+  var label = labels[eventType] || 'changed.';
+
+  var row = function(k, v) {
+    return '<p style="margin:4px 0"><strong>' + k + ':</strong> ' + (v || '—') + '</p>';
+  };
+  var leadBlock =
+    '<div style="background:rgba(237,92,37,0.08);border:1px solid rgba(237,92,37,0.2);border-radius:12px;padding:16px 20px;margin:16px 0">' +
+    row('Name', leadName) +
+    row('Email', lead.email) +
+    row('Phone', lead.phone) +
+    row('Location', (oldBooking && oldBooking.location) || (newBooking && newBooking.location)) +
+    '</div>';
+
+  var slotsBlock;
+  if (eventType === 'rescheduled' && newBooking) {
+    slotsBlock =
+      '<p style="margin:16px 0 8px;color:rgba(255,255,255,0.5);font-size:13px;text-transform:uppercase;letter-spacing:0.08em">Was</p>' +
+      '<div style="background:rgba(255,255,255,0.04);border:1px solid rgba(255,255,255,0.08);border-radius:12px;padding:14px 18px;margin:0 0 12px">' +
+        row('Date', oldBooking && oldBooking.date) + row('Time', oldBooking && oldBooking.time) +
+      '</div>' +
+      '<p style="margin:16px 0 8px;color:rgba(255,255,255,0.5);font-size:13px;text-transform:uppercase;letter-spacing:0.08em">Now</p>' +
+      '<div style="background:rgba(46,204,113,0.06);border:1px solid rgba(46,204,113,0.2);border-radius:12px;padding:14px 18px">' +
+        row('Date', newBooking.date) + row('Time', newBooking.time) +
+      '</div>';
+  } else {
+    slotsBlock =
+      '<div style="background:rgba(255,255,255,0.04);border:1px solid rgba(255,255,255,0.08);border-radius:12px;padding:14px 18px;margin:16px 0">' +
+        row('Date', oldBooking && oldBooking.date) + row('Time', oldBooking && oldBooking.time) +
+      '</div>';
+  }
+
+  var body =
+    '<p>The consultation with <strong>' + leadName + '</strong> ' + label + '</p>' +
+    leadBlock + slotsBlock;
+  var html = emailTemplate(title, body, '', '');
+
+  try { return await sendEmail(TEAM_NOTIFY_EMAIL, title, html, null); }
+  catch (e) { console.warn('Team notify failed:', e); return { success: false, error: e.message }; }
+}
+
+/* ══════════════════════════════════════
    STUDIO META — coach name, address, maps link per studio
 ══════════════════════════════════════ */
 function studioMeta(booking) {
