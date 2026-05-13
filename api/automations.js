@@ -425,6 +425,8 @@ function replaceVars(text, lead, booking) {
 // Convert plain text body (from database) into HTML email via emailTemplate()
 // bodyText uses \n\n to separate paragraphs; ctaText/ctaUrl are optional
 function wrapEmailBody(subject, bodyText, ctaText, ctaUrl) {
+  // Normalise literal \n sequences (stored as text in some DB rows) to real newlines
+  bodyText = bodyText.replace(/\\n/g, '\n');
   var paragraphs = bodyText.split(/\n\n/);
   var html = '';
   for (var i = 0; i < paragraphs.length; i++) {
@@ -480,6 +482,9 @@ async function queueSequenceFromDB(sequenceName, lead, booking, supabaseClient) 
     // Apply variable substitution
     var bodyText = replaceVars(step.body || '', lead, booking);
     var subjectText = replaceVars(step.subject || '', lead, booking);
+
+    // Normalise literal \n from DB rows into real newlines
+    bodyText = bodyText.replace(/\\n/g, '\n');
 
     // Wrap email bodies in HTML template
     var finalBody;
