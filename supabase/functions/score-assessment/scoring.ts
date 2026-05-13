@@ -130,7 +130,10 @@ export const WEIGHTS: Record<string, Record<string, Weights>> = {
 };
 
 const REQUIRED_QUESTIONS = [
-  "Q1", "Q1b", "Q2", "Q3", "Q4", "Q5",
+  // Q1b is intentionally NOT required — the quiz UI always asks it,
+  // but old in-flight sessions (taken before Q1b existed) should still
+  // score. When Q1b is missing the engine treats it as "none".
+  "Q1", "Q2", "Q3", "Q4", "Q5",
   "Q6", "Q7", "Q8", "Q9", "Q10",
   "Q11", "Q12", "Q14",
 ];
