@@ -41,7 +41,7 @@ begin
     -- Step 0: Confirmation email (immediate)
     (seq_id, 0, 'email', 0,
      E'Application received \u2014 here''s what happens next',
-     E'Hey {first_name}, we got your application!\n\nThanks for applying to ReShape. We''re reviewing your details now.\n\nIn the meantime, why not book your in-person visit? Spots fill up fast.',
+     E'Hey {first_name}, we got your application!\n\nThanks for applying to ReShape. We''re reviewing your details now.\n\nIn the meantime, why not book your consult? Spots fill up fast.\n\nBook your visit \u2192 {book_link}',
      true),
 
     -- Step 1: SMS (1 hour)
@@ -59,7 +59,7 @@ begin
     -- Step 3: Email (1 day)
     (seq_id, 3, 'email', 86400,
      E'People like you are getting results',
-     E'{first_name}, people just like you are transforming.\n\nSince you applied, 3 more people have started their journey with us.\n\nOur members lose an average of 8\u201312kg in 12 weeks. And if they don''t? We coach them for free until they do.\n\nDon''t let this opportunity pass \u2014 book your visit now.',
+     E'{first_name}, people just like you are transforming.\n\nSince you applied, 3 more people have started their journey with us.\n\nOur members lose an average of 8\u201312kg in 12 weeks. And if they don''t? We coach them for free until they do.\n\nDon''t let this opportunity pass \u2014 book your consult now.\n\nBook your visit \u2192 {book_link}',
      true),
 
     -- Step 4: WhatsApp (2 days)
@@ -77,6 +77,6 @@ begin
     -- Step 6: Final email (7 days)
     (seq_id, 6, 'email', 604800,
      E'Last chance \u2014 your spot won''t wait forever',
-     E'{first_name}, your spot is still open \u2014 but not for long.\n\nIt''s been a week since you applied. We''d love to help you start your transformation, but we can only hold spots for so long.\n\nThis is your final reminder \u2014 book your visit and let''s make it happen.',
+     E'{first_name}, your spot is still open \u2014 but not for long.\n\nIt''s been a week since you applied. We''d love to help you start your transformation, but we can only hold spots for so long.\n\nThis is your final reminder \u2014 book your consult and let''s make it happen.\n\nBook your visit \u2192 {book_link}',
      true);
 end $$;
