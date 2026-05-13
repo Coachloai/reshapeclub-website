@@ -464,15 +464,16 @@ function replaceVars(text, lead, booking) {
     first_name:    (lead && lead.first_name) || '',
     pattern:       hp ? 'your ' + hp + ' results' : 'the goals you shared with us',
     book_link:     AUTOMATION_CONFIG.booking_url || '',
+    booking_url:   AUTOMATION_CONFIG.booking_url || '',  // alias used by some DB sequences
     coach:         meta.coach,
     studio:        (lead && lead.location) || b.location || 'Ipswich & Colchester',
     date:          b.date || '',
     time:          b.time || '',
     location:      b.location || '',
-    booking_date:  b.date || '',  // alias used by some DB sequences
-    booking_time:  b.time || '',  // alias used by some DB sequences
-    results_url:   resultsUrl,    // preferred — personalised /results page
-    confirm_url:   resultsUrl,    // legacy alias (was /confirm — renamed to /results)
+    booking_date:  b.date || '',                  // alias used by some DB sequences
+    booking_time:  b.time || '',                  // alias used by some DB sequences
+    results_url:   resultsUrl,                    // preferred — personalised /results page
+    confirm_url:   resultsUrl,                    // legacy alias (was /confirm — renamed to /results)
     confirm_id:    b.id || '',
     confirm_token: b.confirm_token || '',
     address:       meta.address || '',
