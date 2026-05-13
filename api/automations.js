@@ -332,15 +332,33 @@ var SEQUENCES = {
     { delay: 0,        channel: 'sms',
       body: function(lead, booking) { return 'You\'re booked, ' + lead.first_name + '! ' + (booking.date || '') + ' at ' + (booking.time || '') + ', ' + (booking.location || '') + '. Wear something comfortable - see you there!'; }
     },
+    // Confirm-request WhatsApp — fires ~1 min after booking. Primary
+    // place the confirm link goes out so it works regardless of booking
+    // lead time. The 24h-before reminder below is a secondary nudge.
     { delay: 60,       channel: 'whatsapp',
-      body: function(lead, booking) { return 'Hey ' + lead.first_name + '! 🎉 Jaime here — just saw your booking come through for ' + (booking.date || '') + ' at ' + (booking.time || '') + ', ' + (booking.location || '') + '. Buzzing to meet you! Wear something comfy and bring a water bottle. See you there! 💪'; }
+      body: function(lead, booking) {
+        var m = studioMeta(booking);
+        var confirmUrl = (booking.id && booking.confirm_token)
+          ? 'https://reshape.fit/confirm?id=' + encodeURIComponent(booking.id) + '&token=' + encodeURIComponent(booking.confirm_token)
+          : 'https://reshape.fit/confirm';
+        return 'Hey ' + (lead.first_name || '') + '\n\n' +
+          'It\'s ' + m.coach + ' from ReShape :)\n\n' +
+          'Just got your booking through for ' + (booking.date || '') + ' at ' + (booking.time || '') + '. I\'ve had a look at your application and I think this will be a great fit for you.\n\n' +
+          'We only take confirmed appointments \u2014 please have a look at the page below and let me know if there\'s anyone on there you can relate to in terms of starting point and/or goal:\n\n' +
+          confirmUrl + '\n\n' +
+          'This helps us understand where we\'re starting from and how we can best help you.\n\n' +
+          'The address is: ' + m.address + '\n' +
+          '\uD83D\uDCCD ' + m.mapsUrl + '\n\n' +
+          'Look forward to meeting you :)\n' +
+          m.coach;
+      }
     },
     { delay: -86400,   channel: 'whatsapp', is_reminder: true,
       body: function(lead, booking) {
         var m = studioMeta(booking);
         var resultsUrl = (booking.id && booking.confirm_token)
-          ? 'https://reshape.fit/results/?id=' + encodeURIComponent(booking.id) + '&token=' + encodeURIComponent(booking.confirm_token)
-          : 'https://reshape.fit/results';
+          ? 'https://reshape.fit/confirm?id=' + encodeURIComponent(booking.id) + '&token=' + encodeURIComponent(booking.confirm_token)
+          : 'https://reshape.fit/confirm';
         return 'Hey ' + (lead.first_name || '') + '\n\n' +
           'It\'s ' + m.coach + ' from Re-Shape :)\n\n' +
           'Just a quick message to let you know your consult tomorrow at ' + (booking.time || '') + ' will be with me. I\'ve looked through your application and I think this will be a great fit for you!\n\n' +
@@ -379,15 +397,25 @@ function replaceVars(text, lead, booking) {
   var b = booking || {};
   var meta = studioMeta(b);
   var hp = lead && lead.hormonal_pattern;
+  var confirmUrl = (b.id && b.confirm_token)
+    ? 'https://reshape.fit/confirm?id=' + encodeURIComponent(b.id) + '&token=' + encodeURIComponent(b.confirm_token)
+    : 'https://reshape.fit/confirm';
   var vars = {
-    first_name: (lead && lead.first_name) || '',
-    pattern:    hp ? 'your ' + hp + ' results' : 'the goals you shared with us',
-    book_link:  AUTOMATION_CONFIG.booking_url || '',
-    coach:      meta.coach,
-    studio:     (lead && lead.location) || b.location || 'Ipswich & Colchester',
-    date:       b.date || '',
-    time:       b.time || '',
-    location:   b.location || ''
+    first_name:   (lead && lead.first_name) || '',
+    pattern:      hp ? 'your ' + hp + ' results' : 'the goals you shared with us',
+    book_link:    AUTOMATION_CONFIG.booking_url || '',
+    coach:        meta.coach,
+    studio:       (lead && lead.location) || b.location || 'Ipswich & Colchester',
+    date:         b.date || '',
+    time:         b.time || '',
+    location:     b.location || '',
+    booking_date: b.date || '',                  // alias used by some DB sequences
+    booking_time: b.time || '',                  // alias used by some DB sequences
+    confirm_url:  confirmUrl,
+    confirm_id:   b.id || '',
+    confirm_token: b.confirm_token || '',
+    address:      meta.address || '',
+    maps_url:     meta.mapsUrl || ''
   };
   return text.replace(/\{(\w+)\}/g, function(match, key) {
     return vars.hasOwnProperty(key) ? vars[key] : match;
