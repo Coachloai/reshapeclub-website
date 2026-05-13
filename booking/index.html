@@ -169,10 +169,51 @@ var __selectedSlotId = null;
 var __selectedLoc = null;
 var __selectedDate = null;
 var __bookingWeekOffset = 0;
+var __rescheduleCtx = null; // populated if we're on a /booking/?reschedule=...&token=... URL
 function __localDate(dt) { return dt.getFullYear() + '-' + String(dt.getMonth()+1).padStart(2,'0') + '-' + String(dt.getDate()).padStart(2,'0'); }
+function __escAttr(s){ return String(s||'').replace(/[&<>"']/g, function(c){ return ({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c]); }); }
 
-// Auto-select Ipswich on load
-selectBookingLoc('Ipswich');
+// Init: handle reschedule URL params, then auto-select location.
+(async function initBookingPage(){
+  var qs = new URLSearchParams(window.location.search);
+  var rId = qs.get('reschedule');
+  var rTok = qs.get('token');
+  if (rId && rTok) {
+    try {
+      var bRes = await window.__supabaseClient.from('bookings')
+        .select('id, confirm_token, first_name, last_name, email, phone, location, slot_id, booking_slots(date, start_time, end_time)')
+        .eq('id', rId).maybeSingle();
+      var b = bRes && bRes.data;
+      if (b && b.confirm_token === rTok) {
+        __rescheduleCtx = b;
+        prefillRescheduleForm(b);
+      }
+    } catch (e) { console.warn('Reschedule lookup failed:', e); }
+  }
+  selectBookingLoc((__rescheduleCtx && __rescheduleCtx.location) || 'Ipswich');
+})();
+
+function prefillRescheduleForm(b) {
+  document.getElementById('bk-fname').value = b.first_name || '';
+  document.getElementById('bk-lname').value = b.last_name || '';
+  document.getElementById('bk-email').value = b.email || '';
+  document.getElementById('bk-phone').value = b.phone || '';
+  ['bk-fname','bk-lname','bk-email','bk-phone'].forEach(function(id){
+    var el = document.getElementById(id);
+    if (el) { el.readOnly = true; el.style.opacity = '0.7'; }
+  });
+  var slot = b.booking_slots || {};
+  var dateLabel = slot.date ? new Date(slot.date + 'T00:00:00').toLocaleDateString('en-GB', { weekday:'long', day:'numeric', month:'long' }) : '';
+  var timeLabel = slot.start_time ? slot.start_time.substring(0,5) : '';
+  var hdr = document.querySelector('.booking-header');
+  if (hdr) {
+    var h = hdr.querySelector('h3'); if (h) h.textContent = 'Reschedule Your Visit';
+    var p = hdr.querySelector('p');
+    if (p) p.innerHTML = 'Currently booked for <strong>' + __escAttr(dateLabel + (timeLabel ? ' at ' + timeLabel : '')) + '</strong>. Pick a new time below.';
+  }
+  var btn = document.getElementById('bookingConfirmBtn');
+  if (btn) btn.textContent = 'Reschedule My Visit';
+}
 
 async function selectBookingLoc(loc) {
   __selectedLoc = loc;
@@ -311,16 +352,39 @@ async function confirmBooking() {
   var lead = { first_name: fname, last_name: lname, email: email, phone: phone };
 
   try {
-    // Insert booking
-    var __bookRes = await window.__supabaseClient.from('bookings').insert([{
-      slot_id: __selectedSlotId, first_name: fname, last_name: lname,
-      email: email, phone: phone, location: __selectedLoc
-    }]).select('id, confirm_token').single();
-    var __bookRow = (__bookRes && __bookRes.data) || {};
-    // Increment booked_count
+    var __bookRow;
     var slot = __bookingSlots.find(function(s) { return s.id === __selectedSlotId; });
-    if (slot) {
-      await window.__supabaseClient.from('booking_slots').update({ booked_count: slot.booked_count + 1 }).eq('id', __selectedSlotId);
+    if (__rescheduleCtx) {
+      // RESCHEDULE: update existing booking row + adjust slot counts.
+      var __updRes = await window.__supabaseClient.from('bookings')
+        .update({ slot_id: __selectedSlotId, location: __selectedLoc, status: 'confirmed' })
+        .eq('id', __rescheduleCtx.id)
+        .select('id, confirm_token').single();
+      __bookRow = (__updRes && __updRes.data) || {};
+      if (__rescheduleCtx.slot_id && __rescheduleCtx.slot_id !== __selectedSlotId) {
+        try {
+          var oldSlotRes = await window.__supabaseClient.from('booking_slots').select('booked_count').eq('id', __rescheduleCtx.slot_id).single();
+          var oldCount = oldSlotRes && oldSlotRes.data && oldSlotRes.data.booked_count;
+          if (typeof oldCount === 'number') {
+            await window.__supabaseClient.from('booking_slots').update({ booked_count: Math.max(0, oldCount - 1) }).eq('id', __rescheduleCtx.slot_id);
+          }
+        } catch (e) { console.warn('Old slot decrement failed:', e); }
+        if (slot) await window.__supabaseClient.from('booking_slots').update({ booked_count: slot.booked_count + 1 }).eq('id', __selectedSlotId);
+      }
+      // Cancel any pending booking_confirmed messages for this lead — fresh queue happens below.
+      await window.__supabaseClient.from('message_queue')
+        .update({ status: 'cancelled' })
+        .eq('lead_email', email).eq('sequence', 'booking_confirmed').eq('status', 'queued');
+    } else {
+      // New booking — original insert flow.
+      var __bookRes = await window.__supabaseClient.from('bookings').insert([{
+        slot_id: __selectedSlotId, first_name: fname, last_name: lname,
+        email: email, phone: phone, location: __selectedLoc
+      }]).select('id, confirm_token').single();
+      __bookRow = (__bookRes && __bookRes.data) || {};
+      if (slot) {
+        await window.__supabaseClient.from('booking_slots').update({ booked_count: slot.booked_count + 1 }).eq('id', __selectedSlotId);
+      }
     }
     // Show confirmation
     var dateObj = new Date(__selectedDate + 'T12:00:00');
@@ -348,6 +412,17 @@ async function confirmBooking() {
     // Queue booking confirmation sequence
     if (typeof queueSequence === 'function') {
       queueSequence('booking_confirmed', lead, bookingData, window.__supabaseClient);
+    }
+    // Team notification — reschedule only (new bookings already get a sequence-driven email).
+    if (__rescheduleCtx && typeof notifyTeamBookingEvent === 'function') {
+      var __oldSlot = __rescheduleCtx.booking_slots || {};
+      var __oldDate = __oldSlot.date ? new Date(__oldSlot.date + 'T00:00:00').toLocaleDateString('en-GB', { weekday:'long', day:'numeric', month:'long' }) : '';
+      var __oldTime = __oldSlot.start_time ? __oldSlot.start_time.substring(0,5) : '';
+      try {
+        notifyTeamBookingEvent('rescheduled', lead,
+          { date: __oldDate, time: __oldTime, location: __rescheduleCtx.location },
+          { date: dateStr, time: timeStr, location: __selectedLoc });
+      } catch (e) { console.warn('Team notify failed:', e); }
     }
   } catch (e) {
     console.error('Booking error:', e);

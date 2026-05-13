@@ -3262,6 +3262,17 @@ async function applyBookingLifecycle(bookingId, newStatus, sequenceName, confirm
     catch (e) { console.warn('queueSequence failed:', e); }
   }
 
+  // Team notification
+  if (typeof notifyTeamBookingEvent === 'function') {
+    var slotDateStr = slot.date ? new Date(slot.date + 'T00:00:00').toLocaleDateString('en-GB', { weekday:'long', day:'numeric', month:'long' }) : '';
+    var teamEvent = (newStatus === 'noshow') ? 'noshow' : 'cancelled';
+    try {
+      await notifyTeamBookingEvent(teamEvent, lead, {
+        date: slotDateStr, time: bookingCtx.time, location: bookingCtx.location
+      }, null);
+    } catch (e) { console.warn('Team notify failed:', e); }
+  }
+
   showToast(successMsg);
   await initBookingsView();
 }
