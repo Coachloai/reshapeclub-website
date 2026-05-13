@@ -30,7 +30,12 @@ export const WEIGHTS: Record<string, Record<string, Weights>> = {
     cycling_regularly: {},
     perimenopausal:    { estrogen: 2, progesterone: 2 },
     menopausal:        { estrogen: 3, progesterone: 2, testosterone: 2 },
-    on_hbc:            {},
+    on_hbc:            {}, // legacy — pre-Q1b sessions may still send this
+  },
+  Q1b: {
+    none: {},
+    hbc:  {}, // no direct hormone-score contribution; halves Q2 weight downstream
+    hrt:  {}, // same — captured as a flag, doesn't alter base scoring
   },
   Q2: {
     regular:        {},
@@ -125,7 +130,7 @@ export const WEIGHTS: Record<string, Record<string, Weights>> = {
 };
 
 const REQUIRED_QUESTIONS = [
-  "Q1", "Q2", "Q3", "Q4", "Q5",
+  "Q1", "Q1b", "Q2", "Q3", "Q4", "Q5",
   "Q6", "Q7", "Q8", "Q9", "Q10",
   "Q11", "Q12", "Q14",
 ];
@@ -195,10 +200,14 @@ export function scoreAssessment(
   };
   const flags: string[] = [];
 
-  const onHbc       = answers.Q1 === "on_hbc";
+  // Q1b is the new home for hormonal contraception / HRT. Old sessions
+  // may still carry Q1 === "on_hbc" — accept both for back-compat.
+  const onHbc       = answers.Q1b === "hbc" || answers.Q1b === "hrt" || answers.Q1 === "on_hbc";
+  const onHrt       = answers.Q1b === "hrt";
   const isMenopausal = answers.Q1 === "menopausal";
   const isPostpartum = answers.Q1 === "postpartum";
-  if (onHbc)       flags.push("on_hormonal_birth_control");
+  if (onHbc)        flags.push("on_hormonal_birth_control");
+  if (onHrt)        flags.push("on_hrt");
   if (isMenopausal) flags.push("menopausal");
   if (isPostpartum) flags.push("postpartum");
 

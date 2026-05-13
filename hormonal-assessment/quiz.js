@@ -40,7 +40,7 @@
 
   function progressUpdate(){
     var done = state.queueIdx;
-    var total = state.displayQuestions.length || 14;
+    var total = state.displayQuestions.length || 15;
     var pct = Math.min(100, Math.round((done / total) * 100));
     var fill = $('#bar-fill');
     if (fill) fill.style.width = pct + '%';

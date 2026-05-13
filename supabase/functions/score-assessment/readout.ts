@@ -204,7 +204,10 @@ function mirrorHormonal(
   const meno = flags.includes("menopausal");
   const pp   = flags.includes("postpartum");
   const peri = answers.Q1 === "perimenopausal";
-  const young = answers.Q1 === "cycling_regularly" || answers.Q1 === "on_hbc";
+  // "young" = fertile/non-(peri)menopausal life stage. Used to pick the
+  // right narrative tone. HBC/HRT is now Q1b — anyone on contraception
+  // while cycling regularly still counts as "young" here.
+  const young = answers.Q1 === "cycling_regularly";
 
   if (meno) {
     phrases.push("your cycle has stopped and the rules have changed");

@@ -11,10 +11,21 @@ window.RESHAPE_QUESTIONS = [
     type: 'single',
     options: [
       { value: 'cycling_regularly', label: 'Cycling regularly',         sub: 'I have a regular monthly cycle.' },
-      { value: 'on_hbc',            label: 'On hormonal birth control',  sub: 'Pill, IUD, implant, ring, or similar.' },
       { value: 'postpartum',        label: 'Postpartum',                 sub: 'Within ~18 months of giving birth.' },
       { value: 'perimenopausal',    label: 'Perimenopausal',             sub: 'Cycle is changing — irregular, heavier, or lighter.' },
       { value: 'menopausal',        label: 'Menopausal',                 sub: 'Periods stopped at least 12 months ago.' }
+    ]
+  },
+  {
+    id: 'Q1b',
+    category: 'Life stage',
+    text: 'Are you on hormonal birth control or HRT?',
+    why: 'Why we ask: hormonal contraception and replacement therapy change how your symptoms read — we need to know which signals are yours vs. the medication.',
+    type: 'single',
+    options: [
+      { value: 'none', label: 'No',                                       sub: "I'm not on any hormonal medication." },
+      { value: 'hbc',  label: 'Yes — hormonal contraception',             sub: 'Pill, IUD, implant, ring, or similar.' },
+      { value: 'hrt',  label: 'Yes — HRT / MHT',                          sub: 'Estrogen, progesterone, or testosterone replacement.' }
     ]
   },
   {
