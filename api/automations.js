@@ -464,6 +464,7 @@ function replaceVars(text, lead, booking) {
     first_name:   (lead && lead.first_name) || '',
     pattern:      hp ? 'your ' + hp + ' results' : 'the goals you shared with us',
     book_link:    AUTOMATION_CONFIG.booking_url || '',
+    booking_url:  AUTOMATION_CONFIG.booking_url || '',  // alias used by some DB sequences
     coach:        meta.coach,
     studio:       (lead && lead.location) || b.location || 'Ipswich & Colchester',
     date:         b.date || '',
