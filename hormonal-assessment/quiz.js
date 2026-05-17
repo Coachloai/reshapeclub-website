@@ -257,6 +257,16 @@
         return;
       }
       try { sessionStorage.setItem('reshape_hormonal_result_' + state.sessionId, JSON.stringify(r.body)); } catch(e){}
+      if (typeof fbq === 'function') {
+        fbq('track', 'Lead', {
+          content_name: 'Hormonal Assessment Completion',
+          content_category: 'hormonal_assessment',
+          archetype: (r.body && r.body.archetype) || 'unknown',
+          value: 0.00,
+          currency: 'GBP',
+          eventID: state.sessionId
+        });
+      }
       window.location.href = './result.html?session_id=' + encodeURIComponent(state.sessionId);
     }).catch(function(){
       alert('Network error. Please try again.');
