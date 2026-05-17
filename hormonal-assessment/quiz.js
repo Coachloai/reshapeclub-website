@@ -263,9 +263,8 @@
           content_category: 'hormonal_assessment',
           archetype: (r.body && r.body.archetype) || 'unknown',
           value: 0.00,
-          currency: 'GBP',
-          eventID: state.sessionId
-        });
+          currency: 'GBP'
+        }, { eventID: state.sessionId });
       }
       window.location.href = './result.html?session_id=' + encodeURIComponent(state.sessionId);
     }).catch(function(){
