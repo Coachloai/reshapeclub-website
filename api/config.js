@@ -6,6 +6,7 @@
     google_client_id: '',
     google_client_secret: '',
     google_refresh_token: '',
+    icloud_enabled: false,
     from_email: 'coach@reshape.fit',
     from_name: 'Coach Jaime | ReShape',
     booking_url: 'https://reshape.fit/booking',
