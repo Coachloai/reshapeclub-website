@@ -234,38 +234,25 @@ async function loadBookingSlots(loc) {
   renderBookingDates();
 }
 
-// Hide slots that overlap busy events on any of the appointment type's conflict calendars.
+// Hide slots that overlap busy events on the global conflict calendars (calendar_settings.conflict_calendars).
 async function applyConflictCalendarFiltering() {
   if (!__bookingSlots || __bookingSlots.length === 0) return;
   try {
-    // Collect distinct appointment type ids for the slots in view.
-    var apptIds = Array.from(new Set(__bookingSlots.map(function(s) { return s.appointment_type_id; }).filter(Boolean)));
-    if (apptIds.length === 0) return;
-    var atRes = await window.__supabaseClient.from('appointment_types').select('id, conflict_calendars').in('id', apptIds);
-    var conflictsByAppt = {};
-    var allCals = new Set();
-    (atRes.data || []).forEach(function(a) {
-      var list = Array.isArray(a.conflict_calendars) ? a.conflict_calendars : [];
-      conflictsByAppt[a.id] = list;
-      list.forEach(function(c) { allCals.add(c); });
-    });
-    if (allCals.size === 0) return; // nothing to filter against
-    // Time window: from now to end of last slot in view.
+    var setRes = await window.__supabaseClient.from('calendar_settings').select('conflict_calendars').eq('id', 'global').maybeSingle();
+    var cals = (setRes.data && Array.isArray(setRes.data.conflict_calendars)) ? setRes.data.conflict_calendars : [];
+    if (cals.length === 0) return; // nothing to filter against
     var fromIso = new Date().toISOString();
     var lastSlot = __bookingSlots[__bookingSlots.length - 1];
     var toIso = new Date(lastSlot.date + 'T23:59:59').toISOString();
     var fb = await fetch('https://lvizldmdficsfpgegehp.supabase.co/functions/v1/calendar-freebusy', {
       method: 'POST',
       headers: { 'Content-Type': 'application/json' },
-      body: JSON.stringify({ calendars: Array.from(allCals), from: fromIso, to: toIso }),
+      body: JSON.stringify({ calendars: cals, from: fromIso, to: toIso }),
     });
     var fbData = await fb.json().catch(function() { return {}; });
     if (!fbData.success || !Array.isArray(fbData.busy) || fbData.busy.length === 0) return;
     var busy = fbData.busy.map(function(w) { return { start: new Date(w.start).getTime(), end: new Date(w.end).getTime() }; });
     __bookingSlots = __bookingSlots.filter(function(s) {
-      // Only filter against the busy set if this appt type actually has conflict calendars configured.
-      var cals = conflictsByAppt[s.appointment_type_id] || [];
-      if (cals.length === 0) return true;
       var slotStart = new Date(s.date + 'T' + s.start_time).getTime();
       var slotEnd = new Date(s.date + 'T' + s.end_time).getTime();
       for (var i = 0; i < busy.length; i++) {
