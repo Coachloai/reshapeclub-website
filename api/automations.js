@@ -11,6 +11,7 @@ var AUTOMATION_CONFIG = window.__AUTOMATION_CONFIG || {
   google_client_id: '',
   google_client_secret: '',
   google_refresh_token: '',
+  icloud_enabled: false,
   from_email: 'coach@reshape.fit',
   from_name: 'Jaime | ReShape',
   booking_url: 'https://reshape.fit/booking',
@@ -162,10 +163,10 @@ async function getGoogleAccessToken() {
 }
 
 /* ── GOOGLE CALENDAR — CREATE EVENT ── */
-async function addToGoogleCalendar(lead, booking) {
+async function addToGoogleCalendar(lead, booking, calendarIdOverride) {
   var token = await getGoogleAccessToken();
   if (!token) return { success: false, error: 'No access token' };
-  var calendarId = AUTOMATION_CONFIG.google_calendar_id || 'primary';
+  var calendarId = calendarIdOverride || AUTOMATION_CONFIG.google_calendar_id || 'primary';
   var leadName = ((lead.first_name || '') + ' ' + (lead.last_name || '')).trim();
   var dt = new Date(booking.datetime);
   var endDt = new Date(dt.getTime() + 3600000);
@@ -193,22 +194,95 @@ async function addToGoogleCalendar(lead, booking) {
   return data.id ? { success: true, id: data.id } : { success: false, error: data.error ? data.error.message : 'Unknown error' };
 }
 
+/* ── ICLOUD CALENDAR — CREATE EVENT (via Supabase Edge Function) ── */
+async function addToIcloudCalendar(lead, booking) {
+  var leadName = ((lead.first_name || '') + ' ' + (lead.last_name || '')).trim();
+  var res = await fetch('https://lvizldmdficsfpgegehp.supabase.co/functions/v1/icloud-calendar', {
+    method: 'POST',
+    headers: { 'Content-Type': 'application/json' },
+    body: JSON.stringify({
+      leadName: leadName,
+      leadEmail: lead.email,
+      leadPhone: lead.phone,
+      datetime: booking.datetime,
+      location: booking.location,
+      durationMinutes: 45,
+    }),
+  });
+  var data = await res.json().catch(function(){ return {}; });
+  return data && data.success ? { success: true, id: data.id } : { success: false, error: (data && data.error) || ('HTTP ' + res.status) };
+}
+
+/* ── LOAD APPOINTMENT TYPE ROUTING ── */
+// Tries (in order): booking.appointment_type already attached → Supabase lookup by id.
+async function loadApptTypeForBooking(booking) {
+  if (booking && booking.appointment_type) return booking.appointment_type;
+  var sbClient = (typeof window !== 'undefined' && window.__supabaseClient) || null;
+  if (!sbClient || !booking || !booking.appointment_type_id) return null;
+  try {
+    var res = await sbClient.from('appointment_types')
+      .select('id, name, duration, calendar_targets, conflict_calendars')
+      .eq('id', booking.appointment_type_id).maybeSingle();
+    return res.data || null;
+  } catch (e) { return null; }
+}
+
 /* ── SEND COACH CALENDAR INVITE ── */
 async function sendCoachCalendarInvite(lead, booking) {
   if (!booking || !booking.datetime) return;
 
-  // Try Google Calendar API first
-  if (AUTOMATION_CONFIG.google_client_id && AUTOMATION_CONFIG.google_refresh_token) {
-    try {
-      var gcResult = await addToGoogleCalendar(lead, booking);
-      if (gcResult.success) {
-        console.log('Google Calendar event created:', gcResult.id);
-        return;
+  // Resolve routing: per-appointment-type targets if configured, else fall back to defaults.
+  var apptType = await loadApptTypeForBooking(booking);
+  var targets = (apptType && Array.isArray(apptType.calendar_targets) && apptType.calendar_targets.length > 0)
+    ? apptType.calendar_targets
+    : null;
+
+  var tasks = [];
+  if (targets) {
+    // Per-type routing — only write to the calendars the coach assigned to this type.
+    targets.forEach(function(t) {
+      if (t === 'icloud' && AUTOMATION_CONFIG.icloud_enabled) {
+        tasks.push(addToIcloudCalendar(lead, booking).then(
+          function(r){ return { name: 'icloud', result: r }; },
+          function(e){ return { name: 'icloud', result: { success: false, error: e.message } }; }
+        ));
+      } else if (t.indexOf('google:') === 0 && AUTOMATION_CONFIG.google_client_id && AUTOMATION_CONFIG.google_refresh_token) {
+        var calId = t.slice('google:'.length) || 'primary';
+        tasks.push(addToGoogleCalendar(lead, booking, calId).then(
+          function(r){ return { name: 'google:' + calId, result: r }; },
+          function(e){ return { name: 'google:' + calId, result: { success: false, error: e.message } }; }
+        ));
       }
-      console.warn('Google Calendar failed, falling back to email:', gcResult.error);
-    } catch (e) {
-      console.warn('Google Calendar error, falling back to email:', e.message);
+    });
+  } else {
+    // Default: write to whatever's connected.
+    if (AUTOMATION_CONFIG.icloud_enabled) {
+      tasks.push(addToIcloudCalendar(lead, booking).then(
+        function(r){ return { name: 'icloud', result: r }; },
+        function(e){ return { name: 'icloud', result: { success: false, error: e.message } }; }
+      ));
     }
+    if (AUTOMATION_CONFIG.google_client_id && AUTOMATION_CONFIG.google_refresh_token) {
+      tasks.push(addToGoogleCalendar(lead, booking).then(
+        function(r){ return { name: 'google', result: r }; },
+        function(e){ return { name: 'google', result: { success: false, error: e.message } }; }
+      ));
+    }
+  }
+
+  if (tasks.length > 0) {
+    var outcomes = await Promise.all(tasks);
+    var anySuccess = false;
+    for (var i = 0; i < outcomes.length; i++) {
+      var o = outcomes[i];
+      if (o.result.success) {
+        console.log(o.name + ' calendar event created:', o.result.id);
+        anySuccess = true;
+      } else {
+        console.warn(o.name + ' calendar failed:', o.result.error);
+      }
+    }
+    if (anySuccess) return;
   }
 
   // Fallback: send .ics email invite
