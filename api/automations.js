@@ -539,7 +539,15 @@ async function queueSequenceFromDB(sequenceName, lead, booking, supabaseClient) 
 
   for (var i = 0; i < steps.length; i++) {
     var step = steps[i];
-    var sendAt = new Date(now + (step.delay_seconds * 1000)).toISOString();
+    // Negative delay_seconds = schedule relative to booking.datetime
+    // (e.g. -86400 = 24h before, -7200 = 2h before). See
+    // supabase/seeds/booking_confirmed_dbdriven.sql for the convention.
+    var sendAt;
+    if (step.delay_seconds < 0 && booking && booking.datetime) {
+      sendAt = new Date(new Date(booking.datetime).getTime() + (step.delay_seconds * 1000)).toISOString();
+    } else {
+      sendAt = new Date(now + (step.delay_seconds * 1000)).toISOString();
+    }
 
     // Apply variable substitution
     var bodyText = replaceVars(step.body || '', lead, booking);
