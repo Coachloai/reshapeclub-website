@@ -1,17 +1,26 @@
-// ReShape — iCloud CalDAV bridge
-// POST { leadName, leadEmail?, leadPhone?, datetime, durationMinutes?, location?, summary?, description? }
-//   datetime: ISO string. durationMinutes defaults to 45 (consultation length).
+// ReShape — iCloud CalDAV bridge.
+//
+// Actions:
+//   default (or action="create"): write a VEVENT to a calendar.
+//     POST { leadName, leadEmail?, leadPhone?, datetime, durationMinutes?, location?, summary?, description?, calendarName? }
+//   action="list": enumerate calendars.
+//     POST { action: "list" } → { success, calendars: [{ name, href }] }
+//   action="busy": busy time windows across one or more calendars.
+//     POST { action: "busy", calendarNames?: string[], from: ISO, to: ISO }
+//          omit calendarNames to query every VEVENT-capable calendar
+//     → { success, busy: [{ calendar, start, end, summary? }] }
+//
 // Env required:
-//   ICLOUD_USERNAME       — Apple ID email (e.g. you@icloud.com)
+//   ICLOUD_USERNAME       — Apple ID email
 //   ICLOUD_APP_PASSWORD   — app-specific password from appleid.apple.com
 // Env optional:
-//   ICLOUD_CALENDAR_NAME  — display name of target calendar; defaults to first calendar that supports VEVENT.
+//   ICLOUD_CALENDAR_NAME  — default calendar for create when calendarName isn't supplied
 //
 // Notes:
 //   - iCloud often 301s root requests to a per-user pod (e.g. p01-caldav.icloud.com).
 //     Deno's automatic redirect strips the Authorization header on cross-origin hops,
 //     so we follow redirects manually and re-send Basic auth.
-//   - Discovery is cached per cold start to avoid 3 round-trips per event.
+//   - Discovery (principal → home → calendars) is cached per cold start; busted on failure.
 
 const corsHeaders = {
   'Access-Control-Allow-Origin': '*',
@@ -21,12 +30,13 @@ const corsHeaders = {
 
 const ICLOUD_ROOT = 'https://caldav.icloud.com/';
 
-interface CalendarTarget {
-  url: string;          // absolute URL of the calendar collection (ends with /)
+interface CalendarInfo {
+  href: string;        // absolute URL, ends with /
   displayName: string;
+  supportsVEvent: boolean;
 }
 
-let cachedTarget: CalendarTarget | null = null;
+let cachedCalendars: CalendarInfo[] | null = null;
 
 Deno.serve(async (req: Request) => {
   if (req.method === 'OPTIONS') return new Response('ok', { headers: corsHeaders });
@@ -38,11 +48,37 @@ Deno.serve(async (req: Request) => {
       return json({ success: false, error: 'iCloud credentials not configured' }, 500);
     }
 
-    const body = await req.json();
-    if (!body.datetime) return json({ success: false, error: 'datetime required' }, 400);
-
+    const body = await req.json().catch(() => ({}));
     const auth = 'Basic ' + btoa(username + ':' + password);
-    const target = cachedTarget ?? (cachedTarget = await discoverCalendar(auth, Deno.env.get('ICLOUD_CALENDAR_NAME')));
+    const action = body.action || 'create';
+
+    if (action === 'list') {
+      const cals = await getCalendars(auth);
+      return json({
+        success: true,
+        calendars: cals.filter(c => c.supportsVEvent).map(c => ({ name: c.displayName, href: c.href })),
+      });
+    }
+
+    if (action === 'busy') {
+      if (!body.from || !body.to) return json({ success: false, error: 'from and to (ISO) required' }, 400);
+      const cals = (await getCalendars(auth)).filter(c => c.supportsVEvent);
+      const wanted = body.calendarNames && Array.isArray(body.calendarNames) && body.calendarNames.length > 0
+        ? cals.filter(c => body.calendarNames.map((n: string) => n.toLowerCase()).includes(c.displayName.toLowerCase()))
+        : cals;
+      if (wanted.length === 0) return json({ success: true, busy: [] });
+      const busy = await collectBusy(auth, wanted, body.from, body.to);
+      return json({ success: true, busy });
+    }
+
+    // default = create event
+    if (!body.datetime) return json({ success: false, error: 'datetime required' }, 400);
+    const cals = (await getCalendars(auth)).filter(c => c.supportsVEvent);
+    if (cals.length === 0) throw new Error('No VEVENT-capable calendars found');
+    const preferredName = body.calendarName || Deno.env.get('ICLOUD_CALENDAR_NAME') || null;
+    const target = (preferredName
+      ? cals.find(c => c.displayName.toLowerCase() === preferredName.toLowerCase())
+      : null) ?? cals[0];
 
     const uid = crypto.randomUUID();
     const ics = buildICS({
@@ -55,7 +91,7 @@ Deno.serve(async (req: Request) => {
       organizerEmail: username,
     });
 
-    const eventUrl = target.url + uid + '.ics';
+    const eventUrl = target.href + uid + '.ics';
     const put = await caldavFetch(eventUrl, {
       method: 'PUT',
       headers: {
@@ -69,19 +105,24 @@ Deno.serve(async (req: Request) => {
     if (put.res.status >= 200 && put.res.status < 300) {
       return json({ success: true, id: uid, url: eventUrl, calendar: target.displayName });
     }
-    // Bust the cache so the next request rediscovers — calendar URL may have changed.
-    cachedTarget = null;
+    cachedCalendars = null;
     const text = await put.res.text();
     return json({ success: false, error: 'iCloud PUT ' + put.res.status, detail: text.slice(0, 500) }, 502);
   } catch (e) {
-    cachedTarget = null;
+    cachedCalendars = null;
     return json({ success: false, error: (e as Error).message }, 500);
   }
 });
 
 // ─── CalDAV discovery ────────────────────────────────────────────────────
 
-async function discoverCalendar(auth: string, preferredName?: string | null): Promise<CalendarTarget> {
+async function getCalendars(auth: string): Promise<CalendarInfo[]> {
+  if (cachedCalendars) return cachedCalendars;
+  cachedCalendars = await discoverCalendars(auth);
+  return cachedCalendars;
+}
+
+async function discoverCalendars(auth: string): Promise<CalendarInfo[]> {
   // 1. current-user-principal
   const principalRes = await caldavFetch(ICLOUD_ROOT, {
     method: 'PROPFIND',
@@ -109,7 +150,7 @@ async function discoverCalendar(auth: string, preferredName?: string | null): Pr
   if (!homePath) throw new Error('No calendar-home-set in response');
   const homeUrl = resolveUrl(homeRes.finalUrl, homePath);
 
-  // 3. list calendars
+  // 3. list calendars under the home set
   const listRes = await caldavFetch(homeUrl, {
     method: 'PROPFIND',
     headers: { Authorization: auth, Depth: '1', 'Content-Type': 'application/xml; charset=utf-8' },
@@ -120,24 +161,118 @@ async function discoverCalendar(auth: string, preferredName?: string | null): Pr
       '<c:supported-calendar-component-set/></d:prop></d:propfind>',
   });
   const listXml = await listRes.res.text();
-  const calendars = parseCalendarList(listXml).filter(c => c.supportsVEvent);
-  if (calendars.length === 0) throw new Error('No VEVENT-capable calendars found');
-
-  const chosen = (preferredName
-    ? calendars.find(c => c.displayName.toLowerCase() === preferredName.toLowerCase())
-    : null) ?? calendars[0];
-
-  return {
-    url: resolveUrl(listRes.finalUrl, chosen.href).replace(/\/?$/, '/'),
-    displayName: chosen.displayName,
-  };
+  const raw = parseCalendarList(listXml);
+  return raw.map(c => ({
+    href: resolveUrl(listRes.finalUrl, c.href).replace(/\/?$/, '/'),
+    displayName: c.displayName,
+    supportsVEvent: c.supportsVEvent,
+  }));
 }
 
-interface ParsedCal { href: string; displayName: string; supportsVEvent: boolean; }
+// ─── Busy time fetch (CalDAV calendar-query REPORT) ──────────────────────
+
+interface BusyWindow { calendar: string; start: string; end: string; summary?: string }
+
+async function collectBusy(
+  auth: string,
+  calendars: CalendarInfo[],
+  fromIso: string,
+  toIso: string,
+): Promise<BusyWindow[]> {
+  const from = formatUtc(new Date(fromIso));
+  const to = formatUtc(new Date(toIso));
+  const body =
+    '<?xml version="1.0" encoding="utf-8"?>' +
+    '<c:calendar-query xmlns:d="DAV:" xmlns:c="urn:ietf:params:xml:ns:caldav">' +
+    '<d:prop><d:getetag/><c:calendar-data><c:expand start="' + from + '" end="' + to + '"/></c:calendar-data></d:prop>' +
+    '<c:filter><c:comp-filter name="VCALENDAR">' +
+    '<c:comp-filter name="VEVENT">' +
+    '<c:time-range start="' + from + '" end="' + to + '"/>' +
+    '</c:comp-filter></c:comp-filter></c:filter>' +
+    '</c:calendar-query>';
+
+  const out: BusyWindow[] = [];
+  await Promise.all(calendars.map(async (cal) => {
+    try {
+      const res = await caldavFetch(cal.href, {
+        method: 'REPORT',
+        headers: { Authorization: auth, Depth: '1', 'Content-Type': 'application/xml; charset=utf-8' },
+        body,
+      });
+      const xml = await res.res.text();
+      const events = extractCalendarData(xml);
+      for (const ical of events) {
+        for (const ev of parseVEvents(ical)) {
+          if (ev.transp === 'TRANSPARENT') continue; // ignore "free" events
+          out.push({ calendar: cal.displayName, start: ev.start, end: ev.end, summary: ev.summary });
+        }
+      }
+    } catch (e) {
+      console.warn('busy fetch failed for', cal.displayName, (e as Error).message);
+    }
+  }));
+  return out;
+}
+
+function extractCalendarData(xml: string): string[] {
+  const out: string[] = [];
+  const re = /<[^>]*?:calendar-data[^>]*>([\s\S]*?)<\/[^>]*?:calendar-data>/gi;
+  let m;
+  while ((m = re.exec(xml)) !== null) out.push(decodeEntities(m[1]).trim());
+  return out;
+}
+
+interface VEvent { start: string; end: string; summary?: string; transp?: string }
+
+function parseVEvents(ical: string): VEvent[] {
+  // Unfold continuation lines (CRLF + space).
+  const text = ical.replace(/\r?\n[ \t]/g, '');
+  const events: VEvent[] = [];
+  const lines = text.split(/\r?\n/);
+  let cur: Partial<VEvent> | null = null;
+  for (const line of lines) {
+    if (line === 'BEGIN:VEVENT') cur = {};
+    else if (line === 'END:VEVENT') {
+      if (cur && cur.start && cur.end) events.push(cur as VEvent);
+      cur = null;
+    } else if (cur) {
+      const m = line.match(/^([A-Z\-]+)(?:;[^:]+)?:(.*)$/);
+      if (!m) continue;
+      const [, name, value] = m;
+      if (name === 'DTSTART') cur.start = parseIcsDate(line);
+      else if (name === 'DTEND') cur.end = parseIcsDate(line);
+      else if (name === 'SUMMARY') cur.summary = value;
+      else if (name === 'TRANSP') cur.transp = value;
+    }
+  }
+  return events;
+}
+
+// Returns an ISO 8601 UTC string from a DTSTART/DTEND line (handles UTC, floating, and date-only).
+function parseIcsDate(line: string): string {
+  const m = line.match(/^(?:DTSTART|DTEND)(;[^:]+)?:(.+)$/);
+  if (!m) return '';
+  const params = m[1] || '';
+  const v = m[2].trim();
+  if (/^\d{8}$/.test(v)) {
+    // date-only — treat as full-day in UTC (start of day)
+    return v.slice(0, 4) + '-' + v.slice(4, 6) + '-' + v.slice(6, 8) + 'T00:00:00.000Z';
+  }
+  const isUtc = /Z$/.test(v) || /TZID=UTC/i.test(params);
+  const iso = v.replace(/^(\d{4})(\d{2})(\d{2})T(\d{2})(\d{2})(\d{2}).*$/, '$1-$2-$3T$4:$5:$6');
+  return new Date(isUtc ? iso + 'Z' : iso + 'Z').toISOString(); // floating treated as UTC; close enough for conflict checks
+}
+
+function formatUtc(d: Date): string {
+  return d.toISOString().replace(/[-:]/g, '').replace(/\.\d{3}/, '');
+}
+
+// ─── XML helpers ─────────────────────────────────────────────────────────
+
+interface ParsedCal { href: string; displayName: string; supportsVEvent: boolean }
 
 function parseCalendarList(xml: string): ParsedCal[] {
   const out: ParsedCal[] = [];
-  // Split into <response> blocks — works on both DAV: and d: namespace prefixes.
   const blocks = xml.split(/<[^>]*?:response[\s>]/i).slice(1);
   for (const raw of blocks) {
     const block = raw.split(/<\/[^>]*?:response>/i)[0];
@@ -160,7 +295,7 @@ function parseCalendarList(xml: string): ParsedCal[] {
 function extractHref(xml: string, propLocalName: string): string | null {
   const re = new RegExp(
     '<[^>]*?:' + propLocalName + '[^>]*>([\\s\\S]*?)<\\/[^>]*?:' + propLocalName + '>',
-    'i'
+    'i',
   );
   const m = xml.match(re);
   if (!m) return null;
