@@ -1232,6 +1232,7 @@ if(sessionStorage.getItem('rs_auth')==='1'){
               <th onclick="sortTable('form')" data-col="form"><div class="th-inner">Page<span class="sort-icon">↕</span></div></th>
               <th onclick="sortTable('quality')" data-col="quality"><div class="th-inner">Quality<span class="sort-icon">↕</span></div></th>
               <th onclick="sortTable('date')" data-col="date"><div class="th-inner">Date<span class="sort-icon">↕</span></div></th>
+              <th onclick="sortTable('time')" data-col="time"><div class="th-inner">Time<span class="sort-icon">↕</span></div></th>
               <th></th>
             </tr>
           </thead>
@@ -1353,6 +1354,7 @@ if(sessionStorage.getItem('rs_auth')==='1'){
                 <th onclick="sortTable('form')" data-col="form"><div class="th-inner">Page<span class="sort-icon">↕</span></div></th>
                 <th onclick="sortTable('quality')" data-col="quality"><div class="th-inner">Quality<span class="sort-icon">↕</span></div></th>
                 <th onclick="sortTable('date')" data-col="date"><div class="th-inner">Date<span class="sort-icon">↕</span></div></th>
+                <th onclick="sortTable('time')" data-col="time"><div class="th-inner">Time<span class="sort-icon">↕</span></div></th>
                 <th></th>
               </tr>
             </thead>
@@ -2232,6 +2234,7 @@ function mapLead(row, i) {
     age: parseInt(row.age) || 0,
     gender: row.gender || 'Unknown',
     date: (row.created_at || '').split('T')[0],
+    createdAt: row.created_at || '',
     source: source,
     answers: {
       intent: row.looking_for || '',
@@ -2287,7 +2290,7 @@ Chart.defaults.font.size = 11;
 ══════════════════════════════════════ */
 let filtered = [...ALL_LEADS];
 let currentPage = 1;
-const PER_PAGE = 8;
+const PER_PAGE = 20;
 let sortCol = 'date';
 let sortDir = -1;
 let charts = {};
@@ -2328,7 +2331,9 @@ function renderTable() {
   empty.style.display = 'none';
   tbody.innerHTML = page.map((l, i) => {
     const qClass = l.quality === 'High' ? 'tag-high' : l.quality === 'Med' ? 'tag-med' : 'tag-low';
-    const d = new Date(l.date).toLocaleDateString('en-GB',{day:'numeric',month:'short',year:'numeric'});
+    const ts = l.createdAt ? new Date(l.createdAt) : (l.date ? new Date(l.date) : null);
+    const d = ts ? ts.toLocaleDateString('en-GB',{day:'numeric',month:'short',year:'numeric'}) : '-';
+    const t = ts && l.createdAt ? ts.toLocaleTimeString('en-GB',{hour:'2-digit',minute:'2-digit'}) : '-';
     return `
       <tr>
         <td><input type="checkbox" class="lead-check" data-id="${l.id}" onchange="updateBulkBar()"></td>
@@ -2340,6 +2345,7 @@ function renderTable() {
         <td><span class="tag tag-form">${l.formLabel}</span></td>
         <td><span class="tag tag-quality ${qClass}">${l.quality}</span></td>
         <td style="color:var(--text3);white-space:nowrap">${d}</td>
+        <td style="color:var(--text3);white-space:nowrap;font-variant-numeric:tabular-nums">${t}</td>
         <td><button class="btn-view" onclick="event.stopPropagation();openLeadModal('${l.id}')">View →</button></td>
       </tr>`;
   }).join('');
@@ -2367,8 +2373,14 @@ function sortTable(col) {
   document.querySelectorAll('th').forEach(th => th.classList.remove('sorted'));
   document.querySelectorAll(`th[data-col="${col}"]`).forEach(th => th.classList.add('sorted'));
   filtered.sort((a, b) => {
-    let va = col === 'date' ? new Date(a[col]) : (a[col] || '').toString().toLowerCase();
-    let vb = col === 'date' ? new Date(b[col]) : (b[col] || '').toString().toLowerCase();
+    let va, vb;
+    if (col === 'date' || col === 'time') {
+      va = a.createdAt ? new Date(a.createdAt).getTime() : 0;
+      vb = b.createdAt ? new Date(b.createdAt).getTime() : 0;
+    } else {
+      va = (a[col] || '').toString().toLowerCase();
+      vb = (b[col] || '').toString().toLowerCase();
+    }
     return va < vb ? sortDir : va > vb ? -sortDir : 0;
   });
   currentPage = 1;
@@ -2745,7 +2757,9 @@ function renderLeadsView() {
   document.getElementById('leads-view-count').textContent = filtered.length + ' leads';
   tbody.innerHTML = filtered.map((l, i) => {
     const qClass = l.quality === 'High' ? 'tag-high' : l.quality === 'Med' ? 'tag-med' : 'tag-low';
-    const d = new Date(l.date).toLocaleDateString('en-GB',{day:'numeric',month:'short',year:'numeric'});
+    const ts = l.createdAt ? new Date(l.createdAt) : (l.date ? new Date(l.date) : null);
+    const d = ts ? ts.toLocaleDateString('en-GB',{day:'numeric',month:'short',year:'numeric'}) : '-';
+    const t = ts && l.createdAt ? ts.toLocaleTimeString('en-GB',{hour:'2-digit',minute:'2-digit'}) : '-';
     return `
       <tr>
         <td><input type="checkbox" class="lead-check" data-id="${l.id}" onchange="updateBulkBar()"></td>
@@ -2757,6 +2771,7 @@ function renderLeadsView() {
         <td><span class="tag tag-form">${l.formLabel}</span></td>
         <td><span class="tag tag-quality ${qClass}">${l.quality}</span></td>
         <td style="color:var(--text3);white-space:nowrap">${d}</td>
+        <td style="color:var(--text3);white-space:nowrap;font-variant-numeric:tabular-nums">${t}</td>
         <td><button class="btn-view" onclick="event.stopPropagation();openLeadModal('${l.id}')">View →</button></td>
       </tr>`;
   }).join('');
