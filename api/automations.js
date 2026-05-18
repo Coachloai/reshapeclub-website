@@ -214,16 +214,12 @@ async function addToIcloudCalendar(lead, booking, calendarNameOverride) {
   return data && data.success ? { success: true, id: data.id, calendar: data.calendar } : { success: false, error: (data && data.error) || ('HTTP ' + res.status) };
 }
 
-/* ── LOAD APPOINTMENT TYPE ROUTING ── */
-// Tries (in order): booking.appointment_type already attached → Supabase lookup by id.
-async function loadApptTypeForBooking(booking) {
-  if (booking && booking.appointment_type) return booking.appointment_type;
+/* ── LOAD GLOBAL CALENDAR SETTINGS ── */
+async function loadGlobalCalendarSettings() {
   var sbClient = (typeof window !== 'undefined' && window.__supabaseClient) || null;
-  if (!sbClient || !booking || !booking.appointment_type_id) return null;
+  if (!sbClient) return null;
   try {
-    var res = await sbClient.from('appointment_types')
-      .select('id, name, duration, calendar_targets, conflict_calendars')
-      .eq('id', booking.appointment_type_id).maybeSingle();
+    var res = await sbClient.from('calendar_settings').select('default_target_calendar, include_buffers').eq('id', 'global').maybeSingle();
     return res.data || null;
   } catch (e) { return null; }
 }
@@ -232,32 +228,29 @@ async function loadApptTypeForBooking(booking) {
 async function sendCoachCalendarInvite(lead, booking) {
   if (!booking || !booking.datetime) return;
 
-  // Resolve routing: per-appointment-type targets if configured, else fall back to defaults.
-  var apptType = await loadApptTypeForBooking(booking);
-  var targets = (apptType && Array.isArray(apptType.calendar_targets) && apptType.calendar_targets.length > 0)
-    ? apptType.calendar_targets
-    : null;
+  // Resolve where to write the event from the global calendar settings.
+  var settings = await loadGlobalCalendarSettings();
+  var target = settings && settings.default_target_calendar;
 
   var tasks = [];
-  if (targets) {
-    // Per-type routing — only write to the calendars the coach assigned to this type.
-    targets.forEach(function(t) {
-      if (t.indexOf('icloud') === 0 && AUTOMATION_CONFIG.icloud_enabled) {
-        var icalName = t === 'icloud' ? null : t.slice('icloud:'.length);
-        tasks.push(addToIcloudCalendar(lead, booking, icalName).then(
-          function(r){ return { name: 'icloud' + (icalName ? ':' + icalName : ''), result: r }; },
-          function(e){ return { name: 'icloud', result: { success: false, error: e.message } }; }
-        ));
-      } else if (t.indexOf('google:') === 0 && AUTOMATION_CONFIG.google_client_id && AUTOMATION_CONFIG.google_refresh_token) {
-        var calId = t.slice('google:'.length) || 'primary';
-        tasks.push(addToGoogleCalendar(lead, booking, calId).then(
-          function(r){ return { name: 'google:' + calId, result: r }; },
-          function(e){ return { name: 'google:' + calId, result: { success: false, error: e.message } }; }
-        ));
-      }
-    });
-  } else {
-    // Default: write to whatever's connected.
+  if (target) {
+    if (target.indexOf('icloud') === 0 && AUTOMATION_CONFIG.icloud_enabled) {
+      var icalName = target === 'icloud' ? null : target.slice('icloud:'.length);
+      tasks.push(addToIcloudCalendar(lead, booking, icalName).then(
+        function(r){ return { name: 'icloud' + (icalName ? ':' + icalName : ''), result: r }; },
+        function(e){ return { name: 'icloud', result: { success: false, error: e.message } }; }
+      ));
+    } else if (target.indexOf('google:') === 0 && AUTOMATION_CONFIG.google_client_id && AUTOMATION_CONFIG.google_refresh_token) {
+      var calId = target.slice('google:'.length) || 'primary';
+      tasks.push(addToGoogleCalendar(lead, booking, calId).then(
+        function(r){ return { name: 'google:' + calId, result: r }; },
+        function(e){ return { name: 'google:' + calId, result: { success: false, error: e.message } }; }
+      ));
+    }
+  }
+  // If nothing's been configured globally, fall back to whatever's connected so existing
+  // installs don't suddenly lose calendar events.
+  if (tasks.length === 0) {
     if (AUTOMATION_CONFIG.icloud_enabled) {
       tasks.push(addToIcloudCalendar(lead, booking).then(
         function(r){ return { name: 'icloud', result: r }; },
