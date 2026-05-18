@@ -9,12 +9,18 @@
 //     POST { action: "busy", calendarNames?: string[], from: ISO, to: ISO }
 //          omit calendarNames to query every VEVENT-capable calendar
 //     → { success, busy: [{ calendar, start, end, summary? }] }
+//   action="connect": validate credentials and persist a calendar_accounts row.
+//     POST { action: "connect", username, password }
+//     → { success, account: { id, email } }
 //
-// Env required:
-//   ICLOUD_USERNAME       — Apple ID email
-//   ICLOUD_APP_PASSWORD   — app-specific password from appleid.apple.com
+// Credentials are resolved in this order:
+//   1. POST body (only for action="connect")
+//   2. calendar_accounts row where provider='icloud' (most recently updated)
+//   3. ICLOUD_USERNAME / ICLOUD_APP_PASSWORD env vars (legacy fallback)
+//
 // Env optional:
 //   ICLOUD_CALENDAR_NAME  — default calendar for create when calendarName isn't supplied
+//   SUPABASE_URL, SUPABASE_SERVICE_ROLE_KEY — required to read calendar_accounts
 //
 // Notes:
 //   - iCloud often 301s root requests to a per-user pod (e.g. p01-caldav.icloud.com).
@@ -42,15 +48,39 @@ Deno.serve(async (req: Request) => {
   if (req.method === 'OPTIONS') return new Response('ok', { headers: corsHeaders });
 
   try {
-    const username = Deno.env.get('ICLOUD_USERNAME');
-    const password = Deno.env.get('ICLOUD_APP_PASSWORD');
-    if (!username || !password) {
-      return json({ success: false, error: 'iCloud credentials not configured' }, 500);
-    }
-
     const body = await req.json().catch(() => ({}));
-    const auth = 'Basic ' + btoa(username + ':' + password);
     const action = body.action || 'create';
+
+    // Resolve credentials.
+    let username: string | null = null;
+    let password: string | null = null;
+    if (action === 'connect' && body.username && body.password) {
+      username = String(body.username).trim();
+      password = String(body.password).trim();
+    } else {
+      const stored = await loadStoredIcloud();
+      if (stored) { username = stored.username; password = stored.password; }
+      else {
+        username = Deno.env.get('ICLOUD_USERNAME') || null;
+        password = Deno.env.get('ICLOUD_APP_PASSWORD') || null;
+      }
+    }
+    if (!username || !password) {
+      return json({ success: false, error: 'iCloud credentials not configured. Connect an iCloud account from the dashboard.' }, 401);
+    }
+    const auth = 'Basic ' + btoa(username + ':' + password);
+
+    if (action === 'connect') {
+      // Validate creds by hitting discovery once, then persist.
+      cachedCalendars = null;
+      const cals = await getCalendars(auth); // throws on bad auth or network
+      const account = await saveIcloudAccount(username!, password!);
+      return json({
+        success: true,
+        account,
+        calendars: cals.filter(c => c.supportsVEvent).map(c => ({ name: c.displayName, href: c.href })),
+      });
+    }
 
     if (action === 'list') {
       const cals = await getCalendars(auth);
@@ -398,4 +428,55 @@ function json(body: unknown, status = 200): Response {
     status,
     headers: { ...corsHeaders, 'Content-Type': 'application/json' },
   });
+}
+
+// ─── calendar_accounts I/O (service role) ────────────────────────────────
+
+interface StoredIcloud { username: string; password: string }
+
+async function loadStoredIcloud(): Promise<StoredIcloud | null> {
+  const baseUrl = Deno.env.get('SUPABASE_URL');
+  const serviceKey = Deno.env.get('SUPABASE_SERVICE_ROLE_KEY');
+  if (!baseUrl || !serviceKey) return null;
+  const res = await fetch(
+    baseUrl.replace(/\/$/, '') +
+    "/rest/v1/calendar_accounts?provider=eq.icloud&order=updated_at.desc&limit=1&select=email,creds",
+    { headers: { apikey: serviceKey, Authorization: 'Bearer ' + serviceKey } },
+  );
+  if (!res.ok) return null;
+  const rows = await res.json() as Array<{ email: string; creds: { username?: string; app_password?: string } }>;
+  const row = rows[0];
+  if (!row) return null;
+  const username = row.creds?.username || row.email;
+  const password = row.creds?.app_password;
+  if (!username || !password) return null;
+  return { username, password };
+}
+
+async function saveIcloudAccount(username: string, appPassword: string): Promise<{ id: string; email: string }> {
+  const baseUrl = Deno.env.get('SUPABASE_URL');
+  const serviceKey = Deno.env.get('SUPABASE_SERVICE_ROLE_KEY');
+  if (!baseUrl || !serviceKey) throw new Error('SUPABASE_URL / SUPABASE_SERVICE_ROLE_KEY not set');
+  const res = await fetch(baseUrl.replace(/\/$/, '') + '/rest/v1/calendar_accounts?on_conflict=provider,email', {
+    method: 'POST',
+    headers: {
+      apikey: serviceKey,
+      Authorization: 'Bearer ' + serviceKey,
+      'Content-Type': 'application/json',
+      Prefer: 'resolution=merge-duplicates,return=representation',
+    },
+    body: JSON.stringify({
+      provider: 'icloud',
+      email: username,
+      creds: { username, app_password: appPassword },
+      updated_at: new Date().toISOString(),
+    }),
+  });
+  if (!res.ok) {
+    const text = await res.text();
+    throw new Error('Could not save account: ' + text.slice(0, 300));
+  }
+  const rows = await res.json();
+  const row = Array.isArray(rows) ? rows[0] : rows;
+  return { id: row.id, email: row.email };
 }

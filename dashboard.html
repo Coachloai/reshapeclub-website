@@ -438,6 +438,8 @@ body{
 .cal-modal-item{display:flex;align-items:center;gap:12px;padding:8px 4px;font-size:14px;color:var(--text2);cursor:pointer}
 .cal-modal-item input{width:16px;height:16px;accent-color:var(--orange);cursor:pointer}
 .cal-modal-item:hover{color:var(--text)}
+.connect-tile{display:flex;align-items:center;gap:14px;padding:14px 16px;background:var(--s2);border:1px solid var(--border);border-radius:10px;color:var(--text);font-family:var(--body);cursor:pointer;width:100%;text-align:left;transition:border-color .15s,background .15s}
+.connect-tile:hover{border-color:rgba(237,92,37,.4);background:var(--s3)}
 .appts-topbar{display:flex;justify-content:space-between;align-items:center;gap:16px;flex-wrap:wrap;border-bottom:1px solid var(--border);padding-bottom:12px}
 .appts-tabs{display:flex;gap:4px}
 .appts-tab{background:transparent;border:none;color:var(--text3);font-family:var(--body);font-size:13px;font-weight:600;padding:8px 4px;cursor:pointer;border-bottom:2px solid transparent;transition:color .15s,border-color .15s}
@@ -1883,10 +1885,7 @@ if(sessionStorage.getItem('rs_auth')==='1'){
         <!-- Calendars to check for conflicts -->
         <div style="display:flex;justify-content:space-between;align-items:center;gap:12px;margin-bottom:6px;flex-wrap:wrap">
           <div style="font-size:13px;font-weight:600;color:var(--text)">Calendars to check for conflicts</div>
-          <div style="display:flex;gap:6px;flex-wrap:wrap">
-            <button class="btn btn-ghost btn-sm" onclick="refreshIcloudCalendarList()">Refresh iCloud</button>
-            <button class="btn btn-ghost btn-sm" onclick="refreshGoogleCalendarList()">Refresh Google</button>
-          </div>
+          <button class="btn btn-ghost btn-sm" onclick="openConnectModal()" style="border-color:rgba(237,92,37,.3);color:var(--orange)">+ Connect calendar account</button>
         </div>
         <div style="font-size:12px;color:var(--text3);margin-bottom:10px">These calendars will be used to prevent double bookings.</div>
         <div id="cal-accounts" style="display:flex;flex-direction:column;gap:8px;margin-bottom:18px"></div>
@@ -1924,6 +1923,86 @@ if(sessionStorage.getItem('rs_auth')==='1'){
           <div style="display:flex;justify-content:flex-end;gap:8px;margin-top:18px;padding-top:14px;border-top:1px solid var(--border)">
             <button class="btn btn-ghost" onclick="closeConflictModal()">Cancel</button>
             <button class="btn btn-primary" onclick="confirmConflictModal()">Update</button>
+          </div>
+        </div>
+      </div>
+
+      <!-- CONNECT CALENDAR ACCOUNT MODAL -->
+      <div id="cal-connect-modal" class="cal-modal-overlay" style="display:none" onclick="if(event.target===this)closeConnectModal()">
+        <div class="cal-modal-panel" id="cal-connect-panel">
+          <!-- Step 1: provider chooser -->
+          <div id="cal-connect-step-pick">
+            <div style="display:flex;justify-content:space-between;align-items:flex-start;margin-bottom:6px">
+              <div style="font-size:18px;font-weight:700;color:var(--text);line-height:1.3">Connect a calendar account</div>
+              <button class="drawer-close" onclick="closeConnectModal()" style="margin:-4px -4px 0 8px">&times;</button>
+            </div>
+            <div style="font-size:13px;color:var(--text3);margin:6px 0 16px;line-height:1.5">Pick a provider to add a new account.</div>
+            <div style="display:flex;flex-direction:column;gap:8px">
+              <button class="connect-tile" onclick="showConnectStep('icloud')">
+                <div class="cal-account-icon"></div>
+                <div style="flex:1;text-align:left">
+                  <div style="font-size:14px;font-weight:600;color:var(--text)">iCloud Calendar</div>
+                  <div style="font-size:12px;color:var(--text3)">Sign in with your Apple ID and an app-specific password.</div>
+                </div>
+                <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polyline points="9 18 15 12 9 6"/></svg>
+              </button>
+              <button class="connect-tile" onclick="showConnectStep('google')">
+                <div class="cal-account-icon">G</div>
+                <div style="flex:1;text-align:left">
+                  <div style="font-size:14px;font-weight:600;color:var(--text)">Google Calendar</div>
+                  <div style="font-size:12px;color:var(--text3)">Authorize with Google to read free/busy and write events.</div>
+                </div>
+                <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polyline points="9 18 15 12 9 6"/></svg>
+              </button>
+            </div>
+          </div>
+          <!-- Step 2a: iCloud form -->
+          <div id="cal-connect-step-icloud" style="display:none">
+            <div style="display:flex;justify-content:space-between;align-items:flex-start;margin-bottom:6px">
+              <div>
+                <div style="font-size:12px;color:var(--orange);font-weight:600;margin-bottom:4px">iCloud Calendar</div>
+                <div style="font-size:18px;font-weight:700;color:var(--text);line-height:1.3">Sign in with Apple ID</div>
+              </div>
+              <button class="drawer-close" onclick="closeConnectModal()" style="margin:-4px -4px 0 8px">&times;</button>
+            </div>
+            <div style="font-size:13px;color:var(--text3);margin:6px 0 18px;line-height:1.5">Two-factor authentication and an <a href="https://account.apple.com/account/manage" target="_blank" style="color:var(--orange);text-decoration:underline">app-specific password</a> are required.</div>
+            <div class="appt-form-group" style="margin-bottom:14px">
+              <label class="appt-form-label">iCloud Email Address</label>
+              <input type="email" class="appt-form-input" id="connect-icloud-email" placeholder="you@icloud.com" autocomplete="off">
+            </div>
+            <div class="appt-form-group" style="margin-bottom:6px">
+              <label class="appt-form-label">App-specific password</label>
+              <input type="password" class="appt-form-input" id="connect-icloud-password" placeholder="xxxx-xxxx-xxxx-xxxx" autocomplete="off">
+            </div>
+            <div id="cal-connect-error" style="font-size:12px;color:var(--red);min-height:18px;margin:6px 0"></div>
+            <div style="display:flex;justify-content:space-between;gap:8px;margin-top:6px;padding-top:14px;border-top:1px solid var(--border)">
+              <button class="btn btn-ghost" onclick="showConnectStep('pick')">← Back</button>
+              <button class="btn btn-primary" id="cal-connect-icloud-btn" onclick="submitIcloudConnect()">Connect</button>
+            </div>
+          </div>
+          <!-- Step 2b: Google form (Client ID + Secret + OAuth) -->
+          <div id="cal-connect-step-google" style="display:none">
+            <div style="display:flex;justify-content:space-between;align-items:flex-start;margin-bottom:6px">
+              <div>
+                <div style="font-size:12px;color:var(--orange);font-weight:600;margin-bottom:4px">Google Calendar</div>
+                <div style="font-size:18px;font-weight:700;color:var(--text);line-height:1.3">Authorize Google</div>
+              </div>
+              <button class="drawer-close" onclick="closeConnectModal()" style="margin:-4px -4px 0 8px">&times;</button>
+            </div>
+            <div style="font-size:13px;color:var(--text3);margin:6px 0 16px;line-height:1.5">If you've already entered OAuth credentials in Settings → Google Calendar, just click Authorize. Otherwise paste your Client ID + Secret from <a href="https://console.cloud.google.com/apis/credentials" target="_blank" style="color:var(--orange);text-decoration:underline">Google Cloud Console</a>.</div>
+            <div class="appt-form-group" style="margin-bottom:12px">
+              <label class="appt-form-label">OAuth Client ID</label>
+              <input type="text" class="appt-form-input" id="connect-google-client-id" placeholder="xxxxxxxx.apps.googleusercontent.com">
+            </div>
+            <div class="appt-form-group" style="margin-bottom:6px">
+              <label class="appt-form-label">OAuth Client Secret</label>
+              <input type="password" class="appt-form-input" id="connect-google-client-secret" placeholder="GOCSPX-…">
+            </div>
+            <div id="cal-connect-google-error" style="font-size:12px;color:var(--red);min-height:18px;margin:6px 0"></div>
+            <div style="display:flex;justify-content:space-between;gap:8px;margin-top:6px;padding-top:14px;border-top:1px solid var(--border)">
+              <button class="btn btn-ghost" onclick="showConnectStep('pick')">← Back</button>
+              <button class="btn btn-primary" onclick="submitGoogleConnect()">Authorize</button>
+            </div>
           </div>
         </div>
       </div>
@@ -3448,11 +3527,15 @@ async function saveCalendarSettings() {
   }
 }
 
-function disconnectCalendarAccount(account) {
+async function disconnectCalendarAccount(account) {
   if (!confirm('Disconnect ' + (account === 'icloud' ? 'iCloud' : 'Google') + '? This will remove all of its calendars from conflict checks and the events-target dropdown.')) return;
+  try {
+    await sb.from('calendar_accounts').delete().eq('provider', account);
+  } catch (e) { console.warn('Could not remove calendar_accounts row:', e.message); }
   if (account === 'icloud') {
     localStorage.removeItem('icloud_calendar_list');
     AUTOMATION_CONFIG.icloud_enabled = false;
+    AUTOMATION_CONFIG.icloud_username = '';
     CAL_SETTINGS.conflict_calendars = (CAL_SETTINGS.conflict_calendars || []).filter(function(c){ return c.indexOf('icloud') !== 0; });
     if (CAL_SETTINGS.default_target_calendar && CAL_SETTINGS.default_target_calendar.indexOf('icloud') === 0) CAL_SETTINGS.default_target_calendar = null;
   } else {
@@ -3516,6 +3599,120 @@ async function confirmConflictModal() {
 }
 
 /* ── REFRESH CALENDAR LISTS ── */
+
+/* ── CONNECT CALENDAR ACCOUNT (Calendly-style) ── */
+
+function openConnectModal() {
+  showConnectStep('pick');
+  document.getElementById('cal-connect-modal').style.display = 'flex';
+}
+function closeConnectModal() {
+  document.getElementById('cal-connect-modal').style.display = 'none';
+}
+function showConnectStep(step) {
+  ['pick','icloud','google'].forEach(function(s) {
+    var el = document.getElementById('cal-connect-step-' + s);
+    if (el) el.style.display = (s === step) ? 'block' : 'none';
+  });
+  if (step === 'icloud') {
+    document.getElementById('connect-icloud-email').value = '';
+    document.getElementById('connect-icloud-password').value = '';
+    document.getElementById('cal-connect-error').textContent = '';
+  }
+  if (step === 'google') {
+    var saved = JSON.parse(localStorage.getItem('gcal_settings') || '{}');
+    document.getElementById('connect-google-client-id').value = saved.client_id || '';
+    document.getElementById('connect-google-client-secret').value = saved.client_secret || '';
+    document.getElementById('cal-connect-google-error').textContent = '';
+  }
+}
+
+async function submitIcloudConnect() {
+  var btn = document.getElementById('cal-connect-icloud-btn');
+  var errEl = document.getElementById('cal-connect-error');
+  var email = document.getElementById('connect-icloud-email').value.trim();
+  var pw = document.getElementById('connect-icloud-password').value.trim();
+  errEl.textContent = '';
+  if (!email || !pw) { errEl.textContent = 'Email and password are required.'; return; }
+  btn.disabled = true; var oldLabel = btn.textContent; btn.textContent = 'Connecting…';
+  try {
+    var res = await fetch('https://lvizldmdficsfpgegehp.supabase.co/functions/v1/icloud-calendar', {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({ action: 'connect', username: email, password: pw }),
+    });
+    var data = await res.json().catch(function(){ return {}; });
+    if (!data.success) {
+      errEl.textContent = data.error || 'Connection failed. Double-check your app-specific password.';
+      return;
+    }
+    var list = (data.calendars || []).map(function(c){ return { name: c.name }; });
+    localStorage.setItem('icloud_calendar_list', JSON.stringify(list));
+    AUTOMATION_CONFIG.icloud_enabled = true;
+    AUTOMATION_CONFIG.icloud_username = email;
+    closeConnectModal();
+    renderCalendarSettings();
+    showToast('iCloud connected · ' + list.length + ' calendar' + (list.length === 1 ? '' : 's') + ' loaded');
+  } catch (e) {
+    errEl.textContent = e.message;
+  } finally {
+    btn.disabled = false; btn.textContent = oldLabel;
+  }
+}
+
+async function submitGoogleConnect() {
+  var errEl = document.getElementById('cal-connect-google-error');
+  errEl.textContent = '';
+  var clientId = document.getElementById('connect-google-client-id').value.trim();
+  var clientSecret = document.getElementById('connect-google-client-secret').value.trim();
+  if (!clientId || !clientSecret) { errEl.textContent = 'Client ID and Secret are required.'; return; }
+  // Stash so the OAuth callback can finish the exchange.
+  var saved = JSON.parse(localStorage.getItem('gcal_settings') || '{}');
+  saved.client_id = clientId;
+  saved.client_secret = clientSecret;
+  saved.calendar_id = saved.calendar_id || 'primary';
+  saved.__pending_connect = true;
+  localStorage.setItem('gcal_settings', JSON.stringify(saved));
+  // Hand off to the existing OAuth helper. It redirects to Google's consent screen.
+  if (typeof startGCalAuth === 'function') {
+    startGCalAuth();
+  } else {
+    errEl.textContent = 'OAuth helper not loaded. Use Settings → Google Calendar to complete the connection.';
+  }
+}
+
+/* Persist Google creds in calendar_accounts after the OAuth flow finishes.
+   Hook into existing exchangeGCalCode logic if/when it finishes. */
+async function persistGoogleAccountFromLocal() {
+  var saved = JSON.parse(localStorage.getItem('gcal_settings') || '{}');
+  if (!saved.client_id || !saved.client_secret || !saved.refresh_token) return;
+  try {
+    // Try to fetch the account email so the row has a meaningful key.
+    var email = saved.account_email || '';
+    if (!email && typeof getGoogleAccessToken === 'function') {
+      try {
+        var tok = await getGoogleAccessToken();
+        if (tok) {
+          var me = await fetch('https://www.googleapis.com/calendar/v3/users/me/calendarList/primary', {
+            headers: { 'Authorization': 'Bearer ' + tok },
+          }).then(function(r){ return r.json(); }).catch(function(){ return {}; });
+          if (me.id) { email = me.id; saved.account_email = me.id; localStorage.setItem('gcal_settings', JSON.stringify(saved)); }
+        }
+      } catch (e) { /* ignore */ }
+    }
+    if (!email) email = 'google-account';
+    await sb.from('calendar_accounts').upsert({
+      provider: 'google',
+      email: email,
+      creds: { client_id: saved.client_id, client_secret: saved.client_secret, refresh_token: saved.refresh_token },
+      updated_at: new Date().toISOString(),
+    }, { onConflict: 'provider,email' });
+    delete saved.__pending_connect;
+    localStorage.setItem('gcal_settings', JSON.stringify(saved));
+  } catch (e) {
+    console.warn('Could not persist Google account:', e.message);
+  }
+}
 
 async function refreshIcloudCalendarList() {
   if (!AUTOMATION_CONFIG || !AUTOMATION_CONFIG.icloud_enabled) { showToast('Enable icloud_enabled first'); return; }
@@ -5434,6 +5631,9 @@ async function exchangeGCalCode() {
       AUTOMATION_CONFIG.google_refresh_token = data.refresh_token;
       AUTOMATION_CONFIG.google_calendar_id = saved.calendar_id || 'primary';
       updateGCalStatus();
+      // Push the credentials into calendar_accounts so the edge functions can use them server-side.
+      if (typeof persistGoogleAccountFromLocal === 'function') { persistGoogleAccountFromLocal(); }
+      if (typeof renderCalendarSettings === 'function') { renderCalendarSettings(); }
       showToast('Google Calendar connected successfully!');
     } else {
       showToast('Error: ' + (data.error_description || data.error || 'No refresh token received'));
