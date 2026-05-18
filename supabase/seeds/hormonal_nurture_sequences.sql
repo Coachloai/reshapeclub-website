@@ -64,7 +64,7 @@ In short: your body isn''t holding fat because you''re eating too much. It''s ho
 
 The single biggest shift you can make this week isn''t in your kitchen. It''s in your sleep. The next time you wake at 3 AM, don''t reach for your phone — that single habit drops cortisol fastest.
 
-When you''re ready, the free 45-minute strategy call is where we map your full protocol — sleep, training, eating — to your specific score:
+When you''re ready, the free 45-minute in-person consult is where we map your full protocol — sleep, training, eating — to your specific score:
 
 https://reshape.fit/hormonal-assessment/result.html
 
@@ -96,9 +96,9 @@ Weeks 5–8: strength training, 3x a week, full body. Heavy enough to matter, sh
 
 Weeks 9–12: tighten the eating window, add deliberate recovery, check sleep markers. By now your body has stopped fighting the work — and the scale starts to follow.
 
-This is the protocol shape. Your version of it gets dialled in on the call.
+This is the protocol shape. Your version of it gets dialled in in the consult.
 
-Book your free 45-minute strategy call here — we''ll go through your full pattern, agree the first 3 shifts, and tell you straight whether we''re a fit:
+Book your free 45-minute in-person consult here — we''ll go through your full pattern, agree the first 3 shifts, and tell you straight whether we''re a fit:
 
 https://reshape.fit/hormonal-assessment/result.html
 
@@ -130,7 +130,7 @@ This isn''t a smaller version of the same problem. It''s a different problem wit
 
 The first lever is muscle. Not cardio, not fasting, not a smaller plate. Strength training is the one intervention that consistently flips this pattern — because muscle is what your shifting hormones are quietly demanding more of.
 
-When you''re ready, the free 45-minute strategy call is where we map your full pattern + protocol:
+When you''re ready, the free 45-minute in-person consult is where we map your full pattern + protocol:
 
 https://reshape.fit/hormonal-assessment/result.html
 
@@ -162,9 +162,9 @@ Weeks 5–8: layer in walking + sleep priority. We don''t add cardio. We sometim
 
 Weeks 9–12: refine training stimulus, refine eating windows, look at HRT/peri-supportive supplementation if relevant. By now you''ve usually got 2–3kg off and you''re lifting heavier than you have in a decade.
 
-That''s the shape. Your version gets dialled to your scores on the call.
+That''s the shape. Your version gets dialled to your scores in the consult.
 
-Book your free 45-minute strategy call here:
+Book your free 45-minute in-person consult here:
 
 https://reshape.fit/hormonal-assessment/result.html
 
@@ -196,7 +196,7 @@ This isn''t willpower. It''s a signalling problem. And willpower is the wrong to
 
 The first shift is to stop dieting harder. We need to feed the system back into communication before we ask it to change shape.
 
-When you''re ready, the free 45-minute strategy call is where we map your specific way out:
+When you''re ready, the free 45-minute in-person consult is where we map your specific way out:
 
 https://reshape.fit/hormonal-assessment/result.html
 
@@ -228,9 +228,9 @@ Weeks 5–8: strength training, 3x a week. Walking 8–10k steps a day. We tight
 
 Weeks 9–12: introduce a small, sustainable deficit. By now leptin and insulin are listening again, and the same 200-cal cut that did nothing in month one starts to actually move you.
 
-This is the protocol shape. Your version gets dialled on the call.
+This is the protocol shape. Your version gets dialled in the consult.
 
-Book your free 45-minute strategy call here:
+Book your free 45-minute in-person consult here:
 
 https://reshape.fit/hormonal-assessment/result.html
 
@@ -260,9 +260,9 @@ Your symptoms span all three layers: stress signalling, hormonal shift, and meta
 
 This isn''t a "do more, harder" problem. It''s an order problem. When all three are present, treating them in parallel means nothing moves. Treated in the right sequence — usually stress first, then metabolic, then hormonal — they unlock one layer at a time.
 
-This is also the one pattern where a basic bloodwork panel almost always pays for itself before we set the plan. We''d talk through that on the call.
+This is also the one pattern where a basic bloodwork panel almost always pays for itself before we set the plan. We''d talk through that in the consult.
 
-When you''re ready, book your free 45-minute strategy call here:
+When you''re ready, book your free 45-minute in-person consult here:
 
 https://reshape.fit/hormonal-assessment/result.html
 
@@ -298,9 +298,9 @@ Weeks 5–8 (metabolic): introduce strength training, 3x a week. Begin a slow re
 
 Weeks 9–12 (hormonal): refine training, refine eating window, layer in any peri/menopausal-supportive interventions the bloodwork supports. By now the foundation is real and the hormonal piece has a chance of landing.
 
-That''s the shape. The order, dialled to your scores, is what gets agreed on the call.
+That''s the shape. The order, dialled to your scores, is what gets agreed in the consult.
 
-Book your free 45-minute strategy call here — we''ll review your assessment + any panel together:
+Book your free 45-minute in-person consult here — we''ll review your assessment + any panel together:
 
 https://reshape.fit/hormonal-assessment/result.html
 
