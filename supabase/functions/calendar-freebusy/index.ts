@@ -55,10 +55,12 @@ Deno.serve(async (req: Request) => {
 // ─── Google ──────────────────────────────────────────────────────────────
 
 async function googleFreeBusy(calendarIds: string[], fromIso: string, toIso: string): Promise<BusyWindow[]> {
-  const clientId = Deno.env.get('GOOGLE_CLIENT_ID');
-  const clientSecret = Deno.env.get('GOOGLE_CLIENT_SECRET');
-  const refreshToken = Deno.env.get('GOOGLE_REFRESH_TOKEN');
-  if (!clientId || !clientSecret || !refreshToken) throw new Error('Google credentials not configured');
+  // Prefer calendar_accounts row over env vars so the dashboard's "Connect Google" flow Just Works.
+  const stored = await loadStoredGoogle();
+  const clientId = stored?.client_id || Deno.env.get('GOOGLE_CLIENT_ID');
+  const clientSecret = stored?.client_secret || Deno.env.get('GOOGLE_CLIENT_SECRET');
+  const refreshToken = stored?.refresh_token || Deno.env.get('GOOGLE_REFRESH_TOKEN');
+  if (!clientId || !clientSecret || !refreshToken) throw new Error('Google credentials not configured. Connect a Google account from the dashboard.');
 
   const tokenRes = await fetch('https://oauth2.googleapis.com/token', {
     method: 'POST',
@@ -119,4 +121,22 @@ function json(body: unknown, status = 200): Response {
     status,
     headers: { ...corsHeaders, 'Content-Type': 'application/json' },
   });
+}
+
+interface StoredGoogle { client_id: string; client_secret: string; refresh_token: string }
+
+async function loadStoredGoogle(): Promise<StoredGoogle | null> {
+  const baseUrl = Deno.env.get('SUPABASE_URL');
+  const serviceKey = Deno.env.get('SUPABASE_SERVICE_ROLE_KEY');
+  if (!baseUrl || !serviceKey) return null;
+  const res = await fetch(
+    baseUrl.replace(/\/$/, '') +
+    "/rest/v1/calendar_accounts?provider=eq.google&order=updated_at.desc&limit=1&select=creds",
+    { headers: { apikey: serviceKey, Authorization: 'Bearer ' + serviceKey } },
+  );
+  if (!res.ok) return null;
+  const rows = await res.json() as Array<{ creds: Partial<StoredGoogle> }>;
+  const c = rows[0]?.creds;
+  if (!c || !c.client_id || !c.client_secret || !c.refresh_token) return null;
+  return { client_id: c.client_id, client_secret: c.client_secret, refresh_token: c.refresh_token };
 }
