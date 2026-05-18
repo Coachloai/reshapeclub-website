@@ -1791,6 +1791,19 @@ if(sessionStorage.getItem('rs_auth')==='1'){
                 <input type="date" class="appt-form-input" id="appt-range-end">
               </div>
             </div>
+            <!-- Calendar routing (Calendly-style) -->
+            <div class="appt-form-group" style="margin-bottom:16px;padding-top:16px;border-top:1px solid var(--border)">
+              <label class="appt-form-label">Calendar Routing</label>
+              <p style="font-size:12px;color:var(--text3);margin-bottom:8px">Where this appointment writes events &amp; which calendars block availability.</p>
+              <div id="appt-routing-status" style="font-size:11px;color:var(--text3);margin-bottom:10px"></div>
+              <div style="font-size:11px;color:var(--text3);margin-bottom:4px;text-transform:uppercase;letter-spacing:.5px">Write bookings to</div>
+              <div class="funnel-chips" id="appt-cal-targets" style="margin-bottom:10px"></div>
+              <div style="font-size:11px;color:var(--text3);margin-bottom:4px;text-transform:uppercase;letter-spacing:.5px">Block availability when busy in</div>
+              <div class="funnel-chips" id="appt-cal-conflicts"></div>
+              <div style="margin-top:8px">
+                <button type="button" class="btn btn-ghost btn-sm" onclick="refreshGoogleCalendarList(true)">Refresh Google Calendars</button>
+              </div>
+            </div>
           </div>
           <div class="drawer-footer">
             <button class="btn btn-ghost" onclick="toggleApptForm()">Cancel</button>
@@ -3268,7 +3281,7 @@ async function applyRoutingToAll() {
   }
 }
 
-async function refreshGoogleCalendarList() {
+async function refreshGoogleCalendarList(fromDrawer) {
   var saved = JSON.parse(localStorage.getItem('gcal_settings') || '{}');
   if (!saved.refresh_token) { showToast('Connect Google Calendar in Settings first'); return; }
   try {
@@ -3290,6 +3303,11 @@ async function refreshGoogleCalendarList() {
       });
     localStorage.setItem('gcal_calendar_list', JSON.stringify(list));
     renderRoutingCard();
+    if (fromDrawer) {
+      var existingTargets = Array.from(document.querySelectorAll('#appt-cal-targets .funnel-chip.selected')).map(function(el){ return el.dataset.cal; });
+      var existingConflicts = Array.from(document.querySelectorAll('#appt-cal-conflicts .funnel-chip.selected')).map(function(el){ return el.dataset.cal; });
+      renderApptDrawerRouting(existingTargets, existingConflicts);
+    }
     showToast('Loaded ' + list.length + ' Google calendar' + (list.length === 1 ? '' : 's'));
   } catch (e) {
     showToast('Refresh failed: ' + e.message);
@@ -3530,6 +3548,7 @@ function toggleApptForm() {
   document.querySelectorAll('#appt-locations .funnel-chip').forEach(function(el) { el.classList.toggle('selected', el.dataset.loc === 'Ipswich'); });
   document.querySelectorAll('#appt-funnels .funnel-chip').forEach(function(el) { el.classList.toggle('selected', el.dataset.funnel !== 'ReShape Club'); });
   renderDaySchedules(null); // Default Mon-Fri 09:00-17:00
+  renderApptDrawerRouting([], []);
 }
 
 function editApptType(id) {
@@ -3560,6 +3579,31 @@ function editApptType(id) {
     a.weekdays.forEach(function(d) { ds[String(d)] = JSON.parse(JSON.stringify(tw)); });
   }
   renderDaySchedules(ds);
+  renderApptDrawerRouting(a.calendar_targets || [], a.conflict_calendars || []);
+}
+
+function renderApptDrawerRouting(targets, conflicts) {
+  var opts = getRoutingOptions();
+  var statusEl = document.getElementById('appt-routing-status');
+  if (opts.length === 0) {
+    statusEl.innerHTML = '<span style="color:var(--orange)">No calendars connected.</span> Enable iCloud or connect Google Calendar in Settings.';
+  } else {
+    statusEl.textContent = opts.length + ' calendar' + (opts.length === 1 ? '' : 's') + ' available.';
+  }
+  function paint(containerId, selected) {
+    var el = document.getElementById(containerId);
+    if (opts.length === 0) {
+      el.innerHTML = '<span style="font-size:12px;color:var(--text3)">No calendars available</span>';
+      return;
+    }
+    el.innerHTML = opts.map(function(o) {
+      var on = selected.indexOf(o.id) !== -1;
+      return '<button type="button" class="funnel-chip' + (on ? ' selected' : '') +
+        '" data-cal="' + escapeAttr(o.id) + '">' + escapeHtmlDash(o.label) + '</button>';
+    }).join('');
+  }
+  paint('appt-cal-targets', targets);
+  paint('appt-cal-conflicts', conflicts);
 }
 
 document.addEventListener('click', function(e) {
@@ -3597,6 +3641,9 @@ async function saveApptType() {
   var rollingEnd = document.getElementById('appt-rolling-end').value || null;
   var rangeStart = document.getElementById('appt-range-start').value || null;
   var rangeEnd = document.getElementById('appt-range-end').value || null;
+  // Calendar routing
+  var calendarTargets = Array.from(document.querySelectorAll('#appt-cal-targets .funnel-chip.selected')).map(function(el){ return el.dataset.cal; });
+  var conflictCalendars = Array.from(document.querySelectorAll('#appt-cal-conflicts .funnel-chip.selected')).map(function(el){ return el.dataset.cal; });
 
   var apptData = {
     name: name, duration: duration,
@@ -3610,6 +3657,8 @@ async function saveApptType() {
     rolling_weeks: __apptMode === 'rolling' ? rollingWeeks : null,
     range_start: __apptMode === 'range' ? rangeStart : null,
     range_end: __apptMode === 'rolling' ? rollingEnd : (__apptMode === 'range' ? rangeEnd : null),
+    calendar_targets: calendarTargets,
+    conflict_calendars: conflictCalendars,
     is_active: true
   };
 
