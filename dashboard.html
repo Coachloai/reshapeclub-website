@@ -412,6 +412,30 @@ body{
 .settings-row:last-child { border-bottom: none; padding-bottom: 0; }
 /* ── APPOINTMENT CARDS ── */
 .appt-grid{display:grid;grid-template-columns:repeat(auto-fill,minmax(340px,1fr));gap:16px;margin-bottom:20px}
+.appts-topbar{display:flex;justify-content:space-between;align-items:center;gap:16px;flex-wrap:wrap;border-bottom:1px solid var(--border);padding-bottom:12px}
+.appts-tabs{display:flex;gap:4px}
+.appts-tab{background:transparent;border:none;color:var(--text3);font-family:var(--body);font-size:13px;font-weight:600;padding:8px 4px;cursor:pointer;border-bottom:2px solid transparent;transition:color .15s,border-color .15s}
+.appts-tab:hover{color:var(--text2)}
+.appts-tab.selected{color:var(--orange);border-bottom-color:var(--orange)}
+.appts-tab + .appts-tab{margin-left:18px}
+.appts-filters{display:flex;align-items:center;gap:10px;flex-wrap:wrap}
+.appts-day{font-size:12px;color:var(--text3);text-transform:uppercase;letter-spacing:.08em;padding:14px 4px 8px;border-bottom:1px solid var(--border)}
+.appts-row{display:grid;grid-template-columns:14px 1fr 2fr auto;gap:14px;align-items:center;padding:14px 4px;border-bottom:1px solid var(--border);transition:background .15s}
+.appts-row:hover{background:rgba(255,255,255,.02)}
+.appts-row:last-child{border-bottom:none}
+.appts-dot{width:10px;height:10px;border-radius:50%;background:var(--orange);box-shadow:0 0 0 3px rgba(237,92,37,.18)}
+.appts-time{font-size:13px;color:var(--text);font-variant-numeric:tabular-nums;white-space:nowrap}
+.appts-time-status{font-size:11px;margin-top:2px}
+.appts-status-confirmed{color:#52c47a}
+.appts-status-unconfirmed{color:#f0b03c}
+.appts-status-missed{color:var(--red)}
+.appts-status-noshow{color:var(--text3)}
+.appts-name{font-size:13px;color:var(--text);font-weight:600}
+.appts-meta{font-size:12px;color:var(--text3);margin-top:2px;line-height:1.5}
+.appts-details-btn{display:inline-flex;align-items:center;gap:4px;font-size:12px;color:var(--text2);background:transparent;border:1px solid var(--border);border-radius:6px;padding:6px 10px;cursor:pointer;font-family:var(--body)}
+.appts-details-btn:hover{border-color:rgba(255,255,255,.2);color:var(--text)}
+.appts-details-btn.open{color:var(--orange);border-color:rgba(237,92,37,.4)}
+.appts-detail{grid-column:1 / -1;padding:12px 14px 18px;color:var(--text2);font-size:12px;line-height:1.6;background:var(--s2);border-radius:8px;margin:8px 0 12px}
 .appt-card{background:var(--s1);border:1px solid var(--border);border-radius:var(--r);padding:22px;position:relative;transition:border-color .2s}
 .appt-card:hover{border-color:rgba(255,255,255,.12)}
 .appt-card.paused{opacity:.55}
@@ -996,6 +1020,9 @@ if(sessionStorage.getItem('rs_auth')==='1'){
     </button>
     <button class="sb-btn" data-view="bookings" title="Bookings" onclick="switchView('bookings', this)">
       <svg width="16" height="16" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><rect x="3" y="4" width="18" height="18" rx="2" ry="2"/><line x1="16" y1="2" x2="16" y2="6"/><line x1="8" y1="2" x2="8" y2="6"/><line x1="3" y1="10" x2="21" y2="10"/></svg>
+    </button>
+    <button class="sb-btn" data-view="appointments" title="Appointments" onclick="switchView('appointments', this)">
+      <svg width="16" height="16" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><circle cx="12" cy="12" r="10"/><polyline points="12 6 12 12 16 14"/></svg>
     </button>
     <button class="sb-btn" data-view="hormonal" title="Hormonal Assessments" onclick="switchView('hormonal', this)">
       <svg width="16" height="16" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><path d="M3 12h4l3-9 4 18 3-9h4"/></svg>
@@ -1693,7 +1720,7 @@ if(sessionStorage.getItem('rs_auth')==='1'){
       <div class="page-header fade-in" style="margin-bottom:20px">
         <div>
           <div class="page-title">Bookings</div>
-          <div class="page-sub">Manage appointment types, availability &amp; bookings</div>
+          <div class="page-sub">Appointment types, availability &amp; calendar routing</div>
         </div>
         <div class="header-actions">
           <button class="btn btn-primary" id="btn-new-appt" onclick="toggleApptForm()">+ New Appointment Type</button>
@@ -1894,39 +1921,47 @@ if(sessionStorage.getItem('rs_auth')==='1'){
           </div>
         </div>
       </div>
-      <!-- BOOKINGS TABLE -->
+    </div>
+    <!-- ── VIEW: APPOINTMENTS (Calendly-style) ── -->
+    <div id="view-appointments" class="view" style="display:none">
+      <div class="page-header fade-in" style="margin-bottom:20px">
+        <div>
+          <div class="page-title">Appointments</div>
+          <div class="page-sub" id="appts-sub">All bookings</div>
+        </div>
+        <div class="header-actions">
+          <button class="btn btn-ghost" onclick="refreshAppointmentsView()">Refresh</button>
+        </div>
+      </div>
       <div class="chart-card fade-in">
-        <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:16px;flex-wrap:wrap;gap:12px">
-          <div class="chart-title">Upcoming Bookings</div>
-          <div style="display:flex;align-items:center;gap:14px">
-            <label style="display:flex;align-items:center;gap:6px;font-size:12px;color:var(--text2);cursor:pointer">
-              <input type="checkbox" id="bookings-filter-unconfirmed" style="margin:0">
-              Unconfirmed only
-            </label>
-            <span style="font-size:12px;color:var(--text3)" id="bookings-count">0 bookings</span>
+        <!-- Top bar: tabs + filters -->
+        <div class="appts-topbar">
+          <div class="appts-tabs">
+            <button class="appts-tab selected" data-range="upcoming" onclick="setAppointmentsRange('upcoming')">Upcoming</button>
+            <button class="appts-tab" data-range="past" onclick="setAppointmentsRange('past')">Past</button>
+            <button class="appts-tab" data-range="custom" onclick="setAppointmentsRange('custom')">Date Range</button>
+          </div>
+          <div class="appts-filters">
+            <select class="filter-select" id="appts-location" onchange="renderAppointments()">
+              <option value="">All locations</option>
+              <option>Ipswich</option>
+              <option>Colchester</option>
+            </select>
+            <select class="filter-select" id="appts-status" onchange="renderAppointments()">
+              <option value="">All statuses</option>
+              <option value="confirmed">Confirmed only</option>
+              <option value="unconfirmed">Unconfirmed only</option>
+            </select>
+            <div id="appts-daterange" style="display:none;gap:6px;align-items:center">
+              <input type="date" class="filter-input" id="appts-from" onchange="renderAppointments()">
+              <span style="font-size:12px;color:var(--text3)">to</span>
+              <input type="date" class="filter-input" id="appts-to" onchange="renderAppointments()">
+            </div>
+            <span style="font-size:12px;color:var(--text3)" id="appts-count">0 events</span>
           </div>
         </div>
-        <div style="overflow-x:auto">
-          <table class="leads-table" style="width:100%">
-            <thead>
-              <tr>
-                <th>#</th>
-                <th>Name</th>
-                <th>Email</th>
-                <th>Phone</th>
-                <th>Appointment</th>
-                <th>Date</th>
-                <th>Time</th>
-                <th>Location</th>
-                <th>Confirmed</th>
-                <th>Status</th>
-                <th>Actions</th>
-              </tr>
-            </thead>
-            <tbody id="bookings-tbody"></tbody>
-          </table>
-        </div>
-        <div id="bookings-empty" style="display:none;text-align:center;padding:32px;color:var(--text3);font-size:14px">No bookings yet.</div>
+        <div id="appts-list" style="margin-top:10px"></div>
+        <div id="appts-empty" style="display:none;text-align:center;padding:40px;color:var(--text3);font-size:13px">No appointments in this range.</div>
       </div>
     </div>
     <!-- ── VIEW: HORMONAL ASSESSMENTS ── -->
@@ -2698,6 +2733,7 @@ function switchView(view, btn) {
   if (view === 'analytics') initAnalyticsCharts();
   if (view === 'performance') initPerfCharts();
   if (view === 'bookings') initBookingsView();
+  if (view === 'appointments') initAppointmentsView();
   if (view === 'automations') initAutomationsView();
   if (view === 'content') initContentView();
   if (view === 'hormonal') loadHormonalView();
@@ -3331,6 +3367,7 @@ function toggleBookingDetail(idx) {
 }
 function renderBookings() {
   var tbody = document.getElementById('bookings-tbody');
+  if (!tbody) return; // Legacy table; bookings now live in the Appointments view.
   var empty = document.getElementById('bookings-empty');
   var countEl = document.getElementById('bookings-count');
   var rows = BOOKINGS_FILTER_UNCONFIRMED
@@ -3394,6 +3431,164 @@ function renderBookings() {
   }
 }
 
+/* ══════════════════════════════════════
+   APPOINTMENTS VIEW (Calendly-style)
+══════════════════════════════════════ */
+var __apptsRange = 'upcoming'; // 'upcoming' | 'past' | 'custom'
+var __apptsExpanded = {};      // booking id -> bool
+
+async function initAppointmentsView() {
+  // Bookings need appointment-type names too, so reuse the bookings fetchers.
+  if (!ALL_BOOKINGS || ALL_BOOKINGS.length === 0) {
+    await Promise.all([fetchApptTypes(), fetchBookings()]);
+  }
+  renderAppointments();
+}
+
+async function refreshAppointmentsView() {
+  await Promise.all([fetchApptTypes(), fetchBookings()]);
+  renderAppointments();
+  showToast('Appointments refreshed');
+}
+
+function setAppointmentsRange(range) {
+  __apptsRange = range;
+  document.querySelectorAll('.appts-tab').forEach(function(b) {
+    b.classList.toggle('selected', b.dataset.range === range);
+  });
+  document.getElementById('appts-daterange').style.display = range === 'custom' ? 'flex' : 'none';
+  renderAppointments();
+}
+
+function bookingStartDt(b) {
+  var slot = b.booking_slots || {};
+  if (!slot.date || !slot.start_time) return null;
+  return new Date(slot.date + 'T' + slot.start_time);
+}
+
+function renderAppointments() {
+  var listEl = document.getElementById('appts-list');
+  var emptyEl = document.getElementById('appts-empty');
+  var countEl = document.getElementById('appts-count');
+  if (!listEl) return;
+
+  var loc = document.getElementById('appts-location').value || '';
+  var statusFilter = document.getElementById('appts-status').value || '';
+  var fromVal = document.getElementById('appts-from').value || '';
+  var toVal = document.getElementById('appts-to').value || '';
+  var now = Date.now();
+
+  var rows = (ALL_BOOKINGS || []).filter(function(b) {
+    var dt = bookingStartDt(b);
+    if (!dt) return false;
+    if (__apptsRange === 'upcoming' && dt.getTime() < now - 60_000) return false;
+    if (__apptsRange === 'past' && dt.getTime() >= now) return false;
+    if (__apptsRange === 'custom') {
+      if (fromVal && b.booking_slots.date < fromVal) return false;
+      if (toVal && b.booking_slots.date > toVal) return false;
+    }
+    if (loc) {
+      var bLoc = b.location || (b.booking_slots && b.booking_slots.location) || '';
+      if (bLoc !== loc) return false;
+    }
+    if (statusFilter === 'confirmed' && !b.confirmed_at) return false;
+    if (statusFilter === 'unconfirmed' && b.confirmed_at) return false;
+    return true;
+  });
+
+  // Past list reads naturally with most recent first; upcoming reads with soonest first.
+  rows.sort(function(a, b) {
+    var da = bookingStartDt(a).getTime();
+    var db = bookingStartDt(b).getTime();
+    return __apptsRange === 'past' ? db - da : da - db;
+  });
+
+  countEl.textContent = rows.length + ' event' + (rows.length === 1 ? '' : 's');
+  if (rows.length === 0) { listEl.innerHTML = ''; emptyEl.style.display = 'block'; return; }
+  emptyEl.style.display = 'none';
+
+  // Group by date.
+  var groups = {};
+  rows.forEach(function(b) {
+    var key = b.booking_slots.date;
+    (groups[key] = groups[key] || []).push(b);
+  });
+  var dateKeys = Object.keys(groups).sort(function(a, b) {
+    return __apptsRange === 'past' ? b.localeCompare(a) : a.localeCompare(b);
+  });
+
+  listEl.innerHTML = dateKeys.map(function(key) {
+    var dateLabel = new Date(key + 'T12:00:00').toLocaleDateString('en-GB', {
+      weekday: 'long', day: 'numeric', month: 'long', year: 'numeric'
+    });
+    var dayRows = groups[key].map(function(b) {
+      var slot = b.booking_slots;
+      var appt = ALL_APPT_TYPES.find(function(a) { return a.id === slot.appointment_type_id; });
+      var name = ((b.first_name || '') + ' ' + (b.last_name || '')).trim() || b.email || 'Unknown';
+      var t = slot.start_time.substring(0, 5) + ' – ' + slot.end_time.substring(0, 5);
+      var status = bookingStatusLabel(b);
+      var bLoc = b.location || slot.location || '';
+      var open = !!__apptsExpanded[b.id];
+      var detailHtml = open ? renderAppointmentDetail(b, appt) : '';
+      return '<div class="appts-row">' +
+        '<div class="appts-dot"></div>' +
+        '<div>' +
+          '<div class="appts-time">' + t + '</div>' +
+          '<div class="appts-time-status ' + status.cls + '">' + status.label + '</div>' +
+        '</div>' +
+        '<div>' +
+          '<div class="appts-name">' + escapeHtmlDash(name) + ' <span style="color:var(--text3);font-weight:400">with you</span></div>' +
+          '<div class="appts-meta">Event type <span style="color:var(--text2);font-weight:600">' + escapeHtmlDash(appt ? appt.name : 'Unknown') + '</span>' +
+            (bLoc ? ' · ' + escapeHtmlDash(bLoc) : '') +
+          '</div>' +
+        '</div>' +
+        '<button class="appts-details-btn' + (open ? ' open' : '') + '" onclick="toggleAppointmentDetail(\'' + b.id + '\')">' +
+          (open ? '▾' : '▸') + ' Details' +
+        '</button>' +
+        detailHtml +
+      '</div>';
+    }).join('');
+    return '<div><div class="appts-day">' + dateLabel + '</div>' + dayRows + '</div>';
+  }).join('');
+}
+
+function bookingStatusLabel(b) {
+  if (b.status === 'cancelled') return { label: 'Cancelled', cls: 'appts-status-noshow' };
+  if (b.status === 'no_show') return { label: 'No-show', cls: 'appts-status-noshow' };
+  if (b.confirmed_at) return { label: 'Invitee confirmed', cls: 'appts-status-confirmed' };
+  var dt = bookingStartDt(b);
+  if (dt && dt.getTime() < Date.now()) return { label: 'Missed (no confirm)', cls: 'appts-status-missed' };
+  return { label: 'Awaiting confirmation', cls: 'appts-status-unconfirmed' };
+}
+
+function renderAppointmentDetail(b, appt) {
+  var memberNames = (b.relate_to_members || []).map(function(id) {
+    return TRANSFORMATION_MEMBERS_BY_ID[id] || id;
+  });
+  var parts = [];
+  parts.push('<div style="display:grid;grid-template-columns:repeat(auto-fit,minmax(180px,1fr));gap:10px;margin-bottom:10px">' +
+    '<div><div style="font-size:11px;color:var(--text3);text-transform:uppercase;letter-spacing:.08em">Email</div><div>' + escapeHtmlDash(b.email || '-') + '</div></div>' +
+    '<div><div style="font-size:11px;color:var(--text3);text-transform:uppercase;letter-spacing:.08em">Phone</div><div>' + escapeHtmlDash(b.phone || '-') + '</div></div>' +
+    (b.confirmed_at ? '<div><div style="font-size:11px;color:var(--text3);text-transform:uppercase;letter-spacing:.08em">Confirmed</div><div>' + new Date(b.confirmed_at).toLocaleString('en-GB') + '</div></div>' : '') +
+  '</div>');
+  if (memberNames.length) {
+    parts.push('<div style="margin-bottom:10px"><div style="font-size:11px;color:var(--text3);text-transform:uppercase;letter-spacing:.08em;margin-bottom:4px">Related to</div><div>' + memberNames.map(escapeHtmlDash).join(' · ') + '</div></div>');
+  }
+  if (b.pre_consult_note) {
+    parts.push('<div style="margin-bottom:10px"><div style="font-size:11px;color:var(--text3);text-transform:uppercase;letter-spacing:.08em;margin-bottom:4px">Pre-consult note</div><div style="white-space:pre-wrap;background:var(--s3);border:1px solid var(--border2);border-radius:8px;padding:10px 12px">' + escapeHtmlDash(b.pre_consult_note) + '</div></div>');
+  }
+  parts.push('<div style="display:flex;gap:8px;margin-top:6px">' +
+    '<button class="btn btn-ghost btn-sm" onclick="markBookingNoShow(\'' + b.id + '\')">Mark no-show</button>' +
+    '<button class="btn btn-ghost btn-sm" style="color:var(--red);border-color:rgba(231,76,60,.3)" onclick="cancelBookingFromDashboard(\'' + b.id + '\')">Cancel</button>' +
+  '</div>');
+  return '<div class="appts-detail">' + parts.join('') + '</div>';
+}
+
+function toggleAppointmentDetail(id) {
+  __apptsExpanded[id] = !__apptsExpanded[id];
+  renderAppointments();
+}
+
 /* ── BOOKING LIFECYCLE (cancel / no-show) ── */
 async function applyBookingLifecycle(bookingId, newStatus, sequenceName, confirmMsg, successMsg) {
   var b = ALL_BOOKINGS.find(function(x){ return x.id === bookingId; });
@@ -3450,6 +3645,10 @@ async function applyBookingLifecycle(bookingId, newStatus, sequenceName, confirm
 
   showToast(successMsg);
   await initBookingsView();
+  if (typeof renderAppointments === 'function' && document.getElementById('appts-list')) {
+    await fetchBookings();
+    renderAppointments();
+  }
 }
 
 async function cancelBookingFromDashboard(id) {
