@@ -195,7 +195,7 @@ async function addToGoogleCalendar(lead, booking, calendarIdOverride) {
 }
 
 /* ── ICLOUD CALENDAR — CREATE EVENT (via Supabase Edge Function) ── */
-async function addToIcloudCalendar(lead, booking) {
+async function addToIcloudCalendar(lead, booking, calendarNameOverride) {
   var leadName = ((lead.first_name || '') + ' ' + (lead.last_name || '')).trim();
   var res = await fetch('https://lvizldmdficsfpgegehp.supabase.co/functions/v1/icloud-calendar', {
     method: 'POST',
@@ -207,10 +207,11 @@ async function addToIcloudCalendar(lead, booking) {
       datetime: booking.datetime,
       location: booking.location,
       durationMinutes: 45,
+      calendarName: calendarNameOverride || undefined,
     }),
   });
   var data = await res.json().catch(function(){ return {}; });
-  return data && data.success ? { success: true, id: data.id } : { success: false, error: (data && data.error) || ('HTTP ' + res.status) };
+  return data && data.success ? { success: true, id: data.id, calendar: data.calendar } : { success: false, error: (data && data.error) || ('HTTP ' + res.status) };
 }
 
 /* ── LOAD APPOINTMENT TYPE ROUTING ── */
@@ -241,9 +242,10 @@ async function sendCoachCalendarInvite(lead, booking) {
   if (targets) {
     // Per-type routing — only write to the calendars the coach assigned to this type.
     targets.forEach(function(t) {
-      if (t === 'icloud' && AUTOMATION_CONFIG.icloud_enabled) {
-        tasks.push(addToIcloudCalendar(lead, booking).then(
-          function(r){ return { name: 'icloud', result: r }; },
+      if (t.indexOf('icloud') === 0 && AUTOMATION_CONFIG.icloud_enabled) {
+        var icalName = t === 'icloud' ? null : t.slice('icloud:'.length);
+        tasks.push(addToIcloudCalendar(lead, booking, icalName).then(
+          function(r){ return { name: 'icloud' + (icalName ? ':' + icalName : ''), result: r }; },
           function(e){ return { name: 'icloud', result: { success: false, error: e.message } }; }
         ));
       } else if (t.indexOf('google:') === 0 && AUTOMATION_CONFIG.google_client_id && AUTOMATION_CONFIG.google_refresh_token) {

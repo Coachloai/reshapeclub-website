@@ -1830,7 +1830,8 @@ if(sessionStorage.getItem('rs_auth')==='1'){
               <div class="funnel-chips" id="appt-cal-targets" style="margin-bottom:10px"></div>
               <div style="font-size:11px;color:var(--text3);margin-bottom:4px;text-transform:uppercase;letter-spacing:.5px">Block availability when busy in</div>
               <div class="funnel-chips" id="appt-cal-conflicts"></div>
-              <div style="margin-top:8px">
+              <div style="margin-top:8px;display:flex;gap:6px;flex-wrap:wrap">
+                <button type="button" class="btn btn-ghost btn-sm" onclick="refreshIcloudCalendarList(true)">Refresh iCloud Calendars</button>
                 <button type="button" class="btn btn-ghost btn-sm" onclick="refreshGoogleCalendarList(true)">Refresh Google Calendars</button>
               </div>
             </div>
@@ -1871,6 +1872,7 @@ if(sessionStorage.getItem('rs_auth')==='1'){
             <div style="font-size:12px;color:var(--text3);margin-top:2px;max-width:560px;line-height:1.5">Pick which calendar(s) each appointment type writes to, and which calendars block availability (busy time hides slots). Calendly-style.</div>
           </div>
           <div style="display:flex;gap:8px;flex-wrap:wrap">
+            <button class="btn btn-ghost btn-sm" onclick="refreshIcloudCalendarList()">Refresh iCloud Calendars</button>
             <button class="btn btn-ghost btn-sm" onclick="refreshGoogleCalendarList()">Refresh Google Calendars</button>
             <button class="btn btn-ghost btn-sm" onclick="applyRoutingToAll()" title="Copy the first row's settings to every appointment type">Apply to all</button>
           </div>
@@ -3223,17 +3225,22 @@ function renderApptCards() {
 ══════════════════════════════════════ */
 
 // Calendar identifier scheme:
-//   "icloud"              -> primary iCloud calendar
-//   "google:<calendarId>" -> a specific Google calendar (e.g. google:primary)
-// Available options are derived from what's connected:
-//   - iCloud is offered if AUTOMATION_CONFIG.icloud_enabled is true
-//   - Google primary is offered if a refresh token is saved
-//   - Google sub-calendars come from localStorage cache populated by refreshGoogleCalendarList()
+//   "icloud:<displayName>"  -> a specific iCloud calendar (e.g. icloud:Work)
+//   "icloud"                -> default iCloud calendar (back-compat / pre-discovery)
+//   "google:<calendarId>"   -> a specific Google calendar (e.g. google:primary)
+// Available options come from what's connected and discovered:
+//   - iCloud chips are populated by refreshIcloudCalendarList() (cached in localStorage)
+//   - Google chips are populated by refreshGoogleCalendarList() (cached in localStorage)
 
 function getRoutingOptions() {
   var opts = [];
   if (window.AUTOMATION_CONFIG && AUTOMATION_CONFIG.icloud_enabled) {
-    opts.push({ id: 'icloud', label: 'iCloud' });
+    var ilist = JSON.parse(localStorage.getItem('icloud_calendar_list') || '[]');
+    if (ilist.length === 0) {
+      opts.push({ id: 'icloud', label: 'iCloud (default)' });
+    } else {
+      ilist.forEach(function(c) { opts.push({ id: 'icloud:' + c.name, label: 'iCloud: ' + c.name }); });
+    }
   }
   var gcal = JSON.parse(localStorage.getItem('gcal_settings') || '{}');
   if (gcal.refresh_token) {
@@ -3245,6 +3252,31 @@ function getRoutingOptions() {
     }
   }
   return opts;
+}
+
+async function refreshIcloudCalendarList(fromDrawer) {
+  if (!AUTOMATION_CONFIG || !AUTOMATION_CONFIG.icloud_enabled) { showToast('Enable icloud_enabled first'); return; }
+  try {
+    var res = await fetch('https://lvizldmdficsfpgegehp.supabase.co/functions/v1/icloud-calendar', {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({ action: 'list' }),
+    });
+    var data = await res.json();
+    if (!data.success) { showToast('iCloud: ' + (data.error || 'failed')); return; }
+    var list = (data.calendars || []).map(function(c) { return { name: c.name }; });
+    localStorage.setItem('icloud_calendar_list', JSON.stringify(list));
+    renderRoutingCard();
+    if (fromDrawer) {
+      var existingTargets = Array.from(document.querySelectorAll('#appt-cal-targets .funnel-chip.selected')).map(function(el){ return el.dataset.cal; });
+      var existingConflicts = Array.from(document.querySelectorAll('#appt-cal-conflicts .funnel-chip.selected')).map(function(el){ return el.dataset.cal; });
+      renderApptDrawerRouting(existingTargets, existingConflicts);
+    }
+    showToast('Loaded ' + list.length + ' iCloud calendar' + (list.length === 1 ? '' : 's'));
+  } catch (e) {
+    showToast('iCloud refresh failed: ' + e.message);
+    console.error(e);
+  }
 }
 
 function renderRoutingCard() {
