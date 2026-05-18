@@ -163,10 +163,10 @@ async function getGoogleAccessToken() {
 }
 
 /* ── GOOGLE CALENDAR — CREATE EVENT ── */
-async function addToGoogleCalendar(lead, booking) {
+async function addToGoogleCalendar(lead, booking, calendarIdOverride) {
   var token = await getGoogleAccessToken();
   if (!token) return { success: false, error: 'No access token' };
-  var calendarId = AUTOMATION_CONFIG.google_calendar_id || 'primary';
+  var calendarId = calendarIdOverride || AUTOMATION_CONFIG.google_calendar_id || 'primary';
   var leadName = ((lead.first_name || '') + ' ' + (lead.last_name || '')).trim();
   var dt = new Date(booking.datetime);
   var endDt = new Date(dt.getTime() + 3600000);
@@ -213,23 +213,61 @@ async function addToIcloudCalendar(lead, booking) {
   return data && data.success ? { success: true, id: data.id } : { success: false, error: (data && data.error) || ('HTTP ' + res.status) };
 }
 
+/* ── LOAD APPOINTMENT TYPE ROUTING ── */
+// Tries (in order): booking.appointment_type already attached → Supabase lookup by id.
+async function loadApptTypeForBooking(booking) {
+  if (booking && booking.appointment_type) return booking.appointment_type;
+  var sbClient = (typeof window !== 'undefined' && window.__supabaseClient) || null;
+  if (!sbClient || !booking || !booking.appointment_type_id) return null;
+  try {
+    var res = await sbClient.from('appointment_types')
+      .select('id, name, duration, calendar_targets, conflict_calendars')
+      .eq('id', booking.appointment_type_id).maybeSingle();
+    return res.data || null;
+  } catch (e) { return null; }
+}
+
 /* ── SEND COACH CALENDAR INVITE ── */
 async function sendCoachCalendarInvite(lead, booking) {
   if (!booking || !booking.datetime) return;
 
-  // Push to iCloud and Google in parallel where each is configured.
+  // Resolve routing: per-appointment-type targets if configured, else fall back to defaults.
+  var apptType = await loadApptTypeForBooking(booking);
+  var targets = (apptType && Array.isArray(apptType.calendar_targets) && apptType.calendar_targets.length > 0)
+    ? apptType.calendar_targets
+    : null;
+
   var tasks = [];
-  if (AUTOMATION_CONFIG.icloud_enabled) {
-    tasks.push(addToIcloudCalendar(lead, booking).then(
-      function(r){ return { name: 'icloud', result: r }; },
-      function(e){ return { name: 'icloud', result: { success: false, error: e.message } }; }
-    ));
-  }
-  if (AUTOMATION_CONFIG.google_client_id && AUTOMATION_CONFIG.google_refresh_token) {
-    tasks.push(addToGoogleCalendar(lead, booking).then(
-      function(r){ return { name: 'google', result: r }; },
-      function(e){ return { name: 'google', result: { success: false, error: e.message } }; }
-    ));
+  if (targets) {
+    // Per-type routing — only write to the calendars the coach assigned to this type.
+    targets.forEach(function(t) {
+      if (t === 'icloud' && AUTOMATION_CONFIG.icloud_enabled) {
+        tasks.push(addToIcloudCalendar(lead, booking).then(
+          function(r){ return { name: 'icloud', result: r }; },
+          function(e){ return { name: 'icloud', result: { success: false, error: e.message } }; }
+        ));
+      } else if (t.indexOf('google:') === 0 && AUTOMATION_CONFIG.google_client_id && AUTOMATION_CONFIG.google_refresh_token) {
+        var calId = t.slice('google:'.length) || 'primary';
+        tasks.push(addToGoogleCalendar(lead, booking, calId).then(
+          function(r){ return { name: 'google:' + calId, result: r }; },
+          function(e){ return { name: 'google:' + calId, result: { success: false, error: e.message } }; }
+        ));
+      }
+    });
+  } else {
+    // Default: write to whatever's connected.
+    if (AUTOMATION_CONFIG.icloud_enabled) {
+      tasks.push(addToIcloudCalendar(lead, booking).then(
+        function(r){ return { name: 'icloud', result: r }; },
+        function(e){ return { name: 'icloud', result: { success: false, error: e.message } }; }
+      ));
+    }
+    if (AUTOMATION_CONFIG.google_client_id && AUTOMATION_CONFIG.google_refresh_token) {
+      tasks.push(addToGoogleCalendar(lead, booking).then(
+        function(r){ return { name: 'google', result: r }; },
+        function(e){ return { name: 'google', result: { success: false, error: e.message } }; }
+      ));
+    }
   }
 
   if (tasks.length > 0) {

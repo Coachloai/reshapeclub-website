@@ -397,7 +397,7 @@ async function confirmBooking() {
       '<div class="booking-done-row"><span>Time</span><span>' + timeStr + '</span></div>' +
       '<div class="booking-done-row"><span>Location</span><span>' + __selectedLoc + '</span></div>';
     // Add to Calendar .ics download
-    var bookingData = { id: __bookRow.id, confirm_token: __bookRow.confirm_token, date: dateStr, time: timeStr, location: __selectedLoc, datetime: __selectedDate + 'T' + (slot ? slot.start_time.substring(0,5) : '09:00') + ':00' };
+    var bookingData = { id: __bookRow.id, confirm_token: __bookRow.confirm_token, date: dateStr, time: timeStr, location: __selectedLoc, datetime: __selectedDate + 'T' + (slot ? slot.start_time.substring(0,5) : '09:00') + ':00', appointment_type_id: slot ? slot.appointment_type_id : null };
     try {
       if (typeof generateICS === 'function') {
         var icsContent = generateICS(bookingData, lead.first_name || '');
