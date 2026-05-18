@@ -2266,62 +2266,6 @@ if(sessionStorage.getItem('rs_auth')==='1'){
           </div>
         </div>
       </div>
-      <!-- GOOGLE CALENDAR INTEGRATION -->
-      <div class="chart-card fade-in" style="margin-top:14px">
-        <div class="chart-title" style="margin-bottom:4px">Google Calendar Integration</div>
-        <div style="font-size:12px;color:var(--text3);margin-bottom:16px">Automatically add bookings to your Google Calendar</div>
-        <div id="gcal-status" style="margin-bottom:16px"></div>
-        <div style="display:flex;flex-direction:column;gap:12px">
-          <div class="appt-form-group">
-            <label class="appt-form-label">Client ID</label>
-            <input type="text" class="appt-form-input" id="gcal-client-id" placeholder="xxxxxxxx.apps.googleusercontent.com" style="font-size:12px">
-          </div>
-          <div class="appt-form-group">
-            <label class="appt-form-label">Client Secret</label>
-            <input type="password" class="appt-form-input" id="gcal-client-secret" placeholder="GOCSPX-xxxxxxxx" style="font-size:12px">
-          </div>
-          <div class="appt-form-group">
-            <label class="appt-form-label">Calendar ID <span style="color:var(--text3);font-weight:400">(leave blank for primary)</span></label>
-            <input type="text" class="appt-form-input" id="gcal-calendar-id" placeholder="primary" style="font-size:12px">
-          </div>
-          <div class="appt-form-group">
-            <label class="appt-form-label">Appointment Duration</label>
-            <select class="appt-form-input" id="gcal-duration" style="font-size:12px">
-              <option value="30">30 minutes</option>
-              <option value="45">45 minutes</option>
-              <option value="60" selected>1 hour</option>
-              <option value="90">1.5 hours</option>
-              <option value="120">2 hours</option>
-            </select>
-          </div>
-          <div id="gcal-auth-section" style="display:none">
-            <div class="appt-form-group">
-              <label class="appt-form-label">Authorization Code</label>
-              <input type="text" class="appt-form-input" id="gcal-auth-code" placeholder="Paste the code from Google here" style="font-size:12px">
-            </div>
-            <button class="btn btn-primary btn-sm" style="margin-top:8px" onclick="exchangeGCalCode()">Exchange for Token</button>
-          </div>
-          <div id="gcal-token-display" style="display:none">
-            <div class="appt-form-group">
-              <label class="appt-form-label">Refresh Token</label>
-              <input type="text" class="appt-form-input" id="gcal-refresh-token" placeholder="Will be filled after authorization" style="font-size:12px">
-            </div>
-          </div>
-          <div style="display:flex;gap:8px;margin-top:4px">
-            <button class="btn btn-primary btn-sm" onclick="startGCalAuth()">Connect Google Calendar</button>
-            <button class="btn btn-ghost btn-sm" onclick="testGCalConnection()">Test Connection</button>
-            <button class="btn btn-ghost btn-sm" onclick="sendTestCalEvent()">Send Test Event</button>
-            <button class="btn btn-ghost btn-sm" onclick="saveGCalSettings()">Save</button>
-          </div>
-        </div>
-        <div style="margin-top:16px;padding:12px 14px;background:rgba(255,255,255,0.03);border:1px solid var(--border);border-radius:10px;font-size:12px;color:var(--text3);line-height:1.7">
-          <strong style="color:var(--text2)">Setup guide:</strong><br>
-          1. Go to <a href="https://console.cloud.google.com/apis/credentials" target="_blank" style="color:var(--orange)">Google Cloud Console</a> and create an OAuth 2.0 Client ID (Web application)<br>
-          2. Add <code style="background:rgba(255,255,255,0.06);padding:2px 6px;border-radius:4px">https://reshape.fit/dashboard.html</code> as an Authorized redirect URI<br>
-          3. Enable the <a href="https://console.cloud.google.com/apis/library/calendar-json.googleapis.com" target="_blank" style="color:var(--orange)">Google Calendar API</a><br>
-          4. Paste your Client ID and Client Secret above, then click "Connect Google Calendar"
-        </div>
-      </div>
     </div>
   </main>
 </div>
@@ -5531,52 +5475,34 @@ document.addEventListener('keydown', e=>{
 });
 
 /* ══════════════════════════════════════
-   GOOGLE CALENDAR SETTINGS
+   GOOGLE CALENDAR OAUTH HELPERS
 ══════════════════════════════════════ */
 (function() {
-  // Load saved settings
   var saved = JSON.parse(localStorage.getItem('gcal_settings') || '{}');
-  if (saved.client_id) document.getElementById('gcal-client-id').value = saved.client_id;
-  if (saved.client_secret) document.getElementById('gcal-client-secret').value = saved.client_secret;
-  if (saved.calendar_id) document.getElementById('gcal-calendar-id').value = saved.calendar_id;
-  if (saved.duration) document.getElementById('gcal-duration').value = saved.duration;
   if (saved.refresh_token) {
-    document.getElementById('gcal-refresh-token').value = saved.refresh_token;
-    document.getElementById('gcal-token-display').style.display = 'block';
-    // Apply to automation config
     AUTOMATION_CONFIG.google_client_id = saved.client_id;
     AUTOMATION_CONFIG.google_client_secret = saved.client_secret;
     AUTOMATION_CONFIG.google_refresh_token = saved.refresh_token;
     AUTOMATION_CONFIG.google_calendar_id = saved.calendar_id || 'primary';
   }
-  updateGCalStatus();
-
-  // Check if returning from Google OAuth redirect
+  // OAuth return — pick up ?code= from Google, finish exchange, land on Bookings.
   var params = new URLSearchParams(window.location.search);
   var code = params.get('code');
   if (code) {
-    document.getElementById('gcal-auth-code').value = code;
-    document.getElementById('gcal-auth-section').style.display = 'block';
-    document.getElementById('gcal-token-display').style.display = 'block';
-    // Clean URL
     window.history.replaceState({}, '', window.location.pathname);
-    switchView('settings', document.querySelector('[data-view="settings"]'));
-    showToast('Authorization code received — click "Exchange for Token"');
+    (async function finishConnect() {
+      try {
+        await exchangeGCalCode(code);
+        switchView('bookings', document.querySelector('[data-view="bookings"]'));
+        if (typeof refreshGoogleCalendarList === 'function') await refreshGoogleCalendarList();
+      } catch (e) { console.error('Google connect failed:', e); }
+    })();
   }
 })();
 
-function updateGCalStatus() {
-  var saved = JSON.parse(localStorage.getItem('gcal_settings') || '{}');
-  var el = document.getElementById('gcal-status');
-  if (saved.refresh_token) {
-    el.innerHTML = '<span style="display:inline-flex;align-items:center;gap:6px;padding:6px 12px;border-radius:8px;font-size:13px;font-weight:600;background:rgba(46,204,113,0.1);color:#2ecc71;border:1px solid rgba(46,204,113,0.2)"><svg width="14" height="14" fill="none" stroke="currentColor" stroke-width="2.5" viewBox="0 0 24 24"><path d="M5 13l4 4L19 7"/></svg> Connected</span>';
-  } else {
-    el.innerHTML = '<span style="display:inline-flex;align-items:center;gap:6px;padding:6px 12px;border-radius:8px;font-size:13px;font-weight:600;background:rgba(255,255,255,0.04);color:var(--text3);border:1px solid var(--border)">Not connected</span>';
-  }
-}
-
 function startGCalAuth() {
-  var clientId = document.getElementById('gcal-client-id').value.trim();
+  var saved = JSON.parse(localStorage.getItem('gcal_settings') || '{}');
+  var clientId = saved.client_id;
   if (!clientId) { showToast('Enter a Client ID first'); return; }
   var redirect = window.location.origin + '/dashboard.html';
   var scope = 'https://www.googleapis.com/auth/calendar';
@@ -5586,130 +5512,45 @@ function startGCalAuth() {
     response_type: 'code',
     scope: scope,
     access_type: 'offline',
-    prompt: 'consent'
+    prompt: 'consent',
   }).toString();
-  // Save client_id and secret before redirect
-  var settings = JSON.parse(localStorage.getItem('gcal_settings') || '{}');
-  settings.client_id = clientId;
-  settings.client_secret = document.getElementById('gcal-client-secret').value.trim();
-  settings.calendar_id = document.getElementById('gcal-calendar-id').value.trim();
-  localStorage.setItem('gcal_settings', JSON.stringify(settings));
   window.location.href = url;
 }
 
-async function exchangeGCalCode() {
-  var code = document.getElementById('gcal-auth-code').value.trim();
+async function exchangeGCalCode(code) {
   var saved = JSON.parse(localStorage.getItem('gcal_settings') || '{}');
-  var clientId = document.getElementById('gcal-client-id').value.trim() || saved.client_id;
-  var clientSecret = document.getElementById('gcal-client-secret').value.trim() || saved.client_secret;
-  if (!code || !clientId || !clientSecret) { showToast('Missing code, client ID, or secret'); return; }
-  try {
-    var res = await fetch('https://oauth2.googleapis.com/token', {
-      method: 'POST',
-      headers: { 'Content-Type': 'application/x-www-form-urlencoded' },
-      body: new URLSearchParams({
-        code: code,
-        client_id: clientId,
-        client_secret: clientSecret,
-        redirect_uri: window.location.origin + '/dashboard.html',
-        grant_type: 'authorization_code'
-      }).toString()
-    });
-    var data = await res.json();
-    if (data.refresh_token) {
-      document.getElementById('gcal-refresh-token').value = data.refresh_token;
-      document.getElementById('gcal-token-display').style.display = 'block';
-      document.getElementById('gcal-auth-section').style.display = 'none';
-      // Save
-      saved.refresh_token = data.refresh_token;
-      saved.client_id = clientId;
-      saved.client_secret = clientSecret;
-      localStorage.setItem('gcal_settings', JSON.stringify(saved));
-      // Apply to config
-      AUTOMATION_CONFIG.google_client_id = clientId;
-      AUTOMATION_CONFIG.google_client_secret = clientSecret;
-      AUTOMATION_CONFIG.google_refresh_token = data.refresh_token;
-      AUTOMATION_CONFIG.google_calendar_id = saved.calendar_id || 'primary';
-      updateGCalStatus();
-      // Push the credentials into calendar_accounts so the edge functions can use them server-side.
-      if (typeof persistGoogleAccountFromLocal === 'function') { persistGoogleAccountFromLocal(); }
-      if (typeof renderCalendarSettings === 'function') { renderCalendarSettings(); }
-      showToast('Google Calendar connected successfully!');
-    } else {
-      showToast('Error: ' + (data.error_description || data.error || 'No refresh token received'));
-    }
-  } catch (e) { showToast('Error exchanging code: ' + e.message); }
-}
-
-async function testGCalConnection() {
-  var saved = JSON.parse(localStorage.getItem('gcal_settings') || '{}');
-  if (!saved.refresh_token) { showToast('Connect Google Calendar first'); return; }
-  AUTOMATION_CONFIG.google_client_id = saved.client_id;
-  AUTOMATION_CONFIG.google_client_secret = saved.client_secret;
-  AUTOMATION_CONFIG.google_refresh_token = saved.refresh_token;
-  AUTOMATION_CONFIG.google_calendar_id = saved.calendar_id || 'primary';
-  try {
-    var token = await getGoogleAccessToken();
-    if (!token) { showToast('Failed to get access token — check credentials'); return; }
-    var calId = saved.calendar_id || 'primary';
-    var res = await fetch('https://www.googleapis.com/calendar/v3/calendars/' + encodeURIComponent(calId), {
-      headers: { 'Authorization': 'Bearer ' + token }
-    });
-    var data = await res.json();
-    if (data.summary) {
-      showToast('Connected to: ' + data.summary);
-    } else {
-      showToast('Error: ' + (data.error ? data.error.message : 'Could not read calendar'));
-    }
-  } catch (e) { showToast('Connection test failed: ' + e.message); }
-}
-
-function saveGCalSettings() {
-  var settings = {
-    client_id: document.getElementById('gcal-client-id').value.trim(),
-    client_secret: document.getElementById('gcal-client-secret').value.trim(),
-    calendar_id: document.getElementById('gcal-calendar-id').value.trim(),
-    refresh_token: document.getElementById('gcal-refresh-token').value.trim(),
-    duration: document.getElementById('gcal-duration').value
-  };
-  localStorage.setItem('gcal_settings', JSON.stringify(settings));
-  // Apply to config
-  if (settings.refresh_token) {
-    AUTOMATION_CONFIG.google_client_id = settings.client_id;
-    AUTOMATION_CONFIG.google_client_secret = settings.client_secret;
-    AUTOMATION_CONFIG.google_refresh_token = settings.refresh_token;
-    AUTOMATION_CONFIG.google_calendar_id = settings.calendar_id || 'primary';
+  var clientId = saved.client_id;
+  var clientSecret = saved.client_secret;
+  if (!code || !clientId || !clientSecret) {
+    showToast('Missing code, client ID, or secret');
+    throw new Error('exchangeGCalCode: missing fields');
   }
-  updateGCalStatus();
-  showToast('Google Calendar settings saved');
-}
-
-async function sendTestCalEvent() {
-  var saved = JSON.parse(localStorage.getItem('gcal_settings') || '{}');
-  if (!saved.refresh_token) { showToast('Connect Google Calendar first'); return; }
-  AUTOMATION_CONFIG.google_client_id = saved.client_id;
-  AUTOMATION_CONFIG.google_client_secret = saved.client_secret;
-  AUTOMATION_CONFIG.google_refresh_token = saved.refresh_token;
+  var res = await fetch('https://oauth2.googleapis.com/token', {
+    method: 'POST',
+    headers: { 'Content-Type': 'application/x-www-form-urlencoded' },
+    body: new URLSearchParams({
+      code: code,
+      client_id: clientId,
+      client_secret: clientSecret,
+      redirect_uri: window.location.origin + '/dashboard.html',
+      grant_type: 'authorization_code',
+    }).toString(),
+  });
+  var data = await res.json();
+  if (!data.refresh_token) {
+    showToast('Error: ' + (data.error_description || data.error || 'No refresh token received'));
+    throw new Error(data.error_description || data.error || 'no refresh_token');
+  }
+  saved.refresh_token = data.refresh_token;
+  delete saved.__pending_connect;
+  localStorage.setItem('gcal_settings', JSON.stringify(saved));
+  AUTOMATION_CONFIG.google_client_id = clientId;
+  AUTOMATION_CONFIG.google_client_secret = clientSecret;
+  AUTOMATION_CONFIG.google_refresh_token = data.refresh_token;
   AUTOMATION_CONFIG.google_calendar_id = saved.calendar_id || 'primary';
-  var durationMins = parseInt(saved.duration || '60');
-  var testLead = { first_name: 'Test', last_name: 'Booking', email: 'test@example.com', phone: '+44 7700 000000' };
-  var now = new Date();
-  var tomorrow = new Date(now.getTime() + 86400000);
-  tomorrow.setHours(10, 0, 0, 0);
-  var testBooking = {
-    date: tomorrow.toLocaleDateString('en-GB', { weekday: 'long', day: 'numeric', month: 'long' }),
-    time: '10:00',
-    location: 'Ipswich',
-    datetime: tomorrow.toISOString().substring(0, 11) + '10:00:00'
-  };
-  try {
-    var result = await addToGoogleCalendar(testLead, testBooking, durationMins);
-    if (result.success) {
-      showToast('Test event added to your calendar for tomorrow at 10am!');
-    } else {
-      showToast('Error: ' + result.error);
-    }
-  } catch (e) { showToast('Error: ' + e.message); }
+  if (typeof persistGoogleAccountFromLocal === 'function') { await persistGoogleAccountFromLocal(); }
+  if (typeof renderCalendarSettings === 'function') { renderCalendarSettings(); }
+  showToast('Google Calendar connected');
 }
 
 /* ── HORMONAL ASSESSMENTS ── */
