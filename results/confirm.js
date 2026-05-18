@@ -203,8 +203,80 @@
     window.location.href = url;
   }
 
+  // Preview mode — lets us view the page without a real booking row.
+  // Usage: ?preview=1 (form state) or ?preview=success (success state).
+  function mockBooking(){
+    var d = new Date();
+    d.setDate(d.getDate() + 5);
+    return {
+      id: 'preview',
+      confirm_token: 'preview',
+      confirmed_at: null,
+      first_name: 'Sarah',
+      last_name: 'Example',
+      email: 'sarah@example.com',
+      location: 'Ipswich',
+      assessment_session_id: null,
+      slot_id: null,
+      booking_slots: {
+        date: d.toISOString().slice(0, 10),
+        start_time: '10:30:00',
+        end_time: '11:30:00',
+        location: 'Ipswich'
+      }
+    };
+  }
+  function mockMembers(){
+    return [
+      { id:'m1', name:'Member A',
+        image_url:'https://placehold.co/600x800/E8DDD0/2A2724?text=Member+A',
+        starting_point:"Belly weight that wouldn't shift, despite training 4x/week",
+        goal:'Sleep through the night, drop a stone' },
+      { id:'m2', name:'Member B',
+        image_url:'https://placehold.co/600x800/E8DDD0/2A2724?text=Member+B',
+        starting_point:'Wired all day, knackered all evening, cravings at 4pm',
+        goal:'Get her energy back, lose 8kg' },
+      { id:'m3', name:'Member C',
+        image_url:'https://placehold.co/600x800/E8DDD0/2A2724?text=Member+C',
+        starting_point:'High-stress job, plateaued for 18 months',
+        goal:'Reshape around her stress, not against it' }
+    ];
+  }
+  function runPreview(mode){
+    state.bookingId = 'preview';
+    state.confirmToken = 'preview';
+    state.booking = mockBooking();
+    var sb = buildClient();
+    loadGallery(sb).catch(function(){ return null; }).then(function(){
+      if (!state.members || state.members.length === 0){
+        state.members = mockMembers();
+      }
+      renderHero();
+      renderGallery();
+      $('#submit-btn').addEventListener('click', function(){
+        show('state-success');
+        window.scrollTo({ top: 0, behavior: 'smooth' });
+      });
+      $('#reschedule-btn').addEventListener('click', function(){
+        alert('Reschedule (preview mode — no redirect).');
+      });
+      if (mode === 'success'){
+        show('state-success');
+      } else {
+        show('state-form');
+      }
+    });
+  }
+
   // ── INIT ──
   document.addEventListener('DOMContentLoaded', function(){
+    var qs = new URLSearchParams(window.location.search);
+    var preview = qs.get('preview');
+    if (preview){
+      runPreview(preview);
+      return;
+    }
+
     var p = getParams();
     if (!p.id || !p.token){
       showError("This confirmation link is missing some details. Check the message we sent you, or get in touch.");
