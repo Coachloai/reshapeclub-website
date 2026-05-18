@@ -3219,7 +3219,7 @@ function renderRoutingCard() {
         var on = selected.indexOf(o.id) !== -1;
         return '<button type="button" class="funnel-chip' + (on ? ' selected' : '') +
           '" data-appt="' + a.id + '" data-kind="' + kind + '" data-cal="' + escapeAttr(o.id) +
-          '" onclick="toggleRoutingChip(this)">' + escapeHtmlDash(o.label) + '</button>';
+          '">' + escapeHtmlDash(o.label) + '</button>';
       }).join('');
     }
     return '<div style="border:1px solid var(--border);border-radius:10px;padding:14px 16px;background:var(--s1)">' +
@@ -3237,10 +3237,6 @@ function renderRoutingCard() {
 }
 
 function escapeAttr(s) { return String(s == null ? '' : s).replace(/"/g, '&quot;'); }
-
-function toggleRoutingChip(btn) {
-  btn.classList.toggle('selected');
-}
 
 async function saveRoutingRow(apptId) {
   var targetEls = document.querySelectorAll('#routing-rows .funnel-chip[data-appt="' + apptId + '"][data-kind="target"].selected');

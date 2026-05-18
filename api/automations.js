@@ -11,7 +11,7 @@ var AUTOMATION_CONFIG = window.__AUTOMATION_CONFIG || {
   google_client_id: '',
   google_client_secret: '',
   google_refresh_token: '',
-  icloud_enabled: false,
+  icloud_enabled: true,
   from_email: 'coach@reshape.fit',
   from_name: 'Jaime | ReShape',
   booking_url: 'https://reshape.fit/booking',
