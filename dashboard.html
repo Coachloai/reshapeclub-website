@@ -418,8 +418,9 @@ body{
 .cal-account-body{flex:1;min-width:0}
 .cal-account-name{font-size:13px;font-weight:600;color:var(--text)}
 .cal-account-email{font-size:12px;color:var(--text3);overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
-.cal-account-count{font-size:12px;font-weight:600;color:var(--orange);margin-top:2px;cursor:pointer}
-.cal-account-count:hover{text-decoration:underline}
+.cal-account-count{display:inline-flex;align-items:center;gap:4px;margin-top:4px;font-size:12px;font-weight:600;color:var(--orange);background:rgba(237,92,37,.08);border:1px solid rgba(237,92,37,.25);border-radius:6px;padding:4px 8px;cursor:pointer;transition:background .15s,border-color .15s}
+.cal-account-count:hover{background:rgba(237,92,37,.16);border-color:rgba(237,92,37,.5)}
+.cal-account-count::after{content:'›';margin-left:2px;font-weight:400;opacity:.7}
 .cal-account-x{background:none;border:none;color:var(--text3);font-size:18px;cursor:pointer;width:28px;height:28px;border-radius:6px;display:flex;align-items:center;justify-content:center}
 .cal-account-x:hover{color:var(--red);background:rgba(231,76,60,.08)}
 .cal-empty{padding:24px;text-align:center;color:var(--text3);font-size:13px;background:var(--s1);border:1px dashed var(--border);border-radius:10px}
@@ -440,6 +441,9 @@ body{
 .cal-modal-item:hover{color:var(--text)}
 .connect-tile{display:flex;align-items:center;gap:14px;padding:14px 16px;background:var(--s2);border:1px solid var(--border);border-radius:10px;color:var(--text);font-family:var(--body);cursor:pointer;width:100%;text-align:left;transition:border-color .15s,background .15s}
 .connect-tile:hover{border-color:rgba(237,92,37,.4);background:var(--s3)}
+.cal-info{position:relative;display:inline-flex;align-items:center;justify-content:center;width:14px;height:14px;border-radius:50%;border:1px solid var(--border);color:var(--text3);font-size:10px;font-style:normal;cursor:help;margin-left:4px;font-family:var(--body)}
+.cal-info:hover{border-color:var(--orange);color:var(--orange)}
+.cal-info[data-tip]:hover::after{content:attr(data-tip);position:absolute;bottom:calc(100% + 6px);left:50%;transform:translateX(-50%);background:var(--s3);border:1px solid var(--border);border-radius:8px;padding:8px 12px;font-size:12px;color:var(--text2);white-space:nowrap;max-width:280px;white-space:normal;width:max-content;z-index:50;box-shadow:0 8px 20px rgba(0,0,0,.4);font-weight:400;line-height:1.4}
 .appts-topbar{display:flex;justify-content:space-between;align-items:center;gap:16px;flex-wrap:wrap;border-bottom:1px solid var(--border);padding-bottom:12px}
 .appts-tabs{display:flex;gap:4px}
 .appts-tab{background:transparent;border:none;color:var(--text3);font-family:var(--body);font-size:13px;font-weight:600;padding:8px 4px;cursor:pointer;border-bottom:2px solid transparent;transition:color .15s,border-color .15s}
@@ -1848,6 +1852,24 @@ if(sessionStorage.getItem('rs_auth')==='1'){
                 <input type="date" class="appt-form-input" id="appt-range-end">
               </div>
             </div>
+            <!-- Per-appointment-type calendar routing override -->
+            <div class="appt-form-group" style="margin-bottom:16px;padding-top:16px;border-top:1px solid var(--border)">
+              <label class="appt-form-label">Calendar routing (override)</label>
+              <p style="font-size:12px;color:var(--text3);margin-bottom:8px">Leave blank to use the global Calendar settings. Override these to route this appointment type to a specific calendar — useful if Ipswich and Colchester use different staff accounts.</p>
+              <div style="font-size:11px;color:var(--text3);margin:8px 0 4px;text-transform:uppercase;letter-spacing:.5px">Write bookings to</div>
+              <div style="position:relative">
+                <button id="appt-target-btn" type="button" class="cal-target-btn" onclick="toggleApptTargetDropdown(event)">
+                  <span id="appt-target-label">Use global default</span>
+                  <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polyline points="6 9 12 15 18 9"/></svg>
+                </button>
+                <div id="appt-target-dropdown" class="cal-target-dropdown" style="display:none"></div>
+              </div>
+              <div style="font-size:11px;color:var(--text3);margin:14px 0 4px;text-transform:uppercase;letter-spacing:.5px">Conflict calendars</div>
+              <button type="button" class="cal-target-btn" onclick="openApptConflictModal()">
+                <span id="appt-conflicts-label">Use global default</span>
+                <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polyline points="9 18 15 12 9 6"/></svg>
+              </button>
+            </div>
           </div>
           <div class="drawer-footer">
             <button class="btn btn-ghost" onclick="toggleApptForm()">Cancel</button>
@@ -1904,7 +1926,7 @@ if(sessionStorage.getItem('rs_auth')==='1'){
         <div style="font-size:13px;font-weight:600;color:var(--text);margin:18px 0 10px">Sync settings</div>
         <label style="display:flex;align-items:center;gap:10px;font-size:13px;color:var(--text2);cursor:pointer">
           <input type="checkbox" id="cal-include-buffers" onchange="saveCalendarSettings()">
-          <span>Include buffers on this calendar <span title="Block availability for any buffer events on the target calendar." style="color:var(--text3);font-size:12px">ⓘ</span></span>
+          <span>Include buffers on this calendar <span class="cal-info" data-tip="When on, any buffer events you've added before or after meetings on the target calendar also block availability on the booking page.">i</span></span>
         </label>
       </div>
 
@@ -3345,6 +3367,38 @@ async function loadCalendarSettings() {
     console.warn('Could not load calendar_settings:', e.message);
     CAL_SETTINGS = { id: 'global', conflict_calendars: [], default_target_calendar: null, include_buffers: false };
   }
+
+  // Auto-refresh per-account calendar lists if we have a connection but no cache yet.
+  // Without this the conflict modal and target dropdown both show "no calendars"
+  // even though the account is fully connected.
+  try {
+    var accRes = await sb.from('calendar_accounts_public').select('provider, email');
+    var accs = (accRes.data || []);
+    var hasIcloud = accs.some(function(a){ return a.provider === 'icloud'; });
+    var hasGoogle = accs.some(function(a){ return a.provider === 'google'; });
+    if (hasIcloud) {
+      AUTOMATION_CONFIG.icloud_enabled = true;
+      var icEmail = (accs.find(function(a){ return a.provider === 'icloud'; }) || {}).email;
+      if (icEmail) AUTOMATION_CONFIG.icloud_username = icEmail;
+      if (JSON.parse(localStorage.getItem('icloud_calendar_list') || '[]').length === 0) {
+        refreshIcloudCalendarList(); // fire-and-forget; renderCalendarSettings is called when it finishes
+      }
+    }
+    if (hasGoogle) {
+      var gEmail = (accs.find(function(a){ return a.provider === 'google'; }) || {}).email;
+      if (gEmail) {
+        var saved = JSON.parse(localStorage.getItem('gcal_settings') || '{}');
+        if (!saved.account_email) { saved.account_email = gEmail; localStorage.setItem('gcal_settings', JSON.stringify(saved)); }
+      }
+      if (JSON.parse(localStorage.getItem('gcal_calendar_list') || '[]').length === 0) {
+        // Need an access token first — only attempt if we have a refresh token saved.
+        var gsaved = JSON.parse(localStorage.getItem('gcal_settings') || '{}');
+        if (gsaved.refresh_token) refreshGoogleCalendarList();
+      }
+    }
+  } catch (e) {
+    console.warn('Could not auto-refresh calendar accounts:', e.message);
+  }
 }
 
 function renderCalendarSettings() {
@@ -3495,6 +3549,7 @@ async function disconnectCalendarAccount(account) {
 /* ── CONFLICT MODAL ── */
 
 function openConflictModal(account) {
+  __conflictModalScope = 'global';
   __conflictModalAccount = account;
   var modal = document.getElementById('cal-conflict-modal');
   var listEl = document.getElementById('cal-modal-list');
@@ -3529,10 +3584,16 @@ function closeConflictModal() {
   document.getElementById('cal-conflict-modal').style.display = 'none';
 }
 async function confirmConflictModal() {
-  var account = __conflictModalAccount;
   var checked = Array.from(document.querySelectorAll('#cal-modal-list input[type=checkbox]'));
   var picked = checked.filter(function(c){ return c.checked; }).map(function(c){ return c.dataset.cal; });
-  // Strip the old selections from this account, then add the new ones.
+  if (__conflictModalScope === 'appt') {
+    __apptOverrides.conflicts = picked;
+    closeConflictModal();
+    renderApptOverrideUI();
+    return;
+  }
+  // Global: strip the old selections from this account, then add the new ones.
+  var account = __conflictModalAccount;
   var others = (CAL_SETTINGS.conflict_calendars || []).filter(function(c) {
     return account === 'icloud' ? c.indexOf('icloud') !== 0 : c.indexOf('google:') !== 0;
   });
@@ -3540,6 +3601,129 @@ async function confirmConflictModal() {
   closeConflictModal();
   renderCalendarSettings();
   await saveCalendarSettings();
+}
+
+/* ──────────────────────────────────────
+   PER-APPOINTMENT-TYPE CALENDAR ROUTING (override)
+   The drawer holds the current edit's overrides in __apptOverrides;
+   saveApptType writes them to appointment_types.calendar_targets[0]
+   (single target) and appointment_types.conflict_calendars (array).
+────────────────────────────────────── */
+
+var __apptOverrides = { target: null, conflicts: [] };
+
+function resetApptOverrides(appt) {
+  __apptOverrides.target = (appt && Array.isArray(appt.calendar_targets) && appt.calendar_targets[0]) || null;
+  __apptOverrides.conflicts = (appt && Array.isArray(appt.conflict_calendars)) ? appt.conflict_calendars.slice() : [];
+  renderApptOverrideUI();
+}
+
+function renderApptOverrideUI() {
+  var opts = getAllCalendarOptions();
+  var label = document.getElementById('appt-target-label');
+  if (!label) return;
+  if (!__apptOverrides.target) {
+    label.textContent = 'Use global default';
+  } else {
+    var match = opts.find(function(o){ return o.id === __apptOverrides.target; });
+    label.textContent = match
+      ? match.label + (match.account === 'icloud' ? ' (iCloud)' : ' (Google)')
+      : __apptOverrides.target;
+  }
+  var conflictsLabel = document.getElementById('appt-conflicts-label');
+  if (conflictsLabel) {
+    var n = __apptOverrides.conflicts.length;
+    conflictsLabel.textContent = n === 0 ? 'Use global default' : (n + ' calendar' + (n === 1 ? '' : 's') + ' selected (overrides global)');
+  }
+}
+
+function toggleApptTargetDropdown(ev) {
+  if (ev) ev.stopPropagation();
+  var dd = document.getElementById('appt-target-dropdown');
+  if (dd.style.display === 'block') { dd.style.display = 'none'; return; }
+  var opts = getAllCalendarOptions();
+  var current = __apptOverrides.target;
+  var html = '';
+  // Default option
+  html += '<div class="cal-target-group">Default</div>';
+  html += '<div class="cal-target-opt' + (!current ? ' selected' : '') + '" onclick="selectApptTarget(null, event)">' +
+    '<span class="cal-check">✓</span>Use global default</div>';
+  var byAccount = { icloud: [], google: [] };
+  opts.forEach(function(o){ byAccount[o.account].push(o); });
+  if (byAccount.icloud.length) {
+    html += '<div class="cal-target-group">iCloud · ' + escapeHtmlDash(AUTOMATION_CONFIG.icloud_username || 'iCloud') + '</div>';
+    html += byAccount.icloud.map(function(o){
+      return '<div class="cal-target-opt' + (o.id === current ? ' selected' : '') + '" onclick="selectApptTarget(\'' + escapeAttr(o.id) + '\', event)">' +
+        '<span class="cal-check">✓</span>' + escapeHtmlDash(o.label) + '</div>';
+    }).join('');
+  }
+  if (byAccount.google.length) {
+    var gsaved = JSON.parse(localStorage.getItem('gcal_settings') || '{}');
+    html += '<div class="cal-target-group">Google · ' + escapeHtmlDash(gsaved.account_email || 'Google') + '</div>';
+    html += byAccount.google.map(function(o){
+      return '<div class="cal-target-opt' + (o.id === current ? ' selected' : '') + '" onclick="selectApptTarget(\'' + escapeAttr(o.id) + '\', event)">' +
+        '<span class="cal-check">✓</span>' + escapeHtmlDash(o.label) + '</div>';
+    }).join('');
+  }
+  dd.innerHTML = html;
+  dd.style.display = 'block';
+  setTimeout(function() { document.addEventListener('click', closeApptTargetDropdownOnOutside, { once: true }); }, 0);
+}
+function closeApptTargetDropdownOnOutside(e) {
+  var dd = document.getElementById('appt-target-dropdown');
+  var btn = document.getElementById('appt-target-btn');
+  if (!dd || !btn) return;
+  if (!dd.contains(e.target) && !btn.contains(e.target)) dd.style.display = 'none';
+  else document.addEventListener('click', closeApptTargetDropdownOnOutside, { once: true });
+}
+function selectApptTarget(calId, ev) {
+  if (ev) ev.stopPropagation();
+  document.getElementById('appt-target-dropdown').style.display = 'none';
+  __apptOverrides.target = calId;
+  renderApptOverrideUI();
+}
+
+// Reuses the existing conflict modal markup but with a different selection set
+// and a flag telling confirmConflictModal to write into __apptOverrides instead
+// of CAL_SETTINGS.
+var __conflictModalScope = 'global'; // 'global' | 'appt'
+
+function openApptConflictModal() {
+  __conflictModalScope = 'appt';
+  var modal = document.getElementById('cal-conflict-modal');
+  var listEl = document.getElementById('cal-modal-list');
+  var accountEl = document.getElementById('cal-modal-account');
+  accountEl.textContent = 'This appointment type (override)';
+  var opts = getAllCalendarOptions();
+  var selected = new Set(__apptOverrides.conflicts);
+  if (opts.length === 0) {
+    listEl.innerHTML = '<div style="color:var(--text3);font-size:13px;padding:8px 4px">No calendars discovered yet. Connect an account first.</div>';
+  } else {
+    // Group by account for clarity.
+    var byAccount = { icloud: [], google: [] };
+    opts.forEach(function(o){ byAccount[o.account].push(o); });
+    var html = '';
+    if (byAccount.icloud.length) {
+      html += '<div style="font-size:11px;color:var(--text3);text-transform:uppercase;letter-spacing:.5px;margin:4px 0">iCloud</div>';
+      html += byAccount.icloud.map(function(o) {
+        return '<label class="cal-modal-item">' +
+          '<input type="checkbox" data-cal="' + escapeAttr(o.id) + '"' + (selected.has(o.id) ? ' checked' : '') + '>' +
+          '<span>' + escapeHtmlDash(o.label) + '</span>' +
+        '</label>';
+      }).join('');
+    }
+    if (byAccount.google.length) {
+      html += '<div style="font-size:11px;color:var(--text3);text-transform:uppercase;letter-spacing:.5px;margin:10px 0 4px">Google</div>';
+      html += byAccount.google.map(function(o) {
+        return '<label class="cal-modal-item">' +
+          '<input type="checkbox" data-cal="' + escapeAttr(o.id) + '"' + (selected.has(o.id) ? ' checked' : '') + '>' +
+          '<span>' + escapeHtmlDash(o.label) + '</span>' +
+        '</label>';
+      }).join('');
+    }
+    listEl.innerHTML = html;
+  }
+  modal.style.display = 'flex';
 }
 
 /* ── REFRESH CALENDAR LISTS ── */
@@ -4119,6 +4303,7 @@ function toggleApptForm() {
   document.querySelectorAll('#appt-locations .funnel-chip').forEach(function(el) { el.classList.toggle('selected', el.dataset.loc === 'Ipswich'); });
   document.querySelectorAll('#appt-funnels .funnel-chip').forEach(function(el) { el.classList.toggle('selected', el.dataset.funnel !== 'ReShape Club'); });
   renderDaySchedules(null); // Default Mon-Fri 09:00-17:00
+  resetApptOverrides(null);
 }
 
 function editApptType(id) {
@@ -4149,6 +4334,7 @@ function editApptType(id) {
     a.weekdays.forEach(function(d) { ds[String(d)] = JSON.parse(JSON.stringify(tw)); });
   }
   renderDaySchedules(ds);
+  resetApptOverrides(a);
 }
 
 document.addEventListener('click', function(e) {
@@ -4199,6 +4385,9 @@ async function saveApptType() {
     rolling_weeks: __apptMode === 'rolling' ? rollingWeeks : null,
     range_start: __apptMode === 'range' ? rangeStart : null,
     range_end: __apptMode === 'rolling' ? rollingEnd : (__apptMode === 'range' ? rangeEnd : null),
+    // Per-appointment-type routing override (empty = use global Calendar settings)
+    calendar_targets: __apptOverrides.target ? [__apptOverrides.target] : [],
+    conflict_calendars: __apptOverrides.conflicts || [],
     is_active: true
   };
 

@@ -236,13 +236,29 @@ async function loadGlobalCalendarSettings() {
   } catch (e) { return null; }
 }
 
+/* ── LOAD PER-TYPE OVERRIDE ── */
+async function loadApptTypeTarget(booking) {
+  var sbClient = (typeof window !== 'undefined' && window.__supabaseClient) || null;
+  if (!sbClient || !booking || !booking.appointment_type_id) return null;
+  try {
+    var res = await sbClient.from('appointment_types').select('calendar_targets').eq('id', booking.appointment_type_id).maybeSingle();
+    var arr = res.data && Array.isArray(res.data.calendar_targets) ? res.data.calendar_targets : [];
+    return arr[0] || null;
+  } catch (e) { return null; }
+}
+
 /* ── SEND COACH CALENDAR INVITE ── */
 async function sendCoachCalendarInvite(lead, booking) {
   if (!booking || !booking.datetime) return;
 
-  // Resolve where to write the event from the global calendar settings.
-  var settings = await loadGlobalCalendarSettings();
-  var target = settings && settings.default_target_calendar;
+  // Resolve where to write the event: per-type override first, else the
+  // global default from calendar_settings.
+  var typeTarget = await loadApptTypeTarget(booking);
+  var target = typeTarget;
+  if (!target) {
+    var settings = await loadGlobalCalendarSettings();
+    target = settings && settings.default_target_calendar;
+  }
 
   var tasks = [];
   if (target) {
