@@ -171,7 +171,7 @@
       +   '<div class="gate">'
       +     '<div class="gate-icon">✦</div>'
       +     '<h3>Where should we send your full pattern report?</h3>'
-      +     "<p>You're 40% through. We'll email your archetype reveal, the protocol guidance, and your free strategy-call link the moment you finish.</p>"
+      +     "<p>You're 40% through. We'll email your archetype reveal, the protocol guidance, and your free in-person consult link the moment you finish.</p>"
       +     '<div class="gate-fields">'
       +       '<input type="text" id="gate-name" placeholder="First name" autocomplete="given-name">'
       +       '<input type="email" id="gate-email" placeholder="you@example.com" autocomplete="email">'
