@@ -244,9 +244,14 @@ async function applyConflictCalendarFiltering() {
     var fromIso = new Date().toISOString();
     var lastSlot = __bookingSlots[__bookingSlots.length - 1];
     var toIso = new Date(lastSlot.date + 'T23:59:59').toISOString();
+    var __anon = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6Imx2aXpsZG1kZmljc2ZwZ2VnZWhwIiwicm9sZSI6ImFub24iLCJpYXQiOjE3NzM2OTk4NDQsImV4cCI6MjA4OTI3NTg0NH0.72wHbZaTvqNzW6DTb6Ae1vi9QpOg_-KiEO-Jjm9mn0k';
     var fb = await fetch('https://lvizldmdficsfpgegehp.supabase.co/functions/v1/calendar-freebusy', {
       method: 'POST',
-      headers: { 'Content-Type': 'application/json' },
+      headers: {
+        'Content-Type': 'application/json',
+        'Authorization': 'Bearer ' + __anon,
+        'apikey': __anon,
+      },
       body: JSON.stringify({ calendars: cals, from: fromIso, to: toIso }),
     });
     var fbData = await fb.json().catch(function() { return {}; });

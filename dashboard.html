@@ -3582,7 +3582,11 @@ async function submitIcloudConnect() {
   try {
     var res = await fetch('https://lvizldmdficsfpgegehp.supabase.co/functions/v1/icloud-calendar', {
       method: 'POST',
-      headers: { 'Content-Type': 'application/json' },
+      headers: {
+        'Content-Type': 'application/json',
+        'Authorization': 'Bearer ' + SUPABASE_ANON_KEY,
+        'apikey': SUPABASE_ANON_KEY,
+      },
       body: JSON.stringify({ action: 'connect', username: email, password: pw }),
     });
     var data = await res.json().catch(function(){ return {}; });
@@ -3663,7 +3667,11 @@ async function refreshIcloudCalendarList() {
   try {
     var res = await fetch('https://lvizldmdficsfpgegehp.supabase.co/functions/v1/icloud-calendar', {
       method: 'POST',
-      headers: { 'Content-Type': 'application/json' },
+      headers: {
+        'Content-Type': 'application/json',
+        'Authorization': 'Bearer ' + SUPABASE_ANON_KEY,
+        'apikey': SUPABASE_ANON_KEY,
+      },
       body: JSON.stringify({ action: 'list' }),
     });
     var data = await res.json();

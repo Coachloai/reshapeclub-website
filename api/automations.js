@@ -194,12 +194,24 @@ async function addToGoogleCalendar(lead, booking, calendarIdOverride) {
   return data.id ? { success: true, id: data.id } : { success: false, error: data.error ? data.error.message : 'Unknown error' };
 }
 
+// Supabase anon key (public — safe to include) for hitting the edge functions
+// that have JWT verification enabled.
+var SUPABASE_ANON_KEY_PUBLIC = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6Imx2aXpsZG1kZmljc2ZwZ2VnZWhwIiwicm9sZSI6ImFub24iLCJpYXQiOjE3NzM2OTk4NDQsImV4cCI6MjA4OTI3NTg0NH0.72wHbZaTvqNzW6DTb6Ae1vi9QpOg_-KiEO-Jjm9mn0k';
+
+function edgeHeaders() {
+  return {
+    'Content-Type': 'application/json',
+    'Authorization': 'Bearer ' + SUPABASE_ANON_KEY_PUBLIC,
+    'apikey': SUPABASE_ANON_KEY_PUBLIC,
+  };
+}
+
 /* ── ICLOUD CALENDAR — CREATE EVENT (via Supabase Edge Function) ── */
 async function addToIcloudCalendar(lead, booking, calendarNameOverride) {
   var leadName = ((lead.first_name || '') + ' ' + (lead.last_name || '')).trim();
   var res = await fetch('https://lvizldmdficsfpgegehp.supabase.co/functions/v1/icloud-calendar', {
     method: 'POST',
-    headers: { 'Content-Type': 'application/json' },
+    headers: edgeHeaders(),
     body: JSON.stringify({
       leadName: leadName,
       leadEmail: lead.email,
