@@ -991,6 +991,87 @@ select.appt-form-input option{background:var(--s3)}
 .gate-btn{width:100%;padding:12px;background:var(--orange);color:#fff;border:none;border-radius:10px;font-family:var(--body);font-weight:700;font-size:14px;cursor:pointer;transition:background .2s}
 .gate-btn:hover{background:var(--orange2)}
 .gate-err{color:var(--red);font-size:12px;margin-top:8px;display:none}
+/* ── MESSAGING (BROADCAST COMPOSER) ── */
+.msg-grid{display:grid;grid-template-columns:340px 1fr;gap:18px;align-items:start}
+@media(max-width:900px){.msg-grid{grid-template-columns:1fr}}
+.msg-aud{background:var(--s1);border:1px solid var(--border);border-radius:14px;padding:20px;position:sticky;top:78px}
+.msg-aud h4{font-family:var(--head);font-size:13px;font-weight:700;letter-spacing:.04em;text-transform:uppercase;color:var(--text3);margin:18px 0 10px}
+.msg-aud h4:first-child{margin-top:0}
+.msg-checklist{display:flex;flex-direction:column;gap:6px;max-height:200px;overflow-y:auto}
+.msg-check{display:flex;align-items:center;gap:8px;padding:8px 10px;border:1px solid var(--border);border-radius:8px;cursor:pointer;font-size:13px;color:var(--text2);background:var(--bg);transition:all .15s}
+.msg-check:hover{border-color:rgba(237,92,37,.5);color:var(--text)}
+.msg-check input{accent-color:var(--orange);cursor:pointer}
+.msg-check.selected{background:var(--odim);border-color:var(--orange);color:var(--text)}
+.msg-input{width:100%;background:var(--s3);border:1.5px solid var(--border);border-radius:10px;color:var(--text);padding:10px 12px;font-family:var(--body);font-size:14px;outline:none;transition:border-color .2s}
+.msg-input:focus{border-color:var(--orange)}
+.msg-row{display:flex;gap:8px;align-items:center}
+.msg-row .msg-input{flex:1}
+.msg-row .msg-dash{color:var(--text3);font-size:14px}
+.msg-radios{display:flex;gap:6px;flex-wrap:wrap}
+.msg-radio{flex:1;padding:8px 10px;border:1.5px solid var(--border);border-radius:8px;background:var(--bg);color:var(--text2);font-size:13px;cursor:pointer;text-align:center;transition:all .15s;font-family:var(--body)}
+.msg-radio.active{background:var(--odim);border-color:var(--orange);color:var(--text)}
+.msg-count{margin-top:22px;padding:18px;background:var(--bg);border:1px solid var(--border);border-radius:12px;text-align:center}
+.msg-count-num{font-family:var(--head);font-size:36px;font-weight:700;color:var(--orange);letter-spacing:-0.02em;line-height:1}
+.msg-count-lbl{font-size:11px;text-transform:uppercase;letter-spacing:.14em;color:var(--text3);margin-top:6px;font-weight:600}
+.msg-count-sub{font-size:12px;color:var(--text3);margin-top:8px}
+.msg-compose{background:var(--s1);border:1px solid var(--border);border-radius:14px;padding:0;overflow:hidden}
+.msg-tabs{display:flex;border-bottom:1px solid var(--border)}
+.msg-tab{flex:1;padding:14px 16px;background:transparent;border:none;cursor:pointer;font-family:var(--body);font-weight:600;font-size:13px;color:var(--text3);transition:all .15s;display:flex;align-items:center;justify-content:center;gap:8px;border-bottom:2px solid transparent}
+.msg-tab:hover{color:var(--text)}
+.msg-tab.active{color:var(--orange);border-bottom-color:var(--orange);background:var(--odim2)}
+.msg-tab svg{width:14px;height:14px}
+.msg-pane{padding:24px;display:none}
+.msg-pane.active{display:block}
+.msg-label{font-size:12px;font-weight:600;color:var(--text3);text-transform:uppercase;letter-spacing:.08em;margin-bottom:8px;display:flex;align-items:center;justify-content:space-between}
+.msg-label .msg-counter{color:var(--text2);font-size:11px;font-weight:500;letter-spacing:.02em;text-transform:none;font-variant-numeric:tabular-nums}
+.msg-textarea{width:100%;min-height:220px;background:var(--s3);border:1.5px solid var(--border);border-radius:10px;color:var(--text);padding:14px;font-family:var(--body);font-size:14px;line-height:1.6;outline:none;resize:vertical;transition:border-color .2s}
+.msg-textarea:focus{border-color:var(--orange)}
+.msg-token-hint{font-size:11px;color:var(--text3);margin-top:6px;font-style:italic}
+.msg-token-hint code{background:var(--s3);padding:2px 6px;border-radius:4px;font-family:'SF Mono',Menlo,monospace;color:var(--orange);font-style:normal;font-size:10px}
+.msg-select{width:100%;background:var(--s3);border:1.5px solid var(--border);border-radius:10px;color:var(--text);padding:10px 12px;font-family:var(--body);font-size:14px;outline:none;cursor:pointer;transition:border-color .2s}
+.msg-select:focus{border-color:var(--orange)}
+.msg-tpl-preview{margin-top:12px;padding:14px;background:var(--bg);border:1px dashed var(--border);border-radius:10px;font-size:13px;color:var(--text2);line-height:1.6;white-space:pre-wrap}
+.msg-tpl-preview:empty{display:none}
+.msg-tpl-vars{margin-top:14px;display:flex;flex-direction:column;gap:8px}
+.msg-tpl-vars:empty{display:none}
+.msg-tpl-var-row{display:flex;gap:8px;align-items:center}
+.msg-tpl-var-row label{font-size:12px;color:var(--text3);min-width:64px;font-family:'SF Mono',Menlo,monospace}
+.msg-actions{padding:18px 24px;border-top:1px solid var(--border);background:var(--bg);display:flex;align-items:center;justify-content:space-between;gap:12px;flex-wrap:wrap}
+.msg-schedule{display:flex;align-items:center;gap:8px;font-size:13px;color:var(--text3)}
+.msg-schedule .msg-input{font-size:13px;padding:8px 10px}
+.msg-send-btn{background:var(--orange);color:#fff;padding:12px 24px;border-radius:10px;border:none;cursor:pointer;font-family:var(--body);font-weight:700;font-size:14px;transition:all .2s;display:inline-flex;align-items:center;gap:8px}
+.msg-send-btn:hover:not(:disabled){background:var(--orange2);transform:translateY(-1px);box-shadow:0 8px 24px rgba(237,92,37,.25)}
+.msg-send-btn:disabled{opacity:.4;cursor:not-allowed}
+.msg-history{margin-top:28px;background:var(--s1);border:1px solid var(--border);border-radius:14px;padding:20px}
+.msg-history h3{font-family:var(--head);font-size:14px;font-weight:700;letter-spacing:.04em;text-transform:uppercase;color:var(--text3);margin-bottom:14px}
+.msg-history-table{width:100%;border-collapse:collapse;font-size:13px}
+.msg-history-table th{text-align:left;font-weight:600;color:var(--text3);padding:8px 12px;font-size:11px;text-transform:uppercase;letter-spacing:.08em;border-bottom:1px solid var(--border)}
+.msg-history-table td{padding:12px;border-bottom:1px solid var(--border2);color:var(--text2);vertical-align:middle}
+.msg-history-table tr:last-child td{border-bottom:none}
+.msg-pill{display:inline-flex;align-items:center;gap:6px;padding:4px 10px;border-radius:999px;font-size:11px;font-weight:600;border:1px solid var(--border)}
+.msg-pill.email   {color:var(--text);background:var(--odim2);border-color:rgba(237,92,37,.3)}
+.msg-pill.sms     {color:var(--text);background:rgba(46,204,113,.10);border-color:rgba(46,204,113,.35)}
+.msg-pill.whatsapp{color:var(--text);background:rgba(37,211,102,.10);border-color:rgba(37,211,102,.35)}
+.msg-status{display:inline-flex;align-items:center;gap:6px;font-size:12px;font-weight:600}
+.msg-status::before{content:'';width:6px;height:6px;border-radius:50%}
+.msg-status.queued::before  {background:var(--text4,#B8B2A8)}
+.msg-status.sending::before {background:var(--orange)}
+.msg-status.sent::before    {background:var(--green)}
+.msg-status.partial::before {background:var(--orange2)}
+.msg-status.failed::before  {background:var(--red)}
+.msg-status.cancelled::before{background:var(--text3)}
+.msg-confirm-overlay{position:fixed;inset:0;background:rgba(42,39,36,0.4);backdrop-filter:blur(4px);display:none;align-items:center;justify-content:center;z-index:200;padding:20px}
+.msg-confirm-overlay.open{display:flex}
+.msg-confirm{background:var(--s1);border:1px solid var(--border);border-radius:16px;padding:28px;max-width:480px;width:100%;box-shadow:0 32px 80px rgba(42,39,36,.16)}
+.msg-confirm h3{font-family:var(--head);font-size:22px;color:var(--text);margin-bottom:8px;letter-spacing:-0.02em}
+.msg-confirm p{font-size:14px;color:var(--text2);margin-bottom:16px;line-height:1.6}
+.msg-confirm .msg-cost{margin:18px 0;padding:16px;background:var(--bg);border-radius:10px;border:1px solid var(--border);font-size:13px;color:var(--text2);display:flex;flex-direction:column;gap:6px}
+.msg-confirm .msg-cost-row{display:flex;justify-content:space-between}
+.msg-confirm .msg-cost-row strong{color:var(--text)}
+.msg-confirm-actions{display:flex;gap:10px;justify-content:flex-end;margin-top:18px}
+.msg-aud-sample{margin-top:10px;font-size:11px;color:var(--text3);text-align:left;padding:10px;background:var(--bg);border-radius:8px;border:1px solid var(--border2);max-height:80px;overflow-y:auto}
+.msg-aud-sample div{margin-bottom:2px}
+.msg-aud-sample:empty{display:none}
 </style>
 </head>
 <body>
@@ -1061,6 +1142,9 @@ if(sessionStorage.getItem('rs_auth')==='1'){
     </button>
     <button class="sb-btn" data-view="automations" title="Automations" onclick="switchView('automations', this)">
       <svg width="16" height="16" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><path d="M22 12h-4l-3 9L9 3l-3 9H2"/></svg>
+    </button>
+    <button class="sb-btn" data-view="messaging" title="Messaging" onclick="switchView('messaging', this)">
+      <svg width="16" height="16" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><path d="M3 3l3 18 4-8 8-4-15-6z"/></svg>
     </button>
     <button class="sb-btn" data-view="content" title="Content" onclick="switchView('content', this)">
       <svg width="16" height="16" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><path d="M4 15s1-1 4-1 5 2 8 2 4-1 4-1V3s-1 1-4 1-5-2-8-2-4 1-4 1z"/><line x1="4" y1="22" x2="4" y2="15"/></svg>
@@ -2222,6 +2306,144 @@ if(sessionStorage.getItem('rs_auth')==='1'){
         <div class="drawer-body" id="horm-detail-body" style="padding:20px"></div>
       </div>
     </div>
+    <!-- ── VIEW: MESSAGING (BROADCAST COMPOSER) ── -->
+    <div id="view-messaging" class="view" style="display:none">
+      <div class="page-header fade-in" style="margin-bottom:20px">
+        <div>
+          <div class="page-title">Messaging</div>
+          <div class="page-sub">Send email, SMS, and WhatsApp to filtered prospects — consent-checked at send time.</div>
+        </div>
+      </div>
+
+      <div class="msg-grid fade-in">
+        <!-- ── AUDIENCE PANEL ── -->
+        <aside class="msg-aud">
+          <h4>Lists / funnel</h4>
+          <div class="msg-checklist" id="msg-lists">
+            <div style="font-size:12px;color:var(--text3);padding:4px">Loading…</div>
+          </div>
+
+          <h4>Location</h4>
+          <input type="text" class="msg-input" id="msg-location" placeholder="City, postcode, area…">
+
+          <h4>Gender</h4>
+          <div class="msg-radios" id="msg-gender">
+            <button type="button" class="msg-radio active" data-gender="">All</button>
+            <button type="button" class="msg-radio" data-gender="female">Female</button>
+            <button type="button" class="msg-radio" data-gender="male">Male</button>
+          </div>
+
+          <h4>Age</h4>
+          <div class="msg-row">
+            <input type="number" class="msg-input" id="msg-age-min" placeholder="Min" min="13" max="99">
+            <span class="msg-dash">–</span>
+            <input type="number" class="msg-input" id="msg-age-max" placeholder="Max" min="13" max="99">
+          </div>
+
+          <div class="msg-count">
+            <div class="msg-count-num" id="msg-count-num">—</div>
+            <div class="msg-count-lbl" id="msg-count-lbl">Recipients</div>
+            <div class="msg-count-sub" id="msg-count-sub">Choose a channel to see eligible leads</div>
+            <div class="msg-aud-sample" id="msg-aud-sample"></div>
+          </div>
+        </aside>
+
+        <!-- ── COMPOSE PANEL ── -->
+        <section class="msg-compose">
+          <div class="msg-tabs" role="tablist">
+            <button type="button" class="msg-tab active" data-channel="email" role="tab">
+              <svg fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><path d="M4 4h16c1.1 0 2 .9 2 2v12c0 1.1-.9 2-2 2H4c-1.1 0-2-.9-2-2V6c0-1.1.9-2 2-2z"/><polyline points="22,6 12,13 2,6"/></svg>
+              Email
+            </button>
+            <button type="button" class="msg-tab" data-channel="sms" role="tab">
+              <svg fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><path d="M21 15a2 2 0 01-2 2H7l-4 4V5a2 2 0 012-2h14a2 2 0 012 2z"/></svg>
+              SMS
+            </button>
+            <button type="button" class="msg-tab" data-channel="whatsapp" role="tab">
+              <svg fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><path d="M21 11.5a8.38 8.38 0 01-.9 3.8 8.5 8.5 0 01-7.6 4.7 8.38 8.38 0 01-3.8-.9L3 21l1.9-5.7a8.38 8.38 0 01-.9-3.8 8.5 8.5 0 014.7-7.6 8.38 8.38 0 013.8-.9h.5a8.48 8.48 0 018 8v.5z"/></svg>
+              WhatsApp
+            </button>
+          </div>
+
+          <!-- EMAIL PANE -->
+          <div class="msg-pane active" data-pane="email">
+            <div class="msg-label">Subject</div>
+            <input type="text" class="msg-input" id="msg-email-subject" placeholder="Quick note about your assessment…">
+            <div class="msg-label" style="margin-top:18px">
+              <span>Email body (HTML allowed)</span>
+              <span class="msg-counter"><span id="msg-email-len">0</span> chars</span>
+            </div>
+            <textarea class="msg-textarea" id="msg-email-body" placeholder="Hi {first_name},&#10;&#10;Just wanted to follow up on the assessment you completed…"></textarea>
+            <div class="msg-token-hint">Personalisation tokens: <code>{first_name}</code> <code>{last_name}</code> <code>{location}</code>. An unsubscribe link is added automatically.</div>
+          </div>
+
+          <!-- SMS PANE -->
+          <div class="msg-pane" data-pane="sms">
+            <div class="msg-label">
+              <span>SMS message</span>
+              <span class="msg-counter"><span id="msg-sms-len">0</span> / 160 chars · <span id="msg-sms-segments">1</span> segment</span>
+            </div>
+            <textarea class="msg-textarea" id="msg-sms-body" placeholder="Hey {first_name}, it's Loai from ReShape — quick question for you…" style="min-height:140px"></textarea>
+            <div class="msg-token-hint">Twilio charges per segment (160 chars ≈ 1 segment). Keep it tight. Tokens: <code>{first_name}</code></div>
+          </div>
+
+          <!-- WHATSAPP PANE -->
+          <div class="msg-pane" data-pane="whatsapp">
+            <div class="msg-label">Approved template</div>
+            <select class="msg-select" id="msg-wa-template">
+              <option value="">Loading templates from Twilio…</option>
+            </select>
+            <div class="msg-token-hint" id="msg-wa-hint">WhatsApp requires pre-approved templates for outbound to anyone who hasn't messaged you in the last 24h. Create them in Twilio Console → Content Templates.</div>
+            <div class="msg-tpl-preview" id="msg-wa-preview"></div>
+            <div class="msg-tpl-vars" id="msg-wa-vars"></div>
+          </div>
+
+          <div class="msg-actions">
+            <div class="msg-schedule">
+              <span>Send</span>
+              <select class="msg-input" id="msg-when" style="width:auto">
+                <option value="now">Now</option>
+                <option value="later">Later…</option>
+              </select>
+              <input type="datetime-local" class="msg-input" id="msg-when-at" style="display:none;width:200px">
+            </div>
+            <button type="button" class="msg-send-btn" id="msg-send" disabled>
+              <svg width="14" height="14" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><path d="M22 2L11 13M22 2l-7 20-4-9-9-4 20-7z"/></svg>
+              Send broadcast
+            </button>
+          </div>
+        </section>
+      </div>
+
+      <!-- ── HISTORY ── -->
+      <div class="msg-history fade-in">
+        <h3>Recent sends</h3>
+        <table class="msg-history-table" id="msg-history-table">
+          <thead><tr><th>When</th><th>Channel</th><th>Subject / template</th><th>Audience</th><th>Status</th><th>Delivered</th></tr></thead>
+          <tbody id="msg-history-body"><tr><td colspan="6" style="text-align:center;padding:24px;color:var(--text3)">Loading…</td></tr></tbody>
+        </table>
+      </div>
+    </div>
+
+    <!-- ── CONFIRMATION MODAL ── -->
+    <div class="msg-confirm-overlay" id="msg-confirm-overlay">
+      <div class="msg-confirm">
+        <h3>Confirm broadcast</h3>
+        <p id="msg-confirm-text">Review the details before sending.</p>
+        <div class="msg-cost">
+          <div class="msg-cost-row"><span>Channel</span><strong id="msg-confirm-channel">—</strong></div>
+          <div class="msg-cost-row"><span>Recipients</span><strong id="msg-confirm-count">—</strong></div>
+          <div class="msg-cost-row"><span>When</span><strong id="msg-confirm-when">Now</strong></div>
+          <div class="msg-cost-row"><span>Est. Twilio cost</span><strong id="msg-confirm-cost">—</strong></div>
+        </div>
+        <p style="font-size:12px;color:var(--text3);margin:0">Cost is an estimate based on Twilio's UK pricing (SMS ~£0.04/segment, WhatsApp template ~£0.05, email free via Resend). Final billing per Twilio's invoice.</p>
+        <div class="msg-confirm-actions">
+          <button type="button" class="btn btn-ghost" onclick="msgCloseConfirm()">Cancel</button>
+          <button type="button" class="msg-send-btn" id="msg-confirm-send">Yes, send it</button>
+        </div>
+      </div>
+    </div>
+
     <!-- ── VIEW: SETTINGS ── -->
     <div id="view-settings" class="view" style="display:none">
       <div class="page-header fade-in" style="margin-bottom:20px">
@@ -2843,6 +3065,355 @@ function switchView(view, btn) {
   if (view === 'automations') initAutomationsView();
   if (view === 'content') initContentView();
   if (view === 'hormonal') loadHormonalView();
+  if (view === 'messaging') initMessagingView();
+}
+
+/* ── MESSAGING (BROADCAST COMPOSER) ─────────────────────────── */
+var MSG_EDGE_URL = 'https://lvizldmdficsfpgegehp.supabase.co/functions/v1/process-queue';
+var MSG_STATE = {
+  channel: 'email',
+  lists:   [],
+  selectedLists: new Set(),
+  gender:  '',
+  location: '',
+  ageMin:  null,
+  ageMax:  null,
+  count:   null,
+  templates: [],
+  selectedTemplate: null,
+  initialised: false,
+};
+
+async function initMessagingView() {
+  // Refresh lists every visit so newly-arrived leads show up.
+  await msgLoadLists();
+  msgLoadHistory();
+
+  if (MSG_STATE.initialised) { msgRefreshCount(); return; }
+  MSG_STATE.initialised = true;
+  msgBindFilters();
+  msgBindTabs();
+  msgBindCompose();
+  msgBindSendFlow();
+  msgRefreshCount();
+  msgLoadWhatsAppTemplates();
+}
+
+async function msgLoadLists() {
+  // Pull distinct form_name values from ALL_LEADS (already loaded by initial fetch).
+  var counts = {};
+  if (typeof ALL_LEADS !== 'undefined' && Array.isArray(ALL_LEADS)) {
+    ALL_LEADS.forEach(function(l){
+      var k = (l.formName || l.form_name || l.form || 'Unknown');
+      counts[k] = (counts[k] || 0) + 1;
+    });
+  }
+  var lists = Object.keys(counts).sort();
+  MSG_STATE.lists = lists;
+
+  var html = lists.map(function(name){
+    return '<label class="msg-check" data-list="' + msgEsc(name) + '">'
+         +   '<input type="checkbox" value="' + msgEsc(name) + '">'
+         +   '<span>' + msgEsc(name) + ' <span style="color:var(--text3)">(' + counts[name] + ')</span></span>'
+         + '</label>';
+  }).join('');
+  document.getElementById('msg-lists').innerHTML = html || '<div style="font-size:12px;color:var(--text3);padding:4px">No leads yet.</div>';
+}
+
+function msgBindFilters() {
+  document.querySelectorAll('#msg-lists .msg-check input').forEach(function(cb){
+    cb.addEventListener('change', function(){
+      var lbl = cb.closest('.msg-check');
+      if (cb.checked) { MSG_STATE.selectedLists.add(cb.value); lbl.classList.add('selected'); }
+      else            { MSG_STATE.selectedLists.delete(cb.value); lbl.classList.remove('selected'); }
+      msgRefreshCount();
+    });
+  });
+  document.getElementById('msg-location').addEventListener('input', msgDebounce(function(e){
+    MSG_STATE.location = e.target.value.trim();
+    msgRefreshCount();
+  }, 350));
+  document.getElementById('msg-age-min').addEventListener('input', msgDebounce(function(e){
+    var v = e.target.value; MSG_STATE.ageMin = v === '' ? null : parseInt(v, 10); msgRefreshCount();
+  }, 350));
+  document.getElementById('msg-age-max').addEventListener('input', msgDebounce(function(e){
+    var v = e.target.value; MSG_STATE.ageMax = v === '' ? null : parseInt(v, 10); msgRefreshCount();
+  }, 350));
+  document.querySelectorAll('#msg-gender .msg-radio').forEach(function(b){
+    b.addEventListener('click', function(){
+      document.querySelectorAll('#msg-gender .msg-radio').forEach(function(x){ x.classList.remove('active'); });
+      b.classList.add('active');
+      MSG_STATE.gender = b.dataset.gender || '';
+      msgRefreshCount();
+    });
+  });
+}
+
+function msgBindTabs() {
+  document.querySelectorAll('.msg-tab').forEach(function(t){
+    t.addEventListener('click', function(){
+      document.querySelectorAll('.msg-tab').forEach(function(x){ x.classList.remove('active'); });
+      document.querySelectorAll('.msg-pane').forEach(function(x){ x.classList.remove('active'); });
+      t.classList.add('active');
+      var ch = t.dataset.channel;
+      MSG_STATE.channel = ch;
+      document.querySelector('.msg-pane[data-pane="' + ch + '"]').classList.add('active');
+      msgRefreshCount();
+      msgValidate();
+    });
+  });
+}
+
+function msgBindCompose() {
+  var subj = document.getElementById('msg-email-subject');
+  var ebody = document.getElementById('msg-email-body');
+  var sbody = document.getElementById('msg-sms-body');
+  [subj, ebody, sbody].forEach(function(el){ el && el.addEventListener('input', msgValidate); });
+  ebody.addEventListener('input', function(){ document.getElementById('msg-email-len').textContent = ebody.value.length; });
+  sbody.addEventListener('input', function(){
+    var len = sbody.value.length;
+    document.getElementById('msg-sms-len').textContent = len;
+    document.getElementById('msg-sms-segments').textContent = Math.max(1, Math.ceil(len / 160));
+  });
+  document.getElementById('msg-when').addEventListener('change', function(e){
+    var later = e.target.value === 'later';
+    var at = document.getElementById('msg-when-at');
+    at.style.display = later ? 'inline-block' : 'none';
+    if (later && !at.value) {
+      var d = new Date(Date.now() + 60*60*1000);
+      d.setSeconds(0,0);
+      at.value = d.toISOString().slice(0,16);
+    }
+    msgValidate();
+  });
+  document.getElementById('msg-wa-template').addEventListener('change', msgOnTemplateChange);
+}
+
+function msgBindSendFlow() {
+  document.getElementById('msg-send').addEventListener('click', msgOpenConfirm);
+  document.getElementById('msg-confirm-send').addEventListener('click', msgDoSend);
+}
+
+function msgFilterPayload() {
+  return {
+    list:        Array.from(MSG_STATE.selectedLists),
+    gender:      MSG_STATE.gender || null,
+    location_q:  MSG_STATE.location || null,
+    age_min:     MSG_STATE.ageMin,
+    age_max:     MSG_STATE.ageMax,
+  };
+}
+
+var MSG_COUNT_SEQ = 0;
+async function msgRefreshCount() {
+  var seq = ++MSG_COUNT_SEQ;
+  var lbl = document.getElementById('msg-count-num');
+  var sub = document.getElementById('msg-count-sub');
+  lbl.textContent = '…';
+  sub.textContent = 'Counting…';
+  try {
+    var res  = await msgEdge({ action: 'preview_audience', channel: MSG_STATE.channel, audience: msgFilterPayload() });
+    if (seq !== MSG_COUNT_SEQ) return;
+    var n = (res && typeof res.count === 'number') ? res.count : 0;
+    MSG_STATE.count = n;
+    lbl.textContent = n.toLocaleString();
+    sub.textContent = n === 0
+      ? 'No opted-in leads match these filters on the ' + MSG_STATE.channel + ' channel.'
+      : n + ' leads opted in to ' + MSG_STATE.channel + '. Suppressed leads are excluded.';
+    var sampleEl = document.getElementById('msg-aud-sample');
+    if (res.sample && res.sample.length) {
+      sampleEl.innerHTML = res.sample.map(function(s){
+        return '<div>' + msgEsc(s.name || s.email) + ' · ' + msgEsc(s.location || '—') + ' · ' + msgEsc(s.form_name || '') + '</div>';
+      }).join('');
+    } else {
+      sampleEl.innerHTML = '';
+    }
+  } catch (e) {
+    if (seq !== MSG_COUNT_SEQ) return;
+    lbl.textContent = '!';
+    sub.textContent = 'Could not fetch count: ' + (e.message || e);
+  }
+  msgValidate();
+}
+
+function msgValidate() {
+  var btn = document.getElementById('msg-send');
+  var ok  = (MSG_STATE.count || 0) > 0;
+  if (MSG_STATE.channel === 'email') {
+    ok = ok && document.getElementById('msg-email-subject').value.trim().length > 0
+            && document.getElementById('msg-email-body').value.trim().length > 0;
+  } else if (MSG_STATE.channel === 'sms') {
+    ok = ok && document.getElementById('msg-sms-body').value.trim().length > 0;
+  } else if (MSG_STATE.channel === 'whatsapp') {
+    ok = ok && !!MSG_STATE.selectedTemplate && MSG_STATE.selectedTemplate.approved !== false;
+  }
+  if (document.getElementById('msg-when').value === 'later') {
+    var at = document.getElementById('msg-when-at').value;
+    ok = ok && !!at && new Date(at) > new Date();
+  }
+  btn.disabled = !ok;
+}
+
+async function msgLoadWhatsAppTemplates() {
+  var sel = document.getElementById('msg-wa-template');
+  var hint = document.getElementById('msg-wa-hint');
+  try {
+    var res = await msgEdge({ action: 'list_wa_templates' });
+    var list = (res && Array.isArray(res.templates)) ? res.templates : [];
+    MSG_STATE.templates = list;
+    if (!list.length) {
+      sel.innerHTML = '<option value="">No templates found</option>';
+      hint.textContent = 'No templates returned from Twilio. Create + get approval in Twilio Console → Content Templates, then refresh.';
+      return;
+    }
+    sel.innerHTML = '<option value="">— Choose a template —</option>' + list.map(function(t){
+      var label = (t.friendly_name || t.sid) + ' · ' + (t.language || 'en') + (t.approved ? '' : ' · ⚠ not yet approved');
+      return '<option value="' + msgEsc(t.sid) + '">' + msgEsc(label) + '</option>';
+    }).join('');
+    hint.textContent = 'Pick a template. Only WhatsApp-approved templates can be sent outside the 24h conversation window.';
+  } catch (e) {
+    sel.innerHTML = '<option value="">Failed to load</option>';
+    hint.textContent = 'Could not reach Twilio: ' + (e.message || e);
+  }
+}
+
+function msgOnTemplateChange(e) {
+  var sid = e.target.value;
+  var tpl = MSG_STATE.templates.find(function(t){ return t.sid === sid; });
+  MSG_STATE.selectedTemplate = tpl || null;
+  var preview = document.getElementById('msg-wa-preview');
+  var vars    = document.getElementById('msg-wa-vars');
+  if (!tpl) { preview.textContent = ''; vars.innerHTML = ''; msgValidate(); return; }
+  preview.textContent = tpl.body || '(no preview)';
+  var keys = Object.keys(tpl.variables || {});
+  vars.innerHTML = keys.map(function(k){
+    return '<div class="msg-tpl-var-row"><label>{{' + msgEsc(k) + '}}</label>'
+         + '<input type="text" class="msg-input" data-tpl-var="' + msgEsc(k) + '" placeholder="' + msgEsc(tpl.variables[k] || '') + '"></div>';
+  }).join('');
+  msgValidate();
+}
+
+function msgGetTemplateVars() {
+  var out = {};
+  document.querySelectorAll('#msg-wa-vars input[data-tpl-var]').forEach(function(inp){
+    if (inp.value.trim()) out[inp.dataset.tplVar] = inp.value;
+  });
+  return out;
+}
+
+function msgOpenConfirm() {
+  var count = MSG_STATE.count || 0;
+  var ch    = MSG_STATE.channel;
+  document.getElementById('msg-confirm-channel').textContent = ch.toUpperCase();
+  document.getElementById('msg-confirm-count').textContent   = count.toLocaleString() + ' leads';
+
+  var when = 'Immediately';
+  if (document.getElementById('msg-when').value === 'later') {
+    var at = document.getElementById('msg-when-at').value;
+    when = 'Scheduled · ' + new Date(at).toLocaleString('en-GB', { day:'numeric', month:'short', hour:'2-digit', minute:'2-digit' });
+  }
+  document.getElementById('msg-confirm-when').textContent = when;
+
+  var cost = '—';
+  if (ch === 'email') cost = 'Free (Resend)';
+  else if (ch === 'sms') {
+    var segs = Math.max(1, Math.ceil(document.getElementById('msg-sms-body').value.length / 160));
+    cost = '£' + (count * segs * 0.04).toFixed(2) + ' (' + segs + ' segment' + (segs>1?'s':'') + ' × ' + count + ')';
+  } else if (ch === 'whatsapp') {
+    cost = '£' + (count * 0.05).toFixed(2) + ' (template message)';
+  }
+  document.getElementById('msg-confirm-cost').textContent = cost;
+  document.getElementById('msg-confirm-overlay').classList.add('open');
+}
+
+function msgCloseConfirm() {
+  document.getElementById('msg-confirm-overlay').classList.remove('open');
+}
+
+async function msgDoSend() {
+  var btn = document.getElementById('msg-confirm-send');
+  btn.disabled = true;
+  btn.textContent = 'Sending…';
+  try {
+    var ch = MSG_STATE.channel;
+    var payload = {
+      action:      'send_broadcast',
+      channel:     ch,
+      audience:    msgFilterPayload(),
+      created_by:  'dashboard',
+    };
+    if (document.getElementById('msg-when').value === 'later') {
+      payload.scheduled_at = new Date(document.getElementById('msg-when-at').value).toISOString();
+    }
+    if (ch === 'email') {
+      payload.subject = document.getElementById('msg-email-subject').value;
+      payload.body    = document.getElementById('msg-email-body').value;
+    } else if (ch === 'sms') {
+      payload.body    = document.getElementById('msg-sms-body').value;
+    } else if (ch === 'whatsapp') {
+      payload.template_sid  = MSG_STATE.selectedTemplate.sid;
+      payload.template_vars = msgGetTemplateVars();
+    }
+    var res = await msgEdge(payload);
+    if (!res || res.success === false) throw new Error(res && res.error || 'Send failed');
+    msgCloseConfirm();
+    showToast && showToast('Queued · ' + (res.queued || 0) + ' messages');
+    msgLoadHistory();
+  } catch (e) {
+    alert('Could not send: ' + (e.message || e));
+  } finally {
+    btn.disabled = false;
+    btn.textContent = 'Yes, send it';
+  }
+}
+
+async function msgLoadHistory() {
+  var body = document.getElementById('msg-history-body');
+  try {
+    var res = await fetch(SUPABASE_URL + '/rest/v1/message_sends?select=*&order=created_at.desc&limit=20', {
+      headers: { 'apikey': SUPABASE_ANON_KEY, 'Authorization': 'Bearer ' + SUPABASE_ANON_KEY }
+    });
+    var rows = await res.json();
+    if (!Array.isArray(rows) || !rows.length) {
+      body.innerHTML = '<tr><td colspan="6" style="text-align:center;padding:24px;color:var(--text3)">No broadcasts yet.</td></tr>';
+      return;
+    }
+    body.innerHTML = rows.map(function(r){
+      var when = new Date(r.created_at).toLocaleString('en-GB', { day:'numeric', month:'short', hour:'2-digit', minute:'2-digit' });
+      var label = r.channel === 'whatsapp' && r.template_sid ? ('Template ' + r.template_sid.slice(0,10) + '…')
+                : r.subject || (r.body ? r.body.slice(0,60) + '…' : '—');
+      var delivered = (r.sent_count || 0) + ' / ' + (r.audience_size || 0)
+                    + (r.failed_count ? ' (' + r.failed_count + ' failed)' : '');
+      return '<tr>'
+           + '<td style="white-space:nowrap">' + when + '</td>'
+           + '<td><span class="msg-pill ' + r.channel + '">' + r.channel + '</span></td>'
+           + '<td style="max-width:280px;overflow:hidden;text-overflow:ellipsis;white-space:nowrap">' + msgEsc(label) + '</td>'
+           + '<td style="font-variant-numeric:tabular-nums">' + (r.audience_size || 0) + '</td>'
+           + '<td><span class="msg-status ' + r.status + '">' + r.status + '</span></td>'
+           + '<td style="font-variant-numeric:tabular-nums">' + delivered + '</td>'
+           + '</tr>';
+    }).join('');
+  } catch (e) {
+    body.innerHTML = '<tr><td colspan="6" style="text-align:center;padding:24px;color:var(--red)">Could not load history.</td></tr>';
+  }
+}
+
+async function msgEdge(payload) {
+  var res = await fetch(MSG_EDGE_URL, {
+    method:  'POST',
+    headers: { 'Content-Type': 'application/json' },
+    body:    JSON.stringify(payload),
+  });
+  return await res.json();
+}
+
+function msgDebounce(fn, ms) {
+  var t; return function(){ var a = arguments, c = this; clearTimeout(t); t = setTimeout(function(){ fn.apply(c, a); }, ms); };
+}
+function msgEsc(s) {
+  return String(s == null ? '' : s).replace(/[&<>"']/g, function(c){
+    return ({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'})[c];
+  });
 }
 /* ── LEADS VIEW ── */
 function renderLeadsView() {

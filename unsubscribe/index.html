@@ -1,0 +1,247 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Messaging preferences — ReShape</title>
+<meta name="description" content="Manage which channels ReShape can use to contact you.">
+<link rel="icon" type="image/png" sizes="32x32" href="/favicon-32.png">
+<link rel="icon" type="image/png" href="/favicon.png">
+<link rel="apple-touch-icon" href="/apple-touch-icon.png">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Fraunces:opsz,wght@9..144,400;9..144,500;9..144,600&family=Inter:wght@400;500;600&display=swap" rel="stylesheet">
+<style>
+:root{
+  --cream:       #FAF7F2;
+  --soft-cream:  #F0EBE3;
+  --soft-peach:  #FFF0E5;
+  --white:       #FFFFFF;
+  --charcoal:    #2A2724;
+  --body:        #5A5550;
+  --muted:       #B8B2A8;
+  --line:        #E5DFD5;
+  --terracotta:  #ED5C25;
+  --rust:        #C84A18;
+}
+*{box-sizing:border-box;margin:0;padding:0}
+body{
+  font-family:'Inter',-apple-system,sans-serif;
+  background:var(--cream);color:var(--body);
+  line-height:1.6;font-size:16px;
+  min-height:100vh;display:flex;flex-direction:column;
+  -webkit-font-smoothing:antialiased;
+}
+h1,h2{font-family:'Fraunces',Georgia,serif;color:var(--charcoal);font-weight:400;letter-spacing:-0.02em;line-height:1.15}
+h1{font-size:clamp(1.75rem,4vw,2.5rem)}
+h2{font-size:1.5rem}
+em{font-style:italic;color:var(--terracotta)}
+a{color:var(--terracotta);text-decoration:none}
+a:hover{text-decoration:underline}
+.wrap{max-width:560px;margin:0 auto;padding:3rem 1.5rem;flex:1;width:100%}
+.brand{display:flex;align-items:center;gap:.5rem;margin-bottom:3rem}
+.brand-mark{width:32px;height:32px;background:url('/favicon.png') center/contain no-repeat}
+.brand-name{font-family:'Fraunces',serif;font-size:1.25rem;font-weight:500;color:var(--charcoal)}
+.eyebrow{font-size:.75rem;font-weight:500;text-transform:uppercase;letter-spacing:.14em;color:var(--terracotta);margin-bottom:1rem}
+.card{background:var(--white);border:1px solid var(--line);border-radius:16px;padding:2rem;margin-top:2rem;box-shadow:0 16px 40px rgba(42,39,36,0.05)}
+.intro{margin:1rem 0 0;color:var(--body);font-size:1.0625rem}
+.intro strong{color:var(--charcoal);font-weight:500}
+.channels{margin-top:2rem;display:flex;flex-direction:column;gap:.75rem}
+.channel{display:flex;align-items:center;justify-content:space-between;padding:1.25rem 1.5rem;border:1px solid var(--line);border-radius:12px;background:var(--cream);transition:border-color .2s}
+.channel.opted-out{background:var(--soft-cream);opacity:.7}
+.channel-label{display:flex;flex-direction:column;gap:2px}
+.channel-name{font-family:'Fraunces',serif;font-size:1.125rem;color:var(--charcoal);font-weight:500}
+.channel-state{font-size:.8125rem;color:var(--muted)}
+.channel.opted-in  .channel-state{color:#2ECC71}
+.channel.opted-out .channel-state{color:var(--terracotta)}
+.toggle{position:relative;width:44px;height:24px;border-radius:999px;background:var(--line);border:none;cursor:pointer;flex-shrink:0;transition:background .2s}
+.toggle::after{content:'';position:absolute;top:2px;left:2px;width:20px;height:20px;border-radius:50%;background:var(--white);transition:transform .2s;box-shadow:0 1px 3px rgba(42,39,36,.15)}
+.toggle.on{background:var(--terracotta)}
+.toggle.on::after{transform:translateX(20px)}
+.toggle:disabled{opacity:.5;cursor:wait}
+.footer-actions{margin-top:1.75rem;display:flex;gap:.75rem;flex-wrap:wrap;align-items:center}
+.btn{display:inline-flex;align-items:center;gap:.5rem;padding:.875rem 1.5rem;border-radius:999px;font-size:.9375rem;font-weight:500;border:none;cursor:pointer;font-family:inherit;transition:all .2s}
+.btn-primary{background:var(--charcoal);color:var(--cream)}
+.btn-primary:hover{background:var(--terracotta)}
+.btn-link{background:none;color:var(--muted);font-size:.875rem;padding:.5rem .75rem}
+.btn-link:hover{color:var(--charcoal)}
+.note{margin-top:2rem;padding:1.25rem;background:var(--soft-peach);border-radius:12px;font-size:.875rem;color:var(--body);line-height:1.6}
+.note strong{color:var(--charcoal);font-weight:500}
+.muted{color:var(--muted);font-size:.875rem}
+.error{color:var(--terracotta);font-size:.875rem;margin-top:1rem;min-height:1.2em}
+.spinner{width:32px;height:32px;border:3px solid var(--line);border-top-color:var(--terracotta);border-radius:50%;animation:spin .8s linear infinite;margin:2rem auto}
+@keyframes spin{to{transform:rotate(360deg)}}
+.loading{text-align:center;padding:3rem 0}
+footer{padding:2rem 1.5rem;text-align:center;font-size:.75rem;color:var(--muted)}
+</style>
+</head>
+<body>
+
+<div class="wrap">
+  <div class="brand">
+    <div class="brand-mark"></div>
+    <div class="brand-name">ReShape</div>
+  </div>
+
+  <div id="root">
+    <div class="loading">
+      <div class="spinner"></div>
+      <p class="muted">Loading your preferences…</p>
+    </div>
+  </div>
+</div>
+
+<footer>© 2026 ReShape · Ipswich · Colchester</footer>
+
+<script>
+(function(){
+  var CONSENT_URL = 'https://lvizldmdficsfpgegehp.supabase.co/functions/v1/consent';
+  var TOKEN = new URLSearchParams(location.search).get('token') || '';
+  var preselect = (new URLSearchParams(location.search).get('channel') || '').toLowerCase();
+  var root = document.getElementById('root');
+  var lead = null;
+  var busy = false;
+
+  if (!TOKEN) { renderError("This link is missing its token. Try the link from your email again, or contact coach@reshape.fit."); return; }
+
+  load();
+
+  async function load(){
+    try {
+      var res = await fetch(CONSENT_URL + '?token=' + encodeURIComponent(TOKEN));
+      var data = await res.json();
+      if (!res.ok || data.error) throw new Error(data.error || 'lookup failed');
+      lead = data.lead;
+      render();
+      // If a channel was preselected via ?channel=xxx and they're still opted in, flip it.
+      if (preselect && ['email','sms','whatsapp'].indexOf(preselect) !== -1) {
+        var status = lead[preselect === 'whatsapp' ? 'wa_consent_status' : preselect + '_consent_status'];
+        if (status === 'opted_in') toggle(preselect);
+      }
+    } catch (e) {
+      renderError("We couldn't find a record matching that link. It may have expired or already been used. Email coach@reshape.fit and we'll help.");
+    }
+  }
+
+  function renderError(msg){
+    root.innerHTML =
+      '<div class="card">' +
+      '<div class="eyebrow">Couldn’t load preferences</div>' +
+      '<h1>Something went wrong.</h1>' +
+      '<p class="intro">' + esc(msg) + '</p>' +
+      '</div>';
+  }
+
+  function render(){
+    var fn = (lead.first_name || '').trim();
+    var greet = fn ? 'Hey ' + fn + ',' : 'Hi,';
+    root.innerHTML =
+      '<div class="card">' +
+        '<div class="eyebrow">Messaging preferences</div>' +
+        '<h1>' + esc(greet) + ' <em>tell us how to reach you.</em></h1>' +
+        '<p class="intro">Turn each channel on or off below. Changes save instantly. You’ll still receive essential booking confirmations regardless of these settings.</p>' +
+        '<div class="channels">' +
+          row('email',    'Email',    lead.email   || '', lead.email_consent_status) +
+          row('sms',      'SMS',      lead.phone   || '', lead.sms_consent_status)   +
+          row('whatsapp', 'WhatsApp', lead.phone   || '', lead.wa_consent_status)    +
+        '</div>' +
+        '<div class="footer-actions">' +
+          '<button class="btn btn-primary" type="button" onclick="window.__unsubAll()">Unsubscribe from everything</button>' +
+        '</div>' +
+        '<div class="error" id="err"></div>' +
+        '<div class="note">' +
+          '<strong>Why am I receiving this?</strong> You signed up via one of our forms at reshape.fit. We use these channels to send your assessment results, booking confirmations, and follow-ups. You can change these settings any time.' +
+        '</div>' +
+      '</div>';
+    bindToggles();
+  }
+
+  function row(channel, label, detail, status){
+    var on  = status === 'opted_in';
+    var stateText = on ? 'On — receiving messages' : 'Off — not receiving';
+    return ''
+      + '<div class="channel ' + (on ? 'opted-in' : 'opted-out') + '" data-channel="' + channel + '">'
+      +   '<div class="channel-label">'
+      +     '<div class="channel-name">' + label + '</div>'
+      +     '<div class="muted" style="font-size:.8125rem">' + esc(detail || '—') + '</div>'
+      +     '<div class="channel-state">' + stateText + '</div>'
+      +   '</div>'
+      +   '<button class="toggle ' + (on ? 'on' : '') + '" type="button" data-channel="' + channel + '" aria-label="Toggle ' + label + '"></button>'
+      + '</div>';
+  }
+
+  function bindToggles(){
+    document.querySelectorAll('.toggle').forEach(function(b){
+      b.addEventListener('click', function(){ toggle(b.dataset.channel); });
+    });
+  }
+
+  async function toggle(channel){
+    if (busy) return;
+    var statusField = channel === 'whatsapp' ? 'wa_consent_status' : channel + '_consent_status';
+    var current = lead[statusField];
+    var action  = current === 'opted_in' ? 'unsubscribe' : 'resubscribe';
+    setBusy(true, channel);
+    try {
+      var res = await fetch(CONSENT_URL, {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ token: TOKEN, channel: channel, action: action })
+      });
+      var data = await res.json();
+      if (!res.ok || data.error) throw new Error(data.error || 'update failed');
+      lead = data.lead;
+      render();
+    } catch (e) {
+      document.getElementById('err').textContent = 'Could not save. ' + (e.message || 'Try again.');
+    } finally {
+      setBusy(false);
+    }
+  }
+
+  function setBusy(b, channel){
+    busy = b;
+    document.querySelectorAll('.toggle').forEach(function(t){
+      t.disabled = b;
+      if (b && channel && t.dataset.channel === channel) t.style.opacity = '.5';
+    });
+  }
+
+  window.__unsubAll = async function(){
+    if (busy) return;
+    var channels = ['email','sms','whatsapp'];
+    setBusy(true);
+    try {
+      for (var i = 0; i < channels.length; i++) {
+        var ch = channels[i];
+        var statusField = ch === 'whatsapp' ? 'wa_consent_status' : ch + '_consent_status';
+        if (lead[statusField] === 'opted_in') {
+          await fetch(CONSENT_URL, {
+            method: 'POST',
+            headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify({ token: TOKEN, channel: ch, action: 'unsubscribe' })
+          });
+        }
+      }
+      // Reload state.
+      var res = await fetch(CONSENT_URL + '?token=' + encodeURIComponent(TOKEN));
+      var data = await res.json();
+      if (data.lead) lead = data.lead;
+      render();
+    } catch (e) {
+      document.getElementById('err').textContent = 'Could not save. ' + (e.message || 'Try again.');
+    } finally {
+      setBusy(false);
+    }
+  };
+
+  function esc(s){
+    return String(s == null ? '' : s).replace(/[&<>"']/g, function(c){
+      return ({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'})[c];
+    });
+  }
+})();
+</script>
+
+</body>
+</html>
