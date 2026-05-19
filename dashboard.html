@@ -444,6 +444,34 @@ body{
 .cal-info{position:relative;display:inline-flex;align-items:center;justify-content:center;width:14px;height:14px;border-radius:50%;border:1px solid var(--border);color:var(--text3);font-size:10px;font-style:normal;cursor:help;margin-left:4px;font-family:var(--body)}
 .cal-info:hover{border-color:var(--orange);color:var(--orange)}
 .cal-info[data-tip]:hover::after{content:attr(data-tip);position:absolute;bottom:calc(100% + 6px);left:50%;transform:translateX(-50%);background:var(--s3);border:1px solid var(--border);border-radius:8px;padding:8px 12px;font-size:12px;color:var(--text2);white-space:nowrap;max-width:280px;white-space:normal;width:max-content;z-index:50;box-shadow:0 8px 20px rgba(42,39,36,0.10);font-weight:400;line-height:1.4}
+.inbox-shell{display:grid;grid-template-columns:320px 1fr;gap:0;padding:0;overflow:hidden;min-height:560px}
+@media(max-width:780px){.inbox-shell{grid-template-columns:1fr}}
+.inbox-list{border-right:1px solid var(--border);overflow-y:auto;max-height:680px}
+.inbox-row{padding:14px 16px;border-bottom:1px solid var(--border2);cursor:pointer;transition:background .15s}
+.inbox-row:hover{background:rgba(255,255,255,.03)}
+.inbox-row.active{background:rgba(237,92,37,.08)}
+.inbox-row.unread .inbox-row-name{font-weight:700;color:var(--text)}
+.inbox-row.unread::before{content:'';display:inline-block;width:7px;height:7px;border-radius:50%;background:var(--orange);margin-right:8px;vertical-align:middle}
+.inbox-row-name{font-size:13px;color:var(--text2);font-weight:600}
+.inbox-row-phone{font-size:11px;color:var(--text3);margin-top:2px;font-variant-numeric:tabular-nums}
+.inbox-row-snippet{font-size:12px;color:var(--text3);margin-top:6px;line-height:1.4;display:-webkit-box;-webkit-line-clamp:2;-webkit-box-orient:vertical;overflow:hidden}
+.inbox-row-time{font-size:11px;color:var(--text4);margin-top:6px}
+.inbox-thread{display:flex;flex-direction:column;max-height:680px}
+.inbox-thread-header{padding:14px 18px;border-bottom:1px solid var(--border);display:flex;justify-content:space-between;align-items:center;gap:8px;flex-wrap:wrap}
+.inbox-thread-body{flex:1;padding:18px;overflow-y:auto;display:flex;flex-direction:column;gap:8px}
+.inbox-bubble{max-width:80%;padding:10px 14px;border-radius:14px;font-size:13px;line-height:1.5;white-space:pre-wrap;word-break:break-word}
+.inbox-bubble.inbound{align-self:flex-start;background:var(--s3);color:var(--text);border-bottom-left-radius:4px}
+.inbox-bubble.outbound{align-self:flex-end;background:var(--orange);color:#fff;border-bottom-right-radius:4px}
+.inbox-bubble-meta{font-size:10px;color:var(--text4);margin-top:4px}
+.inbox-bubble.outbound .inbox-bubble-meta{color:rgba(255,255,255,.7)}
+.inbox-reply{padding:12px 14px;border-top:1px solid var(--border);display:flex;gap:8px;align-items:flex-end;background:var(--s2)}
+.inbox-reply textarea{flex:1;background:rgba(255,255,255,.04);border:1px solid var(--border);border-radius:10px;color:var(--text);font-family:var(--body);font-size:13px;padding:10px 12px;resize:vertical;min-height:44px;max-height:160px;outline:none}
+.inbox-reply textarea:focus{border-color:var(--orange)}
+.inbox-reply-channel{display:flex;flex-direction:column;gap:4px;font-size:11px;color:var(--text3)}
+.inbox-empty{display:flex;align-items:center;justify-content:center;height:100%;color:var(--text3);font-size:13px}
+.inbox-window-warn{font-size:11px;color:var(--orange);padding:6px 18px;background:rgba(237,92,37,.08);border-bottom:1px solid var(--border2)}
+.sb-btn{position:relative}
+.sb-dot{position:absolute;top:6px;right:6px;width:7px;height:7px;border-radius:50%;background:var(--orange);box-shadow:0 0 0 2px var(--bg)}
 .appts-topbar{display:flex;justify-content:space-between;align-items:center;gap:16px;flex-wrap:wrap;border-bottom:1px solid var(--border);padding-bottom:12px}
 .appts-tabs{display:flex;gap:4px}
 .appts-tab{background:transparent;border:none;color:var(--text3);font-family:var(--body);font-size:13px;font-weight:600;padding:8px 4px;cursor:pointer;border-bottom:2px solid transparent;transition:color .15s,border-color .15s}
@@ -1136,6 +1164,10 @@ if(sessionStorage.getItem('rs_auth')==='1'){
     </button>
     <button class="sb-btn" data-view="appointments" title="Appointments" onclick="switchView('appointments', this)">
       <svg width="16" height="16" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><circle cx="12" cy="12" r="10"/><polyline points="12 6 12 12 16 14"/></svg>
+    </button>
+    <button class="sb-btn" data-view="inbox" title="Inbox" onclick="switchView('inbox', this)">
+      <svg width="16" height="16" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><path d="M22 12h-6l-2 3h-4l-2-3H2"/><path d="M5.45 5.11L2 12v6a2 2 0 0 0 2 2h16a2 2 0 0 0 2-2v-6l-3.45-6.89A2 2 0 0 0 16.76 4H7.24a2 2 0 0 0-1.79 1.11z"/></svg>
+      <span id="inbox-unread-dot" class="sb-dot" style="display:none"></span>
     </button>
     <button class="sb-btn" data-view="hormonal" title="Hormonal Assessments" onclick="switchView('hormonal', this)">
       <svg width="16" height="16" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><path d="M3 12h4l3-9 4 18 3-9h4"/></svg>
@@ -2200,6 +2232,28 @@ if(sessionStorage.getItem('rs_auth')==='1'){
         <div id="appts-empty" style="display:none;text-align:center;padding:40px;color:var(--text3);font-size:13px">No appointments in this range.</div>
       </div>
     </div>
+    <!-- ── VIEW: INBOX ── -->
+    <div id="view-inbox" class="view" style="display:none">
+      <div class="page-header fade-in" style="margin-bottom:20px">
+        <div>
+          <div class="page-title">Inbox</div>
+          <div class="page-sub" id="inbox-sub">SMS &amp; WhatsApp replies from leads</div>
+        </div>
+        <div class="header-actions">
+          <label style="display:flex;align-items:center;gap:6px;font-size:12px;color:var(--text2);cursor:pointer;margin-right:6px">
+            <input type="checkbox" id="inbox-unread-only" onchange="renderInbox()" style="margin:0">
+            Unread only
+          </label>
+          <button class="btn btn-ghost" onclick="refreshInbox()">Refresh</button>
+        </div>
+      </div>
+      <div class="chart-card fade-in inbox-shell">
+        <div class="inbox-list" id="inbox-list"></div>
+        <div class="inbox-thread" id="inbox-thread">
+          <div class="inbox-empty" id="inbox-empty">Select a conversation on the left.</div>
+        </div>
+      </div>
+    </div>
     <!-- ── VIEW: HORMONAL ASSESSMENTS ── -->
     <div id="view-hormonal" class="view" style="display:none">
       <div class="page-header fade-in" style="margin-bottom:20px">
@@ -2588,6 +2642,18 @@ async function initDashboard() {
   initCharts();
   updateStats();
   setLastUpdated();
+  // Light background poll just for the unread badge on the Inbox icon.
+  pollInboxUnreadBadge();
+  setInterval(pollInboxUnreadBadge, 60000);
+}
+
+async function pollInboxUnreadBadge() {
+  try {
+    var r = await sb.from('inbound_messages').select('id', { count: 'exact', head: true }).is('read_at', null);
+    var dot = document.getElementById('inbox-unread-dot');
+    if (!dot) return;
+    dot.style.display = (r.count && r.count > 0) ? 'inline-block' : 'none';
+  } catch (e) { /* ignore */ }
 }
 const COLORS = {
   orange:  '#ED5C25',
@@ -3062,6 +3128,7 @@ function switchView(view, btn) {
   if (view === 'performance') initPerfCharts();
   if (view === 'bookings') initBookingsView();
   if (view === 'appointments') initAppointmentsView();
+  if (view === 'inbox') initInboxView();
   if (view === 'automations') initAutomationsView();
   if (view === 'content') initContentView();
   if (view === 'hormonal') loadHormonalView();
@@ -4718,6 +4785,229 @@ function renderAppointmentDetail(b, appt) {
 function toggleAppointmentDetail(id) {
   __apptsExpanded[id] = !__apptsExpanded[id];
   renderAppointments();
+}
+
+/* ══════════════════════════════════════
+   INBOX (SMS + WhatsApp replies)
+══════════════════════════════════════ */
+var INBOX_MESSAGES = [];     // all inbound rows
+var INBOX_SENT = {};         // phone -> array of outbound rows (from message_queue, status in ('sent','sending'))
+var __inboxSelectedPhone = null;
+var __inboxPollTimer = null;
+
+async function initInboxView() {
+  await refreshInbox();
+  // Poll every 30s while the tab is mounted; stop when user navigates away.
+  if (__inboxPollTimer) clearInterval(__inboxPollTimer);
+  __inboxPollTimer = setInterval(function() {
+    if (document.getElementById('view-inbox').classList.contains('active-view')) {
+      refreshInbox(true);
+    } else {
+      clearInterval(__inboxPollTimer); __inboxPollTimer = null;
+    }
+  }, 30000);
+}
+
+async function refreshInbox(silent) {
+  try {
+    var [inboundRes, sentRes] = await Promise.all([
+      sb.from('inbound_messages').select('*').order('created_at', { ascending: false }).limit(1000),
+      sb.from('message_queue').select('lead_phone, channel, body, sent_at, status, created_at')
+        .in('channel', ['sms','whatsapp']).not('lead_phone','is',null).order('created_at', { ascending: false }).limit(1000),
+    ]);
+    INBOX_MESSAGES = inboundRes.data || [];
+    INBOX_SENT = {};
+    (sentRes.data || []).forEach(function(m) {
+      var key = normalisePhone(m.lead_phone);
+      if (!INBOX_SENT[key]) INBOX_SENT[key] = [];
+      INBOX_SENT[key].push(m);
+    });
+    renderInbox();
+    refreshInboxUnreadDot();
+  } catch (e) {
+    if (!silent) showToast('Inbox refresh failed: ' + e.message);
+    console.error(e);
+  }
+}
+
+function normalisePhone(p) {
+  return (p || '').replace(/^whatsapp:/i, '').replace(/\s+/g, '');
+}
+
+function refreshInboxUnreadDot() {
+  var dot = document.getElementById('inbox-unread-dot');
+  if (!dot) return;
+  var unread = INBOX_MESSAGES.some(function(m){ return !m.read_at; });
+  dot.style.display = unread ? 'inline-block' : 'none';
+}
+
+function renderInbox() {
+  var listEl = document.getElementById('inbox-list');
+  var threadEl = document.getElementById('inbox-thread');
+  if (!listEl || !threadEl) return;
+
+  var unreadOnly = (document.getElementById('inbox-unread-only') || {}).checked;
+  // Group inbound by phone (keep latest message per phone for the list preview).
+  var byPhone = {};
+  INBOX_MESSAGES.forEach(function(m) {
+    var key = normalisePhone(m.from_phone);
+    if (!byPhone[key]) byPhone[key] = { phone: key, latest: m, all: [], unread: 0, profile: m.profile_name };
+    byPhone[key].all.push(m);
+    if (!m.read_at) byPhone[key].unread += 1;
+    if (new Date(m.created_at) > new Date(byPhone[key].latest.created_at)) byPhone[key].latest = m;
+  });
+  var conversations = Object.values(byPhone)
+    .filter(function(c) { return !unreadOnly || c.unread > 0; })
+    .sort(function(a, b) { return new Date(b.latest.created_at) - new Date(a.latest.created_at); });
+
+  document.getElementById('inbox-sub').textContent =
+    conversations.length + ' conversation' + (conversations.length === 1 ? '' : 's') +
+    ' · ' + INBOX_MESSAGES.filter(function(m){ return !m.read_at; }).length + ' unread';
+
+  if (conversations.length === 0) {
+    listEl.innerHTML = '<div style="padding:24px;text-align:center;color:var(--text3);font-size:13px">No conversations yet.</div>';
+  } else {
+    listEl.innerHTML = conversations.map(function(c) {
+      var name = c.profile || lookupLeadName(c.phone) || c.phone;
+      var snippet = (c.latest.body || (c.latest.num_media > 0 ? '[media]' : '')).slice(0, 140);
+      var when = formatInboxTime(c.latest.created_at);
+      var unreadClass = c.unread > 0 ? ' unread' : '';
+      var activeClass = c.phone === __inboxSelectedPhone ? ' active' : '';
+      return '<div class="inbox-row' + unreadClass + activeClass + '" onclick="selectInboxConversation(\'' + escapeAttr(c.phone) + '\')">' +
+        '<div class="inbox-row-name">' + escapeHtmlDash(name) + '</div>' +
+        '<div class="inbox-row-phone">' + escapeHtmlDash(c.phone) + '</div>' +
+        '<div class="inbox-row-snippet">' + escapeHtmlDash(snippet) + '</div>' +
+        '<div class="inbox-row-time">' + when + '</div>' +
+      '</div>';
+    }).join('');
+  }
+
+  // Right pane: selected thread or placeholder.
+  if (!__inboxSelectedPhone || !byPhone[__inboxSelectedPhone]) {
+    threadEl.innerHTML = '<div class="inbox-empty">Select a conversation on the left.</div>';
+    return;
+  }
+  renderInboxThread(byPhone[__inboxSelectedPhone]);
+}
+
+function lookupLeadName(phone) {
+  if (!Array.isArray(ALL_LEADS) || ALL_LEADS.length === 0) return null;
+  var p = normalisePhone(phone);
+  var hit = ALL_LEADS.find(function(l) { return normalisePhone(l.phone) === p; });
+  return hit ? (hit.name || (hit.firstName + ' ' + hit.lastName).trim() || null) : null;
+}
+
+function formatInboxTime(ts) {
+  var d = new Date(ts);
+  var now = new Date();
+  var sameDay = d.toDateString() === now.toDateString();
+  if (sameDay) return d.toLocaleTimeString('en-GB', { hour: '2-digit', minute: '2-digit' });
+  var diffDays = (now - d) / 864e5;
+  if (diffDays < 7) return d.toLocaleDateString('en-GB', { weekday: 'short' }) + ' ' + d.toLocaleTimeString('en-GB', { hour: '2-digit', minute: '2-digit' });
+  return d.toLocaleDateString('en-GB', { day: 'numeric', month: 'short' });
+}
+
+function renderInboxThread(conv) {
+  var threadEl = document.getElementById('inbox-thread');
+  var sent = INBOX_SENT[conv.phone] || [];
+  // Merge inbound + outbound and sort by time ascending.
+  var merged = []
+    .concat(conv.all.map(function(m) { return { ts: m.created_at, body: m.body, dir: 'in', channel: m.channel }; }))
+    .concat(sent.map(function(m) { return { ts: m.sent_at || m.created_at, body: m.body, dir: 'out', channel: m.channel, status: m.status }; }))
+    .sort(function(a, b) { return new Date(a.ts) - new Date(b.ts); });
+
+  // Are we still inside the 24h WhatsApp customer-service window?
+  var latestInboundWhatsapp = conv.all
+    .filter(function(m){ return m.channel === 'whatsapp'; })
+    .map(function(m){ return new Date(m.created_at).getTime(); })
+    .sort(function(a,b){return b-a;})[0];
+  var windowOpen = latestInboundWhatsapp && (Date.now() - latestInboundWhatsapp) < 24 * 60 * 60 * 1000;
+  var windowMsLeft = windowOpen ? (24 * 60 * 60 * 1000 - (Date.now() - latestInboundWhatsapp)) : 0;
+
+  var name = conv.profile || lookupLeadName(conv.phone) || conv.phone;
+  var defaultChannel = conv.latest.channel || 'whatsapp';
+  threadEl.innerHTML =
+    '<div class="inbox-thread-header">' +
+      '<div>' +
+        '<div style="font-size:14px;font-weight:700;color:var(--text)">' + escapeHtmlDash(name) + '</div>' +
+        '<div style="font-size:12px;color:var(--text3);margin-top:2px">' + escapeHtmlDash(conv.phone) + ' · ' + escapeHtmlDash(defaultChannel) + '</div>' +
+      '</div>' +
+      '<button class="btn btn-ghost btn-sm" onclick="markConversationRead(\'' + escapeAttr(conv.phone) + '\')">Mark read</button>' +
+    '</div>' +
+    (defaultChannel === 'whatsapp' && !windowOpen
+      ? '<div class="inbox-window-warn">WhatsApp 24h reply window closed. Free-form replies will be rejected; switch to SMS to reach this contact.</div>'
+      : (windowOpen ? '<div class="inbox-window-warn" style="color:var(--text3);background:rgba(255,255,255,.03)">WhatsApp window open · ' + Math.round(windowMsLeft / 3.6e6) + 'h left</div>' : '')) +
+    '<div class="inbox-thread-body" id="inbox-thread-body">' +
+      merged.map(function(b) {
+        return '<div class="inbox-bubble ' + (b.dir === 'in' ? 'inbound' : 'outbound') + '">' +
+          escapeHtmlDash(b.body || '') +
+          '<div class="inbox-bubble-meta">' + formatInboxTime(b.ts) + ' · ' + b.channel + (b.dir === 'out' && b.status ? ' · ' + b.status : '') + '</div>' +
+        '</div>';
+      }).join('') +
+    '</div>' +
+    '<div class="inbox-reply">' +
+      '<div class="inbox-reply-channel">' +
+        '<label><input type="radio" name="inbox-channel-' + escapeAttr(conv.phone) + '" value="whatsapp"' + (defaultChannel === 'whatsapp' ? ' checked' : '') + '> WhatsApp</label>' +
+        '<label><input type="radio" name="inbox-channel-' + escapeAttr(conv.phone) + '" value="sms"' + (defaultChannel === 'sms' ? ' checked' : '') + '> SMS</label>' +
+      '</div>' +
+      '<textarea id="inbox-reply-text" placeholder="Type a reply…"></textarea>' +
+      '<button class="btn btn-primary" onclick="sendInboxReply(\'' + escapeAttr(conv.phone) + '\')">Send</button>' +
+    '</div>';
+
+  // Scroll thread to latest.
+  setTimeout(function() {
+    var body = document.getElementById('inbox-thread-body');
+    if (body) body.scrollTop = body.scrollHeight;
+  }, 0);
+}
+
+async function selectInboxConversation(phone) {
+  __inboxSelectedPhone = phone;
+  renderInbox();
+  // Mark all inbound rows from this phone as read.
+  await markConversationRead(phone);
+}
+
+async function markConversationRead(phone) {
+  var unread = INBOX_MESSAGES.filter(function(m) { return normalisePhone(m.from_phone) === phone && !m.read_at; });
+  if (unread.length === 0) { refreshInboxUnreadDot(); return; }
+  try {
+    var ids = unread.map(function(m){ return m.id; });
+    await sb.from('inbound_messages').update({ read_at: new Date().toISOString() }).in('id', ids);
+    unread.forEach(function(m){ m.read_at = new Date().toISOString(); });
+    renderInbox();
+  } catch (e) { console.warn('mark-read failed:', e.message); }
+}
+
+async function sendInboxReply(phone) {
+  var textEl = document.getElementById('inbox-reply-text');
+  if (!textEl) return;
+  var text = textEl.value.trim();
+  if (!text) { showToast('Type a message first'); return; }
+  var channelEl = document.querySelector('input[name="inbox-channel-' + phone + '"]:checked');
+  var channel = channelEl ? channelEl.value : 'whatsapp';
+  textEl.disabled = true;
+  try {
+    var res = await fetch('https://lvizldmdficsfpgegehp.supabase.co/functions/v1/process-queue', {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({ action: 'send_message', channel: channel, to_phone: phone, text_body: text }),
+    });
+    var data = await res.json().catch(function(){ return {}; });
+    if (!data.success) throw new Error(data.error || 'Send failed');
+    // Mirror into message_queue so the thread re-renders with the new bubble.
+    await sb.from('message_queue').insert({
+      lead_phone: phone, channel: channel, body: text, status: 'sent', sent_at: new Date().toISOString(),
+      sequence: 'inbox_reply', step_index: 0,
+    });
+    textEl.value = '';
+    await refreshInbox();
+    showToast('Reply sent');
+  } catch (e) {
+    showToast('Send failed: ' + e.message);
+  } finally {
+    textEl.disabled = false;
+  }
 }
 
 /* ── BOOKING LIFECYCLE (cancel / no-show) ── */
