@@ -8,7 +8,7 @@
     google_refresh_token: '',
     icloud_enabled: true,
     from_email: 'coach@reshape.fit',
-    from_name: 'Coach Jaime | ReShape',
+    from_name: 'Jaime | ReShape',
     booking_url: 'https://reshape.fit/booking',
   };
 })();

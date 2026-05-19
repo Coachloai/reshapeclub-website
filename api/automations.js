@@ -646,6 +646,14 @@ async function queueSequenceFromDB(sequenceName, lead, booking, supabaseClient) 
       sendAt = new Date(now + (step.delay_seconds * 1000)).toISOString();
     }
 
+    // Skip steps whose scheduled time is already in the past.
+    // Happens when a booking is made <24h ahead and the -86400s "TOMORROW"
+    // reminder would have fired yesterday. Without this, the queue fires it
+    // immediately, sending a misleading "TOMORROW" message right after booking.
+    if (new Date(sendAt).getTime() < now - 5 * 60 * 1000) {
+      continue;
+    }
+
     // Apply variable substitution
     var bodyText = replaceVars(step.body || '', lead, booking);
     var subjectText = replaceVars(step.subject || '', lead, booking);

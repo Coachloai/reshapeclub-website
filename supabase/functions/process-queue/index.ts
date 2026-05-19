@@ -120,7 +120,7 @@ async function processQueue() {
 async function sendEmail(to: string, subject: string, htmlBody: string, attachments?: any[]) {
   const resendKey = Deno.env.get('RESEND_KEY');
   const fromEmail = Deno.env.get('FROM_EMAIL') || 'coach@reshape.fit';
-  const fromName = Deno.env.get('FROM_NAME') || 'Coach Jaime | ReShape';
+  const fromName = Deno.env.get('FROM_NAME') || 'Jaime | ReShape';
   const fallbackEmail = Deno.env.get('FALLBACK_EMAIL') || 'onboarding@resend.dev';
 
   if (!resendKey) return { success: false, error: 'RESEND_KEY not set' };

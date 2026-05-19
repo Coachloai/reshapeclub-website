@@ -178,7 +178,7 @@
       +       '<input type="tel" id="gate-phone" placeholder="07700 000000" autocomplete="tel">'
       +     '</div>'
       +     '<button class="cal-confirm" id="gate-submit" style="background:var(--terracotta)">Continue</button>'
-      +     '<label class="gate-consent"><input type="checkbox" id="gate-consent" checked><span>I\'d like Coach Jaime to send me my pattern report and follow-up emails. Unsubscribe anytime.</span></label>'
+      +     '<label class="gate-consent"><input type="checkbox" id="gate-consent" checked><span>I\'d like Jaime to send me my pattern report and follow-up emails. Unsubscribe anytime.</span></label>'
       +     '<div class="gate-error" id="gate-error"></div>'
       +     '<div class="gate-disclaimer">We never share your data. Encrypted in transit and at rest.</div>'
       +   '</div>'

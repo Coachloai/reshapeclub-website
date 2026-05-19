@@ -337,6 +337,13 @@ function selectBookingDate(dateStr) {
 function renderBookingTimes() {
   var container = document.getElementById('bookingTimes');
   var slots = __bookingSlots.filter(function(s) { return s.date === __selectedDate; });
+  // Enforce minimum 2-hour booking lead time so the 2h-before reminder can actually fire.
+  var minLeadMs = 2 * 60 * 60 * 1000;
+  var nowMs = Date.now();
+  slots = slots.filter(function(s) {
+    var slotStartMs = new Date(s.date + 'T' + s.start_time).getTime();
+    return slotStartMs >= nowMs + minLeadMs;
+  });
   if (slots.length === 0) { container.innerHTML = '<div class="booking-empty">No available slots for this date</div>'; return; }
   container.innerHTML = slots.map(function(s) {
     var remaining = s.max_attendees - s.booked_count;
