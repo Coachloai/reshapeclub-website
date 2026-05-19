@@ -199,34 +199,64 @@ async function previewAudience(body: any) {
   })) };
 }
 
-// audience: { list?: string|string[], form_name?: string|string[],
-//             location_q?: string, gender?: string|string[],
-//             age_min?: number, age_max?: number,
-//             include_no_phone?: boolean }
+// audience: { list?, form_name?, location_q?, gender?, age_min?, age_max?,
+//             individual_ids?: string[] }
+// Rules:
+//   - individual_ids alone   → just those leads (consent-checked)
+//   - filter criteria alone  → filter result (consent-checked)
+//   - both                   → union, deduped by id
+//   - neither                → all opted-in leads (preserves prior behaviour)
 async function fetchAudience(audience: any, channel: string): Promise<any[]> {
+  const individuals = toArr(audience.individual_ids);
+  const hasFilter =
+    toArr(audience.list ?? audience.form_name).length > 0 ||
+    (audience.location_q && String(audience.location_q).trim()) ||
+    toArr(audience.gender).length > 0 ||
+    audience.age_min != null ||
+    audience.age_max != null;
+
+  let leads: any[] = [];
+  if (individuals.length) {
+    leads = leads.concat(await fetchLeadsBy({ ids: individuals }, channel));
+    if (hasFilter) {
+      leads = leads.concat(await fetchLeadsBy({ filter: audience }, channel));
+    }
+  } else {
+    leads = await fetchLeadsBy({ filter: audience }, channel);
+  }
+
+  const seen = new Set<string>();
+  return leads.filter((l) => {
+    if (!l || !l.id) return false;
+    if (seen.has(l.id)) return false;
+    seen.add(l.id);
+    return true;
+  });
+}
+
+async function fetchLeadsBy(opts: { ids?: string[]; filter?: any }, channel: string): Promise<any[]> {
   const params = new URLSearchParams();
   params.set('select', 'id,first_name,last_name,email,phone,age,gender,location,form_name,consent_token,email_consent_status,sms_consent_status,wa_consent_status');
   params.set('limit', '5000');
 
-  // Channel-specific consent + contactability gate.
   if (channel === 'email')    params.append('email_consent_status', 'eq.opted_in');
   if (channel === 'sms')      { params.append('sms_consent_status',  'eq.opted_in'); params.append('phone', 'not.is.null'); }
   if (channel === 'whatsapp') { params.append('wa_consent_status',   'eq.opted_in'); params.append('phone', 'not.is.null'); }
 
-  // form_name / "list" filter — same field. Accept either key.
-  const lists = toArr(audience.list ?? audience.form_name);
-  if (lists.length) params.append('form_name', `in.(${lists.map(quote).join(',')})`);
-
-  // Free-text location match (case-insensitive contains).
-  if (audience.location_q && String(audience.location_q).trim()) {
-    params.append('location', `ilike.*${String(audience.location_q).trim()}*`);
+  if (opts.ids?.length) {
+    params.append('id', `in.(${opts.ids.map((s: string) => `"${s}"`).join(',')})`);
+  } else if (opts.filter) {
+    const a = opts.filter;
+    const lists = toArr(a.list ?? a.form_name);
+    if (lists.length) params.append('form_name', `in.(${lists.map(quote).join(',')})`);
+    if (a.location_q && String(a.location_q).trim()) {
+      params.append('location', `ilike.*${String(a.location_q).trim()}*`);
+    }
+    const genders = toArr(a.gender);
+    if (genders.length) params.append('gender', `in.(${genders.map(quote).join(',')})`);
+    if (a.age_min != null) params.append('age', `gte.${Number(a.age_min)}`);
+    if (a.age_max != null) params.append('age', `lte.${Number(a.age_max)}`);
   }
-
-  const genders = toArr(audience.gender);
-  if (genders.length) params.append('gender', `in.(${genders.map(quote).join(',')})`);
-
-  if (audience.age_min != null) params.append('age', `gte.${Number(audience.age_min)}`);
-  if (audience.age_max != null) params.append('age', `lte.${Number(audience.age_max)}`);
 
   const res = await fetch(`${SUPABASE_URL}/rest/v1/leads?${params.toString()}`, {
     headers: srHeaders(),
