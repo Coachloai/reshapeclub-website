@@ -39,6 +39,28 @@ function ipCountry(req: Request): string | null {
 
 const TOTAL_QUESTIONS = 14;
 
+// Normalise UK phone numbers to E.164 (+44...) so downstream WhatsApp/SMS
+// always receives a valid international format regardless of how the user
+// entered it. Defaults to UK because the funnel targets UK only.
+//
+//   "07700 900123"   → "+447700900123"
+//   "7700900123"     → "+447700900123"
+//   "447700900123"   → "+447700900123"
+//   "00447700900123" → "+447700900123"
+//   "+447700900123"  → "+447700900123" (unchanged)
+//   ""               → ""              (unchanged)
+function toE164UK(input: string): string {
+  if (!input) return input;
+  const digits = input.replace(/\D/g, "");
+  if (input.startsWith("+")) return "+" + digits;
+  if (digits.startsWith("00")) return "+" + digits.slice(2);
+  if (digits.startsWith("44")) return "+" + digits;
+  if (digits.startsWith("0")) return "+44" + digits.slice(1);
+  // 10-digit number with no country/trunk prefix — assume UK mobile/landline.
+  if (digits.length === 10) return "+44" + digits;
+  return input;
+}
+
 const REMINDER_BODY = (siteUrl: string, sessionId: string, name: string) =>
   `<p>Hi ${name || "there"},</p>
    <p>You started your ReShape hormonal pattern assessment but didn't quite finish. Your answers are saved — we just need the last few to send you your full pattern report.</p>
@@ -95,9 +117,12 @@ Deno.serve(async (req) => {
       const email      = ((body.email as string) || "").trim().toLowerCase();
       const phoneRaw   = ((body.phone as string) || "").trim();
       // Strip whitespace/dashes/parens; accept +intl, UK 0-prefixed, or 44-prefixed.
-      const phoneCleaned = phoneRaw.replace(/[\s\-()]/g, "");
-      const phoneOk = !phoneCleaned ||
-        /^(\+\d{10,15}|0[1-9]\d{8,10}|44\d{10,11})$/.test(phoneCleaned);
+      const phoneCleanedRaw = phoneRaw.replace(/[\s\-()]/g, "");
+      const phoneOk = !phoneCleanedRaw ||
+        /^(\+\d{10,15}|0[1-9]\d{8,10}|44\d{10,11})$/.test(phoneCleanedRaw);
+      // Normalise to E.164 (+44...) so downstream messaging tooling always
+      // receives a sendable international format.
+      const phoneCleaned = toE164UK(phoneCleanedRaw);
       if (!session_id || !email) {
         return jsonResponse({ error: "session_id and email required" }, 400);
       }
