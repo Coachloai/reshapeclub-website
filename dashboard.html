@@ -2237,7 +2237,7 @@ if(sessionStorage.getItem('rs_auth')==='1'){
       <div class="page-header fade-in" style="margin-bottom:20px">
         <div>
           <div class="page-title">Inbox</div>
-          <div class="page-sub" id="inbox-sub">SMS &amp; WhatsApp replies from leads</div>
+          <div class="page-sub" id="inbox-sub">SMS, WhatsApp &amp; email replies from leads</div>
         </div>
         <div class="header-actions">
           <label style="display:flex;align-items:center;gap:6px;font-size:12px;color:var(--text2);cursor:pointer;margin-right:6px">
@@ -2246,6 +2246,12 @@ if(sessionStorage.getItem('rs_auth')==='1'){
           </label>
           <button class="btn btn-ghost" onclick="refreshInbox()">Refresh</button>
         </div>
+      </div>
+      <div class="appts-tabs" style="margin-bottom:14px;border-bottom:1px solid var(--border)">
+        <button class="appts-tab selected" data-channel="all" onclick="setInboxChannel('all')">All</button>
+        <button class="appts-tab" data-channel="whatsapp" onclick="setInboxChannel('whatsapp')">WhatsApp</button>
+        <button class="appts-tab" data-channel="sms" onclick="setInboxChannel('sms')">SMS</button>
+        <button class="appts-tab" data-channel="email" onclick="setInboxChannel('email')">Email</button>
       </div>
       <div class="chart-card fade-in inbox-shell">
         <div class="inbox-list" id="inbox-list"></div>
@@ -4790,14 +4796,15 @@ function toggleAppointmentDetail(id) {
 /* ══════════════════════════════════════
    INBOX (SMS + WhatsApp replies)
 ══════════════════════════════════════ */
-var INBOX_MESSAGES = [];     // all inbound rows
-var INBOX_SENT = {};         // phone -> array of outbound rows (from message_queue, status in ('sent','sending'))
-var __inboxSelectedPhone = null;
+var INBOX_MESSAGES = [];        // all inbound rows (sms/whatsapp/email)
+var INBOX_SENT_PHONE = {};      // normalised phone -> outbound message_queue rows (sms/whatsapp)
+var INBOX_SENT_EMAIL = {};      // lowercased email -> outbound message_queue rows (email)
+var __inboxSelected = null;     // { kind: 'phone'|'email', handle: '+44…'|'a@b.com' }
+var __inboxChannel = 'all';     // 'all' | 'whatsapp' | 'sms' | 'email'
 var __inboxPollTimer = null;
 
 async function initInboxView() {
   await refreshInbox();
-  // Poll every 30s while the tab is mounted; stop when user navigates away.
   if (__inboxPollTimer) clearInterval(__inboxPollTimer);
   __inboxPollTimer = setInterval(function() {
     if (document.getElementById('view-inbox').classList.contains('active-view')) {
@@ -4808,19 +4815,35 @@ async function initInboxView() {
   }, 30000);
 }
 
+function setInboxChannel(ch) {
+  __inboxChannel = ch;
+  document.querySelectorAll('#view-inbox .appts-tab').forEach(function(b) {
+    b.classList.toggle('selected', b.dataset.channel === ch);
+  });
+  __inboxSelected = null;
+  renderInbox();
+}
+
 async function refreshInbox(silent) {
   try {
     var [inboundRes, sentRes] = await Promise.all([
       sb.from('inbound_messages').select('*').order('created_at', { ascending: false }).limit(1000),
-      sb.from('message_queue').select('lead_phone, channel, body, sent_at, status, created_at')
-        .in('channel', ['sms','whatsapp']).not('lead_phone','is',null).order('created_at', { ascending: false }).limit(1000),
+      sb.from('message_queue').select('lead_phone, lead_email, channel, subject, body, sent_at, status, created_at')
+        .in('channel', ['sms','whatsapp','email']).order('created_at', { ascending: false }).limit(1000),
     ]);
     INBOX_MESSAGES = inboundRes.data || [];
-    INBOX_SENT = {};
+    INBOX_SENT_PHONE = {};
+    INBOX_SENT_EMAIL = {};
     (sentRes.data || []).forEach(function(m) {
-      var key = normalisePhone(m.lead_phone);
-      if (!INBOX_SENT[key]) INBOX_SENT[key] = [];
-      INBOX_SENT[key].push(m);
+      if (m.channel === 'email') {
+        if (!m.lead_email) return;
+        var ek = String(m.lead_email).toLowerCase();
+        (INBOX_SENT_EMAIL[ek] = INBOX_SENT_EMAIL[ek] || []).push(m);
+      } else {
+        if (!m.lead_phone) return;
+        var pk = normalisePhone(m.lead_phone);
+        (INBOX_SENT_PHONE[pk] = INBOX_SENT_PHONE[pk] || []).push(m);
+      }
     });
     renderInbox();
     refreshInboxUnreadDot();
@@ -4841,22 +4864,43 @@ function refreshInboxUnreadDot() {
   dot.style.display = unread ? 'inline-block' : 'none';
 }
 
+// A "handle" is either '+44…' (phone) or 'a@b.com' (email). The conversation
+// list groups inbound rows by handle; emails group by from_email and SMS/
+// WhatsApp group by from_phone.
+function handleForMessage(m) {
+  if (m.channel === 'email') return { kind: 'email', handle: String(m.from_email || '').toLowerCase() };
+  return { kind: 'phone', handle: normalisePhone(m.from_phone) };
+}
+
 function renderInbox() {
   var listEl = document.getElementById('inbox-list');
   var threadEl = document.getElementById('inbox-thread');
   if (!listEl || !threadEl) return;
 
   var unreadOnly = (document.getElementById('inbox-unread-only') || {}).checked;
-  // Group inbound by phone (keep latest message per phone for the list preview).
-  var byPhone = {};
+  var filterCh = __inboxChannel;
+
+  // Group inbound by handle. A row with the same handle but a different channel
+  // (e.g. a lead messaged you via WhatsApp AND email) is intentionally kept
+  // separate so the thread doesn't conflate different inboxes.
+  var byKey = {};
   INBOX_MESSAGES.forEach(function(m) {
-    var key = normalisePhone(m.from_phone);
-    if (!byPhone[key]) byPhone[key] = { phone: key, latest: m, all: [], unread: 0, profile: m.profile_name };
-    byPhone[key].all.push(m);
-    if (!m.read_at) byPhone[key].unread += 1;
-    if (new Date(m.created_at) > new Date(byPhone[key].latest.created_at)) byPhone[key].latest = m;
+    if (filterCh !== 'all' && m.channel !== filterCh) return;
+    var h = handleForMessage(m);
+    if (!h.handle) return;
+    var key = h.kind + ':' + h.handle;
+    if (!byKey[key]) {
+      byKey[key] = {
+        key: key, kind: h.kind, handle: h.handle,
+        latest: m, all: [], unread: 0,
+        profile: m.profile_name, subject: m.subject,
+      };
+    }
+    byKey[key].all.push(m);
+    if (!m.read_at) byKey[key].unread += 1;
+    if (new Date(m.created_at) > new Date(byKey[key].latest.created_at)) byKey[key].latest = m;
   });
-  var conversations = Object.values(byPhone)
+  var conversations = Object.values(byKey)
     .filter(function(c) { return !unreadOnly || c.unread > 0; })
     .sort(function(a, b) { return new Date(b.latest.created_at) - new Date(a.latest.created_at); });
 
@@ -4865,36 +4909,47 @@ function renderInbox() {
     ' · ' + INBOX_MESSAGES.filter(function(m){ return !m.read_at; }).length + ' unread';
 
   if (conversations.length === 0) {
-    listEl.innerHTML = '<div style="padding:24px;text-align:center;color:var(--text3);font-size:13px">No conversations yet.</div>';
+    listEl.innerHTML = '<div style="padding:24px;text-align:center;color:var(--text3);font-size:13px">No ' + (filterCh === 'all' ? '' : filterCh + ' ') + 'conversations yet.</div>';
   } else {
     listEl.innerHTML = conversations.map(function(c) {
-      var name = c.profile || lookupLeadName(c.phone) || c.phone;
-      var snippet = (c.latest.body || (c.latest.num_media > 0 ? '[media]' : '')).slice(0, 140);
+      var name = c.profile || lookupLeadName(c.kind === 'phone' ? c.handle : null, c.kind === 'email' ? c.handle : null) || c.handle;
+      var snippet = (c.latest.subject ? '[' + c.latest.subject + '] ' : '') +
+        (c.latest.body || (c.latest.num_media > 0 ? '[media]' : ''));
       var when = formatInboxTime(c.latest.created_at);
       var unreadClass = c.unread > 0 ? ' unread' : '';
-      var activeClass = c.phone === __inboxSelectedPhone ? ' active' : '';
-      return '<div class="inbox-row' + unreadClass + activeClass + '" onclick="selectInboxConversation(\'' + escapeAttr(c.phone) + '\')">' +
+      var activeKey = __inboxSelected ? (__inboxSelected.kind + ':' + __inboxSelected.handle) : '';
+      var activeClass = c.key === activeKey ? ' active' : '';
+      var channelIcon = c.latest.channel === 'whatsapp' ? '🟢' : c.latest.channel === 'email' ? '✉' : '✉';
+      return '<div class="inbox-row' + unreadClass + activeClass + '" onclick="selectInboxConversation(\'' + c.kind + '\', \'' + escapeAttr(c.handle) + '\')">' +
         '<div class="inbox-row-name">' + escapeHtmlDash(name) + '</div>' +
-        '<div class="inbox-row-phone">' + escapeHtmlDash(c.phone) + '</div>' +
-        '<div class="inbox-row-snippet">' + escapeHtmlDash(snippet) + '</div>' +
+        '<div class="inbox-row-phone">' + escapeHtmlDash(c.handle) + ' · ' + escapeHtmlDash(c.latest.channel) + '</div>' +
+        '<div class="inbox-row-snippet">' + escapeHtmlDash(snippet.slice(0, 160)) + '</div>' +
         '<div class="inbox-row-time">' + when + '</div>' +
       '</div>';
     }).join('');
   }
 
-  // Right pane: selected thread or placeholder.
-  if (!__inboxSelectedPhone || !byPhone[__inboxSelectedPhone]) {
+  var activeKey = __inboxSelected ? (__inboxSelected.kind + ':' + __inboxSelected.handle) : '';
+  if (!activeKey || !byKey[activeKey]) {
     threadEl.innerHTML = '<div class="inbox-empty">Select a conversation on the left.</div>';
     return;
   }
-  renderInboxThread(byPhone[__inboxSelectedPhone]);
+  renderInboxThread(byKey[activeKey]);
 }
 
-function lookupLeadName(phone) {
+function lookupLeadName(phone, email) {
   if (!Array.isArray(ALL_LEADS) || ALL_LEADS.length === 0) return null;
-  var p = normalisePhone(phone);
-  var hit = ALL_LEADS.find(function(l) { return normalisePhone(l.phone) === p; });
-  return hit ? (hit.name || (hit.firstName + ' ' + hit.lastName).trim() || null) : null;
+  if (phone) {
+    var p = normalisePhone(phone);
+    var hit = ALL_LEADS.find(function(l) { return normalisePhone(l.phone) === p; });
+    if (hit) return hit.name || (hit.firstName + ' ' + hit.lastName).trim() || null;
+  }
+  if (email) {
+    var e = String(email).toLowerCase();
+    var hit2 = ALL_LEADS.find(function(l) { return String(l.email || '').toLowerCase() === e; });
+    if (hit2) return hit2.name || (hit2.firstName + ' ' + hit2.lastName).trim() || null;
+  }
+  return null;
 }
 
 function formatInboxTime(ts) {
@@ -4909,67 +4964,101 @@ function formatInboxTime(ts) {
 
 function renderInboxThread(conv) {
   var threadEl = document.getElementById('inbox-thread');
-  var sent = INBOX_SENT[conv.phone] || [];
-  // Merge inbound + outbound and sort by time ascending.
+  var sent = conv.kind === 'email'
+    ? (INBOX_SENT_EMAIL[conv.handle] || [])
+    : (INBOX_SENT_PHONE[conv.handle] || []);
   var merged = []
-    .concat(conv.all.map(function(m) { return { ts: m.created_at, body: m.body, dir: 'in', channel: m.channel }; }))
-    .concat(sent.map(function(m) { return { ts: m.sent_at || m.created_at, body: m.body, dir: 'out', channel: m.channel, status: m.status }; }))
+    .concat(conv.all.map(function(m) { return { ts: m.created_at, body: m.body, subject: m.subject, dir: 'in', channel: m.channel }; }))
+    .concat(sent.map(function(m) { return { ts: m.sent_at || m.created_at, body: m.body, subject: m.subject, dir: 'out', channel: m.channel, status: m.status }; }))
     .sort(function(a, b) { return new Date(a.ts) - new Date(b.ts); });
 
-  // Are we still inside the 24h WhatsApp customer-service window?
-  var latestInboundWhatsapp = conv.all
-    .filter(function(m){ return m.channel === 'whatsapp'; })
-    .map(function(m){ return new Date(m.created_at).getTime(); })
-    .sort(function(a,b){return b-a;})[0];
-  var windowOpen = latestInboundWhatsapp && (Date.now() - latestInboundWhatsapp) < 24 * 60 * 60 * 1000;
-  var windowMsLeft = windowOpen ? (24 * 60 * 60 * 1000 - (Date.now() - latestInboundWhatsapp)) : 0;
+  var name = conv.profile || lookupLeadName(
+    conv.kind === 'phone' ? conv.handle : null,
+    conv.kind === 'email' ? conv.handle : null,
+  ) || conv.handle;
+  var defaultChannel = conv.latest.channel || (conv.kind === 'email' ? 'email' : 'whatsapp');
 
-  var name = conv.profile || lookupLeadName(conv.phone) || conv.phone;
-  var defaultChannel = conv.latest.channel || 'whatsapp';
+  // WhatsApp 24h customer-service window check (phone-based only)
+  var windowBanner = '';
+  if (conv.kind === 'phone') {
+    var latestInboundWhatsapp = conv.all
+      .filter(function(m){ return m.channel === 'whatsapp'; })
+      .map(function(m){ return new Date(m.created_at).getTime(); })
+      .sort(function(a,b){return b-a;})[0];
+    var windowOpen = latestInboundWhatsapp && (Date.now() - latestInboundWhatsapp) < 24 * 60 * 60 * 1000;
+    var windowMsLeft = windowOpen ? (24 * 60 * 60 * 1000 - (Date.now() - latestInboundWhatsapp)) : 0;
+    if (defaultChannel === 'whatsapp' && !windowOpen) {
+      windowBanner = '<div class="inbox-window-warn">WhatsApp 24h reply window closed. Free-form replies will be rejected; switch to SMS to reach this contact.</div>';
+    } else if (windowOpen) {
+      windowBanner = '<div class="inbox-window-warn" style="color:var(--text3);background:rgba(255,255,255,.03)">WhatsApp window open · ' + Math.round(windowMsLeft / 3.6e6) + 'h left</div>';
+    }
+  }
+
+  var safeHandle = escapeAttr(conv.handle);
+  var replyForm;
+  if (conv.kind === 'email') {
+    var lastSubj = conv.latest.subject || '';
+    var replySubj = /^re:/i.test(lastSubj) ? lastSubj : ('Re: ' + lastSubj);
+    replyForm =
+      '<div class="inbox-reply" style="flex-direction:column;align-items:stretch;gap:8px">' +
+        '<input type="text" id="inbox-reply-subject" value="' + escapeAttr(replySubj) + '" placeholder="Subject" style="background:rgba(255,255,255,.04);border:1px solid var(--border);border-radius:10px;color:var(--text);font-family:var(--body);font-size:13px;padding:10px 12px;outline:none">' +
+        '<textarea id="inbox-reply-text" placeholder="Type a reply…"></textarea>' +
+        '<div style="display:flex;justify-content:flex-end">' +
+          '<button class="btn btn-primary" onclick="sendInboxEmailReply(\'' + safeHandle + '\')">Send email</button>' +
+        '</div>' +
+      '</div>';
+  } else {
+    var nm = 'inbox-channel-' + safeHandle;
+    replyForm =
+      '<div class="inbox-reply">' +
+        '<div class="inbox-reply-channel">' +
+          '<label><input type="radio" name="' + nm + '" value="whatsapp"' + (defaultChannel === 'whatsapp' ? ' checked' : '') + '> WhatsApp</label>' +
+          '<label><input type="radio" name="' + nm + '" value="sms"' + (defaultChannel === 'sms' ? ' checked' : '') + '> SMS</label>' +
+        '</div>' +
+        '<textarea id="inbox-reply-text" placeholder="Type a reply…"></textarea>' +
+        '<button class="btn btn-primary" onclick="sendInboxReply(\'' + safeHandle + '\')">Send</button>' +
+      '</div>';
+  }
+
   threadEl.innerHTML =
     '<div class="inbox-thread-header">' +
       '<div>' +
         '<div style="font-size:14px;font-weight:700;color:var(--text)">' + escapeHtmlDash(name) + '</div>' +
-        '<div style="font-size:12px;color:var(--text3);margin-top:2px">' + escapeHtmlDash(conv.phone) + ' · ' + escapeHtmlDash(defaultChannel) + '</div>' +
+        '<div style="font-size:12px;color:var(--text3);margin-top:2px">' + escapeHtmlDash(conv.handle) + ' · ' + escapeHtmlDash(defaultChannel) + '</div>' +
       '</div>' +
-      '<button class="btn btn-ghost btn-sm" onclick="markConversationRead(\'' + escapeAttr(conv.phone) + '\')">Mark read</button>' +
+      '<button class="btn btn-ghost btn-sm" onclick="markConversationRead(\'' + conv.kind + '\', \'' + safeHandle + '\')">Mark read</button>' +
     '</div>' +
-    (defaultChannel === 'whatsapp' && !windowOpen
-      ? '<div class="inbox-window-warn">WhatsApp 24h reply window closed. Free-form replies will be rejected; switch to SMS to reach this contact.</div>'
-      : (windowOpen ? '<div class="inbox-window-warn" style="color:var(--text3);background:rgba(255,255,255,.03)">WhatsApp window open · ' + Math.round(windowMsLeft / 3.6e6) + 'h left</div>' : '')) +
+    windowBanner +
     '<div class="inbox-thread-body" id="inbox-thread-body">' +
       merged.map(function(b) {
+        var subjHtml = (b.channel === 'email' && b.subject)
+          ? '<div style="font-size:11px;color:var(--text3);margin-bottom:4px;text-transform:uppercase;letter-spacing:.04em">' + escapeHtmlDash(b.subject) + '</div>'
+          : '';
         return '<div class="inbox-bubble ' + (b.dir === 'in' ? 'inbound' : 'outbound') + '">' +
-          escapeHtmlDash(b.body || '') +
+          subjHtml + escapeHtmlDash(b.body || '') +
           '<div class="inbox-bubble-meta">' + formatInboxTime(b.ts) + ' · ' + b.channel + (b.dir === 'out' && b.status ? ' · ' + b.status : '') + '</div>' +
         '</div>';
       }).join('') +
     '</div>' +
-    '<div class="inbox-reply">' +
-      '<div class="inbox-reply-channel">' +
-        '<label><input type="radio" name="inbox-channel-' + escapeAttr(conv.phone) + '" value="whatsapp"' + (defaultChannel === 'whatsapp' ? ' checked' : '') + '> WhatsApp</label>' +
-        '<label><input type="radio" name="inbox-channel-' + escapeAttr(conv.phone) + '" value="sms"' + (defaultChannel === 'sms' ? ' checked' : '') + '> SMS</label>' +
-      '</div>' +
-      '<textarea id="inbox-reply-text" placeholder="Type a reply…"></textarea>' +
-      '<button class="btn btn-primary" onclick="sendInboxReply(\'' + escapeAttr(conv.phone) + '\')">Send</button>' +
-    '</div>';
+    replyForm;
 
-  // Scroll thread to latest.
   setTimeout(function() {
     var body = document.getElementById('inbox-thread-body');
     if (body) body.scrollTop = body.scrollHeight;
   }, 0);
 }
 
-async function selectInboxConversation(phone) {
-  __inboxSelectedPhone = phone;
+async function selectInboxConversation(kind, handle) {
+  __inboxSelected = { kind: kind, handle: handle };
   renderInbox();
-  // Mark all inbound rows from this phone as read.
-  await markConversationRead(phone);
+  await markConversationRead(kind, handle);
 }
 
-async function markConversationRead(phone) {
-  var unread = INBOX_MESSAGES.filter(function(m) { return normalisePhone(m.from_phone) === phone && !m.read_at; });
+async function markConversationRead(kind, handle) {
+  var unread = INBOX_MESSAGES.filter(function(m) {
+    var h = handleForMessage(m);
+    return h.kind === kind && h.handle === handle && !m.read_at;
+  });
   if (unread.length === 0) { refreshInboxUnreadDot(); return; }
   try {
     var ids = unread.map(function(m){ return m.id; });
@@ -4995,7 +5084,6 @@ async function sendInboxReply(phone) {
     });
     var data = await res.json().catch(function(){ return {}; });
     if (!data.success) throw new Error(data.error || 'Send failed');
-    // Mirror into message_queue so the thread re-renders with the new bubble.
     await sb.from('message_queue').insert({
       lead_phone: phone, channel: channel, body: text, status: 'sent', sent_at: new Date().toISOString(),
       sequence: 'inbox_reply', step_index: 0,
@@ -5003,6 +5091,37 @@ async function sendInboxReply(phone) {
     textEl.value = '';
     await refreshInbox();
     showToast('Reply sent');
+  } catch (e) {
+    showToast('Send failed: ' + e.message);
+  } finally {
+    textEl.disabled = false;
+  }
+}
+
+async function sendInboxEmailReply(email) {
+  var textEl = document.getElementById('inbox-reply-text');
+  var subjEl = document.getElementById('inbox-reply-subject');
+  if (!textEl) return;
+  var text = textEl.value.trim();
+  var subject = (subjEl ? subjEl.value : '').trim() || '(no subject)';
+  if (!text) { showToast('Type a message first'); return; }
+  textEl.disabled = true;
+  try {
+    var html = '<p>' + escapeHtmlDash(text).replace(/\n/g, '<br>') + '</p>';
+    var res = await fetch('https://lvizldmdficsfpgegehp.supabase.co/functions/v1/process-queue', {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({ action: 'send_message', channel: 'email', to_email: email, subject: subject, html_body: html }),
+    });
+    var data = await res.json().catch(function(){ return {}; });
+    if (!data.success) throw new Error(data.error || 'Send failed');
+    await sb.from('message_queue').insert({
+      lead_email: email, channel: 'email', subject: subject, body: text, status: 'sent', sent_at: new Date().toISOString(),
+      sequence: 'inbox_reply', step_index: 0,
+    });
+    textEl.value = '';
+    await refreshInbox();
+    showToast('Email sent');
   } catch (e) {
     showToast('Send failed: ' + e.message);
   } finally {
