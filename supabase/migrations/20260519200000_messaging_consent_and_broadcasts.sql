@@ -97,6 +97,8 @@ create index if not exists idx_cal_lead    on public.consent_audit_log(lead_id);
 create index if not exists idx_cal_channel on public.consent_audit_log(channel);
 
 alter table public.consent_audit_log enable row level security;
+drop policy if exists cal_read   on public.consent_audit_log;
+drop policy if exists cal_insert on public.consent_audit_log;
 create policy cal_read   on public.consent_audit_log for select using (true);
 create policy cal_insert on public.consent_audit_log for insert with check (true);
 grant select, insert on public.consent_audit_log to anon, authenticated, service_role;
@@ -124,6 +126,9 @@ create index if not exists idx_ms_created_at on public.message_sends(created_at 
 create index if not exists idx_ms_status     on public.message_sends(status);
 
 alter table public.message_sends enable row level security;
+drop policy if exists ms_read   on public.message_sends;
+drop policy if exists ms_insert on public.message_sends;
+drop policy if exists ms_update on public.message_sends;
 create policy ms_read   on public.message_sends for select using (true);
 create policy ms_insert on public.message_sends for insert with check (true);
 create policy ms_update on public.message_sends for update using (true);
