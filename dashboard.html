@@ -1100,6 +1100,56 @@ select.appt-form-input option{background:var(--s3)}
 .msg-aud-sample{margin-top:10px;font-size:11px;color:var(--text3);text-align:left;padding:10px;background:var(--bg);border-radius:8px;border:1px solid var(--border2);max-height:80px;overflow-y:auto}
 .msg-aud-sample div{margin-bottom:2px}
 .msg-aud-sample:empty{display:none}
+/* ── INDIVIDUAL SEARCH + CHIPS ── */
+.msg-section-divider{margin:22px -4px 0;padding:18px 4px 0;border-top:1px solid var(--border)}
+.msg-search-wrap{position:relative;margin-top:8px}
+.msg-search-results{position:absolute;top:calc(100% + 4px);left:0;right:0;background:var(--s1);border:1px solid var(--border);border-radius:10px;box-shadow:0 12px 32px rgba(42,39,36,.12);max-height:240px;overflow-y:auto;z-index:50;display:none}
+.msg-search-results.open{display:block}
+.msg-search-row{padding:10px 12px;cursor:pointer;font-size:13px;border-bottom:1px solid var(--border2);transition:background .12s}
+.msg-search-row:hover,.msg-search-row.active{background:var(--bg)}
+.msg-search-row:last-child{border-bottom:none}
+.msg-search-row .nm{color:var(--text);font-weight:500;display:flex;align-items:center;gap:6px}
+.msg-search-row .nm small{color:var(--text3);font-size:10px;text-transform:uppercase;letter-spacing:.06em;font-weight:600;background:var(--bg);padding:2px 6px;border-radius:6px}
+.msg-search-row .meta{color:var(--text3);font-size:11px;margin-top:2px}
+.msg-search-row.empty{color:var(--text3);cursor:default;text-align:center;padding:14px}
+.msg-chips{margin-top:10px;display:flex;flex-wrap:wrap;gap:6px}
+.msg-chips:empty{display:none}
+.msg-chip{display:inline-flex;align-items:center;gap:6px;padding:5px 4px 5px 10px;background:var(--odim);border:1px solid rgba(237,92,37,.3);border-radius:999px;font-size:12px;color:var(--text);max-width:100%}
+.msg-chip-name{overflow:hidden;text-overflow:ellipsis;white-space:nowrap;max-width:140px}
+.msg-chip-x{width:18px;height:18px;border-radius:50%;background:rgba(237,92,37,.15);color:var(--orange);border:none;cursor:pointer;display:flex;align-items:center;justify-content:center;font-size:13px;line-height:1;padding:0;flex-shrink:0}
+.msg-chip-x:hover{background:var(--orange);color:#fff}
+/* ── CSV IMPORT MODAL ── */
+.csv-modal-overlay{position:fixed;inset:0;background:rgba(42,39,36,.4);backdrop-filter:blur(4px);display:none;align-items:center;justify-content:center;z-index:200;padding:20px}
+.csv-modal-overlay.open{display:flex}
+.csv-modal{background:var(--s1);border:1px solid var(--border);border-radius:16px;padding:28px;max-width:760px;width:100%;max-height:90vh;overflow-y:auto;box-shadow:0 32px 80px rgba(42,39,36,.16)}
+.csv-modal h3{font-family:var(--head);font-size:22px;color:var(--text);margin-bottom:6px;letter-spacing:-0.02em}
+.csv-modal p.csv-sub{font-size:13px;color:var(--text3);margin-bottom:20px;line-height:1.6}
+.csv-drop{border:2px dashed var(--border);border-radius:12px;padding:32px;text-align:center;background:var(--bg);transition:border-color .15s,background .15s;cursor:pointer}
+.csv-drop:hover,.csv-drop.dragover{border-color:var(--orange);background:var(--odim2)}
+.csv-drop svg{width:32px;height:32px;color:var(--text3);margin-bottom:10px}
+.csv-drop .csv-drop-title{font-size:14px;color:var(--text);font-weight:600;margin-bottom:4px}
+.csv-drop .csv-drop-sub{font-size:12px;color:var(--text3)}
+.csv-section{margin-top:20px}
+.csv-section h4{font-size:12px;text-transform:uppercase;letter-spacing:.08em;font-weight:700;color:var(--text3);margin-bottom:10px}
+.csv-preview{border:1px solid var(--border);border-radius:10px;overflow:hidden;font-size:12px}
+.csv-preview table{width:100%;border-collapse:collapse}
+.csv-preview th,.csv-preview td{padding:8px 10px;text-align:left;border-bottom:1px solid var(--border2);max-width:160px;overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
+.csv-preview th{background:var(--bg);font-weight:600;font-size:11px;text-transform:uppercase;letter-spacing:.06em;color:var(--text3)}
+.csv-preview tr:last-child td{border-bottom:none}
+.csv-mapping{display:grid;grid-template-columns:1fr 1fr;gap:10px}
+@media(max-width:600px){.csv-mapping{grid-template-columns:1fr}}
+.csv-mapping label{display:flex;flex-direction:column;gap:4px;font-size:12px;color:var(--text3);font-weight:600;text-transform:uppercase;letter-spacing:.06em}
+.csv-attest{margin-top:18px;padding:14px 16px;background:var(--odim2);border:1px solid rgba(237,92,37,.25);border-radius:10px;display:flex;align-items:flex-start;gap:10px;font-size:13px;color:var(--text2);line-height:1.55}
+.csv-attest input{margin-top:3px;accent-color:var(--orange);cursor:pointer;flex-shrink:0}
+.csv-attest label{cursor:pointer}
+.csv-attest strong{color:var(--text);font-weight:600}
+.csv-summary{margin-top:14px;padding:12px 14px;background:var(--bg);border:1px solid var(--border);border-radius:10px;font-size:13px;color:var(--text2);display:flex;justify-content:space-between;flex-wrap:wrap;gap:8px}
+.csv-summary strong{color:var(--text);font-weight:600}
+.csv-actions{margin-top:22px;display:flex;justify-content:flex-end;gap:10px;flex-wrap:wrap}
+.csv-error{margin-top:12px;color:var(--red);font-size:13px}
+.btn-secondary{background:var(--s3);color:var(--text);border:1px solid var(--border);padding:10px 18px;border-radius:10px;font-family:var(--body);font-weight:600;font-size:13px;cursor:pointer;display:inline-flex;align-items:center;gap:6px;transition:all .15s}
+.btn-secondary:hover{border-color:rgba(237,92,37,.5)}
+.btn-secondary svg{width:14px;height:14px}
 </style>
 </head>
 <body>
@@ -2373,6 +2423,12 @@ if(sessionStorage.getItem('rs_auth')==='1'){
           <div class="page-title">Messaging</div>
           <div class="page-sub">Send email, SMS, and WhatsApp to filtered prospects — consent-checked at send time.</div>
         </div>
+        <div class="header-actions">
+          <button type="button" class="btn-secondary" onclick="csvOpen()">
+            <svg fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><path d="M21 15v4a2 2 0 01-2 2H5a2 2 0 01-2-2v-4M17 8l-5-5-5 5M12 3v12"/></svg>
+            Import CSV
+          </button>
+        </div>
       </div>
 
       <div class="msg-grid fade-in">
@@ -2398,6 +2454,15 @@ if(sessionStorage.getItem('rs_auth')==='1'){
             <input type="number" class="msg-input" id="msg-age-min" placeholder="Min" min="13" max="99">
             <span class="msg-dash">–</span>
             <input type="number" class="msg-input" id="msg-age-max" placeholder="Max" min="13" max="99">
+          </div>
+
+          <div class="msg-section-divider">
+            <h4 style="margin-top:0">Or pick individuals</h4>
+            <div class="msg-search-wrap">
+              <input type="text" class="msg-input" id="msg-search" placeholder="Search name, email, phone…" autocomplete="off">
+              <div class="msg-search-results" id="msg-search-results" role="listbox"></div>
+            </div>
+            <div class="msg-chips" id="msg-chips"></div>
           </div>
 
           <div class="msg-count">
@@ -2482,6 +2547,67 @@ if(sessionStorage.getItem('rs_auth')==='1'){
           <thead><tr><th>When</th><th>Channel</th><th>Subject / template</th><th>Audience</th><th>Status</th><th>Delivered</th></tr></thead>
           <tbody id="msg-history-body"><tr><td colspan="6" style="text-align:center;padding:24px;color:var(--text3)">Loading…</td></tr></tbody>
         </table>
+      </div>
+    </div>
+
+    <!-- ── CSV IMPORT MODAL ── -->
+    <div class="csv-modal-overlay" id="csv-modal-overlay">
+      <div class="csv-modal">
+        <h3>Import CSV → new leads</h3>
+        <p class="csv-sub">Upload a CSV. Each row becomes a new lead with the list name you choose, available immediately in the audience filter. Existing leads aren't touched.</p>
+
+        <div class="csv-drop" id="csv-drop">
+          <svg fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><path d="M21 15v4a2 2 0 01-2 2H5a2 2 0 01-2-2v-4M17 8l-5-5-5 5M12 3v12"/></svg>
+          <div class="csv-drop-title" id="csv-drop-title">Drop your CSV here, or click to choose a file</div>
+          <div class="csv-drop-sub" id="csv-drop-sub">Comma-separated. First row should be column headers (email, first_name, etc.). Max 5,000 rows.</div>
+          <input type="file" id="csv-file" accept=".csv,text/csv,text/plain" style="display:none">
+        </div>
+
+        <div id="csv-after-parse" style="display:none">
+          <div class="csv-section">
+            <h4>Preview · first 5 rows of <span id="csv-row-total">0</span></h4>
+            <div class="csv-preview" id="csv-preview"></div>
+          </div>
+
+          <div class="csv-section">
+            <h4>Map columns</h4>
+            <div class="csv-mapping">
+              <label>Email column<select class="msg-select" id="csv-map-email" data-required="1"></select></label>
+              <label>First name<select class="msg-select" id="csv-map-first_name"></select></label>
+              <label>Last name<select class="msg-select" id="csv-map-last_name"></select></label>
+              <label>Phone<select class="msg-select" id="csv-map-phone"></select></label>
+              <label>Location<select class="msg-select" id="csv-map-location"></select></label>
+              <label>Age<select class="msg-select" id="csv-map-age"></select></label>
+            </div>
+          </div>
+
+          <div class="csv-section">
+            <h4>List name (form_name)</h4>
+            <input type="text" class="msg-input" id="csv-list-name" placeholder="e.g. Spring Promo List 2026">
+            <div class="msg-token-hint">This appears as a 'list' in the messaging filter so you can target these leads later.</div>
+          </div>
+
+          <div class="csv-attest">
+            <input type="checkbox" id="csv-attest">
+            <label for="csv-attest"><strong>I confirm</strong> that every contact in this CSV has opted in to receive email, SMS, and WhatsApp communications about coaching from ReShape, and I can produce evidence of that consent on request. I understand I am the data controller for these contacts under UK GDPR / PECR.</label>
+          </div>
+
+          <div class="csv-summary" id="csv-summary">
+            <span><strong id="csv-summary-valid">0</strong> valid rows · <strong id="csv-summary-invalid">0</strong> skipped (missing email)</span>
+            <span id="csv-summary-existing" style="color:var(--text3)"></span>
+          </div>
+
+          <div class="csv-error" id="csv-error" style="display:none"></div>
+
+          <div class="csv-actions">
+            <button type="button" class="btn btn-ghost" onclick="csvClose()">Cancel</button>
+            <button type="button" class="msg-send-btn" id="csv-import-btn" disabled>Import <span id="csv-import-count">0</span> rows</button>
+          </div>
+        </div>
+
+        <div class="csv-actions" id="csv-pre-actions">
+          <button type="button" class="btn btn-ghost" onclick="csvClose()">Close</button>
+        </div>
       </div>
     </div>
 
@@ -3154,6 +3280,7 @@ var MSG_STATE = {
   count:   null,
   templates: [],
   selectedTemplate: null,
+  selectedIndividuals: new Map(),
   initialised: false,
 };
 
@@ -3168,6 +3295,7 @@ async function initMessagingView() {
   msgBindTabs();
   msgBindCompose();
   msgBindSendFlow();
+  msgBindSearch();
   msgRefreshCount();
   msgLoadWhatsAppTemplates();
 }
@@ -3269,11 +3397,12 @@ function msgBindSendFlow() {
 
 function msgFilterPayload() {
   return {
-    list:        Array.from(MSG_STATE.selectedLists),
-    gender:      MSG_STATE.gender || null,
-    location_q:  MSG_STATE.location || null,
-    age_min:     MSG_STATE.ageMin,
-    age_max:     MSG_STATE.ageMax,
+    list:           Array.from(MSG_STATE.selectedLists),
+    gender:         MSG_STATE.gender || null,
+    location_q:     MSG_STATE.location || null,
+    age_min:        MSG_STATE.ageMin,
+    age_max:        MSG_STATE.ageMax,
+    individual_ids: Array.from(MSG_STATE.selectedIndividuals.keys()),
   };
 }
 
@@ -3290,9 +3419,19 @@ async function msgRefreshCount() {
     var n = (res && typeof res.count === 'number') ? res.count : 0;
     MSG_STATE.count = n;
     lbl.textContent = n.toLocaleString();
-    sub.textContent = n === 0
-      ? 'No opted-in leads match these filters on the ' + MSG_STATE.channel + ' channel.'
-      : n + ' leads opted in to ' + MSG_STATE.channel + '. Suppressed leads are excluded.';
+    var indCount = MSG_STATE.selectedIndividuals.size;
+    var hasFilter = MSG_STATE.selectedLists.size || MSG_STATE.location || MSG_STATE.gender || MSG_STATE.ageMin != null || MSG_STATE.ageMax != null;
+    if (n === 0) {
+      sub.textContent = indCount
+        ? 'Your picked individuals are not opted in to ' + MSG_STATE.channel + '.'
+        : 'No opted-in leads match these filters on the ' + MSG_STATE.channel + ' channel.';
+    } else if (indCount && hasFilter) {
+      sub.textContent = n + ' total · filter result ∪ ' + indCount + ' picked (deduped).';
+    } else if (indCount) {
+      sub.textContent = indCount + ' picked · ' + n + ' opted in to ' + MSG_STATE.channel + '.';
+    } else {
+      sub.textContent = n + ' leads opted in to ' + MSG_STATE.channel + '. Opted-out leads are excluded.';
+    }
     var sampleEl = document.getElementById('msg-aud-sample');
     if (res.sample && res.sample.length) {
       sampleEl.innerHTML = res.sample.map(function(s){
@@ -3487,6 +3626,331 @@ function msgEsc(s) {
   return String(s == null ? '' : s).replace(/[&<>"']/g, function(c){
     return ({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'})[c];
   });
+}
+
+/* ── INDIVIDUAL SEARCH + CHIPS ─────────────────────────────── */
+function msgBindSearch() {
+  var input   = document.getElementById('msg-search');
+  var results = document.getElementById('msg-search-results');
+  if (!input || !results) return;
+  input.addEventListener('input', msgDebounce(function(){
+    var q = input.value.trim().toLowerCase();
+    if (q.length < 2) { results.classList.remove('open'); results.innerHTML = ''; return; }
+    var matches = (window.ALL_LEADS || []).filter(function(l){
+      var hay = ((l.name || '') + ' ' + (l.email || '') + ' ' + (l.phone || '')).toLowerCase();
+      return hay.indexOf(q) !== -1 && !MSG_STATE.selectedIndividuals.has(String(l.id));
+    }).slice(0, 8);
+    if (!matches.length) {
+      results.innerHTML = '<div class="msg-search-row empty">No matches</div>';
+    } else {
+      results.innerHTML = matches.map(function(l){
+        return '<div class="msg-search-row" data-id="' + msgEsc(l.id) + '">'
+             +   '<div class="nm">' + msgEsc(l.name || '(no name)') + (l.form ? ' <small>' + msgEsc(l.form) + '</small>' : '') + '</div>'
+             +   '<div class="meta">' + msgEsc(l.email || '') + ' · ' + msgEsc(l.phone || '—') + '</div>'
+             + '</div>';
+      }).join('');
+    }
+    results.classList.add('open');
+    results.querySelectorAll('.msg-search-row[data-id]').forEach(function(row){
+      row.addEventListener('click', function(){
+        var lead = (window.ALL_LEADS || []).find(function(l){ return String(l.id) === String(row.dataset.id); });
+        if (lead) msgAddIndividual(lead);
+      });
+    });
+  }, 150));
+  document.addEventListener('click', function(e){
+    if (!results.contains(e.target) && e.target !== input) results.classList.remove('open');
+  });
+}
+
+function msgAddIndividual(lead) {
+  MSG_STATE.selectedIndividuals.set(String(lead.id), {
+    id: lead.id, name: lead.name, email: lead.email, phone: lead.phone,
+  });
+  msgRenderChips();
+  var input = document.getElementById('msg-search');
+  if (input) input.value = '';
+  document.getElementById('msg-search-results').classList.remove('open');
+  document.getElementById('msg-search-results').innerHTML = '';
+  msgRefreshCount();
+}
+
+function msgRemoveIndividual(id) {
+  MSG_STATE.selectedIndividuals.delete(String(id));
+  msgRenderChips();
+  msgRefreshCount();
+}
+window.msgRemoveIndividual = msgRemoveIndividual;
+
+function msgRenderChips() {
+  var chips = document.getElementById('msg-chips');
+  if (!chips) return;
+  chips.innerHTML = Array.from(MSG_STATE.selectedIndividuals.values()).map(function(l){
+    return '<span class="msg-chip">'
+         +   '<span class="msg-chip-name" title="' + msgEsc(l.email || '') + '">' + msgEsc(l.name || l.email || '(no name)') + '</span>'
+         +   '<button class="msg-chip-x" type="button" onclick="msgRemoveIndividual(\'' + msgEsc(l.id) + '\')" aria-label="Remove">×</button>'
+         + '</span>';
+  }).join('');
+}
+
+/* ── CSV IMPORT ─────────────────────────────────────────────── */
+var CSV_STATE = { rows:[], headers:[], rowTotal:0, parsedRows:[], validCount:0, invalidCount:0 };
+
+function csvOpen() {
+  csvReset();
+  document.getElementById('csv-modal-overlay').classList.add('open');
+  csvBindOnce();
+}
+function csvClose() {
+  document.getElementById('csv-modal-overlay').classList.remove('open');
+}
+window.csvOpen  = csvOpen;
+window.csvClose = csvClose;
+
+function csvReset() {
+  CSV_STATE = { rows:[], headers:[], rowTotal:0, parsedRows:[], validCount:0, invalidCount:0 };
+  var f = document.getElementById('csv-file');               if (f) f.value = '';
+  var a = document.getElementById('csv-after-parse');        if (a) a.style.display = 'none';
+  var p = document.getElementById('csv-pre-actions');        if (p) p.style.display = 'flex';
+  var att = document.getElementById('csv-attest');           if (att) att.checked = false;
+  var ln = document.getElementById('csv-list-name');         if (ln) ln.value = '';
+  var er = document.getElementById('csv-error');             if (er) er.style.display = 'none';
+  var dt = document.getElementById('csv-drop-title');        if (dt) dt.textContent = 'Drop your CSV here, or click to choose a file';
+  var ds = document.getElementById('csv-drop-sub');          if (ds) ds.textContent = 'Comma-separated. First row should be column headers (email, first_name, etc.). Max 5,000 rows.';
+}
+
+function csvBindOnce() {
+  if (csvBindOnce._done) return;
+  csvBindOnce._done = true;
+  var drop = document.getElementById('csv-drop');
+  var file = document.getElementById('csv-file');
+  drop.addEventListener('click', function(){ file.click(); });
+  drop.addEventListener('dragover',  function(e){ e.preventDefault(); drop.classList.add('dragover'); });
+  drop.addEventListener('dragleave', function(){ drop.classList.remove('dragover'); });
+  drop.addEventListener('drop', function(e){
+    e.preventDefault(); drop.classList.remove('dragover');
+    var f = e.dataTransfer.files && e.dataTransfer.files[0];
+    if (f) csvHandleFile(f);
+  });
+  file.addEventListener('change', function(e){
+    var f = e.target.files && e.target.files[0]; if (f) csvHandleFile(f);
+  });
+  document.getElementById('csv-attest').addEventListener('change', csvValidate);
+  document.getElementById('csv-list-name').addEventListener('input', csvValidate);
+  ['email','first_name','last_name','phone','location','age'].forEach(function(k){
+    document.getElementById('csv-map-' + k).addEventListener('change', csvApplyMapping);
+  });
+  document.getElementById('csv-import-btn').addEventListener('click', csvDoImport);
+}
+
+async function csvHandleFile(file) {
+  document.getElementById('csv-drop-title').textContent = 'Parsing ' + file.name + '…';
+  document.getElementById('csv-error').style.display = 'none';
+  try {
+    var text = await file.text();
+    var parsed = csvParse(text);
+    if (!parsed.headers.length || !parsed.rows.length) throw new Error('No data found in CSV');
+    if (parsed.rows.length > 5000) throw new Error('Max 5,000 rows per CSV — split the file and try again.');
+    CSV_STATE.headers  = parsed.headers;
+    CSV_STATE.rows     = parsed.rows;
+    CSV_STATE.rowTotal = parsed.rows.length;
+
+    document.getElementById('csv-row-total').textContent = parsed.rows.length;
+    csvRenderPreview(parsed.headers, parsed.rows.slice(0, 5));
+    csvFillMappingSelects(parsed.headers);
+    csvAutoMap(parsed.headers);
+    csvApplyMapping();
+
+    document.getElementById('csv-after-parse').style.display = 'block';
+    document.getElementById('csv-pre-actions').style.display = 'none';
+    document.getElementById('csv-drop-title').textContent = '✓ ' + file.name + ' · ' + parsed.rows.length + ' rows parsed';
+    document.getElementById('csv-drop-sub').textContent = 'Click to choose a different file.';
+  } catch (e) {
+    document.getElementById('csv-drop-title').textContent = 'Could not parse ' + file.name;
+    document.getElementById('csv-drop-sub').textContent = e.message || 'Make sure your file is CSV with a header row.';
+  }
+}
+
+function csvParse(text) {
+  // Minimal CSV: double-quoted fields, escaped quotes (""), CRLF/LF newlines.
+  var lines = [];
+  var cur = '', inQ = false;
+  for (var i = 0; i < text.length; i++) {
+    var c = text[i];
+    if (c === '"') {
+      if (inQ && text[i+1] === '"') { cur += '"'; i++; } else { inQ = !inQ; }
+    } else if (c === '\n' && !inQ) { lines.push(cur); cur = ''; }
+    else if (c === '\r' && !inQ) { /* skip */ }
+    else { cur += c; }
+  }
+  if (cur.length) lines.push(cur);
+  if (!lines.length) return { headers: [], rows: [] };
+
+  function parseLine(line) {
+    var out = [], f = '', q = false;
+    for (var i = 0; i < line.length; i++) {
+      var c = line[i];
+      if (c === '"') { if (q && line[i+1] === '"') { f += '"'; i++; } else { q = !q; } }
+      else if (c === ',' && !q) { out.push(f); f = ''; }
+      else { f += c; }
+    }
+    out.push(f);
+    return out;
+  }
+  var headers = parseLine(lines[0]).map(function(h){ return h.trim(); });
+  var rows = [];
+  for (var i = 1; i < lines.length; i++) {
+    if (!lines[i].trim()) continue;
+    rows.push(parseLine(lines[i]));
+  }
+  return { headers: headers, rows: rows };
+}
+
+function csvRenderPreview(headers, rows) {
+  var html = '<table><thead><tr>' + headers.map(function(h){ return '<th>' + msgEsc(h) + '</th>'; }).join('') + '</tr></thead>'
+           + '<tbody>' + rows.map(function(r){
+               return '<tr>' + r.map(function(c){ return '<td title="' + msgEsc(c) + '">' + msgEsc(c) + '</td>'; }).join('') + '</tr>';
+             }).join('') + '</tbody></table>';
+  document.getElementById('csv-preview').innerHTML = html;
+}
+
+function csvFillMappingSelects(headers) {
+  var opts = '<option value="">— skip —</option>'
+           + headers.map(function(h, i){ return '<option value="' + i + '">' + msgEsc(h) + '</option>'; }).join('');
+  ['email','first_name','last_name','phone','location','age'].forEach(function(k){
+    document.getElementById('csv-map-' + k).innerHTML = opts;
+  });
+}
+
+function csvAutoMap(headers) {
+  var norm = function(h){ return h.toLowerCase().replace(/[\s_-]+/g, ''); };
+  var pats = {
+    email:      ['email','emailaddress','mail','e-mail'],
+    first_name: ['firstname','first','fname','given','givenname','forename'],
+    last_name:  ['lastname','last','lname','surname','family','familyname'],
+    phone:      ['phone','mobile','cell','tel','telephone','phonenumber','mobilenumber','phonenum'],
+    location:   ['location','city','town','area','postcode','zip','country'],
+    age:        ['age','years','agerange'],
+  };
+  Object.keys(pats).forEach(function(key){
+    for (var i = 0; i < headers.length; i++) {
+      if (pats[key].indexOf(norm(headers[i])) !== -1) {
+        document.getElementById('csv-map-' + key).value = String(i);
+        return;
+      }
+    }
+  });
+}
+
+function csvApplyMapping() {
+  var emailIdx = document.getElementById('csv-map-email').value;
+  if (emailIdx === '') {
+    CSV_STATE.parsedRows = []; CSV_STATE.validCount = 0; CSV_STATE.invalidCount = CSV_STATE.rowTotal;
+    csvUpdateSummary(); csvValidate(); return;
+  }
+  var map = {};
+  ['email','first_name','last_name','phone','location','age'].forEach(function(k){
+    var v = document.getElementById('csv-map-' + k).value;
+    if (v !== '') map[k] = parseInt(v, 10);
+  });
+  var parsed = [], valid = 0, invalid = 0;
+  var emailRe = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
+  for (var i = 0; i < CSV_STATE.rows.length; i++) {
+    var r = CSV_STATE.rows[i];
+    var email = (r[map.email] || '').trim().toLowerCase();
+    if (!email || !emailRe.test(email)) { invalid++; continue; }
+    parsed.push({
+      email:      email,
+      first_name: map.first_name != null ? (r[map.first_name] || '').trim() : '',
+      last_name:  map.last_name  != null ? (r[map.last_name]  || '').trim() : '',
+      phone:      map.phone      != null ? (r[map.phone]      || '').trim() : '',
+      location:   map.location   != null ? (r[map.location]   || '').trim() : '',
+      age:        map.age        != null ? (parseInt(r[map.age], 10) || null) : null,
+    });
+    valid++;
+  }
+  CSV_STATE.parsedRows = parsed; CSV_STATE.validCount = valid; CSV_STATE.invalidCount = invalid;
+  csvUpdateSummary();
+  csvValidate();
+}
+
+function csvUpdateSummary() {
+  document.getElementById('csv-summary-valid').textContent = CSV_STATE.validCount;
+  document.getElementById('csv-summary-invalid').textContent = CSV_STATE.invalidCount;
+  document.getElementById('csv-import-count').textContent = CSV_STATE.validCount;
+  var emailSet = new Set();
+  (window.ALL_LEADS || []).forEach(function(l){ if (l.email) emailSet.add(l.email.toLowerCase()); });
+  var dup = CSV_STATE.parsedRows.filter(function(r){ return emailSet.has(r.email); }).length;
+  document.getElementById('csv-summary-existing').textContent = dup
+    ? (dup + ' email(s) already in your leads — duplicates will be created')
+    : '';
+}
+
+function csvValidate() {
+  var ok = CSV_STATE.validCount > 0
+        && document.getElementById('csv-attest').checked
+        && document.getElementById('csv-list-name').value.trim().length > 0;
+  document.getElementById('csv-import-btn').disabled = !ok;
+}
+
+async function csvDoImport() {
+  var btn = document.getElementById('csv-import-btn');
+  var errEl = document.getElementById('csv-error');
+  errEl.style.display = 'none';
+  btn.disabled = true;
+  btn.textContent = 'Importing…';
+
+  var listName = document.getElementById('csv-list-name').value.trim();
+  var rows = CSV_STATE.parsedRows.map(function(r){
+    var hasPhone = !!r.phone;
+    return {
+      form_name:            listName,
+      first_name:           r.first_name || '(none)',
+      last_name:            r.last_name || '',
+      email:                r.email,
+      phone:                hasPhone ? r.phone : null,
+      location:             r.location || null,
+      age:                  r.age,
+      email_consent_status: 'opted_in',
+      email_consent_source: 'csv_import_self_attest',
+      sms_consent_status:   hasPhone ? 'opted_in' : 'opted_out',
+      sms_consent_source:   hasPhone ? 'csv_import_self_attest' : null,
+      wa_consent_status:    hasPhone ? 'opted_in' : 'opted_out',
+      wa_consent_source:    hasPhone ? 'csv_import_self_attest' : null,
+    };
+  });
+
+  try {
+    var CHUNK = 200, inserted = 0;
+    for (var i = 0; i < rows.length; i += CHUNK) {
+      var slice = rows.slice(i, i + CHUNK);
+      var res = await fetch(SUPABASE_URL + '/rest/v1/leads', {
+        method:  'POST',
+        headers: {
+          'apikey':         SUPABASE_ANON_KEY,
+          'Authorization':  'Bearer ' + SUPABASE_ANON_KEY,
+          'Content-Type':   'application/json',
+          'Prefer':         'return=minimal',
+        },
+        body: JSON.stringify(slice),
+      });
+      if (!res.ok) throw new Error(await res.text());
+      inserted += slice.length;
+      btn.textContent = 'Importing ' + inserted + ' / ' + rows.length + '…';
+    }
+    if (typeof showToast === 'function') showToast('Imported ' + inserted + ' leads as "' + listName + '"');
+    if (typeof fetchLeads === 'function') {
+      try { ALL_LEADS = await fetchLeads(); } catch (_) {}
+    }
+    csvClose();
+    await msgLoadLists();
+    msgRefreshCount();
+  } catch (e) {
+    errEl.style.display = 'block';
+    errEl.textContent = 'Import failed: ' + (e.message || e);
+    btn.disabled = false;
+    btn.textContent = 'Import ' + CSV_STATE.validCount + ' rows';
+  }
 }
 /* ── LEADS VIEW ── */
 function renderLeadsView() {
