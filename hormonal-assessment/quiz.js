@@ -18,7 +18,8 @@
     queueIdx: 0,
     displayQuestions: [],
     emailCaptured: false,
-    pickedMulti: []
+    pickedMulti: [],
+    intent: null
   };
 
   function $(s, root){ return (root || document).querySelector(s); }
@@ -74,7 +75,11 @@
   function renderQuestion(){
     progressUpdate();
     var q = state.displayQuestions[state.queueIdx];
-    if (!q) { return submitFinal(); }
+    if (!q) {
+      // Out of questions. Capture investment intent before scoring.
+      if (!state.intent) return renderIntent();
+      return submitFinal();
+    }
 
     // Email gate fires the moment we move past the gate question.
     var gateIdx = state.displayQuestions.findIndex(function(qq){ return qq.id === window.RESHAPE_GATE_AFTER; });
@@ -176,6 +181,7 @@
       +       '<input type="text" id="gate-name" placeholder="First name" autocomplete="given-name">'
       +       '<input type="email" id="gate-email" placeholder="you@example.com" autocomplete="email">'
       +       '<input type="tel" id="gate-phone" placeholder="07700 000000" autocomplete="tel">'
+      +       '<input type="number" id="gate-age" placeholder="Age" min="18" max="99" inputmode="numeric">'
       +     '</div>'
       +     '<button class="cal-confirm" id="gate-submit" style="background:var(--terracotta)">Continue</button>'
       +     '<label class="gate-consent"><input type="checkbox" id="gate-consent" checked><span>I\'d like Jaime to send me my pattern report and follow-up emails. Unsubscribe anytime.</span></label>'
@@ -191,15 +197,19 @@
     var savedName  = sessionStorage.getItem('reshape_hormonal_name');
     var savedEmail = sessionStorage.getItem('reshape_hormonal_email');
     var savedPhone = sessionStorage.getItem('reshape_hormonal_phone');
+    var savedAge   = sessionStorage.getItem('reshape_hormonal_age');
     if (savedName)  $('#gate-name').value  = savedName;
     if (savedEmail) $('#gate-email').value = savedEmail;
     if (savedPhone) $('#gate-phone').value = savedPhone;
+    if (savedAge)   $('#gate-age').value   = savedAge;
 
     $('#gate-submit').addEventListener('click', function(){
       var name = ($('#gate-name').value || '').trim();
       var email = ($('#gate-email').value || '').trim().toLowerCase();
       var phoneRaw = ($('#gate-phone').value || '').trim();
       var phoneCleaned = phoneRaw.replace(/[\s\-\(\)]/g, '');
+      var ageStr = ($('#gate-age').value || '').trim();
+      var age = parseInt(ageStr, 10);
       var consent = $('#gate-consent').checked;
       var err = $('#gate-error');
       err.textContent = '';
@@ -208,6 +218,9 @@
       if (!phoneCleaned || !/^(\+\d{10,15}|0[1-9]\d{8,10}|44\d{10,11})$/.test(phoneCleaned)) {
         return err.textContent = 'Please enter a valid phone number (e.g. 07700 000000).';
       }
+      if (!ageStr || isNaN(age) || age < 18 || age > 99) {
+        return err.textContent = 'Please enter your age (18–99).';
+      }
       if (!consent) return err.textContent = 'Please tick the consent box to continue.';
 
       var btn = $('#gate-submit');
@@ -215,7 +228,7 @@
       fetchEdge(SESSION_FN, {
         action: 'capture_email',
         session_id: state.sessionId,
-        name: name, email: email, phone: phoneCleaned, consent_marketing: consent
+        name: name, email: email, phone: phoneCleaned, age: age, consent_marketing: consent
       }).then(function(r){
         btn.disabled = false; btn.textContent = 'Continue';
         if (r.status !== 200){
@@ -226,11 +239,46 @@
         sessionStorage.setItem('reshape_hormonal_email', email);
         sessionStorage.setItem('reshape_hormonal_name', name);
         sessionStorage.setItem('reshape_hormonal_phone', phoneCleaned);
+        sessionStorage.setItem('reshape_hormonal_age', String(age));
         renderQuestion();
       }).catch(function(){
         btn.disabled = false; btn.textContent = 'Continue';
         err.textContent = 'Network error. Please try again.';
       });
+    });
+    window.scrollTo({ top: 0, behavior: 'smooth' });
+  }
+
+  function renderIntent(){
+    var root = $('#screen-root');
+    root.innerHTML = ''
+      + '<div class="assess-question" style="max-width:560px">'
+      +   '<div class="gate">'
+      +     '<div class="gate-icon">✦</div>'
+      +     '<h3>One last thing before your pattern report</h3>'
+      +     '<p>If your assessment reveals a clear pattern, how ready are you to actually work on it?</p>'
+      +     '<div class="form-options" id="intent-options" style="margin-top:1.25rem">'
+      +       '<label class="form-option"><input type="radio" name="intent" value="ready_now"><span><strong>Ready now</strong> · I want to start as soon as I find the right fit</span></label>'
+      +       '<label class="form-option"><input type="radio" name="intent" value="within_3m"><span><strong>Within 3 months</strong> · I want progress this quarter</span></label>'
+      +       '<label class="form-option"><input type="radio" name="intent" value="exploring"><span><strong>Just exploring</strong> · Gathering information for now</span></label>'
+      +       '<label class="form-option"><input type="radio" name="intent" value="not_budgeting"><span><strong>Not budgeting for coaching</strong> · Free resources only</span></label>'
+      +     '</div>'
+      +     '<button class="cal-confirm" id="intent-submit" style="background:var(--terracotta);margin-top:1rem" disabled>See my pattern</button>'
+      +     '<div class="gate-error" id="intent-error"></div>'
+      +   '</div>'
+      + '</div>';
+
+    var submitBtn = $('#intent-submit');
+    var optionsEl = $('#intent-options');
+    optionsEl.addEventListener('change', function(){
+      submitBtn.disabled = !optionsEl.querySelector('input[name="intent"]:checked');
+    });
+    submitBtn.addEventListener('click', function(){
+      var picked = optionsEl.querySelector('input[name="intent"]:checked');
+      if (!picked) return;
+      state.intent = picked.value;
+      sessionStorage.setItem('reshape_hormonal_intent', state.intent);
+      submitFinal();
     });
     window.scrollTo({ top: 0, behavior: 'smooth' });
   }
@@ -244,7 +292,7 @@
       +   '<p>Cross-checking your answers across 7 hormone signals.</p>'
       + '</div>';
 
-    fetchEdge(SCORE_FN, { session_id: state.sessionId }).then(function(r){
+    fetchEdge(SCORE_FN, { session_id: state.sessionId, intent: state.intent }).then(function(r){
       if (r.status !== 200){
         var errBody = r.body || {};
         if (errBody.error === 'incomplete'){
@@ -281,6 +329,8 @@
       if (saved) { try { state.answers = JSON.parse(saved) || {}; } catch(e){} }
       var savedEmail = sessionStorage.getItem('reshape_hormonal_email');
       if (savedEmail) state.emailCaptured = true;
+      var savedIntent = sessionStorage.getItem('reshape_hormonal_intent');
+      if (savedIntent) state.intent = savedIntent;
       buildQueue();
       renderQuestion();
       return;

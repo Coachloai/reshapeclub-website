@@ -123,6 +123,12 @@ Deno.serve(async (req) => {
       // Normalise to E.164 (+44...) so downstream messaging tooling always
       // receives a sendable international format.
       const phoneCleaned = toE164UK(phoneCleanedRaw);
+      // Age: optional but validated when provided. 18–99 prevents kids and
+      // typos like 999. Captured at gate so it lands on the lead row from
+      // the start (not only after quiz completion).
+      const ageRaw = body.age;
+      const age = ageRaw != null && ageRaw !== "" ? Number(ageRaw) : null;
+      const ageOk = age == null || (Number.isFinite(age) && age >= 18 && age <= 99);
       if (!session_id || !email) {
         return jsonResponse({ error: "session_id and email required" }, 400);
       }
@@ -131,6 +137,9 @@ Deno.serve(async (req) => {
       }
       if (!phoneOk) {
         return jsonResponse({ error: "invalid phone" }, 400);
+      }
+      if (!ageOk) {
+        return jsonResponse({ error: "invalid age" }, 400);
       }
 
       // Upsert into leads. The existing leads table has first_name + last_name
@@ -146,9 +155,10 @@ Deno.serve(async (req) => {
       let lead_id: string;
       if (existing) {
         lead_id = existing.id;
-        const patch: Record<string, string> = {};
+        const patch: Record<string, string | number> = {};
         if (!existing.first_name && name) patch.first_name = name;
         if (!existing.phone && phoneCleaned) patch.phone = phoneCleaned;
+        if (age != null) patch.age = age;
         if (Object.keys(patch).length) {
           await supabase.from("leads").update(patch).eq("id", lead_id);
         }
@@ -161,6 +171,7 @@ Deno.serve(async (req) => {
             last_name:  "-",
             email,
             phone:      phoneCleaned || null,
+            age:        age,
           })
           .select("id")
           .single();

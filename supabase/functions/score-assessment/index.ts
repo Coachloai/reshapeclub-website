@@ -139,9 +139,10 @@ Deno.serve(async (req) => {
       return jsonResponse({ error: "rate_limited" }, 429);
     }
 
-    let body: { session_id?: string } = {};
+    let body: { session_id?: string; intent?: string } = {};
     try { body = await req.json(); } catch (_e) { /* empty body */ }
     const session_id = body.session_id;
+    const intent     = (body.intent || "").trim();
     if (!session_id) return jsonResponse({ error: "session_id required" }, 400);
 
     const { data: assessment, error: aErr } = await supabase
@@ -195,6 +196,57 @@ Deno.serve(async (req) => {
       })
       .eq("session_id", session_id);
     if (updErr) return jsonResponse({ error: updErr.message }, 500);
+
+    // Compute lead quality from need (symptom severity) + intent + demo fit,
+    // and write it to the four fields the leads-dashboard's mapLead reads:
+    // coachability, looking_for, reason, willing_to_invest. The dashboard
+    // already converts those four into the High/Med/Low quality badge,
+    // so populating them here drops hormonal-assessment leads into the
+    // same quality model as main-funnel leads without code changes.
+    if (assessment.lead_id) {
+      // NEED: sum of 3 cluster_scores (each 0–10, total max 30).
+      const cs = result.cluster_scores;
+      const needTotal = (cs.stress || 0) + (cs.hormonal_shift || 0) + (cs.metabolic || 0);
+      const needHigh = needTotal >= 18;          // 60%+ of max load
+      const needMed  = needTotal >= 12;          // 40%+ of max load
+
+      // INTENT: from the post-quiz dropdown the user just answered.
+      //   ready_now   = strongest buyer signal
+      //   within_3m   = medium
+      //   exploring   = low (curious)
+      //   not_budgeting = lowest (free-resource only)
+      const intentHigh = intent === "ready_now";
+      const intentMed  = intent === "ready_now" || intent === "within_3m";
+
+      // DEMO FIT: age 35–55 AND life stage in our target band.
+      const lifeStage = (answers as Record<string, string>).Q1 || "";
+      const inTargetStage = lifeStage === "perimenopausal" ||
+                            lifeStage === "menopausal" ||
+                            lifeStage === "postpartum";
+      const { data: leadRow } = await supabase
+        .from("leads")
+        .select("age")
+        .eq("id", assessment.lead_id)
+        .maybeSingle();
+      const age = leadRow && typeof leadRow.age === "number" ? leadRow.age : null;
+      const ageFit = age != null && age >= 35 && age <= 55;
+      const demoFit = ageFit && inTargetStage;
+
+      // Map to the 4 dashboard-quality fields. Each truthy field adds +1
+      // to the dashboard's score (>=3 = High, >=2 = Med, <2 = Low).
+      const patch: Record<string, string> = {};
+      if (needHigh)                    patch.coachability      = "Highly coachable";
+      else if (needMed)                patch.coachability      = "Coachable";
+      if (intentMed)                   patch.looking_for       = "Long-term transformation";
+      if (needHigh)                    patch.reason            = "Best possible results";
+      else if (needMed)                patch.reason            = "Better results";
+      if (intentHigh)                  patch.willing_to_invest = "yes";
+      if (demoFit && !patch.coachability) patch.coachability   = "Coachable";
+
+      if (Object.keys(patch).length) {
+        await supabase.from("leads").update(patch).eq("id", assessment.lead_id);
+      }
+    }
 
     // Cancel the abandonment reminder — they finished.
     await supabase
