@@ -5497,6 +5497,36 @@ function normalisePhone(p) {
   return (p || '').replace(/^whatsapp:/i, '').replace(/\s+/g, '');
 }
 
+// Strip the branded email template / HTML tags so the Inbox bubble shows
+// the readable copy, not the raw markup. Used for both the conversation
+// list snippet and the thread bubble body.
+function stripEmailHtml(s) {
+  if (s == null) return '';
+  var t = String(s);
+  // If it doesn't look like HTML, leave it alone.
+  if (t.indexOf('<') === -1) return t;
+  return t
+    .replace(/<!DOCTYPE[^>]*>/gi, '')
+    .replace(/<style[\s\S]*?<\/style>/gi, '')
+    .replace(/<script[\s\S]*?<\/script>/gi, '')
+    .replace(/<head[\s\S]*?<\/head>/gi, '')
+    .replace(/<br\s*\/?>/gi, '\n')
+    .replace(/<\/p>/gi, '\n\n')
+    .replace(/<\/div>/gi, '\n')
+    .replace(/<\/h\d>/gi, '\n')
+    .replace(/<\/li>/gi, '\n')
+    .replace(/<[^>]+>/g, '')
+    .replace(/&nbsp;/g, ' ')
+    .replace(/&amp;/g, '&')
+    .replace(/&lt;/g, '<')
+    .replace(/&gt;/g, '>')
+    .replace(/&quot;/g, '"')
+    .replace(/&#39;/g, "'")
+    .replace(/\n{3,}/g, '\n\n')
+    .replace(/[ \t]+\n/g, '\n')
+    .trim();
+}
+
 function refreshInboxUnreadDot() {
   var dot = document.getElementById('inbox-unread-dot');
   if (!dot) return;
@@ -5581,8 +5611,9 @@ function renderInbox() {
   } else {
     listEl.innerHTML = conversations.map(function(c) {
       var name = c.profile || lookupLeadName(c.kind === 'phone' ? c.handle : null, c.kind === 'email' ? c.handle : null) || c.handle;
+      var latestBody = c.latest.channel === 'email' ? stripEmailHtml(c.latest.body) : (c.latest.body || '');
       var snippet = (c.latest.subject ? '[' + c.latest.subject + '] ' : '') +
-        (c.latest.body || (c.latest.num_media > 0 ? '[media]' : ''));
+        (latestBody || (c.latest.num_media > 0 ? '[media]' : ''));
       var when = formatInboxTime(c.latest.created_at);
       var unreadClass = c.unread > 0 ? ' unread' : '';
       var activeKey = __inboxSelected ? (__inboxSelected.kind + ':' + __inboxSelected.handle) : '';
@@ -5702,8 +5733,9 @@ function renderInboxThread(conv) {
         var subjHtml = (b.channel === 'email' && b.subject)
           ? '<div style="font-size:11px;color:var(--text3);margin-bottom:4px;text-transform:uppercase;letter-spacing:.04em">' + escapeHtmlDash(b.subject) + '</div>'
           : '';
+        var bodyText = b.channel === 'email' ? stripEmailHtml(b.body) : (b.body || '');
         return '<div class="inbox-bubble ' + (b.dir === 'in' ? 'inbound' : 'outbound') + '">' +
-          subjHtml + escapeHtmlDash(b.body || '') +
+          subjHtml + escapeHtmlDash(bodyText) +
           '<div class="inbox-bubble-meta">' + formatInboxTime(b.ts) + ' · ' + b.channel + (b.dir === 'out' && b.status ? ' · ' + b.status : '') + '</div>' +
         '</div>';
       }).join('') +
