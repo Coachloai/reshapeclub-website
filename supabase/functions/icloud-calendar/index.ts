@@ -83,6 +83,7 @@ Deno.serve(async (req: Request) => {
     }
 
     if (action === 'list') {
+      cachedCalendars = null;
       const cals = await getCalendars(auth);
       return json({
         success: true,
@@ -246,9 +247,12 @@ async function collectBusy(
 
 function extractCalendarData(xml: string): string[] {
   const out: string[] = [];
-  const re = /<[^>]*?:calendar-data[^>]*>([\s\S]*?)<\/[^>]*?:calendar-data>/gi;
+  const re = /calendar-data[^>]*>([^]*?)<\/[^>]*calendar-data>/gi;
   let m;
-  while ((m = re.exec(xml)) !== null) out.push(decodeEntities(m[1]).trim());
+  while ((m = re.exec(xml)) !== null) {
+    let data = m[1].replace(/<!\[CDATA\[/g, '').replace(/\]\]>/g, '').trim();
+    out.push(decodeEntities(data));
+  }
   return out;
 }
 
@@ -303,16 +307,17 @@ interface ParsedCal { href: string; displayName: string; supportsVEvent: boolean
 
 function parseCalendarList(xml: string): ParsedCal[] {
   const out: ParsedCal[] = [];
-  const blocks = xml.split(/<[^>]*?:response[\s>]/i).slice(1);
+  const blocks = xml.split(/<(?:[A-Za-z]+:)?response[\s>]/i).slice(1);
   for (const raw of blocks) {
-    const block = raw.split(/<\/[^>]*?:response>/i)[0];
-    const hrefMatch = block.match(/<[^>]*?:href>([^<]+)<\/[^>]*?:href>/i);
+    const block = raw.split(/<\/(?:[A-Za-z]+:)?response>/i)[0];
+    const hrefMatch = block.match(/<(?:[A-Za-z]+:)?href[^>]*>([^<]+)<\/(?:[A-Za-z]+:)?href>/i);
     if (!hrefMatch) continue;
-    const nameMatch = block.match(/<[^>]*?:displayname>([^<]*)<\/[^>]*?:displayname>/i);
-    const isCalendar = /<[^>]*?:calendar\s*\/>/i.test(block);
+    const nameMatch = block.match(/<(?:[A-Za-z]+:)?displayname[^>]*>([^<]*)<\/(?:[A-Za-z]+:)?displayname>/i);
+    const isCalendar = /calendar/i.test(block) && !/notification|outbox|inbox/i.test(block);
     if (!isCalendar) continue;
-    const compSet = block.match(/<[^>]*?:supported-calendar-component-set[^>]*>([\s\S]*?)<\/[^>]*?:supported-calendar-component-set>/i);
-    const supportsVEvent = !compSet || /name="VEVENT"/i.test(compSet[1]);
+    const compSet = block.match(/supported-calendar-component-set[^>]*>([\s\S]*?)<\/[^>]*supported-calendar-component-set>/i);
+    // If iCloud doesn't return comp-set at all, assume VEVENT is supported
+    const supportsVEvent = !compSet || /name=.?VEVENT/i.test(compSet[1]);
     out.push({
       href: hrefMatch[1],
       displayName: decodeEntities(nameMatch ? nameMatch[1] : ''),
@@ -323,13 +328,14 @@ function parseCalendarList(xml: string): ParsedCal[] {
 }
 
 function extractHref(xml: string, propLocalName: string): string | null {
+  // Match with or without namespace prefix (iCloud often omits prefixes)
   const re = new RegExp(
-    '<[^>]*?:' + propLocalName + '[^>]*>([\\s\\S]*?)<\\/[^>]*?:' + propLocalName + '>',
+    '<(?:[A-Za-z]+:)?' + propLocalName + '[^>]*>([\\s\\S]*?)<\\/(?:[A-Za-z]+:)?' + propLocalName + '>',
     'i',
   );
   const m = xml.match(re);
   if (!m) return null;
-  const hrefMatch = m[1].match(/<[^>]*?:href>([^<]+)<\/[^>]*?:href>/i);
+  const hrefMatch = m[1].match(/<(?:[A-Za-z]+:)?href[^>]*>([^<]+)<\/(?:[A-Za-z]+:)?href>/i);
   return hrefMatch ? hrefMatch[1].trim() : null;
 }
 
