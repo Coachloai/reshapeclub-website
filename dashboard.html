@@ -5540,6 +5540,34 @@ function renderInbox() {
     if (!m.read_at) byKey[key].unread += 1;
     if (new Date(m.created_at) > new Date(byKey[key].latest.created_at)) byKey[key].latest = m;
   });
+
+  // Email is outbound-only for now (no inbound email webhook yet). Surface
+  // every sent-email thread as its own conversation so the Inbox shows what
+  // actually went out, even when the lead hasn't replied by email.
+  if (filterCh === 'all' || filterCh === 'email') {
+    Object.keys(INBOX_SENT_EMAIL).forEach(function(ek) {
+      var key = 'email:' + ek;
+      if (byKey[key]) return; // already covered by an inbound email reply
+      var sent = INBOX_SENT_EMAIL[ek] || [];
+      if (sent.length === 0) return;
+      var latestSent = sent.reduce(function(a, b) {
+        return new Date(b.sent_at || b.created_at) > new Date(a.sent_at || a.created_at) ? b : a;
+      });
+      byKey[key] = {
+        key: key, kind: 'email', handle: ek, unread: 0, all: [],
+        profile: lookupLeadName(null, ek),
+        subject: latestSent.subject,
+        latest: {
+          channel: 'email',
+          subject: latestSent.subject,
+          body: latestSent.body || '',
+          created_at: latestSent.sent_at || latestSent.created_at,
+          read_at: latestSent.sent_at || latestSent.created_at, // outbound = always read
+          num_media: 0
+        }
+      };
+    });
+  }
   var conversations = Object.values(byKey)
     .filter(function(c) { return !unreadOnly || c.unread > 0; })
     .sort(function(a, b) { return new Date(b.latest.created_at) - new Date(a.latest.created_at); });
