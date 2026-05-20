@@ -416,7 +416,7 @@ async function sendWhatsApp(to: string, body: string, templateSid?: string | nul
   return data.sid ? { success: true, sid: data.sid } : { success: false, error: data.message || 'Failed' };
 }
 
-// ── WHATSAPP APPROVED TEMPLATE LIST (Twilio Content API) ───────────
+// ── WHATSAPP TEMPLATE LIST + APPROVAL STATUS (Twilio Content API) ───────────
 async function listWhatsAppTemplates() {
   const sid  = Deno.env.get('TWILIO_SID');
   const auth = Deno.env.get('TWILIO_AUTH');
@@ -424,39 +424,34 @@ async function listWhatsAppTemplates() {
 
   const credentials = btoa(`${sid}:${auth}`);
 
-  // Twilio Content API. Filter to templates that have been approved for WhatsApp.
-  const res = await fetch('https://content.twilio.com/v1/Content?PageSize=50', {
+  // One call returns every template together with its WhatsApp approval status.
+  // The previous approach fetched /ApprovalRequests once per template (up to 50
+  // parallel calls), which could rate-limit and silently mark approved templates
+  // as "not approved".
+  const res = await fetch('https://content.twilio.com/v1/ContentAndApprovals?PageSize=50', {
     headers: { 'Authorization': `Basic ${credentials}` },
   });
   if (!res.ok) return { templates: [], error: await res.text() };
   const data = await res.json();
   const list = Array.isArray(data?.contents) ? data.contents : [];
 
-  // For each template, fetch its WhatsApp approval status.
-  const enriched = await Promise.all(list.map(async (t: any) => {
-    let approved = false;
-    try {
-      const apprRes = await fetch(`https://content.twilio.com/v1/Content/${t.sid}/ApprovalRequests`, {
-        headers: { 'Authorization': `Basic ${credentials}` },
-      });
-      if (apprRes.ok) {
-        const apprData = await apprRes.json();
-        const wa = apprData?.whatsapp || apprData;
-        approved = (wa?.status || '').toLowerCase() === 'approved';
-      }
-    } catch (_) { /* leave approved=false */ }
+  const templates = list.map((t: any) => {
+    const appr   = t.approval_requests || {};
+    const status = (appr.status || 'unsubmitted').toLowerCase();
     return {
-      sid:           t.sid,
-      friendly_name: t.friendly_name,
-      language:      t.language,
-      variables:     t.variables || {},
-      types:         Object.keys(t.types || {}),
-      body:          previewBody(t),
-      approved,
+      sid:              t.sid,
+      friendly_name:    t.friendly_name,
+      language:         t.language,
+      variables:        t.variables || {},
+      types:            Object.keys(t.types || {}),
+      body:             previewBody(t),
+      approved:         status === 'approved',
+      status,
+      rejection_reason: appr.rejection_reason || '',
     };
-  }));
+  });
 
-  return { templates: enriched };
+  return { templates };
 }
 
 function previewBody(t: any) {
