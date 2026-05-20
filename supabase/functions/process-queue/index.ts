@@ -8,6 +8,16 @@ const SUPABASE_URL    = Deno.env.get('SUPABASE_URL')!;
 const SERVICE_KEY     = Deno.env.get('SUPABASE_SERVICE_ROLE_KEY')!;
 const UNSUBSCRIBE_URL = Deno.env.get('UNSUBSCRIBE_URL') || 'https://reshape.fit/unsubscribe';
 
+// Don't auto-send a broadcast whose scheduled time is long past — e.g. a
+// message that sat un-drained before the cron existed. Older rows stay
+// 'queued' and must be re-sent deliberately, so we never blast a stale,
+// time-sensitive message hours or days late.
+const STALE_SEND_GRACE_MS = 6 * 60 * 60 * 1000;
+
+// Provided by the Supabase edge runtime; lets a background task outlive the
+// HTTP response instead of being killed when the isolate returns.
+declare const EdgeRuntime: undefined | { waitUntil: (p: Promise<unknown>) => void };
+
 Deno.serve(async (req: Request) => {
   if (req.method === 'OPTIONS') {
     return new Response('ok', { headers: corsHeaders });
@@ -59,9 +69,10 @@ async function sendMessage(body: any) {
 // ── PROCESS QUEUED MESSAGES ────────────────────────────────────────
 async function processQueue() {
   const now = new Date().toISOString();
+  const staleCutoff = new Date(Date.now() - STALE_SEND_GRACE_MS).toISOString();
 
   const fetchRes = await fetch(
-    `${SUPABASE_URL}/rest/v1/message_queue?status=in.(queued,sending)&send_at=lte.${now}&order=send_at.asc&limit=20`,
+    `${SUPABASE_URL}/rest/v1/message_queue?status=in.(queued,sending)&send_at=lte.${now}&send_at=gte.${staleCutoff}&order=send_at.asc&limit=20`,
     { headers: srHeaders() }
   );
   const messages = await fetchRes.json();
@@ -182,9 +193,16 @@ async function sendBroadcast(body: any) {
     if (!r.ok) return { success: false, error: 'queue insert failed: ' + await r.text() };
   }
 
-  // Best-effort: kick the queue immediately so "Send now" feels instant.
+  // Kick the queue immediately so "Send now" feels instant. Use waitUntil so
+  // the drain survives after the HTTP response returns — otherwise the isolate
+  // can be torn down mid-send. The per-minute cron is the backstop for the
+  // rest of the batch (and for scheduled sends).
   if (new Date(sendAt) <= new Date()) {
-    processQueue().catch(() => {});
+    if (typeof EdgeRuntime !== 'undefined' && EdgeRuntime?.waitUntil) {
+      EdgeRuntime.waitUntil(processQueue());
+    } else {
+      processQueue().catch(() => {});
+    }
   }
 
   return { success: true, send_id: sendId, queued: leads.length };
