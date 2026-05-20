@@ -1157,26 +1157,42 @@ select.appt-form-input option{background:var(--s3)}
 <div class="gate-overlay" id="gate">
   <div class="gate-box">
     <div class="gate-title">Re<span style="color:var(--orange)">Shape</span> Dashboard</div>
-    <div class="gate-sub">Enter the dashboard password to continue</div>
-    <input type="password" class="gate-input" id="gate-pw" placeholder="Password" onkeydown="if(event.key==='Enter')checkGate()">
-    <button class="gate-btn" onclick="checkGate()">Access Dashboard</button>
-    <div class="gate-err" id="gate-err">Incorrect password</div>
+    <div class="gate-sub">Sign in to continue</div>
+    <input type="email" class="gate-input" id="gate-email" placeholder="Email" autocomplete="username" onkeydown="if(event.key==='Enter')checkGate()">
+    <input type="password" class="gate-input" id="gate-pw" placeholder="Password" autocomplete="current-password" onkeydown="if(event.key==='Enter')checkGate()">
+    <button class="gate-btn" id="gate-btn" onclick="checkGate()">Sign In</button>
+    <div class="gate-err" id="gate-err">Incorrect email or password</div>
   </div>
 </div>
 <script>
-function checkGate(){
+async function checkGate(){
+  var email=document.getElementById('gate-email').value.trim();
   var pw=document.getElementById('gate-pw').value;
-  if(pw==='reshape2026'){
-    sessionStorage.setItem('rs_auth','1');
-    document.getElementById('gate').style.display='none';
-    initDashboard();
-  } else {
-    document.getElementById('gate-err').style.display='block';
-    document.getElementById('gate-pw').value='';
+  var errEl=document.getElementById('gate-err');
+  var btn=document.getElementById('gate-btn');
+  errEl.style.display='none';
+  if(!email||!pw){
+    errEl.textContent='Email and password are required';
+    errEl.style.display='block';
+    return;
   }
-}
-if(sessionStorage.getItem('rs_auth')==='1'){
-  document.getElementById('gate').style.display='none';
+  if(btn){btn.disabled=true;btn.textContent='Signing in…';}
+  try{
+    var res=await sbAuth.auth.signInWithPassword({email:email,password:pw});
+    if(res.error){
+      errEl.textContent=res.error.message||'Incorrect email or password';
+      errEl.style.display='block';
+      document.getElementById('gate-pw').value='';
+      return;
+    }
+    document.getElementById('gate').style.display='none';
+    bootDashboard();
+  }catch(e){
+    errEl.textContent='Sign in failed. Please try again.';
+    errEl.style.display='block';
+  }finally{
+    if(btn){btn.disabled=false;btn.textContent='Sign In';}
+  }
 }
 </script>
 <!-- ── TOP NAV ── -->
@@ -2707,6 +2723,13 @@ var SUPABASE_URL = 'https://lvizldmdficsfpgegehp.supabase.co';
 var SUPABASE_ANON_KEY = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6Imx2aXpsZG1kZmljc2ZwZ2VnZWhwIiwicm9sZSI6ImFub24iLCJpYXQiOjE3NzM2OTk4NDQsImV4cCI6MjA4OTI3NTg0NH0.72wHbZaTvqNzW6DTb6Ae1vi9QpOg_-KiEO-Jjm9mn0k';
 var sb = supabase.createClient(SUPABASE_URL, SUPABASE_ANON_KEY);
 
+// Carries the signed-in admin session (role: authenticated) for privileged
+// operations enforced server-side by RLS, e.g. deleting leads. The main `sb`
+// client stays anon so all existing reads/writes are unaffected.
+var sbAuth = supabase.createClient(SUPABASE_URL, SUPABASE_ANON_KEY, {
+  auth: { storageKey: 'rs-admin-auth', persistSession: true, autoRefreshToken: true }
+});
+
 /* ══════════════════════════════════════
    DATA
 ══════════════════════════════════════ */
@@ -2811,15 +2834,22 @@ let charts = {};
 /* ══════════════════════════════════════
    INIT
 ══════════════════════════════════════ */
-window.addEventListener('DOMContentLoaded', () => {
-  if (sessionStorage.getItem('rs_auth') === '1') {
-    initDashboard();
-    // Restore last viewed tab from URL hash
-    var hash = window.location.hash.replace('#', '');
-    if (hash && document.getElementById('view-' + hash)) {
-      switchView(hash, null);
-    }
+function bootDashboard() {
+  initDashboard();
+  // Restore last viewed tab from URL hash
+  var hash = window.location.hash.replace('#', '');
+  if (hash && document.getElementById('view-' + hash)) {
+    switchView(hash, null);
   }
+}
+window.addEventListener('DOMContentLoaded', async () => {
+  try {
+    var { data } = await sbAuth.auth.getSession();
+    if (data && data.session) {
+      document.getElementById('gate').style.display = 'none';
+      bootDashboard();
+    }
+  } catch (e) { /* leave the gate visible */ }
 });
 /* ══════════════════════════════════════
    TABLE
@@ -3214,11 +3244,10 @@ function exportCSV() {
   a.click();
   showToast('CSV exported');
 }
-function logout() {
-  if (confirm('Log out of ReShape dashboard?')) {
-    sessionStorage.removeItem('rs_auth');
-    window.location.reload();
-  }
+async function logout() {
+  if (!confirm('Log out of ReShape dashboard?')) return;
+  try { await sbAuth.auth.signOut(); } catch (e) { /* ignore */ }
+  window.location.reload();
 }
 async function refreshData() {
   ALL_LEADS = await fetchLeads();
@@ -6910,24 +6939,37 @@ async function deleteSelectedLeads() {
   var ids = Array.from(idSet);
   if (ids.length === 0) return;
   if (!confirm('Delete ' + ids.length + ' lead' + (ids.length > 1 ? 's' : '') + ' permanently? This cannot be undone.')) return;
-  try {
-    for (var i = 0; i < ids.length; i++) {
-      await sb.from('leads').delete().eq('id', ids[i]);
-    }
-    ALL_LEADS = ALL_LEADS.filter(function(l) { return ids.indexOf(String(l.id)) === -1; });
-    filtered = filtered.filter(function(l) { return ids.indexOf(String(l.id)) === -1; });
+  var deleted = [];
+  var firstError = null;
+  for (var i = 0; i < ids.length; i++) {
+    try {
+      var res = await sbAuth.from('leads').delete().eq('id', ids[i]);
+      if (res.error) { if (!firstError) firstError = res.error; continue; }
+      deleted.push(String(ids[i]));
+    } catch (e) { if (!firstError) firstError = e; }
+  }
+  if (deleted.length) {
+    ALL_LEADS = ALL_LEADS.filter(function(l) { return deleted.indexOf(String(l.id)) === -1; });
+    filtered = filtered.filter(function(l) { return deleted.indexOf(String(l.id)) === -1; });
     clearSelection();
     renderTable();
     renderLeadsView();
     updateStats();
-    showToast(ids.length + ' lead' + (ids.length > 1 ? 's' : '') + ' deleted');
-  } catch (e) { showToast('Error deleting leads'); }
+  }
+  if (firstError) {
+    var failed = ids.length - deleted.length;
+    showToast(deleted.length
+      ? ('Deleted ' + deleted.length + ', ' + failed + ' failed: ' + (firstError.message || 'error'))
+      : ('Could not delete leads: ' + (firstError.message || 'permission denied')));
+  } else {
+    showToast(deleted.length + ' lead' + (deleted.length > 1 ? 's' : '') + ' deleted');
+  }
 }
 async function deleteLead(id) {
   if (!id) return;
   if (!confirm('Delete this lead permanently? This cannot be undone.')) return;
   try {
-    var res = await sb.from('leads').delete().eq('id', id);
+    var res = await sbAuth.from('leads').delete().eq('id', id);
     if (res.error) { showToast('Error: ' + res.error.message); return; }
     ALL_LEADS = ALL_LEADS.filter(function(l) { return String(l.id) !== String(id); });
     filtered = filtered.filter(function(l) { return String(l.id) !== String(id); });
