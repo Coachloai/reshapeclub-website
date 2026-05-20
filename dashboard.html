@@ -3792,7 +3792,9 @@ async function msgEdge(payload) {
     headers: { 'Content-Type': 'application/json' },
     body:    JSON.stringify(payload),
   });
-  return await res.json();
+  var data = await res.json().catch(function () { return {}; });
+  if (!res.ok) throw new Error(data.error || ('Request failed (' + res.status + ')'));
+  return data;
 }
 
 function msgDebounce(fn, ms) {
