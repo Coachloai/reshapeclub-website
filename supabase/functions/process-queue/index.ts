@@ -165,6 +165,8 @@ async function sendBroadcast(body: any) {
     channel,
     subject:       subject ? fillTokens(subject, l) : null,
     body:          msgBody ? fillTokens(msgBody, l) : (template_sid ? '' : ''),
+    template_sid:  template_sid || null,
+    template_vars: template_vars || null,
     send_at:       sendAt,
     status:        'queued',
     consent_token: l.consent_token,
