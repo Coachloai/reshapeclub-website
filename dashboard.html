@@ -6264,23 +6264,45 @@ function renderSlots() {
   document.getElementById('slots-page-info').textContent = 'Page ' + slotPage + ' of ' + totalPages + ' \u00b7 ' + slots.length + ' slots';
   document.getElementById('slots-prev').disabled = slotPage <= 1;
   document.getElementById('slots-next').disabled = slotPage >= totalPages;
+  // Map slot_id -> prospect name(s) from confirmed bookings.
+  var bookingsBySlot = {};
+  (ALL_BOOKINGS || []).forEach(function(b) {
+    if (!b.slot_id) return;
+    var nm = ((b.first_name || '') + ' ' + (b.last_name || '')).trim();
+    if (!nm) return;
+    if (!bookingsBySlot[b.slot_id]) bookingsBySlot[b.slot_id] = [];
+    bookingsBySlot[b.slot_id].push(nm);
+  });
+
   // Group by date
   var grouped = {};
   pageSlots.forEach(function(s) { if (!grouped[s.date]) grouped[s.date] = []; grouped[s.date].push(s); });
-  var html = '';
+
+  // Single CSS grid so every column lines up across all date groups.
+  var COLS = '96px 104px minmax(140px,1.3fr) minmax(120px,1.1fr) 60px 64px 50px 78px 124px';
+  function gcell(content, extra) {
+    return '<div style="padding:9px 10px;border-bottom:1px solid var(--border);font-size:13px;display:flex;align-items:center;min-width:0;' + (extra || '') + '">' + content + '</div>';
+  }
+  function ghead(content, extra) {
+    return '<div style="padding:9px 10px;border-bottom:1px solid var(--border);font-size:11px;font-weight:700;text-transform:uppercase;letter-spacing:.04em;color:var(--text3);display:flex;align-items:center;' + (extra || '') + '">' + content + '</div>';
+  }
+  var center = 'justify-content:center;text-align:center';
+
+  var html = '<div style="overflow-x:auto"><div style="display:grid;grid-template-columns:' + COLS + ';min-width:840px">';
+  // Column header row (rendered once)
+  html += ghead('Time') + ghead('Location') + ghead('Type') + ghead('Prospect') +
+          ghead('Cap', center) + ghead('Booked', center) + ghead('Left', center) +
+          ghead('Status') + ghead('Actions');
+
   Object.keys(grouped).sort().forEach(function(date) {
     var d = new Date(date + 'T00:00:00');
     var dateLabel = d.toLocaleDateString('en-GB', { weekday: 'long', day: 'numeric', month: 'long' });
     var isToday = date === new Date().toISOString().split('T')[0];
-    html += '<div style="margin-bottom:16px">';
-    html += '<div style="display:flex;align-items:center;gap:8px;margin-bottom:8px;padding:6px 0">';
-    html += '<span style="font-size:13px;font-weight:700;color:var(--text)">' + dateLabel + '</span>';
-    if (isToday) html += '<span style="font-size:10px;font-weight:700;padding:2px 8px;border-radius:4px;background:var(--orange);color:#fff">TODAY</span>';
-    html += '<span style="font-size:11px;color:var(--text3)">' + grouped[date].length + ' slot' + (grouped[date].length > 1 ? 's' : '') + '</span>';
-    html += '</div>';
-    html += '<table class="leads-table" style="width:100%;margin-bottom:0"><thead><tr>';
-    html += '<th>Time</th><th>Location</th><th>Type</th><th>Capacity</th><th>Booked</th><th>Left</th><th>Status</th><th>Actions</th>';
-    html += '</tr></thead><tbody>';
+    var dayHdr = '<span style="font-size:13px;font-weight:700;color:var(--text)">' + dateLabel + '</span>';
+    if (isToday) dayHdr += '<span style="font-size:10px;font-weight:700;padding:2px 8px;border-radius:4px;background:var(--orange);color:#fff;margin-left:8px">TODAY</span>';
+    dayHdr += '<span style="font-size:11px;color:var(--text3);margin-left:8px">' + grouped[date].length + ' slot' + (grouped[date].length > 1 ? 's' : '') + '</span>';
+    html += '<div style="grid-column:1/-1;padding:16px 10px 6px;border-bottom:2px solid var(--border)">' + dayHdr + '</div>';
+
     grouped[date].forEach(function(s) {
       var remaining = s.max_attendees - s.booked_count;
       var timeStr = s.start_time.substring(0, 5) + ' \u2013 ' + s.end_time.substring(0, 5);
@@ -6288,21 +6310,28 @@ function renderSlots() {
       var typeName = appt ? appt.name : '<span style="color:var(--text3)">Manual</span>';
       var statusClass = s.is_active ? (remaining > 0 ? 'tag-high' : 'tag-low') : 'tag-med';
       var statusText = s.is_active ? (remaining > 0 ? 'Open' : 'Full') : 'Paused';
-      html += '<tr>' +
-        '<td style="font-weight:600">' + timeStr + '</td>' +
-        '<td><span class="tag tag-location">' + s.location + '</span></td>' +
-        '<td style="font-size:12px">' + typeName + '</td>' +
-        '<td style="text-align:center">' + s.max_attendees + '</td>' +
-        '<td style="text-align:center;color:var(--orange);font-weight:700">' + s.booked_count + '</td>' +
-        '<td style="text-align:center">' + remaining + '</td>' +
-        '<td><span class="tag tag-quality ' + statusClass + '">' + statusText + '</span></td>' +
-        '<td style="display:flex;gap:4px">' +
+      var names = bookingsBySlot[s.id] || [];
+      var prospect = names.length === 0
+        ? '<span style="color:var(--text3)">\u2014</span>'
+        : '<span style="overflow:hidden;text-overflow:ellipsis;white-space:nowrap">' + escapeHtmlDash(names[0]) +
+          (names.length > 1 ? ' <span style="color:var(--text3)">+' + (names.length - 1) + '</span>' : '') + '</span>';
+
+      html +=
+        gcell('<span style="font-weight:600;white-space:nowrap">' + timeStr + '</span>') +
+        gcell('<span class="tag tag-location">' + s.location + '</span>') +
+        gcell('<span style="overflow:hidden;text-overflow:ellipsis;white-space:nowrap">' + typeName + '</span>', 'font-size:12px') +
+        gcell(prospect) +
+        gcell(String(s.max_attendees), center) +
+        gcell('<span style="color:var(--orange);font-weight:700">' + s.booked_count + '</span>', center) +
+        gcell(String(remaining), center) +
+        gcell('<span class="tag tag-quality ' + statusClass + '">' + statusText + '</span>') +
+        gcell('<div style="display:flex;gap:4px">' +
           '<button class="btn btn-ghost btn-sm" style="padding:4px 10px;font-size:11px" onclick="toggleSlot(\'' + s.id + '\',' + !s.is_active + ')">' + (s.is_active ? 'Pause' : 'Resume') + '</button>' +
-          '<button class="btn btn-ghost btn-sm" style="padding:4px 10px;font-size:11px;color:var(--red);border-color:rgba(231,76,60,0.3)" onclick="deleteSlot(\'' + s.id + '\')">Del</button>' +
-        '</td></tr>';
+          '<button class="btn btn-ghost btn-sm" style="padding:4px 8px;font-size:11px;color:var(--red);border-color:rgba(231,76,60,0.3)" onclick="deleteSlot(\'' + s.id + '\')">Del</button>' +
+        '</div>');
     });
-    html += '</tbody></table></div>';
   });
+  html += '</div></div>';
   container.innerHTML = html;
 }
 
