@@ -5295,6 +5295,7 @@ function renderBookings() {
       '<td><span class="tag tag-quality ' + conf.cls + '">' + conf.label + '</span></td>' +
       '<td><span class="tag tag-quality tag-high">' + b.status + '</span></td>' +
       '<td style="white-space:nowrap" onclick="event.stopPropagation()">' +
+        '<button class="btn btn-ghost btn-sm" style="padding:4px 8px;font-size:11px;margin-right:4px" onclick="rescheduleBookingFromDashboard(\'' + b.id + '\')">Reschedule</button>' +
         '<button class="btn btn-ghost btn-sm" style="padding:4px 8px;font-size:11px;margin-right:4px" onclick="markBookingNoShow(\'' + b.id + '\')">No-show</button>' +
         '<button class="btn btn-ghost btn-sm" style="padding:4px 8px;font-size:11px;color:var(--red);border-color:rgba(231,76,60,.3)" onclick="cancelBookingFromDashboard(\'' + b.id + '\')">Cancel</button>' +
       '</td></tr>' +
@@ -5458,6 +5459,7 @@ function renderAppointmentDetail(b, appt) {
     parts.push('<div style="margin-bottom:10px"><div style="font-size:11px;color:var(--text3);text-transform:uppercase;letter-spacing:.08em;margin-bottom:4px">Pre-consult note</div><div style="white-space:pre-wrap;background:var(--s3);border:1px solid var(--border2);border-radius:8px;padding:10px 12px">' + escapeHtmlDash(b.pre_consult_note) + '</div></div>');
   }
   parts.push('<div style="display:flex;gap:8px;margin-top:6px">' +
+    '<button class="btn btn-ghost btn-sm" onclick="rescheduleBookingFromDashboard(\'' + b.id + '\')">Reschedule</button>' +
     '<button class="btn btn-ghost btn-sm" onclick="markBookingNoShow(\'' + b.id + '\')">Mark no-show</button>' +
     '<button class="btn btn-ghost btn-sm" style="color:var(--red);border-color:rgba(231,76,60,.3)" onclick="cancelBookingFromDashboard(\'' + b.id + '\')">Cancel</button>' +
   '</div>');
@@ -5992,6 +5994,17 @@ async function markBookingNoShow(id) {
   return applyBookingLifecycle(id, 'noshow', 'consultation_noshow',
     'Mark this booking as no-show? The lead will receive the no-show sequence.',
     'Marked no-show, sequence queued');
+}
+
+// Reschedule reuses the public /booking/ reschedule flow, which updates the
+// existing booking's slot, frees the old slot, re-queues booking_confirmed,
+// and notifies the team. Opens pre-loaded with this booking + its token.
+function rescheduleBookingFromDashboard(id) {
+  var b = ALL_BOOKINGS.find(function(x){ return x.id === id; });
+  if (!b) { showToast('Booking not found'); return; }
+  if (!b.confirm_token) { showToast('This booking predates reschedule tokens — cancel + rebook instead'); return; }
+  var url = '/booking/?reschedule=' + encodeURIComponent(b.id) + '&token=' + encodeURIComponent(b.confirm_token);
+  window.open(url, '_blank');
 }
 
 /* ── APPOINTMENT DRAWER ── */
