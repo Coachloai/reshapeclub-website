@@ -5861,10 +5861,12 @@ async function sendInboxReply(phone) {
     });
     var data = await res.json().catch(function(){ return {}; });
     if (!data.success) throw new Error(data.error || 'Send failed');
-    await sb.from('message_queue').insert({
-      lead_phone: phone, channel: channel, body: text, status: 'sent', sent_at: new Date().toISOString(),
+    // lead_email is NOT NULL on message_queue, so set it empty for phone replies.
+    var ins = await sb.from('message_queue').insert({
+      lead_phone: phone, lead_email: '', channel: channel, body: text, status: 'sent', sent_at: new Date().toISOString(),
       sequence: 'inbox_reply', step_index: 0,
     });
+    if (ins.error) { showToast('Sent, but not logged: ' + ins.error.message); return; }
     textEl.value = '';
     if (__inboxSelected) delete INBOX_DRAFTS[__inboxSelected.kind + ':' + __inboxSelected.handle];
     await refreshInbox();
@@ -5893,10 +5895,12 @@ async function sendInboxEmailReply(email) {
     });
     var data = await res.json().catch(function(){ return {}; });
     if (!data.success) throw new Error(data.error || 'Send failed');
-    await sb.from('message_queue').insert({
-      lead_email: email, channel: 'email', subject: subject, body: text, status: 'sent', sent_at: new Date().toISOString(),
+    // lead_phone is NOT NULL on message_queue, so set it empty for email replies.
+    var ins = await sb.from('message_queue').insert({
+      lead_email: email, lead_phone: '', channel: 'email', subject: subject, body: text, status: 'sent', sent_at: new Date().toISOString(),
       sequence: 'inbox_reply', step_index: 0,
     });
+    if (ins.error) { showToast('Sent, but not logged: ' + ins.error.message); return; }
     textEl.value = '';
     if (__inboxSelected) delete INBOX_DRAFTS[__inboxSelected.kind + ':' + __inboxSelected.handle];
     await refreshInbox();
