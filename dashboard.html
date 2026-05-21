@@ -5478,6 +5478,23 @@ var INBOX_SENT_EMAIL = {};      // lowercased email -> outbound message_queue ro
 var __inboxSelected = null;     // { kind: 'phone'|'email', handle: '+44…'|'a@b.com' }
 var __inboxChannel = 'all';     // 'all' | 'whatsapp' | 'sms' | 'email'
 var __inboxPollTimer = null;
+var INBOX_DRAFTS = {};          // conversationKey -> { text, subject } — survives background re-renders
+
+// Capture the in-progress reply (and which field is focused) before a re-render
+// blows away the thread DOM, so the background poll can't wipe what you're typing.
+function captureInboxDraft() {
+  if (!__inboxSelected) return;
+  var key = __inboxSelected.kind + ':' + __inboxSelected.handle;
+  var ta = document.getElementById('inbox-reply-text');
+  var subj = document.getElementById('inbox-reply-subject');
+  if (!ta && !subj) return;
+  var d = INBOX_DRAFTS[key] = INBOX_DRAFTS[key] || {};
+  if (ta) d.text = ta.value;
+  if (subj) d.subject = subj.value;
+  var active = document.activeElement;
+  d._focus = (active === ta) ? 'text' : (active === subj) ? 'subject' : null;
+  d._caret = (active === ta || active === subj) ? active.selectionStart : null;
+}
 
 async function initInboxView() {
   await refreshInbox();
@@ -5582,6 +5599,7 @@ function renderInbox() {
   var listEl = document.getElementById('inbox-list');
   var threadEl = document.getElementById('inbox-thread');
   if (!listEl || !threadEl) return;
+  captureInboxDraft(); // preserve any in-progress reply before we rebuild the DOM
 
   var unreadOnly = (document.getElementById('inbox-unread-only') || {}).checked;
   var filterCh = __inboxChannel;
@@ -5730,14 +5748,17 @@ function renderInboxThread(conv) {
   }
 
   var safeHandle = escapeAttr(conv.handle);
+  var draft = INBOX_DRAFTS[conv.key] || {};
+  var draftText = draft.text || '';
   var replyForm;
   if (conv.kind === 'email') {
     var lastSubj = conv.latest.subject || '';
     var replySubj = /^re:/i.test(lastSubj) ? lastSubj : ('Re: ' + lastSubj);
+    if (typeof draft.subject === 'string') replySubj = draft.subject;
     replyForm =
       '<div class="inbox-reply" style="flex-direction:column;align-items:stretch;gap:8px">' +
         '<input type="text" id="inbox-reply-subject" value="' + escapeAttr(replySubj) + '" placeholder="Subject" style="background:rgba(255,255,255,.04);border:1px solid var(--border);border-radius:10px;color:var(--text);font-family:var(--body);font-size:13px;padding:10px 12px;outline:none">' +
-        '<textarea id="inbox-reply-text" placeholder="Type a reply…"></textarea>' +
+        '<textarea id="inbox-reply-text" placeholder="Type a reply…">' + escapeHtmlDash(draftText) + '</textarea>' +
         '<div style="display:flex;justify-content:flex-end">' +
           '<button class="btn btn-primary" onclick="sendInboxEmailReply(\'' + safeHandle + '\')">Send email</button>' +
         '</div>' +
@@ -5750,7 +5771,7 @@ function renderInboxThread(conv) {
           '<label><input type="radio" name="' + nm + '" value="whatsapp"' + (defaultChannel === 'whatsapp' ? ' checked' : '') + '> WhatsApp</label>' +
           '<label><input type="radio" name="' + nm + '" value="sms"' + (defaultChannel === 'sms' ? ' checked' : '') + '> SMS</label>' +
         '</div>' +
-        '<textarea id="inbox-reply-text" placeholder="Type a reply…"></textarea>' +
+        '<textarea id="inbox-reply-text" placeholder="Type a reply…">' + escapeHtmlDash(draftText) + '</textarea>' +
         '<button class="btn btn-primary" onclick="sendInboxReply(\'' + safeHandle + '\')">Send</button>' +
       '</div>';
   }
@@ -5777,6 +5798,26 @@ function renderInboxThread(conv) {
       }).join('') +
     '</div>' +
     replyForm;
+
+  // Save keystrokes into the draft store so a background poll re-render never loses them.
+  var taEl = document.getElementById('inbox-reply-text');
+  var subjEl = document.getElementById('inbox-reply-subject');
+  function saveDraft() {
+    var d = INBOX_DRAFTS[conv.key] = INBOX_DRAFTS[conv.key] || {};
+    if (taEl) d.text = taEl.value;
+    if (subjEl) d.subject = subjEl.value;
+  }
+  if (taEl) taEl.addEventListener('input', saveDraft);
+  if (subjEl) subjEl.addEventListener('input', saveDraft);
+
+  // Restore focus + caret if the reply box was focused before this re-render.
+  if (draft._focus === 'text' && taEl) {
+    taEl.focus();
+    if (draft._caret != null) { try { taEl.setSelectionRange(draft._caret, draft._caret); } catch (e) {} }
+  } else if (draft._focus === 'subject' && subjEl) {
+    subjEl.focus();
+    if (draft._caret != null) { try { subjEl.setSelectionRange(draft._caret, draft._caret); } catch (e) {} }
+  }
 
   setTimeout(function() {
     var body = document.getElementById('inbox-thread-body');
@@ -5825,6 +5866,7 @@ async function sendInboxReply(phone) {
       sequence: 'inbox_reply', step_index: 0,
     });
     textEl.value = '';
+    if (__inboxSelected) delete INBOX_DRAFTS[__inboxSelected.kind + ':' + __inboxSelected.handle];
     await refreshInbox();
     showToast('Reply sent');
   } catch (e) {
@@ -5856,6 +5898,7 @@ async function sendInboxEmailReply(email) {
       sequence: 'inbox_reply', step_index: 0,
     });
     textEl.value = '';
+    if (__inboxSelected) delete INBOX_DRAFTS[__inboxSelected.kind + ':' + __inboxSelected.handle];
     await refreshInbox();
     showToast('Email sent');
   } catch (e) {
