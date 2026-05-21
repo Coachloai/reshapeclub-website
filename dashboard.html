@@ -5874,6 +5874,18 @@ async function applyBookingLifecycle(bookingId, newStatus, sequenceName, confirm
   var upd = await sb.from('bookings').update({ status: newStatus }).eq('id', bookingId);
   if (upd.error) { showToast('Update failed: ' + upd.error.message); return; }
 
+  // Free the slot — a cancelled/no-show booking no longer occupies it, so it
+  // should stop showing as "Full" and become bookable again.
+  if (b.slot_id) {
+    try {
+      var sRes = await sb.from('booking_slots').select('booked_count').eq('id', b.slot_id).single();
+      var bc = sRes && sRes.data && sRes.data.booked_count;
+      if (typeof bc === 'number' && bc > 0) {
+        await sb.from('booking_slots').update({ booked_count: bc - 1 }).eq('id', b.slot_id);
+      }
+    } catch (e) { console.warn('slot decrement failed:', e); }
+  }
+
   await sb.from('message_queue')
     .update({ status: 'cancelled' })
     .eq('lead_email', b.email)
