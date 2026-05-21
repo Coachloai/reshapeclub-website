@@ -235,6 +235,7 @@ async function collectBusy(
       for (const ical of events) {
         for (const ev of parseVEvents(ical)) {
           if (ev.transp === 'TRANSPARENT') continue; // ignore "free" events
+          if (ev.allDay) continue;                    // ignore all-day markers — they shouldn't block timed booking slots
           out.push({ calendar: cal.displayName, start: ev.start, end: ev.end, summary: ev.summary });
         }
       }
@@ -256,7 +257,7 @@ function extractCalendarData(xml: string): string[] {
   return out;
 }
 
-interface VEvent { start: string; end: string; summary?: string; transp?: string }
+interface VEvent { start: string; end: string; summary?: string; transp?: string; allDay?: boolean }
 
 function parseVEvents(ical: string): VEvent[] {
   // Unfold continuation lines (CRLF + space).
@@ -273,7 +274,12 @@ function parseVEvents(ical: string): VEvent[] {
       const m = line.match(/^([A-Z\-]+)(?:;[^:]+)?:(.*)$/);
       if (!m) continue;
       const [, name, value] = m;
-      if (name === 'DTSTART') cur.start = parseIcsDate(line);
+      if (name === 'DTSTART') {
+        cur.start = parseIcsDate(line);
+        // Date-only DTSTART (e.g. "DTSTART;VALUE=DATE:20260519") = all-day event.
+        const dm = line.match(/^DTSTART(;[^:]+)?:(.+)$/);
+        cur.allDay = dm ? /^\d{8}$/.test(dm[2].trim()) : false;
+      }
       else if (name === 'DTEND') cur.end = parseIcsDate(line);
       else if (name === 'SUMMARY') cur.summary = value;
       else if (name === 'TRANSP') cur.transp = value;
