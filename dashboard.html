@@ -2099,7 +2099,12 @@ async function forgotPassword(){
       <div class="appt-grid fade-in" id="appt-grid"></div>
       <div id="appt-empty" style="display:none;text-align:center;padding:40px;color:var(--text3);font-size:14px;background:var(--s1);border:1px solid var(--border);border-radius:var(--r);margin-bottom:20px">No appointment types yet. Click "+ New Appointment Type" to get started.</div>
       <!-- CALENDAR SETTINGS (Calendly-style) -->
-      <div class="chart-card fade-in" style="margin-bottom:20px">
+      <!-- position:relative + z-index lifts this card (and its "add events to"
+           dropdown) above the Time Slots card below. The .fade-in animation
+           leaves a residual transform on every card, making each its own
+           stacking context, so the dropdown otherwise gets painted under the
+           next card. -->
+      <div class="chart-card fade-in" style="margin-bottom:20px;position:relative;z-index:5">
         <div class="chart-title">Calendar settings</div>
         <div style="font-size:12px;color:var(--text3);margin:2px 0 18px;line-height:1.5">Set which calendars we use to check for busy times, and where new bookings get added.</div>
 
