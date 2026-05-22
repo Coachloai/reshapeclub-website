@@ -21,6 +21,7 @@ Deno.serve(async (req: Request) => {
     if (action === 'send_message')       return ok(await sendMessage(body));
     if (action === 'process_queue')      return ok(await processQueue());
     if (action === 'list_wa_templates')  return ok(await listWhatsAppTemplates());
+    if (action === 'submit_wa_template') return ok(await submitWhatsAppTemplate(body));
     if (action === 'preview_audience')   return ok(await previewAudience(body));
     if (action === 'send_broadcast')     return ok(await sendBroadcast(body));
 
@@ -452,6 +453,48 @@ async function listWhatsAppTemplates() {
   });
 
   return { templates };
+}
+
+// ── SUBMIT A TEMPLATE FOR WHATSAPP APPROVAL (Twilio Content API) ───────────
+// POST /v1/Content/{ContentSid}/ApprovalRequests/whatsapp  { name, category }
+// Meta then reviews it; this only requests the review.
+async function submitWhatsAppTemplate(body: any) {
+  const sid  = Deno.env.get('TWILIO_SID');
+  const auth = Deno.env.get('TWILIO_AUTH');
+  if (!sid || !auth) return { success: false, error: 'Twilio credentials not set' };
+
+  const contentSid = body.content_sid;
+  if (!contentSid) return { success: false, error: 'content_sid required' };
+
+  // WhatsApp template names must be lowercase, alphanumeric + underscores.
+  const rawName = String(body.name || '').toLowerCase();
+  const name = rawName.replace(/[^a-z0-9_]+/g, '_').replace(/_+/g, '_').replace(/^_|_$/g, '');
+  if (!name) return { success: false, error: 'template name required' };
+
+  // Infer category from the name unless one is supplied. Meta requires one of
+  // MARKETING / UTILITY / AUTHENTICATION.
+  const category = (body.category
+    ? String(body.category).toUpperCase()
+    : /market|welcome|birthday|holiday|discount|promo|offer|sale/.test(name)
+      ? 'MARKETING'
+      : /auth|otp|code|verif/.test(name)
+        ? 'AUTHENTICATION'
+        : 'UTILITY');
+
+  const credentials = btoa(`${sid}:${auth}`);
+  const res = await fetch(
+    `https://content.twilio.com/v1/Content/${encodeURIComponent(contentSid)}/ApprovalRequests/whatsapp`,
+    {
+      method: 'POST',
+      headers: { 'Authorization': `Basic ${credentials}`, 'Content-Type': 'application/json' },
+      body: JSON.stringify({ name, category }),
+    },
+  );
+  const data = await res.json().catch(() => ({}));
+  if (!res.ok) {
+    return { success: false, error: data.message || data.error || ('Twilio HTTP ' + res.status), name, category };
+  }
+  return { success: true, name, category, status: data.status || 'received' };
 }
 
 function previewBody(t: any) {

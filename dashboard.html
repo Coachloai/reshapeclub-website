@@ -2557,6 +2557,8 @@ async function forgotPassword(){
               <option value="">Loading templates from Twilio…</option>
             </select>
             <div class="msg-token-hint" id="msg-wa-hint">WhatsApp requires pre-approved templates for outbound to anyone who hasn't messaged you in the last 24h. Create them in Twilio Console → Content Templates.</div>
+            <button class="btn btn-ghost btn-sm" id="msg-wa-submit-all" style="margin-top:8px;display:none" onclick="msgSubmitAllTemplates()">Submit unapproved templates for approval</button>
+            <div class="msg-token-hint" id="msg-wa-submit-status" style="margin-top:6px"></div>
             <div class="msg-tpl-preview" id="msg-wa-preview"></div>
             <div class="msg-tpl-vars" id="msg-wa-vars"></div>
           </div>
@@ -3664,10 +3666,55 @@ async function msgLoadWhatsAppTemplates() {
       return '<option value="' + msgEsc(t.sid) + '">' + msgEsc(label) + '</option>';
     }).join('');
     hint.textContent = 'Pick a template. Only WhatsApp-approved templates can be sent outside the 24h conversation window.';
+    // Show the bulk-submit button only when something is actually submittable.
+    var submitBtn = document.getElementById('msg-wa-submit-all');
+    if (submitBtn) submitBtn.style.display = list.some(msgTemplateSubmittable) ? 'inline-block' : 'none';
   } catch (e) {
     sel.innerHTML = '<option value="">Failed to load</option>';
     hint.textContent = 'Could not reach Twilio: ' + (e.message || e);
   }
+}
+
+// A template is worth (re)submitting when it isn't approved and isn't already
+// awaiting Meta review.
+function msgTemplateSubmittable(t) {
+  var s = (t.status || '').toLowerCase();
+  return !t.approved && s !== 'pending' && s !== 'received';
+}
+
+async function msgSubmitAllTemplates() {
+  var btn = document.getElementById('msg-wa-submit-all');
+  var statusEl = document.getElementById('msg-wa-submit-status');
+  var pending = (MSG_STATE.templates || []).filter(msgTemplateSubmittable);
+  if (pending.length === 0) {
+    statusEl.textContent = 'Nothing to submit — all templates are approved or already pending review.';
+    return;
+  }
+  if (!confirm('Submit ' + pending.length + ' template' + (pending.length > 1 ? 's' : '') + ' to WhatsApp for approval?\n\nMeta reviews them — usually minutes to a few hours. Marketing templates may be rejected if they lack opt-out wording.')) return;
+  btn.disabled = true;
+  var oldLabel = btn.textContent;
+  btn.textContent = 'Submitting…';
+  var okCount = 0, fails = [];
+  for (var i = 0; i < pending.length; i++) {
+    var t = pending[i];
+    statusEl.style.color = '';
+    statusEl.textContent = 'Submitting ' + (i + 1) + ' of ' + pending.length + ': ' + (t.friendly_name || t.sid) + '…';
+    try {
+      var res = await msgEdge({ action: 'submit_wa_template', content_sid: t.sid, name: t.friendly_name });
+      if (res && res.success) okCount++;
+      else fails.push((t.friendly_name || t.sid) + ' — ' + ((res && res.error) || 'failed'));
+    } catch (e) {
+      fails.push((t.friendly_name || t.sid) + ' — ' + (e.message || e));
+    }
+  }
+  btn.disabled = false;
+  btn.textContent = oldLabel;
+  var summary = 'Submitted ' + okCount + ' of ' + pending.length + '.';
+  if (fails.length) summary += ' Failed: ' + fails.join(' · ');
+  statusEl.textContent = summary;
+  statusEl.style.color = fails.length ? 'var(--orange)' : 'var(--green)';
+  showToast(okCount + ' template' + (okCount === 1 ? '' : 's') + ' submitted for approval');
+  setTimeout(msgLoadWhatsAppTemplates, 2000); // re-pull statuses so they flip to "pending review"
 }
 
 function msgWaStatusLabel(status) {
