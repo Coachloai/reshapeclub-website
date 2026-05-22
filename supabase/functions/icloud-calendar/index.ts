@@ -117,7 +117,7 @@ Deno.serve(async (req: Request) => {
       summary: body.summary || ('Visit: ' + (body.leadName || 'New Lead')),
       description: body.description || buildDescription(body),
       location: formatLocation(body.location),
-      start: new Date(body.datetime),
+      start: parseBookingDate(body.datetime),
       durationMinutes: body.durationMinutes || 45,
       organizerEmail: username,
     });
@@ -414,6 +414,36 @@ function buildICS(e: ICSInput): string {
 
 function icsDate(d: Date): string {
   return d.toISOString().replace(/[-:]/g, '').replace(/\.\d{3}/, '');
+}
+
+// How many minutes Europe/London is ahead of UTC at the given instant
+// (0 in winter / GMT, 60 in summer / BST). DST-aware via Intl.
+function londonOffsetMinutes(at: Date): number {
+  const dtf = new Intl.DateTimeFormat('en-GB', {
+    timeZone: 'Europe/London', hour12: false,
+    year: 'numeric', month: '2-digit', day: '2-digit',
+    hour: '2-digit', minute: '2-digit', second: '2-digit',
+  });
+  const p: Record<string, string> = {};
+  for (const part of dtf.formatToParts(at)) p[part.type] = part.value;
+  const asLondon = Date.UTC(+p.year, +p.month - 1, +p.day, +p.hour, +p.minute, +p.second);
+  return Math.round((asLondon - at.getTime()) / 60000);
+}
+
+// Booking times arrive as Europe/London wall-clock strings ("2026-05-22T11:00:00",
+// no timezone). This Edge Function runs on a UTC server, so new Date() would read
+// them as UTC and land events an hour off during BST. Parse them as London local.
+// If the string already carries an explicit timezone, trust it as-is.
+function parseBookingDate(s: string): Date {
+  const str = String(s || '');
+  if (/[zZ]$|[+\-]\d{2}:?\d{2}$/.test(str)) return new Date(str);
+  const m = str.match(/^(\d{4})-(\d{2})-(\d{2})T(\d{2}):(\d{2})(?::(\d{2}))?/);
+  if (!m) return new Date(str);
+  const [, y, mo, d, h, mi, se] = m;
+  // Treat the wall-clock as if UTC, then subtract London's offset to get the true instant.
+  const guess = new Date(Date.UTC(+y, +mo - 1, +d, +h, +mi, +(se || 0)));
+  const off = londonOffsetMinutes(guess);
+  return new Date(guess.getTime() - off * 60000);
 }
 
 function escapeText(s: string): string {
