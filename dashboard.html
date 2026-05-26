@@ -89,35 +89,41 @@ body{
 [data-theme="light"] ::-webkit-scrollbar-thumb{background:rgba(42,39,36,0.12)}
 /* ── TOP NAV ── */
 .topnav{
-  height:56px;flex-shrink:0;
+  height:52px;flex-shrink:0;
   display:flex;align-items:center;justify-content:space-between;
-  padding:0 28px;
+  padding:0 24px;
   background:var(--s1);
   border-bottom:1px solid var(--border);
-  backdrop-filter:blur(16px);
+  backdrop-filter:blur(20px);
   position:sticky;top:0;z-index:50;
 }
 .nav-brand{
-  display:flex;align-items:center;gap:10px;
+  display:flex;align-items:center;gap:10px;margin-right:28px;flex-shrink:0;
 }
-.nav-logo{
-  font-family:var(--head);font-size:18px;font-weight:900;
-  color:var(--text);text-decoration:none;letter-spacing:-0.3px;
+.nav-logo-tile{
+  width:34px;height:34px;border-radius:9px;background:var(--orange);
+  display:flex;align-items:center;justify-content:center;flex-shrink:0;
 }
-.nav-logo span{color:var(--orange)}
-.nav-badge{
-  font-size:10px;font-weight:700;letter-spacing:.15em;text-transform:uppercase;
-  color:var(--text3);padding:3px 8px;
-  border:1px solid var(--border);border-radius:4px;
-}
+.nav-logo-tile span{color:#fff;font-weight:900;font-size:11px;letter-spacing:-0.02em;font-family:var(--head)}
+.nav-brand-text{}
+.nav-brand-super{font-size:9px;font-weight:700;letter-spacing:.14em;color:var(--text3);text-transform:uppercase}
+.nav-brand-title{font-size:12px;font-weight:800;color:var(--text);line-height:1.1}
+.nav-live-stats{display:flex;gap:24px;flex-shrink:0;margin-left:auto;margin-right:16px}
+.nav-live-stat{text-align:right}
+.nav-live-stat-label{font-size:9px;font-weight:700;letter-spacing:.12em;color:var(--text3);text-transform:uppercase}
+.nav-live-stat-val{font-size:15px;font-weight:800;color:var(--text)}
+.nav-live-stat-val.orange{color:var(--orange)}
+.nav-live-stat-val.green{color:var(--green)}
+.nav-live-stat-val.amber{color:var(--amber)}
 .nav-right{display:flex;align-items:center;gap:8px}
 .nav-logout{
-  font-size:13px;font-weight:500;color:var(--text3);
-  background:none;border:1px solid var(--border);
-  border-radius:8px;padding:7px 14px;cursor:pointer;
-  transition:all .2s;font-family:var(--body);
+  font-size:11px;font-weight:600;color:var(--text3);
+  background:rgba(255,255,255,0.06);border:1px solid var(--border);
+  border-radius:8px;padding:6px 14px;cursor:pointer;
+  transition:all .2s;font-family:var(--body);flex-shrink:0;
 }
 .nav-logout:hover{color:var(--text);border-color:rgba(237,92,37,0.5)}
+@media(max-width:900px){.nav-live-stats{display:none}}
 /* ── THEME TOGGLE ── */
 .theme-toggle{
   width:34px;height:34px;border-radius:10px;
@@ -156,7 +162,7 @@ body{
 .sb-btn svg{flex-shrink:0}
 .sb-btn:hover{background:rgba(255,255,255,0.06);color:var(--text2)}
 [data-theme="light"] .sb-btn:hover{background:rgba(42,39,36,0.04)}
-.sb-btn.active{background:var(--odim);color:var(--orange)}
+.sb-btn.active{background:var(--odim);color:var(--orange);border-bottom:2px solid var(--orange)}
 .sb-dot{
   position:absolute;top:4px;right:4px;
   width:6px;height:6px;border-radius:50%;
@@ -176,11 +182,12 @@ body{
   display:flex;align-items:center;justify-content:space-between;
   flex-wrap:wrap;gap:12px;
 }
+.page-header-left{display:flex;align-items:center;gap:14px}
 .page-title{
-  font-family:var(--head);font-size:22px;font-weight:900;
+  font-family:var(--head);font-size:20px;font-weight:900;
   letter-spacing:-0.03em;color:var(--text);
 }
-.page-sub{font-size:13px;color:var(--text3);margin-top:2px}
+.page-sub{font-size:12px;color:var(--text3);margin-top:2px}
 .header-actions{display:flex;align-items:center;gap:8px}
 /* ── BUTTONS ── */
 .btn{
@@ -205,32 +212,43 @@ body{
   background:var(--s1);
   border:1px solid var(--border);
   border-radius:var(--r);
-  padding:14px 18px;
-  display:flex;align-items:flex-end;gap:12px;
+  padding:10px 18px;
+  display:flex;align-items:center;gap:20px;
   flex-wrap:wrap;
 }
-.filter-group{display:flex;flex-direction:column;gap:5px;flex:1;min-width:120px}
-.filter-group.wide{flex:2;min-width:200px}
+.filter-group{display:flex;align-items:center;gap:8px;flex-shrink:0}
+.filter-group.wide{flex:1;min-width:180px}
 .filter-label{
-  font-size:10px;font-weight:700;letter-spacing:.18em;
-  text-transform:uppercase;color:var(--text3);
+  font-size:10px;font-weight:700;letter-spacing:.14em;
+  text-transform:uppercase;color:var(--text3);flex-shrink:0;
 }
 .filter-input,.filter-select{
   background:var(--s3);
-  border:1.5px solid var(--border);
+  border:1px solid var(--border);
   border-radius:8px;
   color:var(--text);
-  padding:8px 12px;
-  font-family:var(--body);font-size:13px;
+  padding:6px 12px;
+  font-family:var(--body);font-size:12px;font-weight:500;
   outline:none;transition:border-color .2s;
-  width:100%;appearance:none;
+  width:auto;min-width:120px;appearance:none;
 }
 .filter-input::placeholder{color:var(--text3)}
 .filter-input:focus,.filter-select:focus{border-color:rgba(237,92,37,.4)}
 .filter-select{cursor:pointer}
 .filter-select option{background:var(--s2);color:var(--text)}
-.filter-divider{width:1px;height:44px;background:var(--border);flex-shrink:0;align-self:flex-end;margin:0 4px}
-.filter-actions{display:flex;gap:8px;align-items:flex-end;flex-shrink:0}
+.filter-divider{width:1px;height:24px;background:var(--border);flex-shrink:0;margin:0}
+.filter-actions{display:flex;gap:8px;align-items:center;flex-shrink:0;margin-left:auto}
+/* ── SEGMENTED TOGGLE ── */
+.seg-toggle{display:flex;gap:3px;background:var(--s3);border-radius:8px;padding:3px;border:1px solid var(--border)}
+.seg-toggle button{
+  padding:4px 12px;border-radius:6px;border:none;cursor:pointer;
+  background:transparent;color:var(--text3);
+  font-size:12px;font-weight:500;transition:all .15s;white-space:nowrap;
+  font-family:var(--body);
+}
+.seg-toggle button:hover{color:var(--text2)}
+.seg-toggle button.active{background:var(--orange);color:#fff;font-weight:700}
+.seg-toggle.loc button.active{background:rgba(237,92,37,0.12);color:var(--orange);outline:1px solid rgba(237,92,37,0.3)}
 /* ── STAT CARDS ── */
 .stats-row{
   display:grid;
@@ -244,15 +262,15 @@ body{
   padding:20px 22px;
   position:relative;
   overflow:hidden;
-  transition:border-color .2s;
+  transition:border-color .2s, box-shadow .2s;
 }
-.stat-card:hover{border-color:var(--orange);border-color:rgba(255,255,255,0.14)}
-[data-theme="light"] .stat-card:hover{border-color:rgba(42,39,36,0.10)}
+.stat-card:hover{border-color:rgba(237,92,37,0.35);box-shadow:0 0 20px rgba(237,92,37,0.08)}
+[data-theme="light"] .stat-card:hover{border-color:rgba(42,39,36,0.10);box-shadow:none}
 .stat-card.primary{
   background:var(--s2);
   border-color:rgba(237,92,37,.2);
 }
-.stat-card.primary:hover{border-color:rgba(237,92,37,.35)}
+.stat-card.primary:hover{border-color:rgba(237,92,37,.45);box-shadow:0 0 28px rgba(237,92,37,0.12)}
 .stat-card::before{
   content:'';position:absolute;top:-20px;right:-20px;
   width:80px;height:80px;border-radius:50%;
@@ -264,28 +282,53 @@ body{
   background:radial-gradient(circle,rgba(237,92,37,.20),transparent 70%);
 }
 .stat-top{display:flex;justify-content:space-between;align-items:flex-start;margin-bottom:14px}
-.stat-label{font-size:11px;font-weight:600;letter-spacing:.16em;text-transform:uppercase;color:var(--text3)}
+.stat-label{font-size:10px;font-weight:700;letter-spacing:.14em;text-transform:uppercase;color:var(--text3)}
 .stat-badge{
-  font-size:11px;font-weight:700;
-  padding:3px 8px;border-radius:100px;
-  display:flex;align-items:center;gap:4px;
+  font-size:10px;font-weight:700;
+  padding:2px 8px;border-radius:999px;
+  display:inline-flex;align-items:center;gap:4px;
+  letter-spacing:.06em;text-transform:uppercase;white-space:nowrap;
 }
-.stat-badge.up{background:rgba(46,204,113,.12);color:#2ECC71}
-.stat-badge.down{background:rgba(231,76,60,.12);color:#E74C3C}
-.stat-badge.neutral{background:var(--odim);color:var(--orange)}
+.stat-badge.up{background:rgba(34,197,94,.13);color:var(--green);border:1px solid rgba(74,222,128,.22)}
+.stat-badge.down{background:rgba(239,68,68,.13);color:var(--red);border:1px solid rgba(248,113,113,.22)}
+.stat-badge.neutral{background:var(--odim);color:var(--orange);border:1px solid rgba(237,92,37,.22)}
+.stat-body{display:flex;align-items:center;justify-content:space-between}
+.stat-body-left{flex:1}
 .stat-num{
   font-family:var(--head);font-weight:900;
-  font-size:42px;line-height:1;
+  font-size:36px;line-height:1;
   letter-spacing:-0.04em;
   color:var(--orange);
   margin-bottom:4px;
 }
-.stat-card.primary .stat-num{font-size:52px}
-.stat-sub{font-size:12px;color:var(--text3)}
+.stat-card.primary .stat-num{font-size:44px}
+.stat-sub{font-size:11px;color:var(--text3)}
+.stat-ring{flex-shrink:0}
+.stat-bar{height:4px;border-radius:99px;background:rgba(255,255,255,0.06);margin-top:12px;overflow:hidden}
+[data-theme="light"] .stat-bar{background:rgba(42,39,36,0.06)}
+.stat-bar-fill{height:100%;border-radius:99px;transition:width .6s cubic-bezier(.4,0,.2,1)}
 .stat-spark{
   position:absolute;bottom:0;left:0;right:0;
   height:36px;opacity:.5;
 }
+/* ── ICON TILE ── */
+.icon-tile{
+  width:38px;height:38px;border-radius:10px;flex-shrink:0;
+  display:flex;align-items:center;justify-content:center;font-size:17px;
+}
+.icon-tile.orange{background:rgba(237,92,37,0.12);border:1px solid rgba(237,92,37,0.22)}
+.icon-tile.green{background:rgba(34,197,94,0.12);border:1px solid rgba(74,222,128,0.22)}
+.icon-tile.blue{background:rgba(59,130,246,0.12);border:1px solid rgba(59,130,246,0.22)}
+.icon-tile.purple{background:rgba(139,92,246,0.12);border:1px solid rgba(139,92,246,0.22)}
+.icon-tile.teal{background:rgba(20,184,166,0.12);border:1px solid rgba(20,184,166,0.22)}
+.icon-tile.amber{background:rgba(245,158,11,0.12);border:1px solid rgba(251,191,36,0.22)}
+/* ── GRADIENT AVATAR ── */
+.avatar{
+  border-radius:50%;display:flex;align-items:center;justify-content:center;
+  font-weight:800;color:#fff;flex-shrink:0;text-transform:uppercase;letter-spacing:0.02em;
+}
+.avatar-sm{width:28px;height:28px;font-size:10px}
+.avatar-md{width:36px;height:36px;font-size:12px}
 /* ── CHARTS ROW ── */
 .charts-row{
   display:grid;
@@ -297,24 +340,28 @@ body{
   border:1px solid var(--border);
   border-radius:var(--r);
   padding:20px 22px;
+  transition:border-color .2s, box-shadow .2s;
 }
+.chart-card:hover{border-color:rgba(255,255,255,0.14);box-shadow:0 4px 20px rgba(0,0,0,0.15)}
+[data-theme="light"] .chart-card:hover{border-color:rgba(42,39,36,0.1);box-shadow:none}
 .chart-header{
   display:flex;justify-content:space-between;align-items:center;
   margin-bottom:20px;
   flex-wrap:wrap;gap:8px;
 }
+.chart-header-left{display:flex;align-items:center;gap:12px}
 .chart-title{
   font-family:var(--head);font-size:15px;font-weight:800;
   letter-spacing:-0.01em;color:var(--text);
 }
-.chart-meta{font-size:12px;color:var(--text3);margin-top:2px}
+.chart-meta{font-size:11px;color:var(--text3);margin-top:2px}
 .chart-tabs{display:flex;gap:2px;background:var(--s3);border-radius:8px;padding:3px}
 .chart-tab{
   font-size:11px;font-weight:600;padding:5px 10px;border-radius:6px;
   cursor:pointer;color:var(--text3);background:none;border:none;
   font-family:var(--body);transition:all .2s;
 }
-.chart-tab.active{background:var(--s1);color:var(--text)}
+.chart-tab.active{background:var(--orange);color:#fff}
 .chart-wrap{position:relative;height:200px}
 /* ── BOTTOM CHARTS ── */
 .charts-bottom{
@@ -350,23 +397,25 @@ body{
   border:1px solid var(--border);
   border-radius:var(--r);
   overflow:hidden;
+  transition:border-color .2s;
 }
 .table-header{
   display:flex;justify-content:space-between;align-items:center;
-  padding:18px 22px;
+  padding:16px 22px;
   border-bottom:1px solid var(--border);
   flex-wrap:wrap;gap:10px;
 }
+.table-header-left{display:flex;align-items:center;gap:12px}
 .table-title{
   font-family:var(--head);font-size:15px;font-weight:800;
   letter-spacing:-0.01em;
 }
-.table-count{font-size:12px;color:var(--text3);margin-top:2px}
+.table-count{font-size:11px;color:var(--text3);margin-top:2px}
 .table-header-right{display:flex;align-items:center;gap:8px}
 .data-table{width:100%;border-collapse:collapse}
 .data-table th{
-  padding:10px 14px;
-  font-size:10px;font-weight:700;letter-spacing:.16em;
+  padding:8px 14px;
+  font-size:9px;font-weight:700;letter-spacing:.14em;
   text-transform:uppercase;color:var(--text3);
   border-bottom:1px solid var(--border);
   text-align:left;background:var(--s2);
@@ -381,12 +430,13 @@ body{
 .data-table th.sorted .sort-icon{opacity:1;color:var(--orange)}
 .data-table th.sorted{color:var(--orange)}
 .data-table td{
-  padding:12px 14px;
+  padding:10px 14px;
   border-bottom:1px solid var(--border2);
-  font-size:13px;color:var(--text2);
+  font-size:12px;color:var(--text2);
   vertical-align:middle;
 }
 .data-table tr:last-child td{border-bottom:none}
+.td-name{display:flex;align-items:center;gap:10px;font-weight:600;color:var(--text)}
 .data-table tr:hover td{background:rgba(255,255,255,0.03)}
 [data-theme="light"] .data-table tr:hover td{background:rgba(42,39,36,0.02)}
 .td-name{font-weight:600;color:var(--text)}
@@ -1282,18 +1332,35 @@ async function forgotPassword(){
 <!-- ── TOP NAV ── -->
 <nav class="topnav">
   <div class="nav-brand">
-    <a href="#" class="nav-logo">Re<span>Shape</span></a>
-    <span class="nav-badge">Leads Dashboard</span>
+    <div class="nav-logo-tile"><span>RS</span></div>
+    <div class="nav-brand-text">
+      <div class="nav-brand-super">RESHAPE</div>
+      <div class="nav-brand-title">Leads Centre</div>
+    </div>
+  </div>
+  <div class="nav-live-stats">
+    <div class="nav-live-stat">
+      <div class="nav-live-stat-label">TOTAL LEADS</div>
+      <div class="nav-live-stat-val orange" id="nav-stat-total">—</div>
+    </div>
+    <div class="nav-live-stat">
+      <div class="nav-live-stat-label">THIS WEEK</div>
+      <div class="nav-live-stat-val green" id="nav-stat-week">—</div>
+    </div>
+    <div class="nav-live-stat">
+      <div class="nav-live-stat-label">BOOKED</div>
+      <div class="nav-live-stat-val amber" id="nav-stat-booked">—</div>
+    </div>
   </div>
   <div class="nav-right">
-    <span style="font-size:12px;color:var(--text3);margin-right:4px" id="last-updated">Updated just now</span>
+    <span style="font-size:11px;color:var(--text3);margin-right:4px" id="last-updated">Updated just now</span>
     <button class="btn btn-ghost btn-sm btn-icon" title="Refresh" onclick="refreshData()">
       <svg width="14" height="14" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><polyline points="23 4 23 10 17 10"/><path d="M20.49 15a9 9 0 11-2.12-9.36L23 10"/></svg>
     </button>
     <button class="theme-toggle" id="theme-toggle" title="Toggle light/dark mode" onclick="toggleTheme()">
       <span id="theme-icon">☀️</span>
     </button>
-    <button class="btn btn-ghost btn-sm" onclick="logout()">Log Out</button>
+    <button class="btn btn-ghost btn-sm" onclick="logout()" style="font-size:11px">Sign Out</button>
   </div>
 </nav>
 <div class="layout">
@@ -1356,34 +1423,48 @@ async function forgotPassword(){
     <div id="view-dashboard" class="view active-view">
     <!-- PAGE HEADER -->
     <div class="page-header fade-in">
-      <div>
-        <div class="page-title">Leads Overview</div>
-        <div class="page-sub" id="date-range-label">Loading…</div>
+      <div class="page-header-left">
+        <div class="icon-tile orange" style="width:42px;height:42px;border-radius:12px;font-size:20px">🎯</div>
+        <div>
+          <div class="page-title">Leads Overview</div>
+          <div class="page-sub" id="date-range-label">Loading…</div>
+        </div>
       </div>
       <div class="header-actions">
-        <button class="btn btn-ghost btn-sm" onclick="clearFilters()">
-          <svg width="12" height="12" fill="none" stroke="currentColor" stroke-width="2.5" viewBox="0 0 24 24"><line x1="18" y1="6" x2="6" y2="18"/><line x1="6" y1="6" x2="18" y2="18"/></svg>
-          Clear
-        </button>
         <button class="btn btn-export btn-sm" onclick="exportCSV()">
           <svg width="12" height="12" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><path d="M21 15v4a2 2 0 01-2 2H5a2 2 0 01-2-2v-4"/><polyline points="7 10 12 15 17 10"/><line x1="12" y1="15" x2="12" y2="3"/></svg>
-          Export CSV
+          Export
         </button>
       </div>
     </div>
     <!-- FILTER BAR -->
     <div class="filters fade-in fade-in-1">
       <div class="filter-group">
-        <label class="filter-label">From</label>
-        <input type="date" class="filter-input" id="filter-from" autocomplete="off">
+        <span class="filter-label">📅</span>
+        <input type="date" class="filter-input" id="filter-from" autocomplete="off" style="min-width:130px">
       </div>
       <div class="filter-group">
-        <label class="filter-label">To</label>
-        <input type="date" class="filter-input" id="filter-to" autocomplete="off">
+        <span class="filter-label">To</span>
+        <input type="date" class="filter-input" id="filter-to" autocomplete="off" style="min-width:130px">
       </div>
+      <div class="filter-divider"></div>
       <div class="filter-group">
-        <label class="filter-label">Website</label>
-        <select class="filter-select" id="filter-form">
+        <span class="filter-label">Location</span>
+        <div class="seg-toggle loc" id="seg-location">
+          <button class="active" onclick="setLocFilter('',this)">All</button>
+          <button onclick="setLocFilter('Ipswich',this)">Ipswich</button>
+          <button onclick="setLocFilter('Colchester',this)">Colchester</button>
+        </div>
+        <select class="filter-select" id="filter-location" style="display:none">
+          <option value="">All Locations</option>
+          <option>Colchester</option>
+          <option>Ipswich</option>
+        </select>
+      </div>
+      <div class="filter-divider"></div>
+      <div class="filter-group">
+        <span class="filter-label">Page</span>
+        <select class="filter-select" id="filter-form" style="min-width:140px">
           <option value="">All Pages</option>
           <option value="Main Landing Page">reshape.fit</option>
           <option value="Men Landing Page">reshape.fit/men</option>
@@ -1393,16 +1474,8 @@ async function forgotPassword(){
         </select>
       </div>
       <div class="filter-group">
-        <label class="filter-label">Location</label>
-        <select class="filter-select" id="filter-location">
-          <option value="">All Locations</option>
-          <option>Colchester</option>
-          <option>Ipswich</option>
-        </select>
-      </div>
-      <div class="filter-group">
-        <label class="filter-label">Gender</label>
-        <select class="filter-select" id="filter-gender">
+        <span class="filter-label">Gender</span>
+        <select class="filter-select" id="filter-gender" style="min-width:80px">
           <option value="">All</option>
           <option>Male</option>
           <option>Female</option>
@@ -1410,14 +1483,12 @@ async function forgotPassword(){
       </div>
       <div class="filter-divider"></div>
       <div class="filter-group wide">
-        <label class="filter-label">Search</label>
-        <input type="text" class="filter-input" id="filter-search" placeholder="Search name or email…">
+        <span style="position:absolute;left:10px;top:50%;transform:translateY(-50%);color:var(--text3);font-size:12px;pointer-events:none">🔍</span>
+        <input type="text" class="filter-input" id="filter-search" placeholder="Search…" style="padding-left:28px">
       </div>
       <div class="filter-actions">
-        <button class="btn btn-primary" onclick="applyFilters()">
-          Apply
-          <svg width="12" height="12" fill="none" stroke="currentColor" stroke-width="2.5" viewBox="0 0 24 24"><polyline points="20 6 9 17 4 12"/></svg>
-        </button>
+        <button class="btn btn-primary btn-sm" onclick="applyFilters()">Apply</button>
+        <button class="btn btn-ghost btn-sm" onclick="clearFilters()" style="font-size:11px">Clear</button>
       </div>
     </div>
     <!-- STAT CARDS -->
@@ -1425,43 +1496,70 @@ async function forgotPassword(){
       <div class="stat-card primary fade-in fade-in-2" onclick="openDrawer('total')" style="cursor:pointer">
         <div class="stat-top">
           <span class="stat-label">Total Leads</span>
-          <span class="stat-badge up">↑ 20% <span style="font-weight:400;opacity:.7">vs last month</span></span>
+          <span class="stat-badge up" id="stat-total-badge">↑ 20%</span>
         </div>
-        <div class="stat-num" id="stat-total">12</div>
-        <div class="stat-sub">All time · filtered view</div>
+        <div class="stat-body">
+          <div class="stat-body-left">
+            <div class="stat-num" id="stat-total">—</div>
+            <div class="stat-sub">All time · filtered view</div>
+          </div>
+          <div class="stat-ring" id="stat-total-ring"></div>
+        </div>
+        <div class="stat-bar"><div class="stat-bar-fill" id="stat-total-bar" style="width:0%;background:var(--orange)"></div></div>
       </div>
       <div class="stat-card fade-in fade-in-2" onclick="openDrawer('week')" style="cursor:pointer">
         <div class="stat-top">
           <span class="stat-label">This Week</span>
-          <span class="stat-badge up">↑ 3</span>
+          <span class="stat-badge up" id="stat-week-badge">↑ 3</span>
         </div>
-        <div class="stat-num" id="stat-week">4</div>
-        <div class="stat-sub">7-day window</div>
+        <div class="stat-body">
+          <div class="stat-body-left">
+            <div class="stat-num" id="stat-week">—</div>
+            <div class="stat-sub">7-day window</div>
+          </div>
+          <div class="stat-ring" id="stat-week-ring"></div>
+        </div>
+        <div class="stat-bar"><div class="stat-bar-fill" id="stat-week-bar" style="width:0%;background:var(--green)"></div></div>
       </div>
       <div class="stat-card fade-in fade-in-3" onclick="openDrawer('quality')" style="cursor:pointer">
         <div class="stat-top">
-          <span class="stat-label">Quality %</span>
-          <span class="stat-badge neutral">Strong</span>
+          <span class="stat-label">Quality</span>
+          <span class="stat-badge neutral" id="stat-quality-badge">Strong</span>
         </div>
-        <div class="stat-num" id="stat-quality">83%</div>
-        <div class="stat-sub">High-fit applicants</div>
+        <div class="stat-body">
+          <div class="stat-body-left">
+            <div class="stat-num" id="stat-quality">—</div>
+            <div class="stat-sub">High-fit applicants</div>
+          </div>
+          <div class="stat-ring" id="stat-quality-ring"></div>
+        </div>
+        <div class="stat-bar"><div class="stat-bar-fill" id="stat-quality-bar" style="width:0%;background:var(--green)"></div></div>
       </div>
       <div class="stat-card fade-in fade-in-3" onclick="openDrawer('age')" style="cursor:pointer">
         <div class="stat-top">
           <span class="stat-label">Avg Age</span>
-          <span class="stat-badge neutral">Target</span>
+          <span class="stat-badge neutral" id="stat-age-badge">Target</span>
         </div>
-        <div class="stat-num" id="stat-age">34</div>
-        <div class="stat-sub">Ideal: 28–45</div>
+        <div class="stat-body">
+          <div class="stat-body-left">
+            <div class="stat-num" id="stat-age">—</div>
+            <div class="stat-sub">Ideal: 28–45</div>
+          </div>
+          <div class="stat-ring" id="stat-age-ring"></div>
+        </div>
+        <div class="stat-bar"><div class="stat-bar-fill" id="stat-age-bar" style="width:0%;background:var(--amber)"></div></div>
       </div>
     </div>
     <!-- CHARTS ROW -->
     <div class="charts-row fade-in fade-in-4">
       <div class="chart-card" onclick="openDrawer('time')" style="cursor:pointer">
         <div class="chart-header">
-          <div>
-            <div class="chart-title">Leads Over Time</div>
-            <div class="chart-meta" id="chart-period-label">Last 30 days</div>
+          <div class="chart-header-left">
+            <div class="icon-tile orange">📈</div>
+            <div>
+              <div class="chart-title">Leads Over Time</div>
+              <div class="chart-meta" id="chart-period-label">Last 30 days</div>
+            </div>
           </div>
           <div class="chart-tabs">
             <button class="chart-tab" onclick="setPeriod('7d',this)">7D</button>
@@ -1473,9 +1571,12 @@ async function forgotPassword(){
       </div>
       <div class="chart-card">
         <div class="chart-header">
-          <div>
-            <div class="chart-title">Referral Sources</div>
-            <div class="chart-meta">By channel</div>
+          <div class="chart-header-left">
+            <div class="icon-tile purple">📡</div>
+            <div>
+              <div class="chart-title">Referral Sources</div>
+              <div class="chart-meta">By channel</div>
+            </div>
           </div>
         </div>
         <div class="chart-wrap"><canvas id="chart-sources"></canvas></div>
@@ -1485,7 +1586,10 @@ async function forgotPassword(){
     <div class="charts-bottom fade-in fade-in-5">
       <div class="chart-card" onclick="openDrawer('gender')" style="cursor:pointer">
         <div class="chart-header">
-          <div class="chart-title">Gender Split</div>
+          <div class="chart-header-left">
+            <div class="icon-tile teal">👫</div>
+            <div class="chart-title">Gender Split</div>
+          </div>
         </div>
         <div class="donut-wrap">
           <canvas id="chart-gender"></canvas>
@@ -1498,14 +1602,20 @@ async function forgotPassword(){
       </div>
       <div class="chart-card" onclick="openDrawer('location')" style="cursor:pointer">
         <div class="chart-header">
-          <div class="chart-title">Location Split</div>
+          <div class="chart-header-left">
+            <div class="icon-tile blue">📍</div>
+            <div class="chart-title">Location Split</div>
+          </div>
         </div>
         <div class="chart-wrap" style="height:160px"><canvas id="chart-location"></canvas></div>
         <div class="chart-legend" id="location-legend"></div>
       </div>
       <div class="chart-card" onclick="openDrawer('ageChart')" style="cursor:pointer">
         <div class="chart-header">
-          <div class="chart-title">Age Distribution</div>
+          <div class="chart-header-left">
+            <div class="icon-tile amber">🎂</div>
+            <div class="chart-title">Age Distribution</div>
+          </div>
         </div>
         <div class="chart-wrap" style="height:160px"><canvas id="chart-age"></canvas></div>
         <div class="chart-legend" style="margin-top:12px">
@@ -1519,9 +1629,12 @@ async function forgotPassword(){
     <!-- ALL LEADS TABLE -->
     <div class="table-card fade-in fade-in-6">
       <div class="table-header">
-        <div>
-          <div class="table-title">All Leads</div>
-          <div class="table-count" id="table-count">Loading…</div>
+        <div class="table-header-left">
+          <div class="icon-tile green">👤</div>
+          <div>
+            <div class="table-title">All Leads</div>
+            <div class="table-count" id="table-count">Loading…</div>
+          </div>
         </div>
         <div class="table-header-right">
           <input type="text" class="filter-input" style="width:200px;padding:7px 12px" placeholder="Quick search…" id="table-search" oninput="quickSearch(this.value)">
@@ -3022,8 +3135,8 @@ function renderTable() {
     return `
       <tr>
         <td><input type="checkbox" class="lead-check" data-id="${l.id}" onchange="updateBulkBar()"></td>
-        <td style="color:var(--text3)">${start + i + 1}</td>
-        <td class="td-name">${l.name}</td>
+        <td style="color:var(--text3);font-size:11px;font-variant-numeric:tabular-nums">${start + i + 1}</td>
+        <td class="td-name"><div class="avatar avatar-sm" style="background:${makeAvatarBg(l.name)}">${makeAvatarInitials(l.name)}</div>${l.name}</td>
         <td class="td-email">${l.email}</td>
         <td class="td-phone">${l.phone}</td>
         <td><span class="tag tag-location">${l.location}</span></td>
@@ -3099,6 +3212,13 @@ function getBaseFiltered() {
     return true;
   });
 }
+function setLocFilter(val, btn) {
+  document.getElementById('filter-location').value = val;
+  var btns = document.querySelectorAll('#seg-location button');
+  btns.forEach(function(b){ b.classList.remove('active'); });
+  if (btn) btn.classList.add('active');
+  applyFilters();
+}
 function applyFilters() {
   filtered = getBaseFiltered();
   currentPage = 1;
@@ -3125,6 +3245,29 @@ function clearFilters() {
 /* ══════════════════════════════════════
    STATS
 ══════════════════════════════════════ */
+function renderRadialRing(container, value, max, color, size) {
+  size = size || 56;
+  var thickness = 6;
+  var cx = size/2, cy = size/2, r = (size-thickness)/2-1;
+  var circ = 2*Math.PI*r;
+  var pct = Math.max(0, Math.min(1, value/max));
+  container.innerHTML = '<svg width="'+size+'" height="'+size+'" style="display:block">' +
+    '<circle cx="'+cx+'" cy="'+cy+'" r="'+r+'" fill="none" stroke="rgba(255,255,255,0.07)" stroke-width="'+thickness+'"/>' +
+    '<circle cx="'+cx+'" cy="'+cy+'" r="'+r+'" fill="none" stroke="'+color+'" stroke-width="'+thickness+'" stroke-linecap="round" ' +
+    'stroke-dasharray="'+(pct*circ)+' '+circ+'" stroke-dashoffset="'+(circ*0.25)+'" style="transition:stroke-dasharray 0.6s ease"/>' +
+    '</svg>';
+}
+
+var AVATAR_PALETTE = ['#ED5C25','#7C6EF5','#0EA5E9','#22C55E','#F59E0B','#8B5CF6','#14B8A6','#EF4444'];
+function makeAvatarBg(name) {
+  var i = (name||'?').charCodeAt(0) % AVATAR_PALETTE.length;
+  var j = (i+2) % AVATAR_PALETTE.length;
+  return 'linear-gradient(135deg,'+AVATAR_PALETTE[i]+','+AVATAR_PALETTE[j]+')';
+}
+function makeAvatarInitials(name) {
+  return (name||'?').split(' ').map(function(w){return w[0]||''}).join('').slice(0,2).toUpperCase();
+}
+
 function updateStats() {
   document.getElementById('stat-total').textContent = filtered.length;
   const week = filtered.filter(l => {
@@ -3139,6 +3282,44 @@ function updateStats() {
   const avgAge = filtered.length ? Math.round(filtered.reduce((s, l) => s + l.age, 0) / filtered.length) : 0;
   document.getElementById('stat-age').textContent = avgAge;
   document.getElementById('date-range-label').textContent = `All time · ${filtered.length} lead${filtered.length !== 1 ? 's' : ''}`;
+
+  // Radial rings
+  var ringTotal = document.getElementById('stat-total-ring');
+  var ringWeek = document.getElementById('stat-week-ring');
+  var ringQuality = document.getElementById('stat-quality-ring');
+  var ringAge = document.getElementById('stat-age-ring');
+  if (ringTotal) renderRadialRing(ringTotal, Math.min(filtered.length, 100), 100, '#ED5C25');
+  if (ringWeek) renderRadialRing(ringWeek, week, 20, '#22C55E');
+  if (ringQuality) renderRadialRing(ringQuality, pct, 100, pct >= 70 ? '#22C55E' : pct >= 40 ? '#F59E0B' : '#EF4444');
+  if (ringAge) renderRadialRing(ringAge, Math.min(avgAge, 60), 60, avgAge >= 28 && avgAge <= 45 ? '#22C55E' : '#F59E0B');
+
+  // Nav live stats
+  var navTotal = document.getElementById('nav-stat-total');
+  var navWeek = document.getElementById('nav-stat-week');
+  var navBooked = document.getElementById('nav-stat-booked');
+  if (navTotal) navTotal.textContent = filtered.length;
+  if (navWeek) navWeek.textContent = week;
+  if (navBooked) {
+    var booked = filtered.filter(function(l){ return l.status === 'booked' || l.status === 'confirmed'; }).length;
+    navBooked.textContent = booked;
+  }
+
+  // Progress bars
+  var barTotal = document.getElementById('stat-total-bar');
+  var barWeek = document.getElementById('stat-week-bar');
+  var barQuality = document.getElementById('stat-quality-bar');
+  var barAge = document.getElementById('stat-age-bar');
+  if (barTotal) barTotal.style.width = Math.min(100, filtered.length) + '%';
+  if (barWeek) barWeek.style.width = Math.min(100, week * 5) + '%';
+  if (barQuality) {
+    barQuality.style.width = pct + '%';
+    barQuality.style.background = pct >= 70 ? 'var(--green)' : pct >= 40 ? 'var(--amber)' : 'var(--red)';
+  }
+  if (barAge) {
+    var agePct = avgAge > 0 ? Math.min(100, Math.round((avgAge / 60) * 100)) : 0;
+    barAge.style.width = agePct + '%';
+    barAge.style.background = (avgAge >= 28 && avgAge <= 45) ? 'var(--green)' : 'var(--amber)';
+  }
 }
 /* ══════════════════════════════════════
    CHARTS
@@ -4322,8 +4503,8 @@ function renderLeadsView() {
     return `
       <tr>
         <td><input type="checkbox" class="lead-check" data-id="${l.id}" onchange="updateBulkBar()"></td>
-        <td style="color:var(--text3)">${i+1}</td>
-        <td class="td-name">${l.name}</td>
+        <td style="color:var(--text3);font-size:11px;font-variant-numeric:tabular-nums">${i+1}</td>
+        <td class="td-name"><div class="avatar avatar-sm" style="background:${makeAvatarBg(l.name)}">${makeAvatarInitials(l.name)}</div>${l.name}</td>
         <td class="td-email">${l.email}</td>
         <td class="td-phone">${l.phone}</td>
         <td><span class="tag tag-location">${l.location}</span></td>
@@ -7269,9 +7450,12 @@ document.addEventListener('keydown', function(e) {
 <div class="modal-overlay" id="modal-overlay" onclick="if(event.target===this)closeModal()">
   <div class="modal" id="lead-modal">
     <div class="modal-head">
-      <div>
-        <div class="modal-lead-name" id="modal-name">—</div>
-        <div class="modal-lead-id" id="modal-id">—</div>
+      <div style="display:flex;align-items:center;gap:14px">
+        <div class="avatar avatar-md" id="modal-avatar" style="background:linear-gradient(135deg,#ED5C25,#7C6EF5)">—</div>
+        <div>
+          <div class="modal-lead-name" id="modal-name">—</div>
+          <div class="modal-lead-id" id="modal-id">—</div>
+        </div>
       </div>
       <button class="drawer-close" onclick="closeModal()">
         <svg width="14" height="14" fill="none" stroke="currentColor" stroke-width="2.5" viewBox="0 0 24 24"><line x1="18" y1="6" x2="6" y2="18"/><line x1="6" y1="6" x2="18" y2="18"/></svg>
@@ -7293,6 +7477,8 @@ function openLeadModal(id) {
   const a = l.answers || {};
   document.getElementById('modal-name').textContent = l.name;
   document.getElementById('modal-name').dataset.leadId = l.id;
+  var modalAv = document.getElementById('modal-avatar');
+  if (modalAv) { modalAv.style.background = makeAvatarBg(l.name); modalAv.textContent = makeAvatarInitials(l.name); }
   document.getElementById('modal-id').textContent   =
     'Lead #' + l.id + ' \u00b7 ' + l.formLabel + ' \u00b7 ' +
     new Date(l.date).toLocaleDateString('en-GB',{day:'numeric',month:'long',year:'numeric'});
