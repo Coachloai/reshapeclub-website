@@ -181,7 +181,7 @@ function __escAttr(s){ return String(s||'').replace(/[&<>"']/g, function(c){ ret
   if (rId && rTok) {
     try {
       var bRes = await window.__supabaseClient.from('bookings')
-        .select('id, confirm_token, first_name, last_name, email, phone, location, slot_id, booking_slots(date, start_time, end_time)')
+        .select('id, confirm_token, first_name, last_name, email, phone, location, slot_id, calendar_event_id, calendar_event_url, calendar_provider, booking_slots(date, start_time, end_time)')
         .eq('id', rId).maybeSingle();
       var b = bRes && bRes.data;
       if (b && b.confirm_token === rTok) {
@@ -411,9 +411,13 @@ async function confirmBooking() {
     var __bookRow;
     var slot = __bookingSlots.find(function(s) { return s.id === __selectedSlotId; });
     if (__rescheduleCtx) {
+      // Delete old calendar event before creating new one
+      if (typeof deleteCalendarEvent === 'function' && (__rescheduleCtx.calendar_event_id || __rescheduleCtx.calendar_event_url)) {
+        try { await deleteCalendarEvent(__rescheduleCtx); } catch (e) { console.warn('Old calendar event delete failed:', e); }
+      }
       // RESCHEDULE: update existing booking row + adjust slot counts.
       var __updRes = await window.__supabaseClient.from('bookings')
-        .update({ slot_id: __selectedSlotId, location: __selectedLoc, status: 'confirmed' })
+        .update({ slot_id: __selectedSlotId, location: __selectedLoc, status: 'confirmed', calendar_event_id: null, calendar_event_url: null, calendar_provider: null })
         .eq('id', __rescheduleCtx.id)
         .select('id, confirm_token').single();
       __bookRow = (__updRes && __updRes.data) || {};

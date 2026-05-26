@@ -1992,9 +1992,9 @@ async function forgotPassword(){
                 <input type="number" class="appt-form-input" id="appt-max" value="10" min="1" max="150">
               </div>
             </div>
-            <!-- Locations (multi-select) -->
+            <!-- Location (single-select) -->
             <div class="appt-form-group" style="margin-bottom:16px">
-              <label class="appt-form-label">Locations</label>
+              <label class="appt-form-label">Location</label>
               <div class="funnel-chips" id="appt-locations">
                 <button class="funnel-chip selected" data-loc="Ipswich">Ipswich</button>
                 <button class="funnel-chip" data-loc="Colchester">Colchester</button>
@@ -5988,6 +5988,12 @@ async function applyBookingLifecycle(bookingId, newStatus, sequenceName, confirm
     .eq('sequence', 'booking_confirmed')
     .eq('status', 'queued');
 
+  // Delete the calendar event from the coach's phone calendar
+  if (typeof deleteCalendarEvent === 'function' && (b.calendar_event_id || b.calendar_event_url)) {
+    try { await deleteCalendarEvent(b); }
+    catch (e) { console.warn('Calendar event deletion failed:', e); }
+  }
+
   var pattern = null;
   if (b.assessment_session_id) {
     try {
@@ -6173,7 +6179,15 @@ function editApptType(id) {
 }
 
 document.addEventListener('click', function(e) {
-  if (e.target.classList.contains('funnel-chip')) e.target.classList.toggle('selected');
+  if (e.target.classList.contains('funnel-chip')) {
+    // Location chips: single-select only (one location per appointment type)
+    if (e.target.closest('#appt-locations')) {
+      e.target.closest('#appt-locations').querySelectorAll('.funnel-chip').forEach(function(el) { el.classList.remove('selected'); });
+      e.target.classList.add('selected');
+    } else {
+      e.target.classList.toggle('selected');
+    }
+  }
 });
 
 function selectApptMode(mode) {

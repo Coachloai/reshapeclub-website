@@ -102,6 +102,20 @@ Deno.serve(async (req: Request) => {
       return json({ success: true, busy });
     }
 
+    // delete event by URL
+    if (action === 'delete') {
+      if (!body.eventUrl) return json({ success: false, error: 'eventUrl required' }, 400);
+      const del = await caldavFetch(body.eventUrl, {
+        method: 'DELETE',
+        headers: { 'Authorization': auth },
+      });
+      if (del.res.status >= 200 && del.res.status < 300 || del.res.status === 404) {
+        return json({ success: true });
+      }
+      const text = await del.res.text();
+      return json({ success: false, error: 'iCloud DELETE ' + del.res.status, detail: text.slice(0, 500) }, 502);
+    }
+
     // default = create event
     if (!body.datetime) return json({ success: false, error: 'datetime required' }, 400);
     const cals = (await getCalendars(auth)).filter(c => c.supportsVEvent);
@@ -114,7 +128,7 @@ Deno.serve(async (req: Request) => {
     const uid = crypto.randomUUID();
     const ics = buildICS({
       uid,
-      summary: body.summary || ('Visit: ' + (body.leadName || 'New Lead')),
+      summary: body.summary || ('Consult: ' + (body.leadName || 'New Lead')),
       description: body.description || buildDescription(body),
       location: formatLocation(body.location),
       start: parseBookingDate(body.datetime),

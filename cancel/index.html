@@ -1,0 +1,176 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Cancel Booking — ReShape</title>
+<link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800;900&family=DM+Sans:opsz,wght@9..40,300;9..40,400;9..40,500;9..40,600;9..40,700&display=swap" rel="stylesheet">
+<style>
+*,*::before,*::after{box-sizing:border-box;margin:0;padding:0}
+:root{
+  --bg:#FAF7F2;--s1:#FFFFFF;--s2:#F0EBE3;--s3:#FFF0E5;
+  --border:#E5DFD5;--border2:rgba(42,39,36,0.06);
+  --text:#2A2724;--text2:#5A5550;--text3:rgba(42,39,36,0.6);
+  --orange:#ED5C25;--orange2:#C84A18;
+  --red:#E74C3C;--red2:#C0392B;
+  --head:'Inter',sans-serif;--body:'DM Sans',sans-serif;
+}
+body{background:var(--bg);color:var(--text);font-family:var(--body);font-size:17px;line-height:1.7;-webkit-font-smoothing:antialiased;min-height:100vh;display:flex;flex-direction:column}
+.nav{height:64px;display:flex;align-items:center;justify-content:center;padding:0 24px;background:rgba(250,247,242,0.92);backdrop-filter:blur(20px);border-bottom:1px solid var(--border)}
+.nav-logo{font-family:var(--head);font-size:20px;font-weight:900;letter-spacing:-0.5px}
+.nav-logo span{color:var(--orange)}
+.page{flex:1;display:flex;align-items:center;justify-content:center;padding:40px 20px}
+.card{background:var(--s1);border:1px solid var(--border);border-radius:20px;padding:40px 32px;max-width:440px;width:100%;text-align:center}
+.card h1{font-family:var(--head);font-size:22px;font-weight:800;margin-bottom:8px}
+.card p{color:var(--text2);font-size:15px;margin-bottom:20px}
+.detail{background:var(--s3);border:1px solid rgba(237,92,37,0.15);border-radius:12px;padding:16px 20px;margin-bottom:24px;text-align:left}
+.detail-row{display:flex;justify-content:space-between;padding:4px 0;font-size:14px}
+.detail-row span:first-child{color:var(--text3);font-weight:500}
+.detail-row span:last-child{font-weight:600}
+.btn{display:inline-flex;align-items:center;justify-content:center;padding:14px 32px;border-radius:12px;font-size:15px;font-weight:700;border:none;cursor:pointer;transition:all .2s;width:100%;margin-bottom:10px}
+.btn-cancel{background:var(--red);color:#fff}
+.btn-cancel:hover{background:var(--red2)}
+.btn-back{background:transparent;color:var(--text3);border:1px solid var(--border);font-size:14px;padding:10px 24px}
+.btn-back:hover{border-color:var(--orange);color:var(--text)}
+.btn:disabled{opacity:0.5;cursor:not-allowed}
+.msg{padding:16px;border-radius:12px;margin-bottom:16px;font-size:14px;font-weight:500}
+.msg-ok{background:rgba(46,204,113,0.1);color:#27ae60;border:1px solid rgba(46,204,113,0.2)}
+.msg-err{background:rgba(231,76,60,0.1);color:#c0392b;border:1px solid rgba(231,76,60,0.2)}
+#loading{color:var(--text3);font-size:14px}
+#cancelled-view{display:none}
+</style>
+</head>
+<body>
+<nav class="nav"><div class="nav-logo">Re<span>Shape</span></div></nav>
+<div class="page">
+  <div class="card" id="cancel-card">
+    <div id="loading">Loading booking details...</div>
+    <div id="booking-view" style="display:none">
+      <h1>Cancel Your Booking?</h1>
+      <p>Are you sure you want to cancel your consultation?</p>
+      <div class="detail" id="booking-detail"></div>
+      <div id="cancel-msg"></div>
+      <button class="btn btn-cancel" id="cancel-btn" onclick="cancelBooking()">Yes, Cancel My Booking</button>
+      <button class="btn btn-back" onclick="window.location.href='/'">No, Keep My Booking</button>
+    </div>
+    <div id="cancelled-view">
+      <h1>Booking Cancelled</h1>
+      <p>Your consultation has been cancelled. If you change your mind, you can always rebook.</p>
+      <a href="/booking/" class="btn btn-back" style="text-decoration:none;display:inline-flex">Book Again</a>
+    </div>
+    <div id="error-view" style="display:none">
+      <h1>Link Invalid</h1>
+      <p>This cancellation link is invalid or has already been used. If you need help, please message us.</p>
+    </div>
+  </div>
+</div>
+
+<script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+<script src="../api/config.js?v=2"></script>
+<script src="../api/automations.js?v=11"></script>
+<script>
+var sb = supabase.createClient(
+  'https://lvizldmdficsfpgegehp.supabase.co',
+  'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6Imx2aXpsZG1kZmljc2ZwZ2VnZWhwIiwicm9sZSI6ImFub24iLCJpYXQiOjE3NzM2OTk4NDQsImV4cCI6MjA4OTI3NTg0NH0.72wHbZaTvqNzW6DTb6Ae1vi9QpOg_-KiEO-Jjm9mn0k'
+);
+window.__supabaseClient = sb;
+
+var __booking = null;
+
+(async function init() {
+  var qs = new URLSearchParams(window.location.search);
+  var id = qs.get('id');
+  var token = qs.get('token');
+  if (!id || !token) { showError(); return; }
+
+  try {
+    var res = await sb.from('bookings')
+      .select('id, confirm_token, first_name, last_name, email, phone, location, status, calendar_event_id, calendar_event_url, calendar_provider, booking_slots(date, start_time, end_time)')
+      .eq('id', id).maybeSingle();
+    var b = res && res.data;
+    if (!b || b.confirm_token !== token) { showError(); return; }
+    if (b.status === 'cancelled') {
+      document.getElementById('loading').style.display = 'none';
+      document.getElementById('cancelled-view').style.display = 'block';
+      return;
+    }
+    __booking = b;
+    var slot = b.booking_slots || {};
+    var dateStr = slot.date ? new Date(slot.date + 'T12:00:00').toLocaleDateString('en-GB', { weekday: 'long', day: 'numeric', month: 'long' }) : '-';
+    var timeStr = slot.start_time ? slot.start_time.substring(0, 5) + ' - ' + slot.end_time.substring(0, 5) : '-';
+    document.getElementById('booking-detail').innerHTML =
+      '<div class="detail-row"><span>Name</span><span>' + (b.first_name || '') + ' ' + (b.last_name || '') + '</span></div>' +
+      '<div class="detail-row"><span>Date</span><span>' + dateStr + '</span></div>' +
+      '<div class="detail-row"><span>Time</span><span>' + timeStr + '</span></div>' +
+      '<div class="detail-row"><span>Location</span><span>' + (b.location || '') + '</span></div>';
+    document.getElementById('loading').style.display = 'none';
+    document.getElementById('booking-view').style.display = 'block';
+  } catch (e) {
+    console.error(e);
+    showError();
+  }
+})();
+
+function showError() {
+  document.getElementById('loading').style.display = 'none';
+  document.getElementById('error-view').style.display = 'block';
+}
+
+async function cancelBooking() {
+  if (!__booking) return;
+  var btn = document.getElementById('cancel-btn');
+  btn.disabled = true;
+  btn.textContent = 'Cancelling...';
+
+  try {
+    // Update booking status
+    var upd = await sb.from('bookings').update({ status: 'cancelled' }).eq('id', __booking.id);
+    if (upd.error) throw new Error(upd.error.message);
+
+    // Free the slot
+    if (__booking.booking_slots) {
+      var slotRes = await sb.from('booking_slots').select('id, booked_count').eq('date', __booking.booking_slots.date).eq('start_time', __booking.booking_slots.start_time).eq('location', __booking.location).maybeSingle();
+      if (slotRes && slotRes.data && slotRes.data.booked_count > 0) {
+        await sb.from('booking_slots').update({ booked_count: slotRes.data.booked_count - 1 }).eq('id', slotRes.data.id);
+      }
+    }
+
+    // Cancel pending messages
+    await sb.from('message_queue')
+      .update({ status: 'cancelled' })
+      .eq('lead_email', __booking.email)
+      .eq('sequence', 'booking_confirmed')
+      .eq('status', 'queued');
+
+    // Delete calendar event
+    if (typeof deleteCalendarEvent === 'function' && (__booking.calendar_event_id || __booking.calendar_event_url)) {
+      try { await deleteCalendarEvent(__booking); } catch (e) { console.warn('Calendar delete failed:', e); }
+    }
+
+    // Queue cancellation sequence
+    var lead = { first_name: __booking.first_name, last_name: __booking.last_name, email: __booking.email, phone: __booking.phone };
+    var slot = __booking.booking_slots || {};
+    var bookingCtx = { location: __booking.location, date: slot.date, time: slot.start_time ? slot.start_time.substring(0, 5) : '' };
+    if (typeof queueSequence === 'function') {
+      try { await queueSequence('consultation_cancelled', lead, bookingCtx, sb); } catch (e) { console.warn('Cancel sequence failed:', e); }
+    }
+
+    // Team notification
+    if (typeof notifyTeamBookingEvent === 'function') {
+      var dateStr = slot.date ? new Date(slot.date + 'T00:00:00').toLocaleDateString('en-GB', { weekday: 'long', day: 'numeric', month: 'long' }) : '';
+      try {
+        await notifyTeamBookingEvent('cancelled', lead, { date: dateStr, time: bookingCtx.time, location: bookingCtx.location }, null);
+      } catch (e) { console.warn('Team notify failed:', e); }
+    }
+
+    document.getElementById('booking-view').style.display = 'none';
+    document.getElementById('cancelled-view').style.display = 'block';
+  } catch (e) {
+    document.getElementById('cancel-msg').innerHTML = '<div class="msg msg-err">Something went wrong: ' + e.message + '</div>';
+    btn.disabled = false;
+    btn.textContent = 'Yes, Cancel My Booking';
+  }
+}
+</script>
+</body>
+</html>

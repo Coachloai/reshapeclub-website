@@ -124,10 +124,10 @@ function generateICS(booking, leadName, opts) {
   }
   var location = booking.location === 'Ipswich' ? 'ReShape, Ipswich' : booking.location === 'Colchester' ? 'ReShape, Colchester' : 'ReShape, ' + (booking.location || '');
   var isCoach = o.forCoach;
-  var summary = isCoach ? 'Visit: ' + (leadName || 'New Lead') : 'ReShape Visit';
+  var summary = isCoach ? 'Consult: ' + (leadName || 'New Lead') : 'ReShape Consultation';
   var description = isCoach
-    ? 'Booking visit with ' + (leadName || 'Lead') + (o.leadEmail ? ' (' + o.leadEmail + ')' : '') + (o.leadPhone ? ' | Phone: ' + o.leadPhone : '')
-    : 'Your in-person visit with Jaime at ReShape. Wear something comfortable!';
+    ? 'Consultation with ' + (leadName || 'Lead') + (o.leadEmail ? ' (' + o.leadEmail + ')' : '') + (o.leadPhone ? ' | Phone: ' + o.leadPhone : '')
+    : 'Your in-person consultation with ReShape. Wear something comfortable!';
   return 'BEGIN:VCALENDAR\r\n' +
     'VERSION:2.0\r\n' +
     'PRODID:-//ReShape//Booking//EN\r\n' +
@@ -172,8 +172,8 @@ async function addToGoogleCalendar(lead, booking, calendarIdOverride) {
   var endDt = new Date(dt.getTime() + 3600000);
   var location = booking.location === 'Ipswich' ? 'ReShape, Ipswich' : booking.location === 'Colchester' ? 'ReShape, Colchester' : 'ReShape, ' + (booking.location || '');
   var event = {
-    summary: 'Visit: ' + (leadName || 'New Lead'),
-    description: 'Booking visit with ' + leadName +
+    summary: 'Consult: ' + (leadName || 'New Lead'),
+    description: 'Consultation with ' + leadName +
       '\nEmail: ' + (lead.email || '') +
       '\nPhone: ' + (lead.phone || '') +
       '\nLocation: ' + (booking.location || ''),
@@ -191,7 +191,42 @@ async function addToGoogleCalendar(lead, booking, calendarIdOverride) {
     body: JSON.stringify(event)
   });
   var data = await res.json();
-  return data.id ? { success: true, id: data.id } : { success: false, error: data.error ? data.error.message : 'Unknown error' };
+  return data.id ? { success: true, id: data.id, calendarId: calendarId } : { success: false, error: data.error ? data.error.message : 'Unknown error' };
+}
+
+/* ── GOOGLE CALENDAR — DELETE EVENT ── */
+async function deleteFromGoogleCalendar(eventId, calendarIdOverride) {
+  var token = await getGoogleAccessToken();
+  if (!token) return { success: false, error: 'No access token' };
+  var calendarId = calendarIdOverride || AUTOMATION_CONFIG.google_calendar_id || 'primary';
+  var res = await fetch('https://www.googleapis.com/calendar/v3/calendars/' + encodeURIComponent(calendarId) + '/events/' + encodeURIComponent(eventId), {
+    method: 'DELETE',
+    headers: { 'Authorization': 'Bearer ' + token }
+  });
+  return (res.status >= 200 && res.status < 300) || res.status === 404 ? { success: true } : { success: false, error: 'HTTP ' + res.status };
+}
+
+/* ── ICLOUD CALENDAR — DELETE EVENT (via Supabase Edge Function) ── */
+async function deleteFromIcloudCalendar(eventUrl) {
+  var res = await fetch('https://lvizldmdficsfpgegehp.supabase.co/functions/v1/icloud-calendar', {
+    method: 'POST',
+    headers: edgeHeaders(),
+    body: JSON.stringify({ action: 'delete', eventUrl: eventUrl }),
+  });
+  var data = await res.json().catch(function(){ return {}; });
+  return data && data.success ? { success: true } : { success: false, error: (data && data.error) || ('HTTP ' + res.status) };
+}
+
+/* ── DELETE CALENDAR EVENT (auto-detect provider) ── */
+async function deleteCalendarEvent(booking) {
+  if (!booking.calendar_event_id && !booking.calendar_event_url) return;
+  try {
+    if (booking.calendar_provider === 'icloud' && booking.calendar_event_url) {
+      await deleteFromIcloudCalendar(booking.calendar_event_url);
+    } else if (booking.calendar_provider === 'google' && booking.calendar_event_id) {
+      await deleteFromGoogleCalendar(booking.calendar_event_id);
+    }
+  } catch (e) { console.warn('Calendar event delete failed:', e); }
 }
 
 // Supabase anon key (public — safe to include) for hitting the edge functions
@@ -260,19 +295,21 @@ async function sendCoachCalendarInvite(lead, booking) {
     target = settings && settings.default_target_calendar;
   }
 
+  console.log('[Calendar] Booking location:', booking.location, '| typeTarget:', typeTarget, '| resolvedTarget:', target, '| bookingId:', booking.id || 'n/a');
+
   var tasks = [];
   if (target) {
     if (target.indexOf('icloud') === 0 && AUTOMATION_CONFIG.icloud_enabled) {
       var icalName = target === 'icloud' ? null : target.slice('icloud:'.length);
       tasks.push(addToIcloudCalendar(lead, booking, icalName).then(
-        function(r){ return { name: 'icloud' + (icalName ? ':' + icalName : ''), result: r }; },
-        function(e){ return { name: 'icloud', result: { success: false, error: e.message } }; }
+        function(r){ return { name: 'icloud' + (icalName ? ':' + icalName : ''), provider: 'icloud', result: r }; },
+        function(e){ return { name: 'icloud', provider: 'icloud', result: { success: false, error: e.message } }; }
       ));
     } else if (target.indexOf('google:') === 0 && AUTOMATION_CONFIG.google_client_id && AUTOMATION_CONFIG.google_refresh_token) {
       var calId = target.slice('google:'.length) || 'primary';
       tasks.push(addToGoogleCalendar(lead, booking, calId).then(
-        function(r){ return { name: 'google:' + calId, result: r }; },
-        function(e){ return { name: 'google:' + calId, result: { success: false, error: e.message } }; }
+        function(r){ return { name: 'google:' + calId, provider: 'google', result: r }; },
+        function(e){ return { name: 'google:' + calId, provider: 'google', result: { success: false, error: e.message } }; }
       ));
     }
   }
@@ -281,14 +318,14 @@ async function sendCoachCalendarInvite(lead, booking) {
   if (tasks.length === 0) {
     if (AUTOMATION_CONFIG.icloud_enabled) {
       tasks.push(addToIcloudCalendar(lead, booking).then(
-        function(r){ return { name: 'icloud', result: r }; },
-        function(e){ return { name: 'icloud', result: { success: false, error: e.message } }; }
+        function(r){ return { name: 'icloud', provider: 'icloud', result: r }; },
+        function(e){ return { name: 'icloud', provider: 'icloud', result: { success: false, error: e.message } }; }
       ));
     }
     if (AUTOMATION_CONFIG.google_client_id && AUTOMATION_CONFIG.google_refresh_token) {
       tasks.push(addToGoogleCalendar(lead, booking).then(
-        function(r){ return { name: 'google', result: r }; },
-        function(e){ return { name: 'google', result: { success: false, error: e.message } }; }
+        function(r){ return { name: 'google', provider: 'google', result: r }; },
+        function(e){ return { name: 'google', provider: 'google', result: { success: false, error: e.message } }; }
       ));
     }
   }
@@ -301,6 +338,17 @@ async function sendCoachCalendarInvite(lead, booking) {
       if (o.result.success) {
         console.log(o.name + ' calendar event created:', o.result.id);
         anySuccess = true;
+        // Save calendar event reference back to the booking row for future delete/update
+        if (booking.id) {
+          var sbClient = (typeof window !== 'undefined' && window.__supabaseClient) || null;
+          if (sbClient) {
+            sbClient.from('bookings').update({
+              calendar_event_id: o.result.id || null,
+              calendar_event_url: o.result.url || null,
+              calendar_provider: o.provider
+            }).eq('id', booking.id).then(function(){}, function(e){ console.warn('Failed to save calendar event ref:', e); });
+          }
+        }
       } else {
         console.warn(o.name + ' calendar failed:', o.result.error);
       }
@@ -482,7 +530,8 @@ var SEQUENCES = {
         '<p style="margin:4px 0"><strong>Time:</strong> ' + (booking.time || '') + '</p>' +
         '<p style="margin:4px 0"><strong>Location:</strong> ' + (booking.location || '') + '</p></div>' +
         '<p>Wear something comfortable. We\'ll handle the rest.</p>' +
-        '<p style="margin-top:16px;font-size:14px;color:rgba(255,255,255,0.5)">A calendar invite (.ics) is attached to this email.</p>',
+        '<p style="margin-top:16px;font-size:14px;color:rgba(255,255,255,0.5)">A calendar invite (.ics) is attached to this email.</p>' +
+        (booking.id && booking.confirm_token ? '<p style="margin-top:12px;font-size:12px;color:rgba(255,255,255,0.3)">Need to cancel? <a href="https://reshape.fit/cancel?id=' + encodeURIComponent(booking.id) + '&token=' + encodeURIComponent(booking.confirm_token) + '" style="color:rgba(255,255,255,0.4);text-decoration:underline">Cancel booking</a></p>' : ''),
         '', ''
       ); }
     },
@@ -573,6 +622,7 @@ function replaceVars(text, lead, booking) {
     confirm_url:   resultsUrl,                    // legacy alias (was /confirm — renamed to /results)
     confirm_id:    b.id || '',
     confirm_token: b.confirm_token || '',
+    cancel_url:    (b.id && b.confirm_token) ? 'https://reshape.fit/cancel?id=' + encodeURIComponent(b.id) + '&token=' + encodeURIComponent(b.confirm_token) : '',
     address:       meta.address || '',
     maps_url:      meta.mapsUrl || ''
   };
