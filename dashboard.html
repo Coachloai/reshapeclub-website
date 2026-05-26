@@ -249,6 +249,7 @@ body{
 .seg-toggle button:hover{color:var(--text2)}
 .seg-toggle button.active{background:var(--orange);color:#fff;font-weight:700}
 .seg-toggle.loc button.active{background:rgba(237,92,37,0.12);color:var(--orange);outline:1px solid rgba(237,92,37,0.3)}
+.seg-toggle.period button{font-size:12px;padding:5px 10px}
 /* ── STAT CARDS ── */
 .stats-row{
   display:grid;
@@ -1441,11 +1442,16 @@ async function forgotPassword(){
     <div class="filters fade-in fade-in-1">
       <div class="filter-group">
         <span class="filter-label">📅</span>
-        <input type="date" class="filter-input" id="filter-from" autocomplete="off" style="min-width:130px">
+        <input type="date" class="filter-input" id="filter-date" autocomplete="off" style="min-width:130px" onchange="if(__activePeriod!=='all')applyFilters()">
       </div>
       <div class="filter-group">
-        <span class="filter-label">To</span>
-        <input type="date" class="filter-input" id="filter-to" autocomplete="off" style="min-width:130px">
+        <div class="seg-toggle period" id="seg-period">
+          <button class="active" onclick="setPeriodFilter('all',this)">All</button>
+          <button onclick="setPeriodFilter('day',this)">Day</button>
+          <button onclick="setPeriodFilter('week',this)">Week</button>
+          <button onclick="setPeriodFilter('month',this)">Month</button>
+          <button onclick="setPeriodFilter('year',this)">Year</button>
+        </div>
       </div>
       <div class="filter-divider"></div>
       <div class="filter-group">
@@ -3037,7 +3043,7 @@ async function fetchLeads() {
 
 async function initDashboard() {
   // Clear any browser-autocompleted or leftover filter values
-  ['filter-from','filter-to','filter-search','table-search','lv-from','lv-to','lv-search'].forEach(id => {
+  ['filter-date','filter-search','table-search','lv-from','lv-to','lv-search'].forEach(id => {
     var el = document.getElementById(id);
     if (el) el.value = '';
   });
@@ -3195,16 +3201,47 @@ function quickSearch(q) {
 /* ══════════════════════════════════════
    FILTERS
 ══════════════════════════════════════ */
+var __activePeriod = 'all';
+function setPeriodFilter(period, btn) {
+  __activePeriod = period;
+  var btns = document.querySelectorAll('#seg-period button');
+  btns.forEach(function(b){ b.classList.remove('active'); });
+  if (btn) btn.classList.add('active');
+  applyFilters();
+}
+function getDateRange() {
+  var dateEl = document.getElementById('filter-date');
+  var picked = dateEl.value;
+  if (__activePeriod === 'all') return { from: '', to: '' };
+  var base = picked ? new Date(picked + 'T00:00:00') : new Date();
+  var from, to;
+  if (__activePeriod === 'day') {
+    from = to = base.toISOString().slice(0,10);
+  } else if (__activePeriod === 'week') {
+    var day = base.getDay() || 7;
+    var mon = new Date(base); mon.setDate(base.getDate() - day + 1);
+    var sun = new Date(mon); sun.setDate(mon.getDate() + 6);
+    from = mon.toISOString().slice(0,10);
+    to = sun.toISOString().slice(0,10);
+  } else if (__activePeriod === 'month') {
+    from = base.getFullYear() + '-' + String(base.getMonth()+1).padStart(2,'0') + '-01';
+    var last = new Date(base.getFullYear(), base.getMonth()+1, 0);
+    to = last.toISOString().slice(0,10);
+  } else if (__activePeriod === 'year') {
+    from = base.getFullYear() + '-01-01';
+    to = base.getFullYear() + '-12-31';
+  }
+  return { from: from || '', to: to || '' };
+}
 function getBaseFiltered() {
-  const from     = document.getElementById('filter-from').value;
-  const to       = document.getElementById('filter-to').value;
+  var range    = getDateRange();
   const form     = document.getElementById('filter-form').value;
   const location = document.getElementById('filter-location').value;
   const gender   = document.getElementById('filter-gender').value;
   const search   = document.getElementById('filter-search').value.toLowerCase();
   return ALL_LEADS.filter(l => {
-    if (from && l.date < from) return false;
-    if (to   && l.date > to)   return false;
+    if (range.from && l.date < range.from) return false;
+    if (range.to   && l.date > range.to)   return false;
     if (form && l.form !== form) return false;
     if (location && l.location !== location) return false;
     if (gender && l.gender !== gender) return false;
@@ -3228,7 +3265,7 @@ function applyFilters() {
   showToast('Filters applied');
 }
 function clearFilters() {
-  ['filter-from','filter-to','filter-search','table-search'].forEach(id => {
+  ['filter-date','filter-search','table-search'].forEach(id => {
     const el = document.getElementById(id);
     if (el) el.value = '';
   });
@@ -3236,6 +3273,11 @@ function clearFilters() {
     const el = document.getElementById(id);
     if (el) el.selectedIndex = 0;
   });
+  __activePeriod = 'all';
+  var pBtns = document.querySelectorAll('#seg-period button');
+  pBtns.forEach(function(b,i){ b.classList.toggle('active', i===0); });
+  var lBtns = document.querySelectorAll('#seg-location button');
+  lBtns.forEach(function(b,i){ b.classList.toggle('active', i===0); });
   filtered = [...ALL_LEADS];
   currentPage = 1;
   renderTable();
