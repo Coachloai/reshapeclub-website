@@ -12,7 +12,7 @@
 <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
 <script src="https://cdnjs.cloudflare.com/ajax/libs/Chart.js/4.4.1/chart.umd.min.js"></script>
 <script src="api/config.js?v=2"></script>
-<script src="api/automations.js?v=9"></script>
+<script src="api/automations.js?v=12"></script>
 <style>
 *,*::before,*::after{box-sizing:border-box;margin:0;padding:0}
 :root{
@@ -5623,7 +5623,8 @@ function renderBookings() {
       '<td style="white-space:nowrap" onclick="event.stopPropagation()">' +
         '<button class="btn btn-ghost btn-sm" style="padding:4px 8px;font-size:11px;margin-right:4px" onclick="rescheduleBookingFromDashboard(\'' + b.id + '\')">Reschedule</button>' +
         '<button class="btn btn-ghost btn-sm" style="padding:4px 8px;font-size:11px;margin-right:4px" onclick="markBookingNoShow(\'' + b.id + '\')">No-show</button>' +
-        '<button class="btn btn-ghost btn-sm" style="padding:4px 8px;font-size:11px;color:var(--red);border-color:rgba(231,76,60,.3)" onclick="cancelBookingFromDashboard(\'' + b.id + '\')">Cancel</button>' +
+        '<button class="btn btn-ghost btn-sm" style="padding:4px 8px;font-size:11px;color:var(--red);border-color:rgba(231,76,60,.3);margin-right:4px" onclick="cancelBookingFromDashboard(\'' + b.id + '\')">Cancel</button>' +
+        '<button class="btn btn-ghost btn-sm" style="padding:4px 8px;font-size:11px;color:var(--text3);border-color:var(--border)" onclick="deleteBookingFromDashboard(\'' + b.id + '\')">🗑</button>' +
       '</td></tr>' +
       detailHtml;
   }).join('');
@@ -5788,6 +5789,7 @@ function renderAppointmentDetail(b, appt) {
     '<button class="btn btn-ghost btn-sm" onclick="rescheduleBookingFromDashboard(\'' + b.id + '\')">Reschedule</button>' +
     '<button class="btn btn-ghost btn-sm" onclick="markBookingNoShow(\'' + b.id + '\')">Mark no-show</button>' +
     '<button class="btn btn-ghost btn-sm" style="color:var(--red);border-color:rgba(231,76,60,.3)" onclick="cancelBookingFromDashboard(\'' + b.id + '\')">Cancel</button>' +
+    '<button class="btn btn-ghost btn-sm" style="color:var(--text3)" onclick="deleteBookingFromDashboard(\'' + b.id + '\')">🗑 Delete</button>' +
   '</div>');
   return '<div class="appts-detail">' + parts.join('') + '</div>';
 }
@@ -6330,6 +6332,41 @@ async function markBookingNoShow(id) {
   return applyBookingLifecycle(id, 'noshow', 'consultation_noshow',
     'Mark this booking as no-show? The lead will receive the no-show sequence.',
     'Marked no-show, sequence queued');
+}
+
+async function deleteBookingFromDashboard(id) {
+  var b = ALL_BOOKINGS.find(function(x){ return x.id === id; });
+  if (!b) { showToast('Booking not found'); return; }
+  if (!confirm('PERMANENTLY DELETE this booking? This cannot be undone. Use Cancel instead if the client needs to be notified.')) return;
+
+  // Delete calendar event first
+  if (typeof deleteCalendarEvent === 'function' && (b.calendar_event_id || b.calendar_event_url)) {
+    try { await deleteCalendarEvent(b); } catch (e) { console.warn('Calendar delete failed:', e); }
+  }
+
+  // Free the slot
+  if (b.slot_id) {
+    try {
+      var sRes = await sb.from('booking_slots').select('booked_count').eq('id', b.slot_id).single();
+      if (sRes && sRes.data && sRes.data.booked_count > 0) {
+        await sb.from('booking_slots').update({ booked_count: sRes.data.booked_count - 1 }).eq('id', b.slot_id);
+      }
+    } catch (e) { console.warn('slot decrement failed:', e); }
+  }
+
+  // Cancel any pending messages
+  await sb.from('message_queue').update({ status: 'cancelled' }).eq('lead_email', b.email).eq('sequence', 'booking_confirmed').eq('status', 'queued');
+
+  // Delete the booking row
+  var del = await sb.from('bookings').delete().eq('id', id);
+  if (del.error) { showToast('Delete failed: ' + del.error.message); return; }
+
+  showToast('Booking deleted');
+  await initBookingsView();
+  if (typeof renderAppointments === 'function' && document.getElementById('appts-list')) {
+    await fetchBookings();
+    renderAppointments();
+  }
 }
 
 // Reschedule reuses the public /booking/ reschedule flow, which updates the

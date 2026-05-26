@@ -258,7 +258,7 @@ async function addToIcloudCalendar(lead, booking, calendarNameOverride) {
     }),
   });
   var data = await res.json().catch(function(){ return {}; });
-  return data && data.success ? { success: true, id: data.id, calendar: data.calendar } : { success: false, error: (data && data.error) || ('HTTP ' + res.status) };
+  return data && data.success ? { success: true, id: data.id, url: data.url, calendar: data.calendar } : { success: false, error: (data && data.error) || ('HTTP ' + res.status) };
 }
 
 /* ── LOAD GLOBAL CALENDAR SETTINGS ── */
