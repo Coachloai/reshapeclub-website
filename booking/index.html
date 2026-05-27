@@ -154,7 +154,7 @@ footer{padding:20px;text-align:center;font-size:12px;color:var(--text4);border-t
 
 <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
 <script src="../api/config.js?v=2"></script>
-<script src="../api/automations.js?v=12"></script>
+<script src="../api/automations.js?v=13"></script>
 <script>
 /* ── Supabase ── */
 (function(){
@@ -411,6 +411,18 @@ async function confirmBooking() {
     var __bookRow;
     var slot = __bookingSlots.find(function(s) { return s.id === __selectedSlotId; });
     if (__rescheduleCtx) {
+      // Re-fetch calendar fields fresh (the page-load snapshot may be stale/null
+      // if sendCoachCalendarInvite's save hadn't completed yet)
+      try {
+        var __freshCal = await window.__supabaseClient.from('bookings')
+          .select('calendar_event_id, calendar_event_url, calendar_provider')
+          .eq('id', __rescheduleCtx.id).maybeSingle();
+        if (__freshCal && __freshCal.data) {
+          __rescheduleCtx.calendar_event_id = __freshCal.data.calendar_event_id;
+          __rescheduleCtx.calendar_event_url = __freshCal.data.calendar_event_url;
+          __rescheduleCtx.calendar_provider = __freshCal.data.calendar_provider;
+        }
+      } catch (e) { console.warn('Fresh calendar ref fetch failed:', e); }
       // Delete old calendar event before creating new one
       if (typeof deleteCalendarEvent === 'function' && (__rescheduleCtx.calendar_event_id || __rescheduleCtx.calendar_event_url)) {
         try { await deleteCalendarEvent(__rescheduleCtx); } catch (e) { console.warn('Old calendar event delete failed:', e); }

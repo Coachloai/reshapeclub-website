@@ -67,7 +67,7 @@ body{background:var(--bg);color:var(--text);font-family:var(--body);font-size:17
 
 <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
 <script src="../api/config.js?v=2"></script>
-<script src="../api/automations.js?v=12"></script>
+<script src="../api/automations.js?v=13"></script>
 <script>
 var sb = supabase.createClient(
   'https://lvizldmdficsfpgegehp.supabase.co',
@@ -142,6 +142,17 @@ async function cancelBooking() {
       .eq('sequence', 'booking_confirmed')
       .eq('status', 'queued');
 
+    // Re-fetch calendar fields fresh (page-load snapshot may be stale/null)
+    try {
+      var __freshCal = await sb.from('bookings')
+        .select('calendar_event_id, calendar_event_url, calendar_provider')
+        .eq('id', __booking.id).maybeSingle();
+      if (__freshCal && __freshCal.data) {
+        __booking.calendar_event_id = __freshCal.data.calendar_event_id;
+        __booking.calendar_event_url = __freshCal.data.calendar_event_url;
+        __booking.calendar_provider = __freshCal.data.calendar_provider;
+      }
+    } catch (e) { console.warn('Fresh calendar ref fetch failed:', e); }
     // Delete calendar event
     if (typeof deleteCalendarEvent === 'function' && (__booking.calendar_event_id || __booking.calendar_event_url)) {
       try { await deleteCalendarEvent(__booking); } catch (e) { console.warn('Calendar delete failed:', e); }

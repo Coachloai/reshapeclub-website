@@ -12,7 +12,7 @@
 <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
 <script src="https://cdnjs.cloudflare.com/ajax/libs/Chart.js/4.4.1/chart.umd.min.js"></script>
 <script src="api/config.js?v=2"></script>
-<script src="api/automations.js?v=12"></script>
+<script src="api/automations.js?v=13"></script>
 <style>
 *,*::before,*::after{box-sizing:border-box;margin:0;padding:0}
 :root{
@@ -6311,6 +6311,11 @@ async function applyBookingLifecycle(bookingId, newStatus, sequenceName, confirm
     .eq('sequence', 'booking_confirmed')
     .eq('status', 'queued');
 
+  // Re-fetch calendar fields fresh (in-memory snapshot may be stale/null)
+  try {
+    var __fc = await sb.from('bookings').select('calendar_event_id, calendar_event_url, calendar_provider').eq('id', bookingId).maybeSingle();
+    if (__fc && __fc.data) { b.calendar_event_id = __fc.data.calendar_event_id; b.calendar_event_url = __fc.data.calendar_event_url; b.calendar_provider = __fc.data.calendar_provider; }
+  } catch (_e) {}
   // Delete the calendar event from the coach's phone calendar
   if (typeof deleteCalendarEvent === 'function' && (b.calendar_event_id || b.calendar_event_url)) {
     try { await deleteCalendarEvent(b); }
@@ -6381,6 +6386,11 @@ async function deleteBookingFromDashboard(id) {
   if (!b) { showToast('Booking not found'); return; }
   if (!confirm('PERMANENTLY DELETE this booking? This cannot be undone. Use Cancel instead if the client needs to be notified.')) return;
 
+  // Re-fetch calendar fields fresh (in-memory snapshot may be stale/null)
+  try {
+    var __fc2 = await sb.from('bookings').select('calendar_event_id, calendar_event_url, calendar_provider').eq('id', id).maybeSingle();
+    if (__fc2 && __fc2.data) { b.calendar_event_id = __fc2.data.calendar_event_id; b.calendar_event_url = __fc2.data.calendar_event_url; b.calendar_provider = __fc2.data.calendar_provider; }
+  } catch (_e) {}
   // Delete calendar event first
   if (typeof deleteCalendarEvent === 'function' && (b.calendar_event_id || b.calendar_event_url)) {
     try { await deleteCalendarEvent(b); } catch (e) { console.warn('Calendar delete failed:', e); }

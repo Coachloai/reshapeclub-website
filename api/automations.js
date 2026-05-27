@@ -342,11 +342,14 @@ async function sendCoachCalendarInvite(lead, booking) {
         if (booking.id) {
           var sbClient = (typeof window !== 'undefined' && window.__supabaseClient) || null;
           if (sbClient) {
-            sbClient.from('bookings').update({
-              calendar_event_id: o.result.id || null,
-              calendar_event_url: o.result.url || null,
-              calendar_provider: o.provider
-            }).eq('id', booking.id).then(function(){}, function(e){ console.warn('Failed to save calendar event ref:', e); });
+            try {
+              await sbClient.from('bookings').update({
+                calendar_event_id: o.result.id || null,
+                calendar_event_url: o.result.url || null,
+                calendar_provider: o.provider
+              }).eq('id', booking.id);
+              console.log('[Calendar] Saved ref to booking ' + booking.id + ' | url: ' + (o.result.url || 'n/a'));
+            } catch (saveErr) { console.warn('Failed to save calendar event ref:', saveErr); }
           }
         }
       } else {
