@@ -171,6 +171,19 @@ var __selectedDate = null;
 var __bookingWeekOffset = 0;
 var __rescheduleCtx = null; // populated if we're on a /booking/?reschedule=...&token=... URL
 function __localDate(dt) { return dt.getFullYear() + '-' + String(dt.getMonth()+1).padStart(2,'0') + '-' + String(dt.getDate()).padStart(2,'0'); }
+// Parse a slot date+time as Europe/London wall-clock (handles BST correctly).
+function __slotToMs(date, time) {
+  // Build a UTC Date from the wall-clock components, then subtract London's offset.
+  var parts = date.split('-');
+  var tp = time.split(':');
+  var guess = new Date(Date.UTC(+parts[0], +parts[1]-1, +parts[2], +tp[0], +tp[1], tp[2] ? +tp[2] : 0));
+  // Determine London's UTC offset at that instant via Intl
+  var fmt = new Intl.DateTimeFormat('en-GB', { timeZone:'Europe/London', hour12:false, year:'numeric', month:'2-digit', day:'2-digit', hour:'2-digit', minute:'2-digit', second:'2-digit' });
+  var p = {}; fmt.formatToParts(guess).forEach(function(x){ p[x.type]=x.value; });
+  var asLondon = Date.UTC(+p.year, +p.month-1, +p.day, +p.hour, +p.minute, +p.second);
+  var offsetMs = asLondon - guess.getTime();
+  return guess.getTime() - offsetMs;
+}
 function __escAttr(s){ return String(s||'').replace(/[&<>"']/g, function(c){ return ({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c]); }); }
 
 // Init: handle reschedule URL params, then auto-select location.
@@ -270,8 +283,8 @@ async function applyConflictCalendarFiltering() {
     if (!fbData.success || !Array.isArray(fbData.busy) || fbData.busy.length === 0) return;
     var busy = fbData.busy.map(function(w) { return { start: new Date(w.start).getTime(), end: new Date(w.end).getTime() }; });
     __bookingSlots = __bookingSlots.filter(function(s) {
-      var slotStart = new Date(s.date + 'T' + s.start_time).getTime();
-      var slotEnd = new Date(s.date + 'T' + s.end_time).getTime();
+      var slotStart = __slotToMs(s.date, s.start_time);
+      var slotEnd = __slotToMs(s.date, s.end_time);
       for (var i = 0; i < busy.length; i++) {
         if (slotStart < busy[i].end && slotEnd > busy[i].start) return false; // overlap
       }
@@ -341,7 +354,7 @@ function renderBookingTimes() {
   var minLeadMs = 2 * 60 * 60 * 1000;
   var nowMs = Date.now();
   slots = slots.filter(function(s) {
-    var slotStartMs = new Date(s.date + 'T' + s.start_time).getTime();
+    var slotStartMs = __slotToMs(s.date, s.start_time);
     return slotStartMs >= nowMs + minLeadMs;
   });
   if (slots.length === 0) { container.innerHTML = '<div class="booking-empty">No available slots for this date</div>'; return; }
