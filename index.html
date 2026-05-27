@@ -37,7 +37,7 @@
 <style>
   /* =========================================================
      RESHAPE CLUB — brand-aligned redesign
-     Brand: reshape.fit hormonal-assessment language
+     Brand: reshapeclub.com hormonal-assessment language
      ========================================================= */
   :root{
     --cream: #F4ECDB;
@@ -1063,7 +1063,7 @@
   .coach-portraits .face img{width:100%;height:100%;object-fit:cover;}
 
   /* =========================================================
-     APPLICATION FORM
+     APPLICATION FORM (8-STEP QUESTIONNAIRE)
      ========================================================= */
   .apply{
     padding:120px var(--pad);
@@ -1103,474 +1103,145 @@
     background:var(--cream);
   }
 
-  .apply-card{
+  .form-card{
     background:#fff;
-    color:var(--ink);
+    border:1px solid rgba(194,65,12,0.18);
     border-radius:var(--radius-lg);
-    padding:48px 48px 36px;
-    position:relative;
-    overflow:hidden;
-    box-shadow:0 4px 24px -6px rgba(26,22,18,.10);
-    border:1px solid var(--line);
-  }
-  .apply-card::before{
-    content:"";position:absolute;inset:0;
-    background:radial-gradient(700px 400px at 90% 0%, rgba(194,65,12,.04), transparent 60%);
-    pointer-events:none;
+    padding:28px;
+    box-shadow:0 32px 80px rgba(26,22,18,0.08);
   }
   @media (max-width:640px){
-    .apply-card{padding:32px 24px 28px;}
+    .form-card{padding:20px 16px}
   }
 
-  /* Progress */
-  .apply-progress{
-    display:flex;align-items:center;gap:18px;
-    margin-bottom:42px;
-    position:relative;z-index:1;
-  }
-  .progress-track{
-    flex:1;height:3px;
-    background:rgba(26,22,18,.10);
-    border-radius:99px;overflow:hidden;
-  }
-  .progress-fill{
-    height:100%;
-    background:var(--sage);
-    width:12.5%;
-    transition:width .6s var(--ease);
-  }
-  .progress-text{
-    font-family:'JetBrains Mono', monospace;
-    font-size:11px;letter-spacing:.16em;text-transform:uppercase;
-    color:var(--mute);white-space:nowrap;
-  }
-  .progress-text em{
-    font-style:normal;color:var(--ink);font-weight:500;
-  }
+  /* Progress bars */
+  .form-progress{display:flex;gap:6px;margin-bottom:40px}
+  .form-progress-bar{flex:1;height:4px;border-radius:2px;background:var(--line);overflow:hidden;transition:background .3s}
+  .form-progress-bar.active,.form-progress-bar.completed{background:var(--sage)}
 
   /* Step panels */
-  .step{
-    display:none;
-    position:relative;z-index:1;
-  }
-  .step.active{
-    display:block;
-    animation:stepIn .45s var(--ease) both;
-  }
-  @keyframes stepIn{
-    from{opacity:0;transform:translateY(10px);}
-    to{opacity:1;transform:translateY(0);}
-  }
-  .step h3{
-    font-family:'Fraunces', serif;
-    font-size:clamp(26px, 3.4vw, 40px);
-    font-weight:400;
-    line-height:1.1;
-    letter-spacing:-.018em;
-    margin-bottom:28px;
-    font-variation-settings:"opsz" 144;
-  }
-  .step h3 em{
-    font-style:italic;
-    color:var(--sage);
-    font-weight:300;
-  }
-  .step .sub-q{
-    font-family:'JetBrains Mono', monospace;
-    font-size:11px;letter-spacing:.18em;text-transform:uppercase;
-    color:var(--mute);
-    margin:32px 0 14px;
-  }
-  .step .sub-q:first-of-type{margin-top:0;}
+  .form-step{display:none;animation:formFadeIn .4s ease}
+  .form-step.active{display:block}
+  @keyframes formFadeIn{from{opacity:0;transform:translateY(20px)}to{opacity:1;transform:translateY(0)}}
+  .form-step-question{font-family:'Fraunces',serif;font-size:22px;font-weight:600;margin-bottom:24px;line-height:1.3;font-variation-settings:"opsz" 144}
+  .form-step-number{font-family:'JetBrains Mono',monospace;font-size:12px;font-weight:700;letter-spacing:.15em;text-transform:uppercase;color:var(--sage);margin-bottom:8px}
 
-  /* Choice grid */
-  .choice-grid{
-    display:grid;gap:10px;
-  }
-  .choice-grid.two{grid-template-columns:1fr 1fr;}
-  .choice-grid.three{grid-template-columns:repeat(3,1fr);}
-  .choice-grid.four{grid-template-columns:repeat(4,1fr);}
-  @media (max-width:640px){
-    .choice-grid.two,
-    .choice-grid.three,
-    .choice-grid.four{grid-template-columns:1fr;}
-  }
+  /* Option cards */
+  .form-options{display:grid;grid-template-columns:1fr 1fr;gap:16px;margin-bottom:32px}
+  @media (max-width:640px){.form-options{grid-template-columns:1fr}}
+  .form-option{position:relative;cursor:pointer;border:2px solid var(--line);border-radius:16px;padding:24px 20px;text-align:center;transition:border-color .2s,background .2s,transform .2s;background:var(--cream)}
+  .form-option:hover{border-color:rgba(194,65,12,0.4);background:var(--cream-2);transform:translateY(-2px)}
+  .form-option.selected{border-color:var(--sage);background:rgba(194,65,12,0.08)}
+  .form-option input{position:absolute;opacity:0;pointer-events:none}
+  .form-option-icon{font-size:32px;margin-bottom:12px;display:block}
+  .form-option-label{font-size:16px;font-weight:600;line-height:1.4;font-family:'Manrope',sans-serif}
+  .form-option-check{position:absolute;top:12px;right:12px;width:22px;height:22px;border-radius:50%;border:2px solid var(--line);display:flex;align-items:center;justify-content:center;transition:background .2s,border-color .2s}
+  .form-option.selected .form-option-check{background:var(--sage);border-color:var(--sage)}
+  .form-option-check svg{width:12px;height:12px;opacity:0;transition:opacity .2s;color:#fff}
+  .form-option.selected .form-option-check svg{opacity:1}
+  .form-options.multi-select .form-option.selected{border-color:var(--sage);background:rgba(194,65,12,0.08)}
+  .form-options.multi-select .form-option.selected .form-option-check{background:var(--sage);border-color:var(--sage)}
 
-  .choice{
-    background:var(--cream);
-    border:1px solid var(--line);
-    color:var(--ink);
-    padding:20px 18px;
-    border-radius:var(--radius);
-    font-family:'Manrope', sans-serif;
-    text-align:left;
-    cursor:pointer;
-    transition:all .25s var(--ease);
-    display:flex;align-items:center;gap:14px;
-  }
-  .choice:hover{
-    background:var(--cream-2);
-    border-color:var(--line);
-    transform:translateY(-1px);
-  }
-  .choice.selected{
-    background:rgba(194,65,12,.08);
-    border-color:var(--sage);
-  }
-  .choice.selected .icon{color:var(--sage);}
-  .choice .icon{
-    font-size:22px;flex-shrink:0;
-    color:var(--clay);
-    display:inline-flex;align-items:center;justify-content:center;
-    min-width:24px;
-    transition:color .25s;
-  }
-  .choice .label{
-    font-size:14px;font-weight:500;line-height:1.3;
-  }
+  /* Text inputs */
+  .form-input-group{margin-bottom:20px}
+  .form-label{display:block;font-family:'JetBrains Mono',monospace;font-size:12px;font-weight:600;letter-spacing:.1em;text-transform:uppercase;color:var(--mute);margin-bottom:8px}
+  .form-input{width:100%;padding:14px 18px;background:var(--cream);border:1px solid var(--line);border-radius:14px;color:var(--ink);font-family:'Manrope',sans-serif;font-size:17px;transition:border-color .2s,box-shadow .2s;outline:none}
+  .form-input:focus{border-color:var(--sage);box-shadow:0 0 0 3px rgba(194,65,12,0.15)}
+  .form-input::placeholder{color:rgba(26,22,18,0.35)}
+  .form-input-row{display:grid;grid-template-columns:1fr 1fr;gap:16px}
+  @media (max-width:640px){.form-input-row{grid-template-columns:1fr}}
+  textarea.form-input{min-height:100px;resize:vertical}
+  .form-input.error{border-color:#EF4444;box-shadow:0 0 0 3px rgba(239,68,68,0.15)}
+  .form-error-msg{font-size:12px;color:#EF4444;margin-top:6px;display:none}
+  .form-error-msg.visible{display:block}
 
-  /* Form fields */
-  .field{margin-bottom:22px;}
-  .field label{
-    display:block;
-    font-family:'JetBrains Mono', monospace;
-    font-size:10px;letter-spacing:.18em;text-transform:uppercase;
-    color:var(--mute);margin-bottom:8px;
-  }
-  .field input,
-  .field textarea{
-    width:100%;
-    background:#fff;
-    border:1px solid var(--line);
-    border-radius:var(--radius);
-    color:var(--ink);
-    font-family:'Manrope', sans-serif;
-    font-size:17px;
-    padding:10px 14px;
-    transition:border-color .25s;
-  }
-  .field input:focus,
-  .field textarea:focus{
-    outline:0;
-    border-color:var(--sage);
-    box-shadow:0 0 0 3px rgba(194,65,12,.08);
-  }
-  .field input::placeholder,
-  .field textarea::placeholder{color:rgba(26,22,18,.30);}
-  .field textarea{resize:vertical;min-height:90px;font-family:'Manrope',sans-serif;}
-  .field-row{
-    display:grid;grid-template-columns:1fr 1fr;gap:24px;
-  }
-  @media (max-width:640px){.field-row{grid-template-columns:1fr;}}
+  /* Rating scale */
+  .form-rating{display:flex;gap:12px;margin-bottom:32px}
+  @media (max-width:640px){.form-rating{gap:8px}}
+  .form-rating-item{flex:1;cursor:pointer;text-align:center;padding:16px 8px;border:2px solid var(--line);border-radius:12px;transition:border-color .2s,background .2s,transform .2s;background:var(--cream)}
+  @media (max-width:640px){.form-rating-item{padding:12px 6px}}
+  .form-rating-item:hover{border-color:rgba(194,65,12,0.4);transform:translateY(-2px)}
+  .form-rating-item.selected{border-color:var(--sage);background:rgba(194,65,12,0.08)}
+  .form-rating-item input{position:absolute;opacity:0;pointer-events:none}
+  .form-rating-number{font-family:'Fraunces',serif;font-size:24px;font-weight:800;display:block;margin-bottom:4px;font-variation-settings:"opsz" 144}
+  @media (max-width:640px){.form-rating-number{font-size:20px}}
+  .form-rating-label{font-size:11px;color:var(--mute)}
+  .form-rating-item.selected .form-rating-number{color:var(--sage)}
 
-  /* Importance scale */
-  .scale{
-    display:grid;grid-template-columns:repeat(5,1fr);gap:8px;
-  }
-  .scale-btn{
-    background:var(--cream);
-    border:1px solid var(--line);
-    color:var(--ink);
-    padding:16px 8px 14px;
-    border-radius:var(--radius);
-    cursor:pointer;
-    text-align:center;
-    transition:all .25s;
-    font-family:'Fraunces', serif;
-    font-size:22px;font-weight:500;
-    font-variation-settings:"opsz" 144;
-  }
-  .scale-btn:hover{border-color:var(--sage);transform:translateY(-1px);}
-  .scale-btn.selected{
-    background:rgba(194,65,12,.08);
-    border-color:var(--sage);
-  }
-  .scale-btn span{
-    display:block;
-    font-family:'JetBrains Mono', monospace;
-    font-size:9px;letter-spacing:.12em;text-transform:uppercase;
-    color:var(--mute);margin-top:4px;font-weight:500;
-  }
-
-  /* Disclaimer box for step 7 */
-  .disclaimer{
-    background:rgba(194,65,12,.06);
-    border-left:2px solid var(--clay);
-    padding:18px 22px;
-    border-radius:var(--radius);
-    margin-bottom:6px;
-  }
-  .disclaimer p{
-    font-size:15px;line-height:1.5;
-    color:var(--ink-2);margin:0;
-  }
-  .disclaimer p em{font-style:italic;color:var(--clay);}
-
-  /* Apply nav */
-  .apply-nav{
-    display:flex;gap:12px;
-    margin-top:42px;
-    position:relative;z-index:1;
-    border-top:1px solid var(--line);
-    padding-top:28px;
-  }
-  .apply-nav button{
-    font-family:'JetBrains Mono', monospace;
-    font-size:12px;text-transform:uppercase;letter-spacing:.16em;
-    padding:15px 24px;
-    border-radius:var(--radius);
-    cursor:pointer;border:0;
-    transition:all .25s var(--ease);
-    font-weight:500;
-  }
-  .btn-back{
-    background:transparent;color:var(--ink);
-    border:1px solid var(--line);
-  }
-  .btn-back:hover{
-    background:var(--cream-2);
-    border-color:rgba(26,22,18,.25);
-  }
-  .btn-next, .btn-submit{
-    background:var(--sage);color:var(--cream);
-    margin-left:auto;
-  }
-  .btn-next:hover, .btn-submit:hover{
-    background:var(--sage-deep);
-    transform:translateY(-1px);
-    box-shadow:0 10px 24px -10px rgba(194,65,12,.5);
-  }
-  .btn-submit{background:var(--clay);}
-  .btn-submit:hover{background:#9A4F2A;}
-  .hidden{display:none !important;}
-
-  @keyframes shake{
-    0%, 100% { transform: translateX(0); }
-    25% { transform: translateX(-5px); }
-    75% { transform: translateX(5px); }
-  }
-  .shake{animation:shake .4s;}
+  /* Nav buttons */
+  .form-nav{display:flex;justify-content:space-between;align-items:center;gap:16px;margin-top:8px}
+  .form-btn-back{padding:12px 24px;background:transparent;color:var(--mute);border:1px solid var(--line);border-radius:12px;font-family:'Manrope',sans-serif;font-weight:600;font-size:16px;cursor:pointer;transition:color .2s,border-color .2s}
+  .form-btn-back:hover{color:var(--ink);border-color:rgba(194,65,12,0.5)}
+  .form-btn-next{padding:14px 32px;background:var(--sage);color:var(--cream);border:none;border-radius:12px;font-family:'Manrope',sans-serif;font-weight:700;font-size:16px;cursor:pointer;transition:background .2s,box-shadow .2s,transform .2s,opacity .2s;box-shadow:0 0 20px rgba(194,65,12,0.3);margin-left:auto}
+  .form-btn-next:hover{background:var(--sage-deep);box-shadow:0 0 35px rgba(194,65,12,0.3);transform:translateY(-1px)}
+  .form-btn-next:disabled{opacity:.4;cursor:not-allowed;transform:none;box-shadow:none}
 
   /* Success state */
-  .success-state{
-    text-align:center;
-    padding:24px 0 12px;
-  }
-  .success-state .success-icon{
-    width:68px;height:68px;border-radius:50%;
-    background:var(--sage);color:var(--cream);
-    display:flex;align-items:center;justify-content:center;
-    font-size:30px;font-weight:600;
-    margin:0 auto 28px;
-  }
-  .success-state h3{
-    font-size:clamp(34px, 4.2vw, 52px);
-    margin-bottom:18px;
-  }
-  .success-state p{
-    font-size:17px;color:var(--ink-2);
-    max-width:54ch;margin:0 auto 14px;line-height:1.55;
-  }
-  .success-state p em{font-style:italic;color:var(--clay-soft);}
-  .success-state .micro{
-    font-family:'JetBrains Mono', monospace;
-    font-size:11px;letter-spacing:.14em;text-transform:uppercase;
-    color:var(--mute);margin-top:24px;
-  }
+  .form-success{display:none;text-align:center;padding:40px 20px;animation:formFadeIn .5s ease}
+  .form-success.active{display:block}
+  .form-success-icon{width:72px;height:72px;border-radius:50%;background:rgba(194,65,12,0.08);display:flex;align-items:center;justify-content:center;margin:0 auto 24px}
+  .form-success-icon svg{width:36px;height:36px;color:var(--sage)}
+  .form-success h3{font-family:'Fraunces',serif;font-size:24px;font-weight:800;margin-bottom:12px;font-variation-settings:"opsz" 144}
+  .form-success p{font-size:17px;color:var(--ink-2);max-width:400px;margin:0 auto;line-height:1.6}
 
-  /* ===== BOOKING FLOW ===== */
-  .booking-state{
-    text-align:center;
-    padding:14px 0 6px;
-  }
-  .booking-state .success-icon{
-    width:60px;height:60px;border-radius:50%;
-    background:var(--sage);color:var(--cream);
-    display:flex;align-items:center;justify-content:center;
-    font-size:26px;font-weight:600;
-    margin:0 auto 22px;
-  }
-  .booking-state h3{
-    font-size:clamp(30px, 3.8vw, 46px);
-    margin-bottom:12px;
-  }
-  .booking-state > p{
-    font-size:16px;color:var(--ink-2);
-    max-width:52ch;margin:0 auto 28px;line-height:1.5;
-  }
+  /* ===== BOOKING CALENDAR ===== */
+  .booking-wrap{animation:formFadeIn .5s ease}
+  .booking-header{text-align:center;margin-bottom:28px}
+  .booking-header h3{font-family:'Fraunces',serif;font-size:22px;font-weight:800;margin-bottom:6px;font-variation-settings:"opsz" 144}
+  .booking-header p{font-size:14px;color:var(--mute);line-height:1.6}
+  .booking-loc-toggle{display:flex;gap:6px;margin-bottom:16px}
+  .booking-loc-btn{flex:1;padding:10px 6px;border:2px solid var(--line);border-radius:10px;background:var(--cream);color:var(--ink-2);font-family:'Manrope',sans-serif;font-size:14px;font-weight:600;cursor:pointer;transition:all .2s;text-align:center}
+  .booking-loc-btn:hover{border-color:rgba(194,65,12,0.4)}
+  .booking-loc-btn.active{border-color:var(--sage);background:rgba(194,65,12,0.08);color:var(--sage)}
+  .booking-week-nav{display:flex;align-items:center;justify-content:space-between;margin-bottom:10px}
+  .booking-week-label{font-family:'Fraunces',serif;font-size:14px;font-weight:700;color:var(--ink);font-variation-settings:"opsz" 144}
+  .booking-week-btn{width:34px;height:34px;border-radius:8px;border:1.5px solid var(--line);background:transparent;color:var(--mute);display:flex;align-items:center;justify-content:center;cursor:pointer;transition:all .2s;font-size:17px;font-family:'Manrope',sans-serif}
+  .booking-week-btn:hover{border-color:rgba(194,65,12,0.5);color:var(--ink)}
+  .booking-week-btn:disabled{opacity:.25;cursor:default;pointer-events:none}
+  .booking-dates{display:grid;grid-template-columns:repeat(7,1fr);gap:6px;margin-bottom:16px}
+  .booking-date{padding:10px 4px;border:2px solid var(--line);border-radius:12px;background:var(--cream);cursor:pointer;text-align:center;transition:all .2s}
+  .booking-date:hover{border-color:rgba(194,65,12,0.4)}
+  .booking-date.active{border-color:var(--sage);background:rgba(194,65,12,0.08)}
+  .booking-date.empty{opacity:.25;cursor:default;pointer-events:none}
+  .booking-date.today{border-color:rgba(194,65,12,0.5)}
+  .booking-date-day{font-family:'JetBrains Mono',monospace;font-size:11px;font-weight:700;color:var(--mute);text-transform:uppercase;letter-spacing:.05em}
+  .booking-date-num{font-family:'Fraunces',serif;font-size:26px;font-weight:800;color:var(--ink);margin:6px 0 2px;font-variation-settings:"opsz" 144}
+  .booking-date.active .booking-date-num{color:var(--sage)}
+  .booking-date-month{font-size:10px;color:var(--mute)}
+  .booking-date-slots{font-size:10px;color:var(--sage);font-weight:700;margin-top:3px;min-height:14px}
+  .booking-times{display:flex;flex-direction:column;gap:8px;margin-bottom:20px}
+  .booking-time{display:flex;align-items:center;justify-content:space-between;padding:14px 18px;border:2px solid var(--line);border-radius:12px;background:var(--cream);cursor:pointer;transition:all .2s}
+  .booking-time:hover{border-color:rgba(194,65,12,0.4)}
+  .booking-time.active{border-color:var(--sage);background:rgba(194,65,12,0.08)}
+  .booking-time.full{opacity:.4;cursor:default;pointer-events:none}
+  .booking-time-left{display:flex;flex-direction:column;gap:2px}
+  .booking-time-range{font-size:16px;font-weight:600;color:var(--ink)}
+  .booking-time-spots{font-size:12px;color:var(--mute)}
+  .booking-time.active .booking-time-range{color:var(--sage)}
+  .booking-time-check{width:22px;height:22px;border-radius:50%;border:2px solid var(--line);display:flex;align-items:center;justify-content:center;transition:all .2s}
+  .booking-time.active .booking-time-check{background:var(--sage);border-color:var(--sage)}
+  .booking-time-check svg{width:12px;height:12px;opacity:0;color:#fff;transition:opacity .2s}
+  .booking-time.active .booking-time-check svg{opacity:1}
+  .booking-empty{text-align:center;padding:24px;color:var(--mute);font-size:14px}
+  .booking-confirm-btn{width:100%;padding:16px;background:var(--sage);color:var(--cream);border:none;border-radius:14px;font-family:'Manrope',sans-serif;font-size:16px;font-weight:700;cursor:pointer;transition:all .2s;box-shadow:0 8px 28px rgba(194,65,12,0.28)}
+  .booking-confirm-btn:hover{background:var(--sage-deep);transform:translateY(-1px)}
+  .booking-confirm-btn:disabled{opacity:.35;cursor:not-allowed;transform:none;box-shadow:none}
+  .booking-skip{display:block;text-align:center;margin-top:16px;font-size:14px;color:var(--mute);cursor:pointer;transition:color .2s;background:none;border:none;font-family:'Manrope',sans-serif}
+  .booking-skip:hover{color:var(--ink-2)}
 
-  .loc-tabs{
-    display:inline-flex;
-    background:var(--cream-2);
-    border-radius:99px;
-    padding:4px;
-    margin-bottom:24px;
-    gap:4px;
-  }
-  .loc-tab{
-    background:transparent;color:var(--mute);
-    border:0;
-    padding:10px 22px;
-    border-radius:99px;
-    cursor:pointer;
-    font-family:'JetBrains Mono', monospace;
-    font-size:11px;
-    text-transform:uppercase;
-    letter-spacing:.14em;
-    transition:all .25s var(--ease);
-    font-weight:500;
-  }
-  .loc-tab.active{
-    background:var(--sage);
-    color:var(--cream);
-  }
-
-  .cal{
-    background:var(--cream);
-    border:1px solid var(--line);
-    border-radius:var(--radius);
-    padding:22px;
-    margin-bottom:22px;
-    text-align:left;
-  }
-  .cal-head{
-    display:flex;justify-content:space-between;align-items:center;
-    margin-bottom:18px;
-  }
-  .cal-nav{
-    background:transparent;
-    border:1px solid var(--line);
-    color:var(--ink);
-    width:34px;height:34px;border-radius:50%;
-    cursor:pointer;font-size:16px;
-    transition:all .25s;
-    display:inline-flex;align-items:center;justify-content:center;
-  }
-  .cal-nav:hover{
-    background:var(--cream-2);
-    border-color:rgba(26,22,18,.3);
-  }
-  .cal-nav:disabled{opacity:.25;pointer-events:none;}
-  .cal-week{
-    font-family:'Fraunces', serif;
-    font-size:18px;font-weight:500;letter-spacing:-.005em;
-    font-variation-settings:"opsz" 144;
-  }
-  .cal-grid{
-    display:grid;
-    grid-template-columns:repeat(7, 1fr);
-    gap:6px;
-  }
-  .cal-day{
-    background:var(--cream-2);
-    border:1px solid var(--line);
-    color:var(--ink);
-    padding:12px 4px 10px;
-    border-radius:var(--radius);
-    cursor:pointer;text-align:center;
-    transition:all .2s;
-    display:flex;flex-direction:column;align-items:center;gap:4px;
-  }
-  .cal-day .dow{
-    font-family:'JetBrains Mono', monospace;
-    font-size:9px;letter-spacing:.14em;color:var(--mute);
-    text-transform:uppercase;
-  }
-  .cal-day .num{
-    font-family:'Fraunces', serif;
-    font-size:20px;font-weight:500;line-height:1;
-    font-variation-settings:"opsz" 144;
-  }
-  .cal-day:hover{border-color:var(--sage);}
-  .cal-day.selected{
-    background:rgba(194,65,12,.10);
-    border-color:var(--sage);
-  }
-  .cal-day.disabled{opacity:.28;pointer-events:none;}
-
-  .cal-times{
-    margin-top:18px;
-    padding-top:18px;
-    border-top:1px solid var(--line);
-  }
-  .cal-help{
-    font-family:'JetBrains Mono', monospace;
-    font-size:11px;letter-spacing:.14em;
-    color:var(--mute);
-    text-transform:uppercase;
-    margin:0;text-align:center;
-  }
-  .cal-help em{font-style:italic;color:var(--ink);text-transform:none;letter-spacing:0;}
-
-  .time-slots{
-    display:grid;
-    grid-template-columns:repeat(4, 1fr);
-    gap:8px;
-    margin-top:14px;
-  }
-  @media (max-width:640px){
-    .time-slots{grid-template-columns:repeat(2,1fr);}
-  }
-  .time-slot{
-    background:var(--cream-2);
-    border:1px solid var(--line);
-    color:var(--ink);
-    padding:11px 8px;border-radius:var(--radius);
-    cursor:pointer;
-    font-family:'JetBrains Mono', monospace;
-    font-size:12px;letter-spacing:.04em;
-    transition:all .2s;
-  }
-  .time-slot:hover{border-color:var(--sage);}
-  .time-slot.selected{
-    background:rgba(194,65,12,.10);
-    border-color:var(--sage);
-  }
-
-  .booking-actions{
-    display:flex;flex-direction:column;align-items:center;
-    gap:16px;margin-top:24px;
-  }
-  .booking-actions .btn-submit:disabled{
-    opacity:.35;pointer-events:none;
-  }
-  .btn-skip{
-    background:transparent;color:var(--mute);
-    border:0;
-    font-family:'JetBrains Mono', monospace;
-    font-size:11px;letter-spacing:.16em;text-transform:uppercase;
-    cursor:pointer;
-    transition:color .2s;
-    padding:8px 16px;
-  }
-  .btn-skip:hover{color:var(--ink);}
-
-  /* Booked state */
-  .booked-state{text-align:center;padding:30px 0 12px;}
-  .booked-state .emoji-icon{
-    font-size:64px;line-height:1;margin-bottom:18px;
-    display:block;
-  }
-  .booked-state h3{
-    font-size:clamp(34px, 4.2vw, 52px);
-    margin-bottom:16px;
-  }
-  .booked-state > p{
-    font-size:17px;color:var(--ink-2);
-    max-width:50ch;margin:0 auto 14px;line-height:1.55;
-  }
-  .booking-summary{
-    font-family:'JetBrains Mono', monospace;
-    font-size:12px;letter-spacing:.14em;
-    text-transform:uppercase;
-    color:var(--clay-soft);
-    margin:18px auto 28px;
-    padding:10px 20px;
-    background:rgba(194,65,12,.10);
-    border:1px solid rgba(216,139,90,.30);
-    border-radius:99px;
-    display:inline-block;
-  }
+  /* Booked confirmation */
+  .booking-done{text-align:center;animation:formFadeIn .5s ease}
+  .booking-done-icon{width:72px;height:72px;border-radius:50%;background:rgba(194,65,12,0.08);display:flex;align-items:center;justify-content:center;margin:0 auto 20px;font-size:32px}
+  .booking-done h3{font-family:'Fraunces',serif;font-size:22px;font-weight:800;margin-bottom:8px;font-variation-settings:"opsz" 144}
+  .booking-done p{font-size:16px;color:var(--ink-2);line-height:1.7;max-width:380px;margin:0 auto}
+  .booking-done-detail{background:rgba(194,65,12,0.08);border:1px solid rgba(194,65,12,0.2);border-radius:14px;padding:16px 20px;margin:20px auto 0;max-width:320px;text-align:left}
+  .booking-done-row{display:flex;justify-content:space-between;padding:6px 0;font-size:14px}
+  .booking-done-row span:first-child{color:var(--mute)}
+  .booking-done-row span:last-child{font-weight:600;color:var(--ink)}
+  .booking-cal-btn{display:inline-flex;align-items:center;gap:8px;margin-top:20px;padding:12px 24px;background:var(--sage);color:var(--cream);border:none;border-radius:12px;font-size:14px;font-weight:700;cursor:pointer;text-decoration:none;transition:opacity .2s}
+  .booking-cal-btn:hover{opacity:.85}
+  .booking-cal-btn svg{width:18px;height:18px}
+  .hidden{display:none !important;}
 
   /* =========================================================
      ENTRY ANIMATION
@@ -2003,228 +1674,172 @@
       </div>
     </div>
 
-    <form class="apply-card" id="applyForm" novalidate>
-
-      <div class="apply-progress">
-        <div class="progress-track"><div class="progress-fill" id="progressFill"></div></div>
-        <div class="progress-text">Step <em id="progressStep">1</em> <span>of 8</span></div>
+    <div class="form-card">
+      <div class="form-progress" id="formProgress">
+        <div class="form-progress-bar active"></div>
+        <div class="form-progress-bar"></div>
+        <div class="form-progress-bar"></div>
+        <div class="form-progress-bar"></div>
+        <div class="form-progress-bar"></div>
+        <div class="form-progress-bar"></div>
+        <div class="form-progress-bar"></div>
+        <div class="form-progress-bar"></div>
       </div>
-
-      <!-- Step 1: Gender -->
-      <div class="step active" data-step="1">
-        <h3>What is your gender?</h3>
-        <div class="choice-grid two">
-          <button type="button" class="choice" data-field="gender" data-value="female">
-            <span class="icon">♀</span><span class="label">Female</span>
-          </button>
-          <button type="button" class="choice" data-field="gender" data-value="male">
-            <span class="icon">♂</span><span class="label">Male</span>
-          </button>
-        </div>
-      </div>
-
-      <!-- Step 2: Solution type -->
-      <div class="step" data-step="2">
-        <h3>Are you looking for...?</h3>
-        <div class="choice-grid two">
-          <button type="button" class="choice" data-field="solution" data-value="quick">
-            <span class="icon">⚡</span><span class="label">Quick Fix</span>
-          </button>
-          <button type="button" class="choice" data-field="solution" data-value="longterm">
-            <span class="icon">🏆</span><span class="label">Long Term Solution</span>
-          </button>
-        </div>
-      </div>
-
-      <!-- Step 3: Reason -->
-      <div class="step" data-step="3">
-        <h3>You are interested in joining because?</h3>
-        <div class="choice-grid two">
-          <button type="button" class="choice" data-field="reason" data-value="card">
-            <span class="icon">💳</span><span class="label">I Want A Membership Card</span>
-          </button>
-          <button type="button" class="choice" data-field="reason" data-value="results">
-            <span class="icon">💪</span><span class="label">I Want Results</span>
-          </button>
-        </div>
-      </div>
-
-      <!-- Step 4: Coachability -->
-      <div class="step" data-step="4">
-        <h3>Which best describes you?</h3>
-        <div class="choice-grid two">
-          <button type="button" class="choice" data-field="coachable" data-value="yes">
-            <span class="icon">🎯</span><span class="label">I Am Coachable &amp; Can Follow Instructions</span>
-          </button>
-          <button type="button" class="choice" data-field="coachable" data-value="no">
-            <span class="icon">🤔</span><span class="label">I Feel I Have All The Answers</span>
-          </button>
-        </div>
-      </div>
-
-      <!-- Step 5: Personal details -->
-      <div class="step" data-step="5">
-        <h3>Tell us about yourself</h3>
-        <div class="field-row">
-          <div class="field">
-            <label>First name</label>
-            <input type="text" name="firstName" autocomplete="given-name" required />
+      <form id="leadForm" novalidate>
+        <!-- STEP 1: Gender -->
+        <div class="form-step active" data-step="1">
+          <div class="form-step-number">Step 1 of 8</div>
+          <div class="form-step-question">What is your gender?</div>
+          <div class="form-options" data-field="gender">
+            <label class="form-option"><input type="radio" name="gender" value="Female"><span class="form-option-icon">&#9792;</span><span class="form-option-label">Female</span><span class="form-option-check"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="3"><path d="M5 13l4 4L19 7"/></svg></span></label>
+            <label class="form-option"><input type="radio" name="gender" value="Male"><span class="form-option-icon">&#9794;</span><span class="form-option-label">Male</span><span class="form-option-check"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="3"><path d="M5 13l4 4L19 7"/></svg></span></label>
           </div>
-          <div class="field">
-            <label>Last name</label>
-            <input type="text" name="lastName" autocomplete="family-name" required />
+          <div class="form-nav"><div></div><button type="button" class="form-btn-next" disabled>Next &rarr;</button></div>
+        </div>
+        <!-- STEP 2 -->
+        <div class="form-step" data-step="2">
+          <div class="form-step-number">Step 2 of 8</div>
+          <div class="form-step-question">Are you looking for...?</div>
+          <div class="form-options" data-field="looking_for">
+            <label class="form-option"><input type="radio" name="looking_for" value="Quick Fix"><span class="form-option-icon">&#9889;</span><span class="form-option-label">Quick Fix</span><span class="form-option-check"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="3"><path d="M5 13l4 4L19 7"/></svg></span></label>
+            <label class="form-option"><input type="radio" name="looking_for" value="Long Term Solution"><span class="form-option-icon">&#127942;</span><span class="form-option-label">Long Term Solution</span><span class="form-option-check"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="3"><path d="M5 13l4 4L19 7"/></svg></span></label>
           </div>
+          <div class="form-nav"><button type="button" class="form-btn-back">&larr; Back</button><button type="button" class="form-btn-next" disabled>Next &rarr;</button></div>
         </div>
-        <div class="field-row">
-          <div class="field">
-            <label>Age</label>
-            <input type="number" name="age" min="18" max="100" required />
+        <!-- STEP 3 -->
+        <div class="form-step" data-step="3">
+          <div class="form-step-number">Step 3 of 8</div>
+          <div class="form-step-question">You are interested in joining because?</div>
+          <div class="form-options" data-field="reason">
+            <label class="form-option"><input type="radio" name="reason" value="I Want A Membership Card"><span class="form-option-icon">&#128179;</span><span class="form-option-label">I Want A Membership Card</span><span class="form-option-check"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="3"><path d="M5 13l4 4L19 7"/></svg></span></label>
+            <label class="form-option"><input type="radio" name="reason" value="I Want Results"><span class="form-option-icon">&#128170;</span><span class="form-option-label">I Want Results</span><span class="form-option-check"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="3"><path d="M5 13l4 4L19 7"/></svg></span></label>
           </div>
-          <div class="field">
-            <label>Phone</label>
-            <input type="tel" name="phone" autocomplete="tel" required />
+          <div class="form-nav"><button type="button" class="form-btn-back">&larr; Back</button><button type="button" class="form-btn-next" disabled>Next &rarr;</button></div>
+        </div>
+        <!-- STEP 4 -->
+        <div class="form-step" data-step="4">
+          <div class="form-step-number">Step 4 of 8</div>
+          <div class="form-step-question">Which best describes you?</div>
+          <div class="form-options" data-field="coachability">
+            <label class="form-option"><input type="radio" name="coachability" value="I Am Coachable And Can Follow Instructions"><span class="form-option-icon">&#127919;</span><span class="form-option-label">I Am Coachable &amp; Can Follow Instructions</span><span class="form-option-check"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="3"><path d="M5 13l4 4L19 7"/></svg></span></label>
+            <label class="form-option"><input type="radio" name="coachability" value="I Feel I Have All The Answers"><span class="form-option-icon">&#129300;</span><span class="form-option-label">I Feel I Have All The Answers</span><span class="form-option-check"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="3"><path d="M5 13l4 4L19 7"/></svg></span></label>
           </div>
+          <div class="form-nav"><button type="button" class="form-btn-back">&larr; Back</button><button type="button" class="form-btn-next" disabled>Next &rarr;</button></div>
         </div>
-        <div class="field">
-          <label>Email</label>
-          <input type="email" name="email" autocomplete="email" required />
-        </div>
-      </div>
-
-      <!-- Step 6: BIG goal -->
-      <div class="step" data-step="6">
-        <h3>What is your BIG goal?</h3>
-        <div class="field">
-          <label>Tell us about it</label>
-          <textarea name="goal" rows="3" placeholder="Please share your goal with us" required></textarea>
-        </div>
-        <div class="sub-q">How important is this goal to you?</div>
-        <div class="scale">
-          <button type="button" class="scale-btn" data-field="importance" data-value="1">1<span>Low</span></button>
-          <button type="button" class="scale-btn" data-field="importance" data-value="2">2<span>&nbsp;</span></button>
-          <button type="button" class="scale-btn" data-field="importance" data-value="3">3<span>Medium</span></button>
-          <button type="button" class="scale-btn" data-field="importance" data-value="4">4<span>&nbsp;</span></button>
-          <button type="button" class="scale-btn" data-field="importance" data-value="5">5<span>Critical</span></button>
-        </div>
-      </div>
-
-      <!-- Step 7: Commitment check -->
-      <div class="step" data-step="7">
-        <h3>Please Read!</h3>
-        <div class="disclaimer">
-          <p>This is a premium transformation programme with a dedicated coach who will be with you every step of the way. This is NOT a standard gym membership.</p>
-        </div>
-
-        <div class="choice-grid two">
-          <button type="button" class="choice" data-field="ready" data-value="yes">
-            <span class="icon">🚀</span><span class="label">Yes, I'm ready to work with a transformation coach</span>
-          </button>
-          <button type="button" class="choice" data-field="ready" data-value="no">
-            <span class="icon">🏋</span><span class="label">No, I'm looking for a standard gym</span>
-          </button>
-        </div>
-
-        <div class="sub-q">Would you achieve your goal in...?</div>
-        <div class="choice-grid three">
-          <button type="button" class="choice" data-field="timeline" data-value="3">
-            <span class="icon">3</span><span class="label">3 months</span>
-          </button>
-          <button type="button" class="choice" data-field="timeline" data-value="6">
-            <span class="icon">6</span><span class="label">6 months</span>
-          </button>
-          <button type="button" class="choice" data-field="timeline" data-value="12">
-            <span class="icon">12</span><span class="label">12 months</span>
-          </button>
-        </div>
-
-        <div class="sub-q">Are you willing to invest in yourself?</div>
-        <div class="choice-grid two">
-          <button type="button" class="choice" data-field="invest" data-value="yes">
-            <span class="icon">✔</span><span class="label">Yes</span>
-          </button>
-          <button type="button" class="choice" data-field="invest" data-value="no">
-            <span class="icon">❌</span><span class="label">No</span>
-          </button>
-        </div>
-      </div>
-
-      <!-- Step 8: Source &amp; location -->
-      <div class="step" data-step="8">
-        <div class="sub-q" style="margin-top:0;">How did you first hear about ReShape?</div>
-        <div class="choice-grid four">
-          <button type="button" class="choice" data-field="source" data-value="social">
-            <span class="icon">📱</span><span class="label">Social Media</span>
-          </button>
-          <button type="button" class="choice" data-field="source" data-value="friend">
-            <span class="icon">🤝</span><span class="label">From a friend</span>
-          </button>
-          <button type="button" class="choice" data-field="source" data-value="google">
-            <span class="icon">🔍</span><span class="label">Google search</span>
-          </button>
-          <button type="button" class="choice" data-field="source" data-value="article">
-            <span class="icon">📰</span><span class="label">Online article</span>
-          </button>
-        </div>
-
-        <div class="sub-q">Please choose your preferred location</div>
-        <div class="choice-grid two">
-          <button type="button" class="choice" data-field="location" data-value="colchester">
-            <span class="icon">📍</span><span class="label">Colchester</span>
-          </button>
-          <button type="button" class="choice" data-field="location" data-value="ipswich">
-            <span class="icon">📍</span><span class="label">Ipswich</span>
-          </button>
-        </div>
-      </div>
-
-      <!-- Submitted: book in-person visit -->
-      <div class="step" data-step="submitted">
-        <div class="booking-state">
-          <div class="success-icon">✓</div>
-          <h3 class="h-display">Application <em>Submitted!</em></h3>
-          <p>Book your in-person visit below, or we'll be in touch within 24 hours.</p>
-
-          <div class="loc-tabs">
-            <button type="button" class="loc-tab active" data-loc="colchester">📍 Colchester</button>
-            <button type="button" class="loc-tab" data-loc="ipswich">📍 Ipswich</button>
+        <!-- STEP 5: Contact -->
+        <div class="form-step" data-step="5">
+          <div class="form-step-number">Step 5 of 8</div>
+          <div class="form-step-question">Tell us about yourself</div>
+          <div class="form-input-row">
+            <div class="form-input-group"><label class="form-label" for="firstName">First Name</label><input type="text" id="firstName" name="first_name" class="form-input" placeholder="John" required><div class="form-error-msg">Please enter your first name</div></div>
+            <div class="form-input-group"><label class="form-label" for="lastName">Last Name</label><input type="text" id="lastName" name="last_name" class="form-input" placeholder="Smith" required><div class="form-error-msg">Please enter your last name</div></div>
           </div>
-
-          <div class="cal">
-            <div class="cal-head">
-              <button type="button" class="cal-nav" id="calPrev" aria-label="Previous week">←</button>
-              <span class="cal-week" id="calWeek">—</span>
-              <button type="button" class="cal-nav" id="calNext" aria-label="Next week">→</button>
-            </div>
-            <div class="cal-grid" id="calGrid"></div>
-            <div class="cal-times" id="calTimes">
-              <p class="cal-help">Select a date to see available times</p>
-            </div>
+          <div class="form-input-row">
+            <div class="form-input-group"><label class="form-label" for="age">Age</label><input type="number" id="age" name="age" class="form-input" placeholder="28" min="16" max="99" required><div class="form-error-msg">Please enter your age</div></div>
+            <div class="form-input-group"><label class="form-label" for="phone">Phone Number</label><input type="tel" id="phone" name="phone" class="form-input" placeholder="07700 000000" required><div class="form-error-msg">Please enter your phone number</div></div>
           </div>
-
-          <div class="booking-actions">
-            <button type="button" class="btn-submit" id="btnBookVisit" disabled>Book My Visit</button>
-          </div>
+          <div class="form-input-group"><label class="form-label" for="email">Email</label><input type="email" id="email" name="email" class="form-input" placeholder="john@example.com" required><div class="form-error-msg">Please enter a valid email</div></div>
+          <div class="form-nav"><button type="button" class="form-btn-back">&larr; Back</button><button type="button" class="form-btn-next">Next &rarr;</button></div>
         </div>
-      </div>
-
-      <!-- Booked confirmation -->
-      <div class="step" data-step="booked">
-        <div class="booked-state">
-          <span class="emoji-icon">🎉</span>
-          <h3 class="h-display">You're <em>Booked!</em></h3>
+        <!-- STEP 6: Goal -->
+        <div class="form-step" data-step="6">
+          <div class="form-step-number">Step 6 of 8</div>
+          <div class="form-step-question">What is your BIG goal?</div>
+          <div class="form-input-group"><textarea name="big_goal" class="form-input" placeholder="Tell us what you want to achieve..." required></textarea><div class="form-error-msg">Please share your goal with us</div></div>
+          <div class="form-step-question" style="margin-top:32px;">How important is this goal to you?</div>
+          <div class="form-rating" data-field="importance">
+            <label class="form-rating-item"><input type="radio" name="importance" value="1"><span class="form-rating-number">1</span><span class="form-rating-label">Low</span></label>
+            <label class="form-rating-item"><input type="radio" name="importance" value="2"><span class="form-rating-number">2</span></label>
+            <label class="form-rating-item"><input type="radio" name="importance" value="3"><span class="form-rating-number">3</span><span class="form-rating-label">Medium</span></label>
+            <label class="form-rating-item"><input type="radio" name="importance" value="4"><span class="form-rating-number">4</span></label>
+            <label class="form-rating-item"><input type="radio" name="importance" value="5"><span class="form-rating-number">5</span><span class="form-rating-label">Critical</span></label>
+          </div>
+          <div class="form-nav"><button type="button" class="form-btn-back">&larr; Back</button><button type="button" class="form-btn-next">Next &rarr;</button></div>
+        </div>
+        <!-- STEP 7: Ready -->
+        <div class="form-step" data-step="7">
+          <div class="form-step-number">Step 7 of 8</div>
+          <div class="form-step-question">Please Read!</div>
+          <p style="color:var(--ink-2);margin-bottom:24px;font-size:16px;line-height:1.7;">This is a premium transformation programme with a dedicated coach who will be with you every step of the way. This is NOT a standard gym membership.</p>
+          <div class="form-options" data-field="ready_for_coach">
+            <label class="form-option"><input type="radio" name="ready_for_coach" value="Yes I'm ready to work with a transformation coach"><span class="form-option-icon">&#128640;</span><span class="form-option-label">Yes, I'm ready to work with a transformation coach</span><span class="form-option-check"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="3"><path d="M5 13l4 4L19 7"/></svg></span></label>
+            <label class="form-option"><input type="radio" name="ready_for_coach" value="No I'm looking for a standard gym"><span class="form-option-icon">&#127947;</span><span class="form-option-label">No, I'm looking for a standard gym</span><span class="form-option-check"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="3"><path d="M5 13l4 4L19 7"/></svg></span></label>
+          </div>
+          <div class="form-step-question">Would you achieve your goal in...?</div>
+          <div class="form-options multi-select" data-field="timeline" style="grid-template-columns:1fr 1fr 1fr;margin-bottom:32px;">
+            <label class="form-option"><input type="checkbox" name="timeline" value="3 months"><span class="form-option-icon">3</span><span class="form-option-label">3 months</span><span class="form-option-check"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="3"><path d="M5 13l4 4L19 7"/></svg></span></label>
+            <label class="form-option"><input type="checkbox" name="timeline" value="6 months"><span class="form-option-icon">6</span><span class="form-option-label">6 months</span><span class="form-option-check"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="3"><path d="M5 13l4 4L19 7"/></svg></span></label>
+            <label class="form-option"><input type="checkbox" name="timeline" value="12 months"><span class="form-option-icon">12</span><span class="form-option-label">12 months</span><span class="form-option-check"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="3"><path d="M5 13l4 4L19 7"/></svg></span></label>
+          </div>
+          <div class="form-step-question">Are you willing to invest in yourself?</div>
+          <div class="form-options" data-field="willing_to_invest">
+            <label class="form-option"><input type="radio" name="willing_to_invest" value="Yes"><span class="form-option-icon">&#10004;</span><span class="form-option-label">Yes</span><span class="form-option-check"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="3"><path d="M5 13l4 4L19 7"/></svg></span></label>
+            <label class="form-option"><input type="radio" name="willing_to_invest" value="No"><span class="form-option-icon">&#10060;</span><span class="form-option-label">No</span><span class="form-option-check"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="3"><path d="M5 13l4 4L19 7"/></svg></span></label>
+          </div>
+          <div class="form-nav"><button type="button" class="form-btn-back">&larr; Back</button><button type="button" class="form-btn-next" disabled>Next &rarr;</button></div>
+        </div>
+        <!-- STEP 8: Referral + Location -->
+        <div class="form-step" data-step="8">
+          <div class="form-step-number">Step 8 of 8</div>
+          <div class="form-step-question">How did you first hear about ReShape?</div>
+          <div class="form-options multi-select" data-field="referral">
+            <label class="form-option"><input type="checkbox" name="referral" value="Social Media"><span class="form-option-icon">&#128241;</span><span class="form-option-label">Social Media</span><span class="form-option-check"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="3"><path d="M5 13l4 4L19 7"/></svg></span></label>
+            <label class="form-option"><input type="checkbox" name="referral" value="From A Friend"><span class="form-option-icon">&#129309;</span><span class="form-option-label">From A Friend</span><span class="form-option-check"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="3"><path d="M5 13l4 4L19 7"/></svg></span></label>
+            <label class="form-option"><input type="checkbox" name="referral" value="Google Search"><span class="form-option-icon">&#128269;</span><span class="form-option-label">Google Search</span><span class="form-option-check"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="3"><path d="M5 13l4 4L19 7"/></svg></span></label>
+            <label class="form-option"><input type="checkbox" name="referral" value="Online Article"><span class="form-option-icon">&#128240;</span><span class="form-option-label">Online Article</span><span class="form-option-check"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="3"><path d="M5 13l4 4L19 7"/></svg></span></label>
+          </div>
+          <div class="form-step-question">Please choose your preferred location</div>
+          <div class="form-options" data-field="location">
+            <label class="form-option"><input type="radio" name="location" value="Colchester"><span class="form-option-icon">&#128205;</span><span class="form-option-label">Colchester</span><span class="form-option-check"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="3"><path d="M5 13l4 4L19 7"/></svg></span></label>
+            <label class="form-option"><input type="radio" name="location" value="Ipswich"><span class="form-option-icon">&#128205;</span><span class="form-option-label">Ipswich</span><span class="form-option-check"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="3"><path d="M5 13l4 4L19 7"/></svg></span></label>
+          </div>
+          <div class="form-nav"><button type="button" class="form-btn-back">&larr; Back</button><button type="submit" class="form-btn-next">Submit Application &#128640;</button></div>
+        </div>
+      </form>
+      <div class="form-success" id="formSuccess">
+        <!-- BOOKING CALENDAR -->
+        <div class="booking-wrap" id="bookingWrap">
+          <div class="booking-header">
+            <div class="form-success-icon" style="margin-bottom:16px"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M5 13l4 4L19 7"/></svg></div>
+            <h3>Application Submitted!</h3>
+            <p>Book your in-person visit below, or we'll be in touch within 24 hours.</p>
+          </div>
+          <!-- Location toggle -->
+          <div class="booking-loc-toggle" id="bookingLocToggle">
+            <button class="booking-loc-btn" data-loc="Ipswich" onclick="selectBookingLoc('Ipswich')">&#128205; Ipswich</button>
+            <button class="booking-loc-btn" data-loc="Colchester" onclick="selectBookingLoc('Colchester')">&#128205; Colchester</button>
+          </div>
+          <!-- Week nav + Date cards -->
+          <div class="booking-week-nav">
+            <button class="booking-week-btn" id="bookingWeekPrev" onclick="changeBookingWeek(-1)">&larr;</button>
+            <span class="booking-week-label" id="bookingWeekLabel"></span>
+            <button class="booking-week-btn" id="bookingWeekNext" onclick="changeBookingWeek(1)">&rarr;</button>
+          </div>
+          <div class="booking-dates" id="bookingDates"></div>
+          <!-- Time slots -->
+          <div class="booking-times" id="bookingTimes">
+            <div class="booking-empty">Select a date to see available times</div>
+          </div>
+          <!-- Confirm -->
+          <button class="booking-confirm-btn" id="bookingConfirmBtn" disabled onclick="confirmBooking()">Book My Visit</button>
+          <button class="booking-skip" onclick="skipBooking()">I'll book later</button>
+        </div>
+        <!-- BOOKING CONFIRMED -->
+        <div class="booking-done" id="bookingDone" style="display:none">
+          <div class="booking-done-icon">&#127881;</div>
+          <h3>You're Booked!</h3>
           <p>We look forward to seeing you. You'll receive a confirmation shortly.</p>
-          <div class="booking-summary" id="bookingSummary"></div>
-          <button type="button" class="btn-submit" style="margin-left:0;">Add to Calendar</button>
+          <div class="booking-done-detail" id="bookingDoneDetail"></div>
+          <a id="bookingCalBtn" class="booking-cal-btn" style="display:none" download="reshape-visit.ics"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="3" y="4" width="18" height="18" rx="2"/><line x1="16" y1="2" x2="16" y2="6"/><line x1="8" y1="2" x2="8" y2="6"/><line x1="3" y1="10" x2="21" y2="10"/></svg> Add to Calendar</a>
+        </div>
+        <!-- SKIP / FALLBACK -->
+        <div id="bookingSkipped" style="display:none;text-align:center;padding:40px 20px;animation:formFadeIn .5s ease">
+          <div class="form-success-icon"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M5 13l4 4L19 7"/></svg></div>
+          <h3>Application Submitted!</h3>
+          <p>We've received your application. We will review your details and be in touch within 24 hours.</p>
         </div>
       </div>
-
-      <div class="apply-nav">
-        <button type="button" class="btn-back hidden" id="btnBack">← Back</button>
-        <button type="button" class="btn-next" id="btnNext">Next →</button>
-        <button type="button" class="btn-submit hidden" id="btnSubmit">Submit Application 🚀</button>
-      </div>
-
-    </form>
+    </div>
   </div>
 </section>
 
@@ -2268,429 +1883,460 @@
 </footer>
 
 <script>
-  // ============ APPLICATION FORM + BOOKING ============
-  (function(){
-    const form = document.getElementById('applyForm');
-    if(!form) return;
+/* ── MULTI-STEP FORM ENGINE ── */
+(function() {
+  var form = document.getElementById('leadForm');
+  var success = document.getElementById('formSuccess');
+  var progressBars = document.querySelectorAll('#formProgress .form-progress-bar');
+  if (!form) return;
 
-    const TOTAL = 8;
-    let current = 1;
-    const answers = {};
+  var steps = form.querySelectorAll('.form-step');
+  var currentStep = 0;
+  var totalSteps = steps.length;
 
-    const btnBack = document.getElementById('btnBack');
-    const btnNext = document.getElementById('btnNext');
-    const btnSubmit = document.getElementById('btnSubmit');
-    const progressFill = document.getElementById('progressFill');
-    const progressStep = document.getElementById('progressStep');
-    const progressEl = document.querySelector('.apply-progress');
-
-    function show(n){
-      form.querySelectorAll('.step').forEach(s => s.classList.remove('active'));
-      const target = form.querySelector(`[data-step="${n}"]`);
-      if(target) target.classList.add('active');
-      current = n;
-
-      const isNumeric = typeof n === 'number';
-      const isPostSubmit = ['submitted','booked'].includes(n);
-
-      if(isNumeric){
-        progressStep.textContent = n;
-        progressFill.style.width = `${(n / TOTAL) * 100}%`;
-        if(progressEl) progressEl.style.display = '';
+  form.querySelectorAll('.form-option').forEach(function(option) {
+    option.addEventListener('click', function() {
+      var input = option.querySelector('input');
+      var container = option.closest('.form-options');
+      var isMulti = container.classList.contains('multi-select');
+      if (isMulti) {
+        input.checked = !input.checked;
+        option.classList.toggle('selected', input.checked);
       } else {
-        if(progressEl) progressEl.style.display = 'none';
+        container.querySelectorAll('.form-option').forEach(function(o) {
+          o.classList.remove('selected');
+          o.querySelector('input').checked = false;
+        });
+        input.checked = true;
+        option.classList.add('selected');
+        /* Auto-advance on single-choice steps (1-4) */
+        var stepEl = option.closest('.form-step');
+        var stepNum = stepEl ? parseInt(stepEl.dataset.step) : 0;
+        if (stepNum >= 1 && stepNum <= 4) {
+          setTimeout(function() { goToStep(stepNum); }, 350);
+        }
       }
+      updateNextButton();
+    });
+  });
 
-      // Nav buttons only shown during questions 1–8
-      btnBack.classList.toggle('hidden', n === 1 || isPostSubmit);
-      btnNext.classList.toggle('hidden', n === TOTAL || isPostSubmit);
-      btnSubmit.classList.toggle('hidden', n !== TOTAL);
-
-      // Scroll form into view when state changes
-      const card = document.querySelector('.apply-card');
-      if(card && window.scrollY > card.offsetTop - 100){
-        card.scrollIntoView({behavior:'smooth', block:'start'});
-      }
-    }
-
-    // Choice/scale buttons
-    form.querySelectorAll('.choice, .scale-btn').forEach(btn => {
-      btn.addEventListener('click', () => {
-        const field = btn.dataset.field;
-        if(!field) return;
-        form.querySelectorAll(`[data-field="${field}"]`).forEach(b => b.classList.remove('selected'));
-        btn.classList.add('selected');
-        answers[field] = btn.dataset.value;
+  form.querySelectorAll('.form-rating-item').forEach(function(item) {
+    item.addEventListener('click', function() {
+      var input = item.querySelector('input');
+      var container = item.closest('.form-rating');
+      container.querySelectorAll('.form-rating-item').forEach(function(r) {
+        r.classList.remove('selected');
+        r.querySelector('input').checked = false;
       });
+      input.checked = true;
+      item.classList.add('selected');
+      updateNextButton();
     });
+  });
 
-    function validateStep(n){
-      const step = form.querySelector(`[data-step="${n}"]`);
-      if(!step) return true;
-      const fieldNames = new Set();
-      step.querySelectorAll('[data-field]').forEach(el => fieldNames.add(el.dataset.field));
-      for(const f of fieldNames){ if(!answers[f]) return false; }
-      const inputs = step.querySelectorAll('input[required], textarea[required]');
-      for(const inp of inputs){
-        if(!inp.value.trim()) return false;
-        if(inp.type === 'email' && !/\S+@\S+\.\S+/.test(inp.value)) return false;
-      }
-      step.querySelectorAll('input, textarea').forEach(inp => {
-        if(inp.name) answers[inp.name] = inp.value.trim();
-      });
-      return true;
+  form.querySelectorAll('.form-btn-next').forEach(function(btn) {
+    btn.addEventListener('click', async function() {
+      if (btn.disabled) return;
+      btn.disabled = true; btn.textContent = 'Checking...';
+      var ok = await validateStep(currentStep);
+      btn.textContent = 'Next \u2192'; btn.disabled = false;
+      if (!ok) { updateNextButton(); return; }
+      goToStep(currentStep + 1);
+    });
+  });
+
+  form.querySelectorAll('.form-btn-back').forEach(function(btn) {
+    btn.addEventListener('click', function() {
+      goToStep(currentStep - 1);
+    });
+  });
+
+  function goToStep(index) {
+    if (index < 0 || index >= totalSteps) return;
+    steps[currentStep].classList.remove('active');
+    currentStep = index;
+    steps[currentStep].classList.add('active');
+    updateProgress();
+    updateNextButton();
+    document.querySelector('.form-card').scrollIntoView({ behavior: 'smooth', block: 'center' });
+    var stepNum = index + 1;
+    if (typeof gtag === 'function') {
+      gtag('event', 'form_step_' + stepNum, { event_category: 'form', event_label: 'Step ' + stepNum + ' of 8', page_variant: 'revamp' });
     }
-
-    function flashInvalid(btn){
-      btn.classList.add('shake');
-      setTimeout(() => btn.classList.remove('shake'), 450);
+    if (typeof fbq === 'function') {
+      fbq('trackCustom', 'FormStep', { step: stepNum, total_steps: 8, page_variant: 'revamp' });
     }
+  }
 
-    btnNext.addEventListener('click', () => {
-      if(!validateStep(current)){ flashInvalid(btnNext); return; }
-      if(typeof current === 'number' && current < TOTAL) show(current + 1);
+  function updateProgress() {
+    for (var i = 0; i < progressBars.length; i++) {
+      progressBars[i].classList.remove('active', 'completed');
+      if (i < currentStep) progressBars[i].classList.add('completed');
+      else if (i === currentStep) progressBars[i].classList.add('active');
+    }
+  }
+
+  function updateNextButton() {
+    var step = steps[currentStep];
+    var nextBtn = step.querySelector('.form-btn-next');
+    if (!nextBtn) return;
+    var incomplete = false;
+    step.querySelectorAll('.form-options:not(.multi-select)').forEach(function(group) {
+      if (!group.querySelector('input[type="radio"]:checked')) incomplete = true;
     });
-    btnBack.addEventListener('click', () => {
-      if(typeof current === 'number' && current > 1) show(current - 1);
+    step.querySelectorAll('.form-options.multi-select').forEach(function(group) {
+      if (!group.querySelector('input:checked')) incomplete = true;
     });
-    btnSubmit.addEventListener('click', async () => {
-      if(!validateStep(current)){ flashInvalid(btnSubmit); return; }
-      console.log('Application:', answers);
+    var rating = step.querySelector('.form-rating');
+    if (rating && !rating.querySelector('input:checked')) incomplete = true;
+    var stepNum = parseInt(step.dataset.step);
+    if (stepNum === 5 || stepNum === 6) {
+      nextBtn.disabled = incomplete;
+      return;
+    }
+    nextBtn.disabled = incomplete;
+  }
 
-      btnSubmit.disabled = true;
-      btnSubmit.textContent = 'Submitting...';
-
-      try {
-        // Verify phone and email via automations.js globals
-        var phoneOk = true;
-        var emailOk = true;
-        if(typeof verifyPhone === 'function'){
-          try { phoneOk = await verifyPhone(answers.phone); } catch(e){ console.warn('Phone verify failed:', e); }
+  async function validateStep(index) {
+    var step = steps[index];
+    var stepNum = parseInt(step.dataset.step);
+    var valid = true;
+    if (stepNum === 5) {
+      var fields = step.querySelectorAll('.form-input[required]');
+      for (var fi = 0; fi < fields.length; fi++) {
+        var field = fields[fi];
+        var errorMsg = field.parentElement.querySelector('.form-error-msg');
+        field.classList.remove('error');
+        if (errorMsg) errorMsg.classList.remove('visible');
+        if (!field.value.trim()) {
+          field.classList.add('error');
+          if (errorMsg) errorMsg.classList.add('visible');
+          valid = false;
+        } else if (field.type === 'email' && !/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(field.value)) {
+          field.classList.add('error');
+          if (errorMsg) { errorMsg.textContent = 'Please enter a valid email address'; errorMsg.classList.add('visible'); }
+          valid = false;
+        } else if (field.type === 'tel') {
+          var phone = field.value.trim().replace(/[\s\-\(\)]/g, '');
+          if (!/^(\+\d{10,15}|0[1-9]\d{8,10}|44\d{10,11})$/.test(phone)) {
+            field.classList.add('error');
+            if (errorMsg) { errorMsg.textContent = 'Enter a valid phone number (e.g. 07700 000000)'; errorMsg.classList.add('visible'); }
+            valid = false;
+          }
         }
-        if(typeof verifyEmail === 'function'){
-          try { emailOk = await verifyEmail(answers.email); } catch(e){ console.warn('Email verify failed:', e); }
+      }
+      if (valid && typeof verifyPhone === 'function') {
+        var phoneField = step.querySelector('input[type="tel"]');
+        var emailField = step.querySelector('input[type="email"]');
+        if (phoneField && phoneField.value) {
+          var phoneResult = await verifyPhone(phoneField.value, phoneField);
+          if (!phoneResult.valid) {
+            phoneField.classList.add('error');
+            var em = phoneField.parentElement.querySelector('.form-error-msg');
+            if (em) { em.textContent = phoneResult.error || 'Invalid phone number'; em.classList.add('visible'); }
+            valid = false;
+          }
         }
-        if(!phoneOk){
-          alert('Please enter a valid phone number.');
-          btnSubmit.disabled = false;
-          btnSubmit.textContent = 'Submit Application \uD83D\uDE80';
-          return;
+        if (emailField && emailField.value) {
+          var emailResult = await verifyEmail(emailField.value);
+          if (!emailResult.valid) {
+            emailField.classList.add('error');
+            var em2 = emailField.parentElement.querySelector('.form-error-msg');
+            if (em2) { em2.textContent = emailResult.error || 'Invalid email'; em2.classList.add('visible'); }
+            valid = false;
+          }
         }
-        if(!emailOk){
-          alert('Please enter a valid email address.');
-          btnSubmit.disabled = false;
-          btnSubmit.textContent = 'Submit Application \uD83D\uDE80';
-          return;
+      }
+    }
+    if (stepNum === 6) {
+      var textarea = step.querySelector('textarea[required]');
+      if (textarea) {
+        var errorMsg = textarea.parentElement.querySelector('.form-error-msg');
+        textarea.classList.remove('error');
+        if (errorMsg) errorMsg.classList.remove('visible');
+        if (!textarea.value.trim()) {
+          textarea.classList.add('error');
+          if (errorMsg) errorMsg.classList.add('visible');
+          valid = false;
         }
+      }
+    }
+    return valid;
+  }
 
-        // Insert lead into Supabase
-        var sb = window.__supabaseClient;
-        var leadPayload = {
-          first_name: answers.firstName,
-          last_name: answers.lastName,
-          email: answers.email,
-          phone: answers.phone,
-          age: parseInt(answers.age, 10) || null,
-          gender: answers.gender || null,
-          source: answers.source || null,
-          location: answers.location || null,
-          goal: answers.goal || null,
-          importance: answers.importance || null,
-          solution: answers.solution || null,
-          coachable: answers.coachable || null,
-          ready: answers.ready || null,
-          timeline: answers.timeline || null,
-          invest: answers.invest || null,
-          status: 'new'
-        };
-
-        var leadResult = await sb.from('leads').insert(leadPayload).select().single();
-        if(leadResult.error) throw leadResult.error;
-        var lead = leadResult.data;
-        console.log('Lead inserted:', lead);
-
-        // Fire Meta Pixel
-        if(typeof fbq === 'function'){
-          fbq('track', 'Lead', { content_name: 'Application Form', value: 1.00, currency: 'GBP' });
-        }
-
-        // Fire GA4
-        if(typeof gtag === 'function'){
-          gtag('event', 'generate_lead', { event_category: 'form', event_label: 'application_submitted' });
-        }
-
-        // Queue form_submitted automation sequence
-        if(typeof queueSequence === 'function'){
-          queueSequence('form_submitted', lead, null, window.__supabaseClient);
-        }
-
-        // Store lead for booking step
-        window.__lastLead = lead;
-
-        show('submitted');
-        renderCalendar();
-
-      } catch(err) {
-        console.error('Submission error:', err);
-        alert('Something went wrong. Please try again.');
-      } finally {
-        btnSubmit.disabled = false;
-        btnSubmit.textContent = 'Submit Application \uD83D\uDE80';
+  form.addEventListener('submit', async function(e) {
+    e.preventDefault();
+    var formData = new FormData(form);
+    var data = {};
+    formData.forEach(function(value, key) {
+      if (data[key]) {
+        if (!Array.isArray(data[key])) data[key] = [data[key]];
+        data[key].push(value);
+      } else {
+        data[key] = value;
       }
     });
+    if (data.timeline && !Array.isArray(data.timeline)) data.timeline = [data.timeline];
+    if (data.referral && !Array.isArray(data.referral)) data.referral = [data.referral];
+    var urlParams = new URLSearchParams(window.location.search);
+    var leadData = {
+      form_name: 'Revamp Landing Page',
+      gender: data.gender || null,
+      looking_for: data.looking_for || null,
+      reason: data.reason || null,
+      coachability: data.coachability || null,
+      first_name: data.first_name,
+      last_name: data.last_name,
+      age: data.age ? parseInt(data.age) : null,
+      phone: data.phone || null,
+      email: data.email,
+      big_goal: data.big_goal || null,
+      importance: data.importance ? parseInt(data.importance) : null,
+      ready_for_coach: data.ready_for_coach || null,
+      timeline: data.timeline || [],
+      willing_to_invest: data.willing_to_invest || null,
+      referral: data.referral || [],
+      location: data.location || null,
+      utm_source: urlParams.get('utm_source') || null,
+      utm_campaign: urlParams.get('utm_campaign') || null
+    };
+    console.log('--- CONSULTATION FORM SUBMISSION ---');
+    console.log(JSON.stringify(leadData, null, 2));
+    try {
+      if (typeof window.__supabaseClient !== 'undefined') {
+        var result = await window.__supabaseClient.from('leads').insert([leadData]);
+        if (result.error) {
+          console.error('Supabase error:', result.error.message);
+        } else {
+          console.log('Lead saved to database successfully');
+        }
+      }
+    } catch (err) {
+      console.error('Submit error:', err);
+    }
+    if (typeof gtag === 'function') {
+      gtag('event', 'generate_lead', { event_category: 'conversion', event_label: 'Application Submitted', page_variant: 'revamp', user_gender: leadData.gender, user_location: leadData.location });
+    }
+    if (typeof fbq === 'function') {
+      fbq('track', 'Lead', { content_name: 'Application Submitted', content_category: 'revamp', gender: leadData.gender, location: leadData.location });
+    }
+    form.style.display = 'none';
+    document.getElementById('formProgress').style.display = 'none';
+    success.classList.add('active');
+    window.__bookingLead = leadData;
+    if (leadData.location) selectBookingLoc(leadData.location);
+    else selectBookingLoc('Ipswich');
+    if (typeof queueSequence === 'function' && window.__supabaseClient) {
+      queueSequence('form_submitted', leadData, null, window.__supabaseClient);
+    }
+  });
 
-    // ===== BOOKING CALENDAR (Supabase-powered) =====
-    var DOWS = ['Sun','Mon','Tue','Wed','Thu','Fri','Sat'];
-    var MONTHS = ['Jan','Feb','Mar','Apr','May','Jun','Jul','Aug','Sep','Oct','Nov','Dec'];
-    var calOffset = 0;
-    var selectedDate = null;
-    var selectedTime = null;
-    var selectedSlotId = null;
-    var selectedLocation = 'colchester';
-    var cachedSlots = [];
+  form.querySelectorAll('.form-input').forEach(function(input) {
+    input.addEventListener('input', function() {
+      input.classList.remove('error');
+      var errorMsg = input.parentElement.querySelector('.form-error-msg');
+      if (errorMsg) errorMsg.classList.remove('visible');
+    });
+  });
 
-    async function fetchSlots(){
-      var sb = window.__supabaseClient;
-      var today = new Date(); today.setHours(0,0,0,0);
-      var todayStr = today.toISOString().split('T')[0];
-      var result = await sb
+  updateProgress();
+  updateNextButton();
+})();
+
+/* ── BOOKING CALENDAR ── */
+var __bookingSlots = [];
+var __selectedSlotId = null;
+var __selectedLoc = null;
+var __selectedDate = null;
+var __bookingWeekOffset = 0;
+function __localDate(dt) { return dt.getFullYear() + '-' + String(dt.getMonth()+1).padStart(2,'0') + '-' + String(dt.getDate()).padStart(2,'0'); }
+
+async function selectBookingLoc(loc) {
+  __selectedLoc = loc;
+  __selectedSlotId = null;
+  __selectedDate = null;
+  document.getElementById('bookingConfirmBtn').disabled = true;
+  document.querySelectorAll('.booking-loc-btn').forEach(function(b) {
+    b.classList.toggle('active', b.dataset.loc === loc);
+  });
+  await loadBookingSlots(loc);
+}
+
+async function loadBookingSlots(loc) {
+  var today = __localDate(new Date());
+  try {
+    if (typeof window.__supabaseClient !== 'undefined') {
+      var res = await window.__supabaseClient
         .from('booking_slots')
         .select('*')
-        .eq('location', selectedLocation)
+        .eq('location', loc)
         .eq('is_active', true)
-        .gte('date', todayStr)
-        .order('date')
-        .order('start_time');
-      if(result.error){ console.error('Slot fetch error:', result.error); return []; }
-      // Only return slots that still have capacity
-      return (result.data || []).filter(function(s){ return s.booked_count < s.max_attendees; });
+        .gte('date', today)
+        .order('date', { ascending: true })
+        .order('start_time', { ascending: true });
+      __bookingSlots = (res.data || []).filter(function(s) { return s.booked_count < s.max_attendees; });
+    } else {
+      __bookingSlots = [];
     }
+  } catch (e) {
+    console.error('Booking slots error:', e);
+    __bookingSlots = [];
+  }
+  renderBookingDates();
+}
 
-    async function renderCalendar(){
-      var grid = document.getElementById('calGrid');
-      var weekLabel = document.getElementById('calWeek');
-      var prevBtn = document.getElementById('calPrev');
-      var timesWrap = document.getElementById('calTimes');
-      if(!grid || !weekLabel) return;
+function renderBookingDates() {
+  var container = document.getElementById('bookingDates');
+  var timesEl = document.getElementById('bookingTimes');
+  var labelEl = document.getElementById('bookingWeekLabel');
+  var prevBtn = document.getElementById('bookingWeekPrev');
+  var nextBtn = document.getElementById('bookingWeekNext');
+  var dateMap = {};
+  __bookingSlots.forEach(function(s) { if (!dateMap[s.date]) dateMap[s.date] = []; dateMap[s.date].push(s); });
+  var now = new Date(); now.setHours(0,0,0,0);
+  var weekStart = new Date(now);
+  weekStart.setDate(weekStart.getDate() - ((weekStart.getDay() + 6) % 7) + (__bookingWeekOffset * 7));
+  var todayStr = __localDate(now);
+  var weekEnd = new Date(weekStart); weekEnd.setDate(weekEnd.getDate() + 6);
+  labelEl.textContent = weekStart.toLocaleDateString('en-GB', { day: 'numeric', month: 'short' }) + ' \u2013 ' + weekEnd.toLocaleDateString('en-GB', { day: 'numeric', month: 'short' });
+  prevBtn.disabled = __bookingWeekOffset <= 0;
+  var nextWeekStart = new Date(weekStart); nextWeekStart.setDate(nextWeekStart.getDate() + 7);
+  var hasNextSlots = __bookingSlots.some(function(s) { return s.date >= __localDate(nextWeekStart); });
+  nextBtn.disabled = !hasNextSlots && __bookingWeekOffset >= 8;
+  var html = '';
+  for (var i = 0; i < 7; i++) {
+    var d = new Date(weekStart); d.setDate(d.getDate() + i);
+    var key = __localDate(d);
+    var isPast = key < todayStr;
+    var slotsForDay = dateMap[key] || [];
+    var hasSlots = slotsForDay.length > 0 && !isPast;
+    html += '<div class="booking-date' + (!hasSlots ? ' empty' : '') + (key === __selectedDate ? ' active' : '') + (key === todayStr ? ' today' : '') + '" data-date="' + key + '" onclick="' + (hasSlots ? "selectBookingDate('" + key + "')" : '') + '">';
+    html += '<div class="booking-date-day">' + d.toLocaleDateString('en-GB', { weekday: 'short' }) + '</div>';
+    html += '<div class="booking-date-num">' + d.getDate() + '</div>';
+    html += '<div class="booking-date-month">' + d.toLocaleDateString('en-GB', { month: 'short' }) + '</div>';
+    html += '<div class="booking-date-slots">' + (hasSlots ? slotsForDay.length + ' slot' + (slotsForDay.length > 1 ? 's' : '') : '') + '</div>';
+    html += '</div>';
+  }
+  container.innerHTML = html;
+  if (!__selectedDate) timesEl.innerHTML = '<div class="booking-empty">Select a date to see available times</div>';
+}
 
-      // Show loading state
-      grid.innerHTML = '<p style="text-align:center;grid-column:1/-1;opacity:.6;">Loading slots...</p>';
-      if(timesWrap) timesWrap.innerHTML = '';
+function changeBookingWeek(dir) {
+  __bookingWeekOffset += dir;
+  if (__bookingWeekOffset < 0) __bookingWeekOffset = 0;
+  __selectedDate = null;
+  __selectedSlotId = null;
+  document.getElementById('bookingConfirmBtn').disabled = true;
+  renderBookingDates();
+  document.getElementById('bookingTimes').innerHTML = '<div class="booking-empty">Select a date to see available times</div>';
+}
 
-      try {
-        cachedSlots = await fetchSlots();
-      } catch(e){
-        console.error('Failed to load slots:', e);
-        grid.innerHTML = '<p style="text-align:center;grid-column:1/-1;color:#e74c3c;">Failed to load available slots. Please refresh.</p>';
-        return;
+function selectBookingDate(dateStr) {
+  __selectedDate = dateStr;
+  __selectedSlotId = null;
+  document.getElementById('bookingConfirmBtn').disabled = true;
+  document.querySelectorAll('.booking-date').forEach(function(el) {
+    el.classList.toggle('active', el.dataset.date === dateStr);
+  });
+  renderBookingTimes();
+}
+
+function renderBookingTimes() {
+  var container = document.getElementById('bookingTimes');
+  var slots = __bookingSlots.filter(function(s) { return s.date === __selectedDate; });
+  if (slots.length === 0) {
+    container.innerHTML = '<div class="booking-empty">No available slots for this date</div>';
+    return;
+  }
+  container.innerHTML = slots.map(function(s) {
+    var remaining = s.max_attendees - s.booked_count;
+    var isFull = remaining <= 0;
+    var startStr = s.start_time.substring(0, 5);
+    var endStr = s.end_time.substring(0, 5);
+    return '<div class="booking-time' + (isFull ? ' full' : '') + (__selectedSlotId === s.id ? ' active' : '') + '" data-id="' + s.id + '" onclick="selectBookingTime(\'' + s.id + '\')">' +
+      '<div class="booking-time-left">' +
+        '<div class="booking-time-range">' + startStr + ' - ' + endStr + '</div>' +
+        '<div class="booking-time-spots">' + (isFull ? 'Full' : remaining + ' spot' + (remaining > 1 ? 's' : '') + ' remaining') + '</div>' +
+      '</div>' +
+      '<div class="booking-time-check"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="3"><path d="M5 13l4 4L19 7"/></svg></div>' +
+    '</div>';
+  }).join('');
+}
+
+function selectBookingTime(slotId) {
+  __selectedSlotId = slotId;
+  document.querySelectorAll('.booking-time').forEach(function(el) {
+    el.classList.toggle('active', el.dataset.id === slotId);
+  });
+  document.getElementById('bookingConfirmBtn').disabled = false;
+}
+
+async function confirmBooking() {
+  var btn = document.getElementById('bookingConfirmBtn');
+  btn.disabled = true;
+  btn.textContent = 'Booking...';
+  var lead = window.__bookingLead || {};
+  try {
+    if (typeof window.__supabaseClient !== 'undefined') {
+      var res = await window.__supabaseClient.from('bookings').insert([{
+        slot_id: __selectedSlotId,
+        first_name: lead.first_name || '',
+        last_name: lead.last_name || '',
+        email: lead.email || '',
+        phone: lead.phone || '',
+        location: __selectedLoc || ''
+      }]).select('id, confirm_token').single();
+      if (res.error) console.error('Booking error:', res.error.message);
+      var __bookRow = (res && res.data) || {};
+      var slot = __bookingSlots.find(function(s) { return s.id === __selectedSlotId; });
+      if (slot) {
+        await window.__supabaseClient.from('booking_slots').update({ booked_count: slot.booked_count + 1 }).eq('id', __selectedSlotId);
       }
-
-      // Build set of dates that have available slots
-      var availableDates = {};
-      cachedSlots.forEach(function(s){ availableDates[s.date] = true; });
-
-      var today = new Date(); today.setHours(0,0,0,0);
-      var start = new Date(today);
-      start.setDate(start.getDate() + (calOffset * 7));
-
-      var days = [];
-      for(var i = 0; i < 7; i++){
-        var d = new Date(start);
-        d.setDate(d.getDate() + i);
-        days.push(d);
+      if (typeof gtag === 'function') {
+        gtag('event', 'booking_confirmed', { event_category: 'conversion', location: __selectedLoc, date: __selectedDate });
       }
-
-      var first = days[0], last = days[6];
-      weekLabel.textContent = first.getMonth() === last.getMonth()
-        ? MONTHS[first.getMonth()] + ' ' + first.getDate() + ' \u2014 ' + last.getDate()
-        : MONTHS[first.getMonth()] + ' ' + first.getDate() + ' \u2014 ' + MONTHS[last.getMonth()] + ' ' + last.getDate();
-
-      if(prevBtn) prevBtn.disabled = calOffset === 0;
-
-      grid.innerHTML = days.map(function(d){
-        var isPast = d < today;
-        var iso = d.toISOString().split('T')[0];
-        var hasSlots = !!availableDates[iso];
-        var disabled = isPast || !hasSlots;
-        var isSelected = selectedDate === iso;
-        var cls = ['cal-day'];
-        if(disabled) cls.push('disabled');
-        if(isSelected) cls.push('selected');
-        return '<button type="button" class="' + cls.join(' ') + '" data-date="' + iso + '" data-dow="' + DOWS[d.getDay()] + '" data-num="' + d.getDate() + '">' +
-          '<span class="dow">' + DOWS[d.getDay()] + '</span>' +
-          '<span class="num">' + d.getDate() + '</span>' +
-        '</button>';
-      }).join('');
-
-      grid.querySelectorAll('.cal-day:not(.disabled)').forEach(function(btn){
-        btn.addEventListener('click', function(){
-          grid.querySelectorAll('.cal-day').forEach(function(b){ b.classList.remove('selected'); });
-          btn.classList.add('selected');
-          selectedDate = btn.dataset.date;
-          selectedTime = null;
-          selectedSlotId = null;
-          renderTimes(btn.dataset.dow, btn.dataset.num);
-          updateBookButton();
-        });
-      });
+      if (typeof fbq === 'function') {
+        fbq('trackCustom', 'BookingConfirmed', { location: __selectedLoc, date: __selectedDate });
+      }
+      var dateObj = new Date(__selectedDate + 'T00:00:00');
+      var dateStr = dateObj.toLocaleDateString('en-GB', { weekday: 'long', day: 'numeric', month: 'long' });
+      var timeStr = slot ? slot.start_time.substring(0, 5) + ' - ' + slot.end_time.substring(0, 5) : '';
+      document.getElementById('bookingWrap').style.display = 'none';
+      document.getElementById('bookingDone').style.display = 'block';
+      document.getElementById('bookingDoneDetail').innerHTML =
+        '<div class="booking-done-row"><span>Date</span><span>' + dateStr + '</span></div>' +
+        '<div class="booking-done-row"><span>Time</span><span>' + timeStr + '</span></div>' +
+        '<div class="booking-done-row"><span>Location</span><span>' + __selectedLoc + '</span></div>';
+      var bookingData = { id: __bookRow.id, confirm_token: __bookRow.confirm_token, date: dateStr, time: timeStr, location: __selectedLoc, datetime: __selectedDate + 'T' + (slot ? slot.start_time.substring(0,5) : '09:00') + ':00' };
+      if (typeof generateICS === 'function') {
+        var icsContent = generateICS(bookingData, lead.first_name || '');
+        var icsBlob = new Blob([icsContent], { type: 'text/calendar;charset=utf-8' });
+        var calBtn = document.getElementById('bookingCalBtn');
+        calBtn.href = URL.createObjectURL(icsBlob);
+        calBtn.style.display = 'inline-flex';
+      }
+      if (window.__supabaseClient && lead.email) {
+        await window.__supabaseClient.from('message_queue')
+          .update({ status: 'cancelled' })
+          .eq('lead_email', lead.email)
+          .eq('sequence', 'form_submitted')
+          .eq('status', 'queued');
+      }
+      if (typeof queueSequence === 'function' && window.__supabaseClient) {
+        queueSequence('booking_confirmed', lead, bookingData, window.__supabaseClient);
+      }
     }
+  } catch (e) {
+    console.error('Booking error:', e);
+    btn.disabled = false;
+    btn.textContent = 'Book My Visit';
+  }
+}
 
-    function renderTimes(dow, num){
-      var wrap = document.getElementById('calTimes');
-      if(!wrap) return;
-
-      // Filter cached slots for the selected date
-      var daySlots = cachedSlots.filter(function(s){ return s.date === selectedDate; });
-
-      if(daySlots.length === 0){
-        wrap.innerHTML = '<p class="cal-help" style="margin-bottom:14px;">No available times for this day.</p>';
-        return;
-      }
-
-      var btns = daySlots.map(function(s){
-        // Format start_time (HH:MM:SS or HH:MM) to readable time
-        var parts = s.start_time.split(':');
-        var h = parseInt(parts[0], 10);
-        var m = parts[1] || '00';
-        var ampm = h >= 12 ? 'PM' : 'AM';
-        var h12 = h % 12 || 12;
-        var label = h12 + ':' + m + ' ' + ampm;
-        return '<button type="button" class="time-slot" data-time="' + label + '" data-slot-id="' + s.id + '">' + label + '</button>';
-      }).join('');
-
-      wrap.innerHTML = '<p class="cal-help" style="margin-bottom:14px;">Available times \u2014 <em>' + dow + ' ' + num + '</em></p>' +
-        '<div class="time-slots">' + btns + '</div>';
-
-      wrap.querySelectorAll('.time-slot').forEach(function(btn){
-        btn.addEventListener('click', function(){
-          wrap.querySelectorAll('.time-slot').forEach(function(b){ b.classList.remove('selected'); });
-          btn.classList.add('selected');
-          selectedTime = btn.dataset.time;
-          selectedSlotId = btn.dataset.slotId;
-          updateBookButton();
-        });
-      });
-    }
-
-    function updateBookButton(){
-      var btn = document.getElementById('btnBookVisit');
-      if(btn) btn.disabled = !(selectedDate && selectedTime && selectedSlotId);
-    }
-
-    // Location tabs (delegated since form may not have them at init)
-    document.addEventListener('click', function(e){
-      var tab = e.target.closest('.loc-tab');
-      if(!tab) return;
-      tab.parentElement.querySelectorAll('.loc-tab').forEach(function(t){ t.classList.remove('active'); });
-      tab.classList.add('active');
-      selectedLocation = tab.dataset.loc;
-      // Re-fetch slots when location changes
-      calOffset = 0;
-      selectedDate = null;
-      selectedTime = null;
-      selectedSlotId = null;
-      renderCalendar();
-    });
-
-    document.getElementById('calPrev')?.addEventListener('click', function(){
-      if(calOffset > 0){ calOffset--; renderCalendar(); }
-    });
-    document.getElementById('calNext')?.addEventListener('click', function(){
-      if(calOffset < 6){ calOffset++; renderCalendar(); }
-    });
-
-    document.getElementById('btnBookVisit')?.addEventListener('click', async function(){
-      if(!selectedDate || !selectedTime || !selectedSlotId) return;
-
-      var bookBtn = document.getElementById('btnBookVisit');
-      bookBtn.disabled = true;
-      bookBtn.textContent = 'Booking...';
-
-      try {
-        var sb = window.__supabaseClient;
-        var loc = selectedLocation === 'colchester' ? 'Colchester' : 'Ipswich';
-        var lead = window.__lastLead || {};
-
-        // Insert booking record
-        var bookingPayload = {
-          slot_id: selectedSlotId,
-          first_name: answers.firstName,
-          last_name: answers.lastName,
-          email: answers.email,
-          phone: answers.phone,
-          location: loc
-        };
-        var bookResult = await sb.from('bookings').insert(bookingPayload).select().single();
-        if(bookResult.error) throw bookResult.error;
-        console.log('Booking created:', bookResult.data);
-
-        // Increment booked_count on the slot
-        await sb.rpc('increment_booked_count', { slot_id_param: selectedSlotId }).then(function(res){
-          if(res.error){
-            // Fallback: manual update if RPC not available
-            return sb.from('booking_slots').select('booked_count').eq('id', selectedSlotId).single().then(function(cur){
-              if(cur.data){
-                return sb.from('booking_slots').update({ booked_count: cur.data.booked_count + 1 }).eq('id', selectedSlotId);
-              }
-            });
-          }
-        });
-
-        // Build booking data for automations
-        var d = new Date(selectedDate);
-        var bookingData = {
-          id: bookResult.data.id,
-          slot_id: selectedSlotId,
-          date: selectedDate,
-          time: selectedTime,
-          location: loc,
-          first_name: answers.firstName,
-          last_name: answers.lastName,
-          email: answers.email,
-          phone: answers.phone
-        };
-
-        // Queue booking_confirmed automation sequence
-        if(typeof queueSequence === 'function'){
-          queueSequence('booking_confirmed', lead, bookingData, window.__supabaseClient);
-        }
-
-        // Generate ICS calendar file download
-        if(typeof generateICS === 'function'){
-          var ics = generateICS(bookingData, answers.firstName);
-          if(ics){
-            var blob = new Blob([ics], { type: 'text/calendar;charset=utf-8' });
-            var url = URL.createObjectURL(blob);
-            var a = document.createElement('a');
-            a.href = url;
-            a.download = 'reshape-visit.ics';
-            document.body.appendChild(a);
-            a.click();
-            document.body.removeChild(a);
-            URL.revokeObjectURL(url);
-          }
-        }
-
-        // Show booked confirmation
-        var summary = loc + ' \u00B7 ' + DOWS[d.getDay()] + ' ' + MONTHS[d.getMonth()] + ' ' + d.getDate() + ' \u00B7 ' + selectedTime;
-        var sumEl = document.getElementById('bookingSummary');
-        if(sumEl) sumEl.textContent = summary;
-        answers.bookedLocation = loc;
-        answers.bookedDate = selectedDate;
-        answers.bookedTime = selectedTime;
-        console.log('Visit booked:', answers);
-        show('booked');
-
-      } catch(err) {
-        console.error('Booking error:', err);
-        alert('Could not complete your booking. Please try again.');
-        bookBtn.disabled = false;
-        bookBtn.textContent = 'Book My Visit';
-      }
-    });
-
-    show(1);
-  })();
+function skipBooking() {
+  document.getElementById('bookingWrap').style.display = 'none';
+  document.getElementById('bookingSkipped').style.display = 'block';
+}
 </script>
 
 <script>
@@ -2698,7 +2344,7 @@
     entries.forEach(e=>{ if(e.isIntersecting) e.target.classList.add('in'); });
   },{threshold:.12});
   document.querySelectorAll(
-    '.paths-head, .path, .how-head, .step, .guarantee-inner, .reviews-head, .review, .coaches-inner, .coach-card, .science-head, .hormone, .faq-list .q, .closer-inner'
+    '.paths-head, .path, .how-head, .guarantee-inner, .reviews-head, .review, .coaches-inner, .coach-card, .science-head, .hormone, .faq-list .q, .closer-inner'
   ).forEach(el=>{
     el.classList.add('fade-up');
     io.observe(el);

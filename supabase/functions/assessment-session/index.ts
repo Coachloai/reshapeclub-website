@@ -75,7 +75,7 @@ Deno.serve(async (req) => {
   try {
     const supabaseUrl = Deno.env.get("SUPABASE_URL")!;
     const serviceKey  = Deno.env.get("SUPABASE_SERVICE_ROLE_KEY")!;
-    const siteUrl     = Deno.env.get("SITE_URL") || "https://reshape.fit";
+    const siteUrl     = Deno.env.get("SITE_URL") || "https://reshapeclub.com";
     const supabase    = createClient(supabaseUrl, serviceKey);
 
     const ip = clientIp(req);

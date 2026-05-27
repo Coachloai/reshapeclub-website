@@ -1472,10 +1472,10 @@ async function forgotPassword(){
         <span class="filter-label">Page</span>
         <select class="filter-select" id="filter-form" style="min-width:140px">
           <option value="">All Pages</option>
-          <option value="Main Landing Page">reshape.fit</option>
-          <option value="Men Landing Page">reshape.fit/men</option>
-          <option value="Women Landing Page">reshape.fit/women</option>
-          <option value="Seminar Application">reshape.fit/seminar-application</option>
+          <option value="Main Landing Page">reshapeclub.com</option>
+          <option value="Men Landing Page">reshapeclub.com/men</option>
+          <option value="Women Landing Page">reshapeclub.com/women</option>
+          <option value="Seminar Application">reshapeclub.com/seminar-application</option>
           <option value="ReShape Club">reshapeclub.com</option>
         </select>
       </div>
@@ -1739,10 +1739,10 @@ async function forgotPassword(){
           <label class="filter-label">Website</label>
           <select class="filter-select" id="lv-form">
             <option value="">All Pages</option>
-            <option value="Main Landing Page">reshape.fit</option>
-            <option value="Men Landing Page">reshape.fit/men</option>
-            <option value="Women Landing Page">reshape.fit/women</option>
-            <option value="Seminar Application">reshape.fit/seminar-application</option>
+            <option value="Main Landing Page">reshapeclub.com</option>
+            <option value="Men Landing Page">reshapeclub.com/men</option>
+            <option value="Women Landing Page">reshapeclub.com/women</option>
+            <option value="Seminar Application">reshapeclub.com/seminar-application</option>
             <option value="ReShape Club">reshapeclub.com</option>
           </select>
         </div>
@@ -2211,9 +2211,9 @@ async function forgotPassword(){
             <div class="appt-form-group" style="margin-bottom:16px">
               <label class="appt-form-label">Show On Funnels</label>
               <div class="funnel-chips" id="appt-funnels">
-                <button class="funnel-chip selected" data-funnel="Main Landing Page">reshape.fit</button>
-                <button class="funnel-chip selected" data-funnel="Men Landing Page">reshape.fit/men</button>
-                <button class="funnel-chip selected" data-funnel="Women Landing Page">reshape.fit/women</button>
+                <button class="funnel-chip selected" data-funnel="Main Landing Page">reshapeclub.com</button>
+                <button class="funnel-chip selected" data-funnel="Men Landing Page">reshapeclub.com/men</button>
+                <button class="funnel-chip selected" data-funnel="Women Landing Page">reshapeclub.com/women</button>
                 <button class="funnel-chip" data-funnel="ReShape Club">reshapeclub.com</button>
               </div>
             </div>
@@ -3030,7 +3030,7 @@ function mapLead(row, i) {
     phone: row.phone || '',
     location: row.location || 'Unknown',
     form: row.form_name || 'Intake',
-    formLabel: ({'Main Landing Page':'reshape.fit','Men Landing Page':'reshape.fit/men','Women Landing Page':'reshape.fit/women','Seminar Application':'reshape.fit/seminar-application','ReShape Club':'reshapeclub.com'})[row.form_name] || row.form_name || 'Unknown',
+    formLabel: ({'Main Landing Page':'reshapeclub.com','Men Landing Page':'reshapeclub.com/men','Women Landing Page':'reshapeclub.com/women','Seminar Application':'reshapeclub.com/seminar-application','ReShape Club':'reshapeclub.com'})[row.form_name] || row.form_name || 'Unknown',
     quality: quality,
     age: parseInt(row.age) || 0,
     gender: row.gender || 'Unknown',
@@ -4747,7 +4747,7 @@ function initPerfCharts() {
   setTimeout(() => {
     const d = filtered;
     const pages = ['Main Landing Page', 'Men Landing Page', 'Women Landing Page', 'ReShape Club'];
-    const pageLabels = ['reshape.fit', '/men', '/women', 'reshapeclub.com'];
+    const pageLabels = ['reshapeclub.com', '/men', '/women', 'reshapeclub.com'];
     const byPage = pages.map(p => d.filter(l => l.form === p));
 
     // ── KPI CARDS ──
@@ -5072,7 +5072,7 @@ function renderApptCards() {
         '<div class="appt-card-row" style="font-size:11px;line-height:1.5"><svg width="14" height="14" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><rect x="3" y="4" width="18" height="18" rx="2"/><line x1="16" y1="2" x2="16" y2="6"/><line x1="8" y1="2" x2="8" y2="6"/><line x1="3" y1="10" x2="21" y2="10"/></svg>' + schedLabel + '</div>' +
         '<div class="appt-card-row"><svg width="14" height="14" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><path d="M17 21v-2a4 4 0 00-4-4H5a4 4 0 00-4 4v2"/><circle cx="9" cy="7" r="4"/></svg>Max ' + a.max_attendees + ' per slot \u00b7 ' + modeLabel + '</div>' +
         '<div class="appt-card-days">' + [1,2,3,4,5,6,0].map(function(d) { return '<div class="appt-day' + (days.includes(d) ? ' on' : '') + '">' + DAY_SHORT[d] + '</div>'; }).join('') + '</div>' +
-        '<div class="appt-card-funnels">' + (a.funnels || []).map(function(f) { var lbl = ({'Main Landing Page':'reshape.fit','Men Landing Page':'/men','Women Landing Page':'/women','ReShape Club':'reshapeclub.com'})[f] || f; return '<span class="appt-funnel-tag">' + lbl + '</span>'; }).join('') + '</div>' +
+        '<div class="appt-card-funnels">' + (a.funnels || []).map(function(f) { var lbl = ({'Main Landing Page':'reshapeclub.com','Men Landing Page':'/men','Women Landing Page':'/women','ReShape Club':'reshapeclub.com'})[f] || f; return '<span class="appt-funnel-tag">' + lbl + '</span>'; }).join('') + '</div>' +
       '</div>' +
       '<div class="appt-card-actions">' +
         '<button class="btn btn-ghost btn-sm" onclick="editApptType(\'' + a.id + '\')" style="border-color:rgba(237,92,37,.3);color:var(--orange)">Edit</button>' +

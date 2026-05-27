@@ -14,7 +14,7 @@ var AUTOMATION_CONFIG = window.__AUTOMATION_CONFIG || {
   icloud_enabled: true,
   from_email: 'coach@reshape.fit',
   from_name: 'Jaime | ReShape',
-  booking_url: 'https://reshape.fit/booking',
+  booking_url: 'https://reshapeclub.com/booking',
 };
 
 // Edge Function URL
@@ -534,7 +534,7 @@ var SEQUENCES = {
         '<p style="margin:4px 0"><strong>Location:</strong> ' + (booking.location || '') + '</p></div>' +
         '<p>Wear something comfortable. We\'ll handle the rest.</p>' +
         '<p style="margin-top:16px;font-size:14px;color:rgba(255,255,255,0.5)">A calendar invite (.ics) is attached to this email.</p>' +
-        (booking.id && booking.confirm_token ? '<p style="margin-top:12px;font-size:12px;color:rgba(255,255,255,0.3)">Need to cancel? <a href="https://reshape.fit/cancel?id=' + encodeURIComponent(booking.id) + '&token=' + encodeURIComponent(booking.confirm_token) + '" style="color:rgba(255,255,255,0.4);text-decoration:underline">Cancel booking</a></p>' : ''),
+        (booking.id && booking.confirm_token ? '<p style="margin-top:12px;font-size:12px;color:rgba(255,255,255,0.3)">Need to cancel? <a href="https://reshapeclub.com/cancel?id=' + encodeURIComponent(booking.id) + '&token=' + encodeURIComponent(booking.confirm_token) + '" style="color:rgba(255,255,255,0.4);text-decoration:underline">Cancel booking</a></p>' : ''),
         '', ''
       ); }
     },
@@ -548,8 +548,8 @@ var SEQUENCES = {
       body: function(lead, booking) {
         var m = studioMeta(booking);
         var confirmUrl = (booking.id && booking.confirm_token)
-          ? 'https://reshape.fit/confirm?id=' + encodeURIComponent(booking.id) + '&token=' + encodeURIComponent(booking.confirm_token)
-          : 'https://reshape.fit/confirm';
+          ? 'https://reshapeclub.com/confirm?id=' + encodeURIComponent(booking.id) + '&token=' + encodeURIComponent(booking.confirm_token)
+          : 'https://reshapeclub.com/confirm';
         return 'Hey ' + (lead.first_name || '') + '\n\n' +
           'It\'s ' + m.coach + ' from ReShape :)\n\n' +
           'Just got your booking through for ' + (booking.date || '') + ' at ' + (booking.time || '') + '. I\'ve had a look at your application and I think this will be a great fit for you.\n\n' +
@@ -566,8 +566,8 @@ var SEQUENCES = {
       body: function(lead, booking) {
         var m = studioMeta(booking);
         var resultsUrl = (booking.id && booking.confirm_token)
-          ? 'https://reshape.fit/confirm?id=' + encodeURIComponent(booking.id) + '&token=' + encodeURIComponent(booking.confirm_token)
-          : 'https://reshape.fit/confirm';
+          ? 'https://reshapeclub.com/confirm?id=' + encodeURIComponent(booking.id) + '&token=' + encodeURIComponent(booking.confirm_token)
+          : 'https://reshapeclub.com/confirm';
         return 'Hey ' + (lead.first_name || '') + '\n\n' +
           'It\'s ' + m.coach + ' from Re-Shape :)\n\n' +
           'Just a quick message to let you know your consult tomorrow at ' + (booking.time || '') + ' will be with me. I\'ve looked through your application and I think this will be a great fit for you!\n\n' +
@@ -607,8 +607,8 @@ function replaceVars(text, lead, booking) {
   var meta = studioMeta(b);
   var hp = lead && lead.hormonal_pattern;
   var resultsUrl = (b.id && b.confirm_token)
-    ? 'https://reshape.fit/results/?id=' + encodeURIComponent(b.id) + '&token=' + encodeURIComponent(b.confirm_token)
-    : 'https://reshape.fit/results';
+    ? 'https://reshapeclub.com/results/?id=' + encodeURIComponent(b.id) + '&token=' + encodeURIComponent(b.confirm_token)
+    : 'https://reshapeclub.com/results';
   var vars = {
     first_name:    (lead && lead.first_name) || '',
     pattern:       hp ? 'your ' + hp + ' results' : 'the goals you shared with us',
@@ -625,7 +625,7 @@ function replaceVars(text, lead, booking) {
     confirm_url:   resultsUrl,                    // legacy alias (was /confirm — renamed to /results)
     confirm_id:    b.id || '',
     confirm_token: b.confirm_token || '',
-    cancel_url:    (b.id && b.confirm_token) ? 'https://reshape.fit/cancel?id=' + encodeURIComponent(b.id) + '&token=' + encodeURIComponent(b.confirm_token) : '',
+    cancel_url:    (b.id && b.confirm_token) ? 'https://reshapeclub.com/cancel?id=' + encodeURIComponent(b.id) + '&token=' + encodeURIComponent(b.confirm_token) : '',
     address:       meta.address || '',
     maps_url:      meta.mapsUrl || ''
   };

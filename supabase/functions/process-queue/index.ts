@@ -6,7 +6,7 @@ const corsHeaders = {
 
 const SUPABASE_URL    = Deno.env.get('SUPABASE_URL')!;
 const SERVICE_KEY     = Deno.env.get('SUPABASE_SERVICE_ROLE_KEY')!;
-const UNSUBSCRIBE_URL = Deno.env.get('UNSUBSCRIBE_URL') || 'https://reshape.fit/unsubscribe';
+const UNSUBSCRIBE_URL = Deno.env.get('UNSUBSCRIBE_URL') || 'https://reshapeclub.com/unsubscribe';
 
 Deno.serve(async (req: Request) => {
   if (req.method === 'OPTIONS') {
@@ -22,6 +22,7 @@ Deno.serve(async (req: Request) => {
     if (action === 'process_queue')      return ok(await processQueue());
     if (action === 'list_wa_templates')  return ok(await listWhatsAppTemplates());
     if (action === 'submit_wa_template') return ok(await submitWhatsAppTemplate(body));
+    if (action === 'create_wa_template') return ok(await createWhatsAppTemplate(body));
     if (action === 'preview_audience')   return ok(await previewAudience(body));
     if (action === 'send_broadcast')     return ok(await sendBroadcast(body));
 
@@ -427,6 +428,30 @@ async function sendWhatsApp(to: string, body: string, templateSid?: string | nul
   const errMsg = data.message || 'Failed';
   const errCode = data.code ? ` (Twilio ${data.code})` : '';
   return { success: false, error: errMsg + errCode };
+}
+
+// ── CREATE A WHATSAPP CONTENT TEMPLATE (Twilio Content API) ─────────────────
+async function createWhatsAppTemplate(body: any) {
+  const sid  = Deno.env.get('TWILIO_SID');
+  const auth = Deno.env.get('TWILIO_AUTH');
+  if (!sid || !auth) return { success: false, error: 'Twilio credentials not set' };
+
+  const { friendly_name, language, variables, types } = body;
+  if (!friendly_name) return { success: false, error: 'friendly_name required' };
+  if (!types)         return { success: false, error: 'types required' };
+
+  const credentials = btoa(`${sid}:${auth}`);
+  const payload: any = { friendly_name, language: language || 'en', types };
+  if (variables && Object.keys(variables).length) payload.variables = variables;
+
+  const res = await fetch('https://content.twilio.com/v1/Content', {
+    method: 'POST',
+    headers: { 'Authorization': `Basic ${credentials}`, 'Content-Type': 'application/json' },
+    body: JSON.stringify(payload),
+  });
+  const data = await res.json().catch(() => ({}));
+  if (!res.ok) return { success: false, error: data.message || data.error || ('Twilio HTTP ' + res.status) };
+  return { success: true, sid: data.sid, friendly_name: data.friendly_name };
 }
 
 // ── WHATSAPP TEMPLATE LIST + APPROVAL STATUS (Twilio Content API) ───────────

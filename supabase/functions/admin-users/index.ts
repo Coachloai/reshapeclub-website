@@ -24,7 +24,7 @@ const SUPABASE_URL = Deno.env.get('SUPABASE_URL')!;
 const SERVICE_KEY  = Deno.env.get('SUPABASE_SERVICE_ROLE_KEY')!;
 const ANON_KEY     = Deno.env.get('SUPABASE_ANON_KEY')!;
 const SET_PASSWORD_URL =
-  Deno.env.get('SET_PASSWORD_URL') || 'https://reshape.fit/set-password/';
+  Deno.env.get('SET_PASSWORD_URL') || 'https://reshapeclub.com/set-password/';
 
 const ADMIN_EMAILS = (Deno.env.get('ADMIN_EMAILS') || '')
   .split(',')

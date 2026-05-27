@@ -57,7 +57,7 @@ function buildBigGoal(p: {
 }
 
 // ── Email templates (terracotta + charcoal, matches site brand) ──
-const ICS_URL = "https://reshape.fit/seminar-application/reshape-seminar-jun-5.ics";
+const ICS_URL = "https://reshapeclub.com/seminar-application/reshape-seminar-jun-5.ics";
 const GCAL_URL = "https://www.google.com/calendar/render?action=TEMPLATE&text=ReShape%20Seminar&dates=20260605T174500Z/20260605T191500Z&details=Your%20seat%20at%20the%20ReShape%20seminar%20with%20Coach%20Loai.&location=ReShape%20Colchester";
 
 function emailShell(bodyHtml: string): string {
