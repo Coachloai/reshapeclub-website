@@ -2753,15 +2753,31 @@ async function forgotPassword(){
 
           <!-- WHATSAPP PANE -->
           <div class="msg-pane" data-pane="whatsapp">
-            <div class="msg-label">Approved template</div>
-            <select class="msg-select" id="msg-wa-template">
-              <option value="">Loading templates from Twilio…</option>
-            </select>
-            <div class="msg-token-hint" id="msg-wa-hint">WhatsApp requires pre-approved templates for outbound to anyone who hasn't messaged you in the last 24h. Create them in Twilio Console → Content Templates.</div>
-            <button class="btn btn-ghost btn-sm" id="msg-wa-submit-all" style="margin-top:8px;display:none" onclick="msgSubmitAllTemplates()">Submit unapproved templates for approval</button>
-            <div class="msg-token-hint" id="msg-wa-submit-status" style="margin-top:6px"></div>
-            <div class="msg-tpl-preview" id="msg-wa-preview"></div>
-            <div class="msg-tpl-vars" id="msg-wa-vars"></div>
+            <div class="msg-radios" id="msg-wa-mode" style="margin-bottom:14px">
+              <button type="button" class="msg-radio active" data-wamode="template" onclick="msgToggleWaMode('template')">Template (outbound)</button>
+              <button type="button" class="msg-radio" data-wamode="freeform" onclick="msgToggleWaMode('freeform')">Free-form (24h window)</button>
+            </div>
+            <div id="msg-wa-template-section">
+              <div class="msg-label">Approved template</div>
+              <select class="msg-select" id="msg-wa-template">
+                <option value="">Loading templates from Twilio…</option>
+              </select>
+              <div class="msg-token-hint" id="msg-wa-hint">WhatsApp requires pre-approved templates for outbound to anyone who hasn't messaged you in the last 24h. Create them in Twilio Console → Content Templates.</div>
+              <button class="btn btn-ghost btn-sm" id="msg-wa-submit-all" style="margin-top:8px;display:none" onclick="msgSubmitAllTemplates()">Submit unapproved templates for approval</button>
+              <div class="msg-token-hint" id="msg-wa-submit-status" style="margin-top:6px"></div>
+              <div class="msg-tpl-preview" id="msg-wa-preview"></div>
+              <div class="msg-tpl-vars" id="msg-wa-vars"></div>
+              <div class="msg-token-hint" id="msg-wa-vars-error" style="color:var(--orange);display:none"></div>
+            </div>
+            <div id="msg-wa-freeform-section" style="display:none">
+              <div class="msg-label">
+                <span>WhatsApp message</span>
+                <span class="msg-counter"><span id="msg-wa-len">0</span> chars</span>
+              </div>
+              <textarea class="msg-textarea" id="msg-wa-body" placeholder="Hey {first_name}, just wanted to follow up…" style="min-height:140px"></textarea>
+              <div class="msg-token-hint" style="color:var(--orange)">Free-form messages only reach people who messaged your WhatsApp number in the last 24 hours. For cold outreach, use a template instead.</div>
+              <div class="msg-token-hint">Tokens: <code>{first_name}</code> <code>{last_name}</code> <code>{location}</code></div>
+            </div>
           </div>
 
           <div class="msg-actions">
@@ -2785,8 +2801,8 @@ async function forgotPassword(){
       <div class="msg-history fade-in">
         <h3>Recent sends</h3>
         <table class="msg-history-table" id="msg-history-table">
-          <thead><tr><th>When</th><th>Channel</th><th>Subject / template</th><th>Audience</th><th>Status</th><th>Delivered</th></tr></thead>
-          <tbody id="msg-history-body"><tr><td colspan="6" style="text-align:center;padding:24px;color:var(--text3)">Loading…</td></tr></tbody>
+          <thead><tr><th>When</th><th>Channel</th><th>Subject / template</th><th>Audience</th><th>Status</th><th>Delivered</th><th>Errors</th></tr></thead>
+          <tbody id="msg-history-body"><tr><td colspan="7" style="text-align:center;padding:24px;color:var(--text3)">Loading…</td></tr></tbody>
         </table>
       </div>
     </div>
@@ -3784,6 +3800,7 @@ var MSG_STATE = {
   count:   null,
   templates: [],
   selectedTemplate: null,
+  waMode: 'template',
   selectedIndividuals: new Map(),
   initialised: false,
 };
@@ -3873,13 +3890,15 @@ function msgBindCompose() {
   var subj = document.getElementById('msg-email-subject');
   var ebody = document.getElementById('msg-email-body');
   var sbody = document.getElementById('msg-sms-body');
-  [subj, ebody, sbody].forEach(function(el){ el && el.addEventListener('input', msgValidate); });
+  var wabody = document.getElementById('msg-wa-body');
+  [subj, ebody, sbody, wabody].forEach(function(el){ el && el.addEventListener('input', msgValidate); });
   ebody.addEventListener('input', function(){ document.getElementById('msg-email-len').textContent = ebody.value.length; });
   sbody.addEventListener('input', function(){
     var len = sbody.value.length;
     document.getElementById('msg-sms-len').textContent = len;
     document.getElementById('msg-sms-segments').textContent = Math.max(1, Math.ceil(len / 160));
   });
+  wabody.addEventListener('input', function(){ document.getElementById('msg-wa-len').textContent = wabody.value.length; });
   document.getElementById('msg-when').addEventListener('change', function(e){
     var later = e.target.value === 'later';
     var at = document.getElementById('msg-when-at');
@@ -3892,6 +3911,16 @@ function msgBindCompose() {
     msgValidate();
   });
   document.getElementById('msg-wa-template').addEventListener('change', msgOnTemplateChange);
+}
+
+function msgToggleWaMode(mode) {
+  MSG_STATE.waMode = mode;
+  document.querySelectorAll('#msg-wa-mode .msg-radio').forEach(function(b){
+    b.classList.toggle('active', b.dataset.wamode === mode);
+  });
+  document.getElementById('msg-wa-template-section').style.display = mode === 'template' ? '' : 'none';
+  document.getElementById('msg-wa-freeform-section').style.display = mode === 'freeform' ? '' : 'none';
+  msgValidate();
 }
 
 function msgBindSendFlow() {
@@ -3961,13 +3990,41 @@ function msgValidate() {
   } else if (MSG_STATE.channel === 'sms') {
     ok = ok && document.getElementById('msg-sms-body').value.trim().length > 0;
   } else if (MSG_STATE.channel === 'whatsapp') {
-    ok = ok && !!MSG_STATE.selectedTemplate && MSG_STATE.selectedTemplate.approved !== false;
+    if (MSG_STATE.waMode === 'freeform') {
+      ok = ok && document.getElementById('msg-wa-body').value.trim().length > 0;
+    } else {
+      // Template mode: must have an approved template selected
+      ok = ok && !!MSG_STATE.selectedTemplate && MSG_STATE.selectedTemplate.approved === true;
+      // Validate all declared template variables are filled
+      if (ok && MSG_STATE.selectedTemplate) {
+        var missing = msgGetMissingTemplateVars();
+        var errEl = document.getElementById('msg-wa-vars-error');
+        if (missing.length > 0) {
+          ok = false;
+          if (errEl) { errEl.textContent = 'Fill in required variables: ' + missing.join(', '); errEl.style.display = ''; }
+        } else {
+          if (errEl) errEl.style.display = 'none';
+        }
+      }
+    }
   }
   if (document.getElementById('msg-when').value === 'later') {
     var at = document.getElementById('msg-when-at').value;
     ok = ok && !!at && new Date(at) > new Date();
   }
   btn.disabled = !ok;
+}
+
+function msgGetMissingTemplateVars() {
+  var tpl = MSG_STATE.selectedTemplate;
+  if (!tpl || !tpl.variables) return [];
+  var keys = Object.keys(tpl.variables);
+  var missing = [];
+  keys.forEach(function(k){
+    var inp = document.querySelector('#msg-wa-vars input[data-tpl-var="' + k + '"]');
+    if (!inp || !inp.value.trim()) missing.push('{{' + k + '}}');
+  });
+  return missing;
 }
 
 async function msgLoadWhatsAppTemplates() {
@@ -4080,6 +4137,11 @@ function msgOnTemplateChange(e) {
     return '<div class="msg-tpl-var-row"><label>{{' + msgEsc(k) + '}}</label>'
          + '<input type="text" class="msg-input" data-tpl-var="' + msgEsc(k) + '" placeholder="' + msgEsc(tpl.variables[k] || '') + '"></div>';
   }).join('');
+  // Bind variable inputs so validation runs as user types
+  vars.querySelectorAll('input[data-tpl-var]').forEach(function(inp){
+    inp.addEventListener('input', msgValidate);
+  });
+  document.getElementById('msg-wa-vars-error').style.display = 'none';
   msgValidate();
 }
 
@@ -4110,7 +4172,11 @@ function msgOpenConfirm() {
     var segs = Math.max(1, Math.ceil(document.getElementById('msg-sms-body').value.length / 160));
     cost = '£' + (count * segs * 0.04).toFixed(2) + ' (' + segs + ' segment' + (segs>1?'s':'') + ' × ' + count + ')';
   } else if (ch === 'whatsapp') {
-    cost = '£' + (count * 0.05).toFixed(2) + ' (template message)';
+    if (MSG_STATE.waMode === 'freeform') {
+      cost = '£' + (count * 0.04).toFixed(2) + ' (free-form, 24h window)';
+    } else {
+      cost = '£' + (count * 0.05).toFixed(2) + ' (template message)';
+    }
   }
   document.getElementById('msg-confirm-cost').textContent = cost;
   document.getElementById('msg-confirm-overlay').classList.add('open');
@@ -4141,8 +4207,12 @@ async function msgDoSend() {
     } else if (ch === 'sms') {
       payload.body    = document.getElementById('msg-sms-body').value;
     } else if (ch === 'whatsapp') {
-      payload.template_sid  = MSG_STATE.selectedTemplate.sid;
-      payload.template_vars = msgGetTemplateVars();
+      if (MSG_STATE.waMode === 'freeform') {
+        payload.body = document.getElementById('msg-wa-body').value;
+      } else {
+        payload.template_sid  = MSG_STATE.selectedTemplate.sid;
+        payload.template_vars = msgGetTemplateVars();
+      }
     }
     var res = await msgEdge(payload);
     if (!res || res.success === false) throw new Error(res && res.error || 'Send failed');
@@ -4165,7 +4235,7 @@ async function msgLoadHistory() {
     });
     var rows = await res.json();
     if (!Array.isArray(rows) || !rows.length) {
-      body.innerHTML = '<tr><td colspan="6" style="text-align:center;padding:24px;color:var(--text3)">No broadcasts yet.</td></tr>';
+      body.innerHTML = '<tr><td colspan="7" style="text-align:center;padding:24px;color:var(--text3)">No broadcasts yet.</td></tr>';
       return;
     }
     body.innerHTML = rows.map(function(r){
@@ -4174,6 +4244,7 @@ async function msgLoadHistory() {
                 : r.subject || (r.body ? r.body.slice(0,60) + '…' : '—');
       var delivered = (r.sent_count || 0) + ' / ' + (r.audience_size || 0)
                     + (r.failed_count ? ' (' + r.failed_count + ' failed)' : '');
+      var failInfo = r.failed_count ? '<a href="#" onclick="msgShowFailedDetails(\'' + r.id + '\');return false" style="color:var(--orange);font-size:11px">' + r.failed_count + ' failed — view</a>' : '<span style="color:var(--text3)">—</span>';
       return '<tr>'
            + '<td style="white-space:nowrap">' + when + '</td>'
            + '<td><span class="msg-pill ' + r.channel + '">' + r.channel + '</span></td>'
@@ -4181,11 +4252,24 @@ async function msgLoadHistory() {
            + '<td style="font-variant-numeric:tabular-nums">' + (r.audience_size || 0) + '</td>'
            + '<td><span class="msg-status ' + r.status + '">' + r.status + '</span></td>'
            + '<td style="font-variant-numeric:tabular-nums">' + delivered + '</td>'
+           + '<td>' + failInfo + '</td>'
            + '</tr>';
     }).join('');
   } catch (e) {
-    body.innerHTML = '<tr><td colspan="6" style="text-align:center;padding:24px;color:var(--red)">Could not load history.</td></tr>';
+    body.innerHTML = '<tr><td colspan="7" style="text-align:center;padding:24px;color:var(--red)">Could not load history.</td></tr>';
   }
+}
+
+async function msgShowFailedDetails(sendId) {
+  try {
+    var res = await fetch(SUPABASE_URL + '/rest/v1/message_queue?select=lead_name,lead_email,lead_phone,error,channel&send_id=eq.' + sendId + '&status=eq.failed&limit=50', {
+      headers: { 'apikey': SUPABASE_ANON_KEY, 'Authorization': 'Bearer ' + SUPABASE_ANON_KEY }
+    });
+    var rows = await res.json();
+    if (!Array.isArray(rows) || !rows.length) { alert('No failed messages found for this send.'); return; }
+    var lines = rows.map(function(r){ return (r.lead_name || r.lead_email || r.lead_phone || '?') + ': ' + (r.error || 'unknown error'); });
+    alert('Failed messages (' + rows.length + '):\n\n' + lines.join('\n'));
+  } catch (e) { alert('Could not fetch details: ' + (e.message || e)); }
 }
 
 async function msgEdge(payload) {

@@ -75,7 +75,7 @@ async function processQueue() {
       // Re-check consent at send time so a same-second opt-out wins.
       const consent = await getConsent(msg.lead_email, msg.lead_phone, msg.channel);
       if (consent === 'opted_out') {
-        result = { success: false, error: 'opted_out' };
+        result = { success: false, error: 'opted_out — lead revoked ' + msg.channel + ' consent or was not found' };
       } else if (msg.channel === 'email') {
         const html = appendUnsubscribeFooter(msg.body, 'email', msg.consent_token);
         result = await sendEmail(msg.lead_email, msg.subject, html);
@@ -297,10 +297,11 @@ async function getConsent(email: string, phone: string | null, channel: string):
   params.set('limit', '1');
   if (email) params.append('email', `eq.${email}`);
   else if (phone) params.append('phone', `eq.${phone}`);
-  else return 'opted_in';
+  else return 'opted_out'; // No identifier — block the message
   const res = await fetch(`${SUPABASE_URL}/rest/v1/leads?${params.toString()}`, { headers: srHeaders() });
   const rows = await res.json();
-  return Array.isArray(rows) && rows[0]?.[col] === 'opted_out' ? 'opted_out' : 'opted_in';
+  if (!Array.isArray(rows) || rows.length === 0) return 'opted_out'; // Lead not found — block
+  return rows[0]?.[col] === 'opted_out' ? 'opted_out' : 'opted_in';
 }
 
 function srHeaders() {
@@ -391,21 +392,28 @@ async function sendWhatsApp(to: string, body: string, templateSid?: string | nul
   const sid   = Deno.env.get('TWILIO_SID');
   const auth  = Deno.env.get('TWILIO_AUTH');
   const phone = Deno.env.get('TWILIO_PHONE');
-  if (!sid || !auth || !phone) return { success: false, error: 'Twilio/WhatsApp credentials not set' };
+  if (!sid)   return { success: false, error: 'TWILIO_SID not set in Edge Function secrets' };
+  if (!auth)  return { success: false, error: 'TWILIO_AUTH not set in Edge Function secrets' };
+  if (!phone) return { success: false, error: 'TWILIO_PHONE not set in Edge Function secrets' };
+
+  // Normalise phone: strip spaces/dashes, ensure + prefix
+  const cleanTo = to.replace(/[\s\-\(\)]/g, '').replace(/^(\d)/, '+$1');
 
   const url = `https://api.twilio.com/2010-04-01/Accounts/${sid}/Messages.json`;
   const credentials = btoa(`${sid}:${auth}`);
   const params = new URLSearchParams();
   params.append('From', `whatsapp:${phone}`);
-  params.append('To',   `whatsapp:${to}`);
+  params.append('To',   `whatsapp:${cleanTo}`);
 
   if (templateSid) {
     params.append('ContentSid', templateSid);
     if (templateVars && Object.keys(templateVars).length) {
       params.append('ContentVariables', JSON.stringify(templateVars));
     }
-  } else {
+  } else if (body) {
     params.append('Body', body);
+  } else {
+    return { success: false, error: 'No template_sid or body provided for WhatsApp message' };
   }
 
   const res = await fetch(url, {
@@ -414,7 +422,11 @@ async function sendWhatsApp(to: string, body: string, templateSid?: string | nul
     body: params.toString(),
   });
   const data = await res.json();
-  return data.sid ? { success: true, sid: data.sid } : { success: false, error: data.message || 'Failed' };
+  if (data.sid) return { success: true, sid: data.sid };
+  // Include Twilio error code for easier debugging
+  const errMsg = data.message || 'Failed';
+  const errCode = data.code ? ` (Twilio ${data.code})` : '';
+  return { success: false, error: errMsg + errCode };
 }
 
 // ── WHATSAPP TEMPLATE LIST + APPROVAL STATUS (Twilio Content API) ───────────
