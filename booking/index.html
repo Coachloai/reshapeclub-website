@@ -248,24 +248,17 @@ async function loadBookingSlots(loc) {
 }
 
 // Hide slots that overlap busy events on the conflict calendars.
-// Conflict list = global calendar_settings.conflict_calendars unioned with each
-// visible appointment type's per-type conflict_calendars override.
+// Only applies to the currently selected location's slots.
 async function applyConflictCalendarFiltering() {
   if (!__bookingSlots || __bookingSlots.length === 0) return;
   try {
-    var setRes = await window.__supabaseClient.from('calendar_settings').select('conflict_calendars').eq('id', 'global').maybeSingle();
-    var globalCals = (setRes.data && Array.isArray(setRes.data.conflict_calendars)) ? setRes.data.conflict_calendars : [];
-    var apptIds = Array.from(new Set(__bookingSlots.map(function(s){ return s.appointment_type_id; }).filter(Boolean)));
-    var typeCals = [];
-    if (apptIds.length > 0) {
-      var atRes = await window.__supabaseClient.from('appointment_types').select('id, conflict_calendars').in('id', apptIds);
-      (atRes.data || []).forEach(function(a) {
-        var list = Array.isArray(a.conflict_calendars) ? a.conflict_calendars : [];
-        list.forEach(function(c){ if (typeCals.indexOf(c) === -1) typeCals.push(c); });
-      });
-    }
-    var cals = Array.from(new Set(globalCals.concat(typeCals)));
-    if (cals.length === 0) return; // nothing to filter against
+    // Location-specific conflict calendars
+    var locConflicts = {
+      'Colchester': ['Colchester consults ', 'Sean'],
+      'Ipswich':    ['Ipswich consults ', 'Sara ']
+    };
+    var cals = locConflicts[__selectedLoc];
+    if (!cals || cals.length === 0) return; // no conflict calendars for this location
     var fromIso = new Date().toISOString();
     var lastSlot = __bookingSlots[__bookingSlots.length - 1];
     var toIso = new Date(lastSlot.date + 'T23:59:59').toISOString();
