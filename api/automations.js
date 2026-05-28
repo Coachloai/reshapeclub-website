@@ -286,10 +286,19 @@ async function loadApptTypeTarget(booking) {
 async function sendCoachCalendarInvite(lead, booking) {
   if (!booking || !booking.datetime) return;
 
-  // Resolve where to write the event: per-type override first, else the
-  // global default from calendar_settings.
+  // Resolve where to write the event: per-type override first, then
+  // location-based iCloud calendar, then global default.
   var typeTarget = await loadApptTypeTarget(booking);
   var target = typeTarget;
+  if (!target) {
+    // Route to location-specific iCloud calendar
+    var loc = ((booking.location || '') + '').toLowerCase();
+    if (loc.indexOf('ipswich') >= 0) {
+      target = 'icloud:Ipswich consults ';
+    } else if (loc.indexOf('colchester') >= 0) {
+      target = 'icloud:Colchester consults ';
+    }
+  }
   if (!target) {
     var settings = await loadGlobalCalendarSettings();
     target = settings && settings.default_target_calendar;
