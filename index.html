@@ -379,20 +379,19 @@
      "WHERE ARE YOU RIGHT NOW" — 3 paths
      ========================================================= */
   .paths{
-    padding:130px var(--pad) 110px;
+    padding:80px var(--pad);
     background:var(--cream);
   }
   .paths-head{
-    max-width:var(--maxw);margin:0 auto 64px;
-    display:grid;grid-template-columns:1fr 1.4fr;gap:60px;align-items:end;
+    max-width:var(--maxw);margin:0 auto 48px;
+    text-align:center;
   }
-  @media (max-width:980px){.paths-head{grid-template-columns:1fr;gap:24px;}}
   .paths-head h2{
-    font-size:clamp(40px, 5.6vw, 76px);
-    margin-top:18px;
+    font-size:clamp(32px, 4vw, 52px);
+    margin:14px 0 16px;
   }
   .paths-head .lede{
-    font-size:18px;color:var(--ink-2);max-width:54ch;line-height:1.55;
+    font-size:18px;color:var(--ink-2);max-width:60ch;line-height:1.55;margin:0 auto;
   }
   .paths-grid{
     max-width:var(--maxw);margin:0 auto;
@@ -1374,11 +1373,9 @@
 
 <!-- ============================ PATHS ============================ -->
 <section class="paths" id="paths">
-  <div class="paths-head wrap" style="padding:0;">
-    <div>
-      <span class="eyebrow">Where you are</span>
-      <h2 class="h-display">Three places <em>most people find themselves.</em></h2>
-    </div>
+  <div class="paths-head">
+    <span class="eyebrow">Where you are</span>
+    <h2 class="h-display">Three places <em>most people find themselves.</em></h2>
     <p class="lede">Whichever one you recognise, the consult maps the specific pattern underneath — what your body's doing, what's been driving it, and exactly what would change it.</p>
   </div>
 
