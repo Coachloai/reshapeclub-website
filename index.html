@@ -730,14 +730,20 @@
     background:var(--cream-2);
     padding:28px 22px;
     transition:background .25s;
+    text-align:center;
   }
   .hormone:hover{background:var(--cream);}
+  .hormone .hicon{
+    width:56px;height:56px;margin:0 auto 16px;
+    background:rgba(237,92,37,0.08);border-radius:14px;
+    display:flex;align-items:center;justify-content:center;
+  }
+  .hormone .hicon svg{width:28px;height:28px;stroke:var(--sage);fill:none;stroke-width:1.5;stroke-linecap:round;stroke-linejoin:round;}
   .hormone .hname{
     font-family:'Inter', sans-serif;
-    font-size:22px;font-weight:500;
+    font-size:20px;font-weight:600;
     line-height:1.1;letter-spacing:-.01em;
     margin-bottom:8px;
-    font-variation-settings:"opsz" 144;
   }
   .hormone .htag{
     font-family:'DM Sans', sans-serif;
@@ -1571,13 +1577,34 @@
     </div>
 
     <div class="hormones">
-      <div class="hormone"><div class="hname">Estrogen</div><div class="htag">Fat distribution</div></div>
-      <div class="hormone"><div class="hname">Progesterone</div><div class="htag">Mood & sleep</div></div>
-      <div class="hormone"><div class="hname">Testosterone</div><div class="htag">Muscle & drive</div></div>
-      <div class="hormone"><div class="hname">Cortisol</div><div class="htag">Stress storage</div></div>
-      <div class="hormone"><div class="hname">Insulin</div><div class="htag">Blood sugar</div></div>
-      <div class="hormone"><div class="hname">Leptin</div><div class="htag">Fullness signal</div></div>
-      <div class="hormone"><div class="hname">Ghrelin</div><div class="htag">Hunger signal</div></div>
+      <div class="hormone">
+        <div class="hicon"><svg viewBox="0 0 24 24"><circle cx="12" cy="12" r="4"/><path d="M12 2v4M12 18v4M4.93 4.93l2.83 2.83M16.24 16.24l2.83 2.83M2 12h4M18 12h4M4.93 19.07l2.83-2.83M16.24 7.76l2.83-2.83"/></svg></div>
+        <div class="hname">Estrogen</div><div class="htag">Fat distribution</div>
+      </div>
+      <div class="hormone">
+        <div class="hicon"><svg viewBox="0 0 24 24"><path d="M21 12.79A9 9 0 1 1 11.21 3a7 7 0 0 0 9.79 9.79z"/></svg></div>
+        <div class="hname">Progesterone</div><div class="htag">Mood & sleep</div>
+      </div>
+      <div class="hormone">
+        <div class="hicon"><svg viewBox="0 0 24 24"><path d="M18 20V10M12 20V4M6 20v-6"/></svg></div>
+        <div class="hname">Testosterone</div><div class="htag">Muscle & drive</div>
+      </div>
+      <div class="hormone">
+        <div class="hicon"><svg viewBox="0 0 24 24"><polyline points="22 12 18 12 15 21 9 3 6 12 2 12"/></svg></div>
+        <div class="hname">Cortisol</div><div class="htag">Stress storage</div>
+      </div>
+      <div class="hormone">
+        <div class="hicon"><svg viewBox="0 0 24 24"><path d="M12 2C6.48 2 2 6.48 2 12s4.48 10 10 10 10-4.48 10-10"/><path d="M22 2L13 11"/><path d="M16 2h6v6"/></svg></div>
+        <div class="hname">Insulin</div><div class="htag">Blood sugar</div>
+      </div>
+      <div class="hormone">
+        <div class="hicon"><svg viewBox="0 0 24 24"><path d="M12 22c-4-3-8-7.5-8-12a8 8 0 1 1 16 0c0 4.5-4 9-8 12z"/><circle cx="12" cy="10" r="3"/></svg></div>
+        <div class="hname">Leptin</div><div class="htag">Fullness signal</div>
+      </div>
+      <div class="hormone">
+        <div class="hicon"><svg viewBox="0 0 24 24"><path d="M18 8h1a4 4 0 0 1 0 8h-1M2 8h16v9a4 4 0 0 1-4 4H6a4 4 0 0 1-4-4V8z"/><line x1="6" y1="1" x2="6" y2="4"/><line x1="10" y1="1" x2="10" y2="4"/><line x1="14" y1="1" x2="14" y2="4"/></svg></div>
+        <div class="hname">Ghrelin</div><div class="htag">Hunger signal</div>
+      </div>
     </div>
   </div>
 </section>
