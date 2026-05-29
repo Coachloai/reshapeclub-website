@@ -1478,18 +1478,19 @@
     <article class="path">
       <div class="path-icon">
         <svg viewBox="0 0 320 180" fill="none" xmlns="http://www.w3.org/2000/svg">
-          <!-- Two overlapping cycle circles — out of sync -->
-          <circle cx="135" cy="90" r="45" stroke="#ED5C25" stroke-width="2.5" opacity=".2"/>
-          <circle cx="185" cy="90" r="45" stroke="#ED5C25" stroke-width="2.5" opacity=".5"/>
-          <!-- Arrows on each circle showing rotation -->
-          <path d="M135 45 C155 45 170 55 175 70" stroke="#ED5C25" stroke-width="2" stroke-linecap="round" opacity=".2"/>
-          <path d="M172 64 L175 70 L169 70" fill="#ED5C25" opacity=".2"/>
-          <path d="M185 45 C205 45 220 55 225 70" stroke="#ED5C25" stroke-width="2" stroke-linecap="round" opacity=".5"/>
-          <path d="M222 64 L225 70 L219 70" fill="#ED5C25" opacity=".5"/>
-          <!-- Overlap zone — the disruption -->
-          <path d="M163 57 A45 45 0 0 1 163 123" fill="#ED5C25" opacity=".06"/>
-          <!-- Shift indicator -->
-          <line x1="160" y1="58" x2="160" y2="122" stroke="#ED5C25" stroke-width="1.5" stroke-dasharray="4 4" opacity=".25"/>
+          <!-- Hourglass outline -->
+          <line x1="120" y1="30" x2="200" y2="30" stroke="#ED5C25" stroke-width="3" stroke-linecap="round" opacity=".6"/>
+          <line x1="120" y1="150" x2="200" y2="150" stroke="#ED5C25" stroke-width="3" stroke-linecap="round" opacity=".6"/>
+          <path d="M122 30 L122 55 C122 70 160 90 160 90 C160 90 122 110 122 125 L122 150" stroke="#ED5C25" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round" opacity=".4"/>
+          <path d="M198 30 L198 55 C198 70 160 90 160 90 C160 90 198 110 198 125 L198 150" stroke="#ED5C25" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round" opacity=".4"/>
+          <!-- Sand accumulated at bottom -->
+          <path d="M135 150 L135 130 C135 120 160 108 160 108 C160 108 185 120 185 130 L185 150Z" fill="#ED5C25" opacity=".2"/>
+          <!-- Few grains still falling through the neck -->
+          <circle cx="160" cy="96" r="1.5" fill="#ED5C25" opacity=".5"/>
+          <circle cx="160" cy="104" r="1.5" fill="#ED5C25" opacity=".35"/>
+          <circle cx="160" cy="112" r="1.5" fill="#ED5C25" opacity=".2"/>
+          <!-- Top nearly empty — just a thin layer -->
+          <path d="M140 52 C140 48 160 42 160 42 C160 42 180 48 180 52" stroke="#ED5C25" stroke-width="1.5" stroke-linecap="round" opacity=".25"/>
         </svg>
       </div>
       <span class="n">03</span>
