@@ -1432,25 +1432,47 @@
     <article class="path">
       <div class="path-icon">
         <svg viewBox="0 0 320 180" fill="none" xmlns="http://www.w3.org/2000/svg">
-          <!-- Grid lines -->
-          <line x1="40" y1="30" x2="40" y2="150" stroke="#4a4540" stroke-width=".5"/>
-          <line x1="40" y1="150" x2="300" y2="150" stroke="#4a4540" stroke-width=".5"/>
-          <line x1="40" y1="110" x2="300" y2="110" stroke="#4a4540" stroke-width=".3" stroke-dasharray="4 4"/>
-          <line x1="40" y1="70" x2="300" y2="70" stroke="#4a4540" stroke-width=".3" stroke-dasharray="4 4"/>
-          <!-- Progress line going up then flat -->
-          <path d="M50 140 L80 120 L110 95 L140 80 L160 75" stroke="#ED5C25" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round" opacity=".3"/>
-          <!-- Flat plateau line -->
-          <path d="M160 75 L190 76 L220 75 L250 76 L280 75" stroke="#ED5C25" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"/>
-          <!-- Glow on plateau -->
-          <circle cx="220" cy="75" r="20" fill="#ED5C25" opacity=".08"/>
-          <circle cx="220" cy="75" r="8" fill="#ED5C25" opacity=".12"/>
-          <!-- Pulse dot -->
-          <circle cx="280" cy="75" r="5" fill="#ED5C25" opacity=".9"/>
-          <circle cx="280" cy="75" r="9" stroke="#ED5C25" stroke-width="1" opacity=".3"/>
-          <!-- Labels -->
-          <text x="50" y="165" fill="#6a6560" font-family="DM Sans,sans-serif" font-size="9" letter-spacing=".05em">EFFORT</text>
-          <text x="250" y="165" fill="#ED5C25" font-family="DM Sans,sans-serif" font-size="9" font-weight="600" letter-spacing=".05em">STUCK</text>
-          <text x="28" y="78" fill="#6a6560" font-family="DM Sans,sans-serif" font-size="7" text-anchor="end" transform="rotate(-90,28,78)">RESULTS</text>
+          <defs>
+            <linearGradient id="plat-fill" x1="0" y1="0" x2="0" y2="1">
+              <stop offset="0%" stop-color="#ED5C25" stop-opacity=".18"/>
+              <stop offset="100%" stop-color="#ED5C25" stop-opacity="0"/>
+            </linearGradient>
+          </defs>
+          <!-- Subtle grid -->
+          <line x1="40" y1="150" x2="295" y2="150" stroke="#4a4540" stroke-width=".4"/>
+          <line x1="40" y1="40" x2="40" y2="150" stroke="#4a4540" stroke-width=".4"/>
+          <line x1="40" y1="110" x2="295" y2="110" stroke="#3a3530" stroke-width=".3" stroke-dasharray="3 5"/>
+          <line x1="40" y1="70" x2="295" y2="70" stroke="#3a3530" stroke-width=".3" stroke-dasharray="3 5"/>
+          <!-- Effort bars rising underneath -->
+          <rect x="52" y="130" width="14" height="20" rx="2" fill="#ED5C25" opacity=".06"/>
+          <rect x="76" y="118" width="14" height="32" rx="2" fill="#ED5C25" opacity=".08"/>
+          <rect x="100" y="105" width="14" height="45" rx="2" fill="#ED5C25" opacity=".1"/>
+          <rect x="124" y="98" width="14" height="52" rx="2" fill="#ED5C25" opacity=".12"/>
+          <rect x="148" y="93" width="14" height="57" rx="2" fill="#ED5C25" opacity=".14"/>
+          <rect x="172" y="93" width="14" height="57" rx="2" fill="#ED5C25" opacity=".14"/>
+          <rect x="196" y="93" width="14" height="57" rx="2" fill="#ED5C25" opacity=".14"/>
+          <rect x="220" y="93" width="14" height="57" rx="2" fill="#ED5C25" opacity=".14"/>
+          <rect x="244" y="93" width="14" height="57" rx="2" fill="#ED5C25" opacity=".14"/>
+          <rect x="268" y="93" width="14" height="57" rx="2" fill="#ED5C25" opacity=".14"/>
+          <!-- Gradient fill under curve -->
+          <path d="M50 140 C65 135 75 118 90 105 C105 92 120 82 145 76 L145 76 L280 76 L280 150 L50 150Z" fill="url(#plat-fill)"/>
+          <!-- Progress curve -->
+          <path d="M50 140 C65 135 75 118 90 105 C105 92 120 82 145 76" stroke="#ED5C25" stroke-width="2" stroke-linecap="round" opacity=".35"/>
+          <!-- Flatline -->
+          <path d="M145 76 L280 76" stroke="#ED5C25" stroke-width="2.5" stroke-linecap="round" stroke-dasharray="6 0"/>
+          <!-- Wall marker -->
+          <line x1="145" y1="55" x2="145" y2="150" stroke="#ED5C25" stroke-width="1" stroke-dasharray="3 3" opacity=".25"/>
+          <!-- Stuck pulse -->
+          <circle cx="280" cy="76" r="4.5" fill="#ED5C25"/>
+          <circle cx="280" cy="76" r="9" stroke="#ED5C25" stroke-width=".8" opacity=".25"/>
+          <circle cx="280" cy="76" r="15" stroke="#ED5C25" stroke-width=".5" opacity=".1"/>
+          <!-- Y-axis label -->
+          <text x="30" y="65" fill="#5a5550" font-family="DM Sans,sans-serif" font-size="7" text-anchor="middle" transform="rotate(-90,30,90)">RESULTS</text>
+          <!-- X-axis labels -->
+          <text x="90" y="166" fill="#5a5550" font-family="DM Sans,sans-serif" font-size="8" text-anchor="middle" letter-spacing=".08em">EFFORT ↑</text>
+          <text x="220" y="166" fill="#ED5C25" font-family="DM Sans,sans-serif" font-size="8" text-anchor="middle" font-weight="600" letter-spacing=".08em">PLATEAU</text>
+          <!-- Question mark -->
+          <text x="275" y="62" fill="#ED5C25" font-family="Inter,sans-serif" font-size="16" font-weight="600" opacity=".6">?</text>
         </svg>
       </div>
       <span class="n">01</span>
@@ -1462,23 +1484,48 @@
     <article class="path">
       <div class="path-icon">
         <svg viewBox="0 0 320 180" fill="none" xmlns="http://www.w3.org/2000/svg">
-          <!-- Body silhouette before -->
-          <path d="M95 55 C95 45 100 38 110 38 C120 38 125 45 125 55 L125 58 C125 58 130 62 130 72 L130 110 C130 115 127 118 122 118 L98 118 C93 118 90 115 90 110 L90 72 C90 62 95 58 95 58Z" fill="#5a5550" opacity=".4"/>
-          <circle cx="110" cy="28" r="12" fill="#5a5550" opacity=".4"/>
-          <text x="110" y="140" fill="#6a6560" font-family="DM Sans,sans-serif" font-size="9" text-anchor="middle" letter-spacing=".05em">BEFORE</text>
-          <!-- Arrow -->
-          <path d="M150 75 L170 75" stroke="#ED5C25" stroke-width="2" stroke-linecap="round"/>
-          <path d="M165 70 L172 75 L165 80" stroke="#ED5C25" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/>
+          <defs>
+            <linearGradient id="pp-glow" x1="0" y1="0" x2="0" y2="1">
+              <stop offset="0%" stop-color="#ED5C25" stop-opacity=".12"/>
+              <stop offset="100%" stop-color="#ED5C25" stop-opacity="0"/>
+            </linearGradient>
+          </defs>
+          <!-- Shattered circle (left) — fragmented self -->
+          <path d="M90 52 A38 38 0 0 1 128 90" stroke="#5a5550" stroke-width="2" stroke-linecap="round" opacity=".5"/>
+          <path d="M128 90 A38 38 0 0 1 90 128" stroke="#5a5550" stroke-width="2" stroke-linecap="round" opacity=".35"/>
+          <path d="M90 128 A38 38 0 0 1 52 90" stroke="#5a5550" stroke-width="2" stroke-linecap="round" opacity=".2"/>
+          <path d="M52 90 A38 38 0 0 1 90 52" stroke="#5a5550" stroke-width="2" stroke-linecap="round" opacity=".4"/>
           <!-- Scattered fragments -->
-          <rect x="155" y="55" width="8" height="3" rx="1" fill="#ED5C25" opacity=".15" transform="rotate(-20,159,56)"/>
-          <rect x="152" y="90" width="10" height="3" rx="1" fill="#ED5C25" opacity=".1" transform="rotate(15,157,91)"/>
-          <circle cx="162" cy="65" r="2" fill="#ED5C25" opacity=".12"/>
-          <!-- Body silhouette after — stronger -->
-          <path d="M195 55 C195 47 200 40 210 40 C220 40 225 47 225 55 L225 57 C225 57 228 60 228 68 L228 108 C228 113 225 116 221 116 L199 116 C195 116 192 113 192 108 L192 68 C192 60 195 57 195 57Z" fill="#ED5C25" opacity=".2" stroke="#ED5C25" stroke-width="1.5"/>
-          <circle cx="210" cy="30" r="11" fill="#ED5C25" opacity=".2" stroke="#ED5C25" stroke-width="1.5"/>
-          <text x="210" y="140" fill="#ED5C25" font-family="DM Sans,sans-serif" font-size="9" text-anchor="middle" font-weight="600" letter-spacing=".05em">RESET</text>
-          <!-- Glow -->
-          <circle cx="210" cy="75" r="35" fill="#ED5C25" opacity=".04"/>
+          <circle cx="70" cy="60" r="3" fill="#5a5550" opacity=".2"/>
+          <circle cx="112" cy="68" r="2" fill="#5a5550" opacity=".15"/>
+          <circle cx="65" cy="115" r="2.5" fill="#5a5550" opacity=".15"/>
+          <circle cx="115" cy="112" r="1.5" fill="#5a5550" opacity=".2"/>
+          <rect x="78" y="78" width="24" height="24" rx="12" stroke="#5a5550" stroke-width="1" stroke-dasharray="2 3" opacity=".2"/>
+          <!-- Disconnected inner lines -->
+          <line x1="80" y1="85" x2="88" y2="80" stroke="#5a5550" stroke-width="1" opacity=".2"/>
+          <line x1="92" y1="95" x2="100" y2="88" stroke="#5a5550" stroke-width="1" opacity=".15"/>
+          <text x="90" y="158" fill="#5a5550" font-family="DM Sans,sans-serif" font-size="8" text-anchor="middle" letter-spacing=".08em">FRAGMENTED</text>
+          <!-- Arrow -->
+          <line x1="145" y1="90" x2="172" y2="90" stroke="#ED5C25" stroke-width="1.5" stroke-linecap="round" opacity=".5"/>
+          <path d="M168 85 L175 90 L168 95" stroke="#ED5C25" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round" opacity=".5"/>
+          <!-- Whole circle (right) — restored -->
+          <circle cx="230" cy="90" r="38" stroke="#ED5C25" stroke-width="2" opacity=".8"/>
+          <circle cx="230" cy="90" r="28" stroke="#ED5C25" stroke-width="1" opacity=".15"/>
+          <!-- Inner glow -->
+          <circle cx="230" cy="90" r="38" fill="url(#pp-glow)"/>
+          <!-- Radiant lines outward -->
+          <line x1="230" y1="46" x2="230" y2="38" stroke="#ED5C25" stroke-width="1" stroke-linecap="round" opacity=".3"/>
+          <line x1="230" y1="134" x2="230" y2="142" stroke="#ED5C25" stroke-width="1" stroke-linecap="round" opacity=".3"/>
+          <line x1="186" y1="90" x2="178" y2="90" stroke="#ED5C25" stroke-width="1" stroke-linecap="round" opacity=".3"/>
+          <line x1="274" y1="90" x2="282" y2="90" stroke="#ED5C25" stroke-width="1" stroke-linecap="round" opacity=".3"/>
+          <line x1="202" y1="62" x2="197" y2="57" stroke="#ED5C25" stroke-width="1" stroke-linecap="round" opacity=".2"/>
+          <line x1="258" y1="62" x2="263" y2="57" stroke="#ED5C25" stroke-width="1" stroke-linecap="round" opacity=".2"/>
+          <line x1="202" y1="118" x2="197" y2="123" stroke="#ED5C25" stroke-width="1" stroke-linecap="round" opacity=".2"/>
+          <line x1="258" y1="118" x2="263" y2="123" stroke="#ED5C25" stroke-width="1" stroke-linecap="round" opacity=".2"/>
+          <!-- Centre dot -->
+          <circle cx="230" cy="90" r="5" fill="#ED5C25" opacity=".7"/>
+          <circle cx="230" cy="90" r="2" fill="#fff" opacity=".9"/>
+          <text x="230" y="158" fill="#ED5C25" font-family="DM Sans,sans-serif" font-size="8" text-anchor="middle" font-weight="600" letter-spacing=".08em">RESTORED</text>
         </svg>
       </div>
       <span class="n">02</span>
@@ -1490,23 +1537,43 @@
     <article class="path">
       <div class="path-icon">
         <svg viewBox="0 0 320 180" fill="none" xmlns="http://www.w3.org/2000/svg">
-          <!-- Hormone wave — erratic -->
-          <path d="M30 110 C45 110 50 45 65 45 C80 45 75 130 95 130 C115 130 110 35 130 35 C145 35 140 120 155 120" stroke="#5a5550" stroke-width="2" stroke-linecap="round" opacity=".35"/>
-          <!-- Arrow transition -->
-          <path d="M165 90 L175 90" stroke="#ED5C25" stroke-width="1.5" stroke-linecap="round"/>
-          <path d="M172 86 L177 90 L172 94" stroke="#ED5C25" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"/>
-          <!-- Hormone wave — balanced -->
-          <path d="M185 95 C195 95 200 70 210 70 C220 70 225 95 235 95 C245 95 250 70 260 70 C270 70 275 95 285 95" stroke="#ED5C25" stroke-width="2.5" stroke-linecap="round"/>
-          <!-- Glow behind balanced wave -->
-          <ellipse cx="235" cy="82" rx="55" ry="25" fill="#ED5C25" opacity=".06"/>
-          <!-- Labels -->
-          <text x="90" y="165" fill="#6a6560" font-family="DM Sans,sans-serif" font-size="9" text-anchor="middle" letter-spacing=".05em">CHAOTIC</text>
-          <text x="235" y="165" fill="#ED5C25" font-family="DM Sans,sans-serif" font-size="9" text-anchor="middle" font-weight="600" letter-spacing=".05em">BALANCED</text>
-          <!-- Axis markers -->
-          <text x="22" y="50" fill="#6a6560" font-family="DM Sans,sans-serif" font-size="7">E₂</text>
-          <text x="22" y="90" fill="#6a6560" font-family="DM Sans,sans-serif" font-size="7">P₄</text>
-          <text x="22" y="125" fill="#6a6560" font-family="DM Sans,sans-serif" font-size="7">T</text>
-          <line x1="32" y1="30" x2="32" y2="150" stroke="#4a4540" stroke-width=".5"/>
+          <defs>
+            <linearGradient id="horm-fill" x1="0" y1="0" x2="0" y2="1">
+              <stop offset="0%" stop-color="#ED5C25" stop-opacity=".1"/>
+              <stop offset="100%" stop-color="#ED5C25" stop-opacity="0"/>
+            </linearGradient>
+          </defs>
+          <!-- Left axis -->
+          <line x1="30" y1="25" x2="30" y2="148" stroke="#4a4540" stroke-width=".4"/>
+          <line x1="30" y1="148" x2="148" y2="148" stroke="#4a4540" stroke-width=".4"/>
+          <!-- Axis labels left -->
+          <text x="22" y="45" fill="#ED5C25" font-family="DM Sans,sans-serif" font-size="7" text-anchor="end" opacity=".7">E₂</text>
+          <text x="22" y="80" fill="#8BC34A" font-family="DM Sans,sans-serif" font-size="7" text-anchor="end" opacity=".7">P₄</text>
+          <text x="22" y="120" fill="#5C9DED" font-family="DM Sans,sans-serif" font-size="7" text-anchor="end" opacity=".7">C</text>
+          <!-- Chaotic estrogen -->
+          <path d="M35 70 C42 30 48 110 58 45 C68 120 72 28 85 95 C95 40 105 130 115 55 C125 110 135 35 145 80" stroke="#ED5C25" stroke-width="1.5" stroke-linecap="round" opacity=".4"/>
+          <!-- Chaotic progesterone -->
+          <path d="M35 100 C45 60 55 130 65 75 C75 120 85 50 95 110 C105 65 115 125 125 70 C135 115 140 55 145 95" stroke="#8BC34A" stroke-width="1.5" stroke-linecap="round" opacity=".25"/>
+          <!-- Chaotic cortisol — high and spiking -->
+          <path d="M35 45 C45 55 50 35 60 50 C70 40 75 58 85 42 C95 55 100 38 110 48 C120 35 130 52 145 40" stroke="#5C9DED" stroke-width="1.2" stroke-linecap="round" opacity=".25"/>
+          <text x="90" y="166" fill="#5a5550" font-family="DM Sans,sans-serif" font-size="8" text-anchor="middle" letter-spacing=".08em">DISRUPTED</text>
+          <!-- Divider arrow -->
+          <line x1="155" y1="90" x2="172" y2="90" stroke="#ED5C25" stroke-width="1.5" stroke-linecap="round" opacity=".4"/>
+          <path d="M168 85 L175 90 L168 95" stroke="#ED5C25" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round" opacity=".4"/>
+          <!-- Right axis -->
+          <line x1="182" y1="25" x2="182" y2="148" stroke="#4a4540" stroke-width=".4"/>
+          <line x1="182" y1="148" x2="300" y2="148" stroke="#4a4540" stroke-width=".4"/>
+          <!-- Balanced estrogen — smooth sine -->
+          <path d="M187 80 C197 55 207 55 217 80 C227 105 237 105 247 80 C257 55 267 55 277 80 C287 105 292 105 297 90" stroke="#ED5C25" stroke-width="2" stroke-linecap="round"/>
+          <!-- Fill under estrogen -->
+          <path d="M187 80 C197 55 207 55 217 80 C227 105 237 105 247 80 C257 55 267 55 277 80 C287 105 292 105 297 90 L297 148 L187 148Z" fill="url(#horm-fill)"/>
+          <!-- Balanced progesterone -->
+          <path d="M187 95 C197 85 207 85 217 95 C227 108 237 108 247 95 C257 85 267 85 277 95 C287 108 292 105 297 100" stroke="#8BC34A" stroke-width="1.5" stroke-linecap="round" opacity=".5"/>
+          <!-- Balanced cortisol — low and steady -->
+          <path d="M187 115 C207 112 227 118 247 114 C267 111 287 116 297 114" stroke="#5C9DED" stroke-width="1.2" stroke-linecap="round" opacity=".4"/>
+          <!-- Cortisol label -->
+          <text x="302" y="117" fill="#5C9DED" font-family="DM Sans,sans-serif" font-size="6" opacity=".5">C↓</text>
+          <text x="240" y="166" fill="#ED5C25" font-family="DM Sans,sans-serif" font-size="8" text-anchor="middle" font-weight="600" letter-spacing=".08em">OPTIMISED</text>
         </svg>
       </div>
       <span class="n">03</span>
