@@ -416,6 +416,18 @@ async function confirmBooking() {
   try {
     var __bookRow;
     var slot = __bookingSlots.find(function(s) { return s.id === __selectedSlotId; });
+
+    // Fresh slot availability check — prevent double-booking
+    var __freshSlot = await window.__supabaseClient.from('booking_slots').select('booked_count, max_attendees').eq('id', __selectedSlotId).single();
+    var __fs = __freshSlot && __freshSlot.data;
+    if (__fs && __fs.booked_count >= __fs.max_attendees) {
+      alert('Sorry, this slot was just taken. Please pick another time.');
+      btn.disabled = false; btn.textContent = __rescheduleCtx ? 'Reschedule My Visit' : 'Book My Visit';
+      await loadBookingSlots(__selectedLoc);
+      return;
+    }
+    var __freshCount = (__fs && __fs.booked_count) || 0;
+
     if (__rescheduleCtx) {
       // Re-fetch calendar fields fresh (the page-load snapshot may be stale/null
       // if sendCoachCalendarInvite's save hadn't completed yet)
@@ -447,7 +459,7 @@ async function confirmBooking() {
             await window.__supabaseClient.from('booking_slots').update({ booked_count: Math.max(0, oldCount - 1) }).eq('id', __rescheduleCtx.slot_id);
           }
         } catch (e) { console.warn('Old slot decrement failed:', e); }
-        if (slot) await window.__supabaseClient.from('booking_slots').update({ booked_count: slot.booked_count + 1 }).eq('id', __selectedSlotId);
+        if (slot) await window.__supabaseClient.from('booking_slots').update({ booked_count: __freshCount + 1 }).eq('id', __selectedSlotId);
       }
       // Cancel any pending booking_confirmed messages for this lead — fresh queue happens below.
       await window.__supabaseClient.from('message_queue')
@@ -461,7 +473,7 @@ async function confirmBooking() {
       }]).select('id, confirm_token').single();
       __bookRow = (__bookRes && __bookRes.data) || {};
       if (slot) {
-        await window.__supabaseClient.from('booking_slots').update({ booked_count: slot.booked_count + 1 }).eq('id', __selectedSlotId);
+        await window.__supabaseClient.from('booking_slots').update({ booked_count: __freshCount + 1 }).eq('id', __selectedSlotId);
       }
     }
     // Show confirmation

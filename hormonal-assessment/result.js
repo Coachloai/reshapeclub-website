@@ -279,8 +279,43 @@
       .order('start_time', { ascending: true })
       .then(function(res){
         ctx.slots = (res.data || []).filter(function(s){ return s.booked_count < s.max_attendees; });
+        return applyConflictFiltering();
+      }).then(function(){
         renderCal();
       });
+  }
+
+  // Hide slots that overlap busy events on location-specific conflict calendars.
+  function applyConflictFiltering() {
+    var ctx = __bookingCtx;
+    if (!ctx.slots || ctx.slots.length === 0) return Promise.resolve();
+    var locConflicts = {
+      'Colchester': ['icloud:Colchester consults ', 'icloud:Sean'],
+      'Ipswich':    ['icloud:Ipswich consults ', 'icloud:Sara ']
+    };
+    var cals = locConflicts[ctx.loc];
+    if (!cals || cals.length === 0) return Promise.resolve();
+    var fromIso = new Date().toISOString();
+    var lastSlot = ctx.slots[ctx.slots.length - 1];
+    var toIso = new Date(lastSlot.date + 'T23:59:59').toISOString();
+    return fetch(SUPABASE_URL + '/functions/v1/calendar-freebusy', {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json', 'Authorization': 'Bearer ' + ANON_KEY, 'apikey': ANON_KEY },
+      body: JSON.stringify({ calendars: cals, from: fromIso, to: toIso })
+    }).then(function(r){ return r.json(); }).then(function(fbData){
+      if (!fbData.success || !Array.isArray(fbData.busy) || fbData.busy.length === 0) return;
+      var busy = fbData.busy.map(function(w){ return { start: new Date(w.start).getTime(), end: new Date(w.end).getTime() }; });
+      ctx.slots = ctx.slots.filter(function(s){
+        var slotStart = new Date(s.date + 'T' + s.start_time).getTime();
+        var slotEnd = new Date(s.date + 'T' + s.end_time).getTime();
+        for (var i = 0; i < busy.length; i++){
+          if (slotStart < busy[i].end && slotEnd > busy[i].start) return false;
+        }
+        return true;
+      });
+    }).catch(function(e){
+      console.warn('Conflict-calendar filtering skipped:', e.message);
+    });
   }
 
   function renderCal(){
@@ -373,9 +408,6 @@
     if (!slot) return;
 
     if (!ctx.lead.email || !ctx.lead.phone){
-      // Fall back to the standalone /booking/ page so we collect missing
-      // contact details (email or phone) there. Older sessions without phone
-      // captured at the gate land here on first booking attempt.
       window.location.href = '/booking/';
       return;
     }
@@ -387,18 +419,30 @@
 
     var phone = ctx.lead.phone || null;
 
+    // Fresh slot availability check — prevent double-booking
     var __bookRow = {};
-    ctx.sb.from('bookings').insert([{
-      slot_id: ctx.selectedSlotId,
-      first_name: firstName,
-      last_name: lastName,
-      email: ctx.lead.email,
-      phone: phone,
-      location: ctx.loc,
-      assessment_session_id: getSessionId()
-    }]).select('id, confirm_token').single().then(function(res){
-      __bookRow = (res && res.data) || {};
-      return ctx.sb.from('booking_slots').update({ booked_count: slot.booked_count + 1 }).eq('id', slot.id);
+    ctx.sb.from('booking_slots').select('booked_count, max_attendees').eq('id', ctx.selectedSlotId).single().then(function(freshRes){
+      var fresh = freshRes && freshRes.data;
+      if (fresh && fresh.booked_count >= fresh.max_attendees) {
+        btn.disabled = false; btn.textContent = 'Pick a time first';
+        btn.disabled = true;
+        alert('Sorry, this slot was just taken. Please pick another time.');
+        loadSlots();
+        throw new Error('__slot_taken__');
+      }
+      var freshCount = (fresh && fresh.booked_count) || 0;
+      return ctx.sb.from('bookings').insert([{
+        slot_id: ctx.selectedSlotId,
+        first_name: firstName,
+        last_name: lastName,
+        email: ctx.lead.email,
+        phone: phone,
+        location: ctx.loc,
+        assessment_session_id: getSessionId()
+      }]).select('id, confirm_token').single().then(function(res){
+        __bookRow = (res && res.data) || {};
+        return ctx.sb.from('booking_slots').update({ booked_count: freshCount + 1 }).eq('id', slot.id);
+      });
     }).then(function(){
       btn.textContent = "✓ You're booked";
       var when = new Date(ctx.selectedDate + 'T12:00:00').toLocaleDateString('en-GB', { weekday: 'long', day: 'numeric', month: 'long' });
@@ -416,6 +460,7 @@
         }, ctx.sb);
       }
     }).catch(function(e){
+      if (e && e.message === '__slot_taken__') return; // already handled above
       btn.disabled = false; btn.textContent = 'Try again';
       alert('Booking failed: ' + (e && e.message ? e.message : 'unknown'));
     });
