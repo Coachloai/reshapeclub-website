@@ -1470,14 +1470,14 @@ async function forgotPassword(){
       </div>
       <div class="filter-divider"></div>
       <div class="filter-group">
-        <span class="filter-label">Page</span>
+        <span class="filter-label">Funnel</span>
         <select class="filter-select" id="filter-form" style="min-width:140px">
-          <option value="">All Pages</option>
-          <option value="Main Landing Page">reshapeclub.com</option>
-          <option value="Men Landing Page">reshapeclub.com/men</option>
-          <option value="Women Landing Page">reshapeclub.com/women</option>
-          <option value="Seminar Application">reshapeclub.com/seminar-application</option>
-          <option value="ReShape Club">reshapeclub.com</option>
+          <option value="">All</option>
+          <option value="Main Landing Page">reshape.fit</option>
+          <option value="Revamp Landing Page">reshapeclub.com</option>
+          <option value="Hormonal Assessment">Hormonal Assessment</option>
+          <option value="Seminar Application">Seminar Application</option>
+          <option value="Meta-Leads-05/26">Meta Leads</option>
         </select>
       </div>
       <div class="filter-group">
@@ -3010,7 +3010,7 @@ var sbAuth = supabase.createClient(SUPABASE_URL, SUPABASE_ANON_KEY, {
 /* ══════════════════════════════════════
    DATA
 ══════════════════════════════════════ */
-let ALL_LEADS = [];
+var ALL_LEADS = [];
 
 function mapLead(row, i) {
   var name = ((row.first_name || '') + ' ' + (row.last_name || '')).trim() || row.email || 'Unknown';
@@ -3031,7 +3031,7 @@ function mapLead(row, i) {
     phone: row.phone || '',
     location: row.location || 'Unknown',
     form: row.form_name || 'Intake',
-    formLabel: ({'Main Landing Page':'reshapeclub.com','Men Landing Page':'reshapeclub.com/men','Women Landing Page':'reshapeclub.com/women','Seminar Application':'reshapeclub.com/seminar-application','ReShape Club':'reshapeclub.com'})[row.form_name] || row.form_name || 'Unknown',
+    formLabel: ({'Main Landing Page':'reshape.fit','Revamp Landing Page':'reshapeclub.com','Hormonal Assessment':'Hormonal Assessment','Seminar Application':'Seminar Application','Meta-Leads-05/26':'Meta Leads'})[row.form_name] || row.form_name || 'Unknown',
     quality: quality,
     age: parseInt(row.age) || 0,
     gender: row.gender || 'Unknown',
