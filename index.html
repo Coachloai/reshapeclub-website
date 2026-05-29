@@ -409,13 +409,21 @@
     display:flex;flex-direction:column;
   }
   .path:hover{background:var(--cream-2);}
+  .path .path-icon{
+    width:56px;height:56px;margin-bottom:20px;
+    border-radius:14px;
+    display:flex;align-items:center;justify-content:center;
+    background:linear-gradient(135deg,rgba(237,92,37,0.08),rgba(237,92,37,0.03));
+    border:1px solid rgba(237,92,37,0.1);
+  }
+  .path .path-icon svg{width:28px;height:28px;}
   .path .n{
     font-family:'Inter', sans-serif;
     font-size:48px;font-weight:300;
     line-height:1;color:var(--sage);
     font-style:italic;
     font-variation-settings:"opsz" 144, "SOFT" 100;
-    margin-bottom:50px;
+    margin-bottom:24px;
   }
   .path h3{
     font-family:'Inter', sans-serif;
@@ -1418,6 +1426,14 @@
   <div class="paths-grid">
 
     <article class="path">
+      <div class="path-icon">
+        <svg viewBox="0 0 28 28" fill="none" xmlns="http://www.w3.org/2000/svg">
+          <path d="M3 22L10 10L14 16L19 8L25 22" stroke="#ED5C25" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"/>
+          <path d="M3 22H25" stroke="#ED5C25" stroke-width="1.8" stroke-linecap="round"/>
+          <circle cx="14" cy="16" r="2" fill="#ED5C25" opacity=".25"/>
+          <path d="M14 16V10" stroke="#ED5C25" stroke-width="1.2" stroke-linecap="round" stroke-dasharray="2 2"/>
+        </svg>
+      </div>
       <span class="n">01</span>
       <h3>Stuck on a plateau, despite the work</h3>
       <p>You're doing the diet, the workouts, the "right things" — and the scale won't move. Not a willpower problem. A pattern problem.</p>
@@ -1425,6 +1441,14 @@
     </article>
 
     <article class="path">
+      <div class="path-icon">
+        <svg viewBox="0 0 28 28" fill="none" xmlns="http://www.w3.org/2000/svg">
+          <path d="M14 24V14" stroke="#ED5C25" stroke-width="1.8" stroke-linecap="round"/>
+          <path d="M14 14C14 14 8 12 8 7C8 4 10.5 3 12 3C13.5 3 14 5 14 5C14 5 14.5 3 16 3C17.5 3 20 4 20 7C20 12 14 14 14 14Z" fill="#ED5C25" opacity=".15" stroke="#ED5C25" stroke-width="1.8" stroke-linejoin="round"/>
+          <path d="M9 22C9 22 11 19 14 19C17 19 19 22 19 22" stroke="#ED5C25" stroke-width="1.8" stroke-linecap="round"/>
+          <path d="M7 25C7 25 10 21 14 21C18 21 21 25 21 25" stroke="#ED5C25" stroke-width="1.2" stroke-linecap="round" opacity=".4"/>
+        </svg>
+      </div>
       <span class="n">02</span>
       <h3>Postpartum, and still not yourself</h3>
       <p>The body changed. Some of it came back. Most of it didn't. The exhaustion, the belly, the fog — it's addressable. It's a system, not a sacrifice.</p>
@@ -1432,6 +1456,16 @@
     </article>
 
     <article class="path">
+      <div class="path-icon">
+        <svg viewBox="0 0 28 28" fill="none" xmlns="http://www.w3.org/2000/svg">
+          <circle cx="14" cy="14" r="9" stroke="#ED5C25" stroke-width="1.8" opacity=".2"/>
+          <path d="M14 5C18.97 5 23 9.03 23 14" stroke="#ED5C25" stroke-width="1.8" stroke-linecap="round"/>
+          <path d="M14 23C9.03 23 5 18.97 5 14" stroke="#ED5C25" stroke-width="1.8" stroke-linecap="round"/>
+          <path d="M21 12L23 14L25 12" stroke="#ED5C25" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"/>
+          <path d="M7 16L5 14L3 16" stroke="#ED5C25" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"/>
+          <circle cx="14" cy="14" r="2.5" fill="#ED5C25" opacity=".2"/>
+        </svg>
+      </div>
       <span class="n">03</span>
       <h3>40s shift — and the rules changed</h3>
       <p>The cycle changed. The mood changed. Weight settled where it never did before. You're not imagining it — and there's a protocol for it.</p>
