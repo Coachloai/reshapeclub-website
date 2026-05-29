@@ -529,31 +529,40 @@
     line-height:1.6;
   }
   .proof-results{
-    display:grid;grid-template-columns:repeat(4,1fr);gap:20px;
-    max-width:960px;margin:40px auto 44px;
+    display:grid;grid-template-columns:repeat(4,1fr);gap:24px;
+    max-width:1060px;margin:48px auto 48px;
   }
-  @media(max-width:880px){.proof-results{grid-template-columns:repeat(2,1fr);}}
-  @media(max-width:480px){.proof-results{grid-template-columns:1fr;max-width:300px;}}
+  @media(max-width:960px){.proof-results{grid-template-columns:repeat(2,1fr);max-width:540px;}}
+  @media(max-width:480px){.proof-results{grid-template-columns:1fr;max-width:280px;}}
   .proof-result-card{
-    position:relative;border-radius:16px;overflow:hidden;
-    aspect-ratio:1;background:var(--cream-3);
-    box-shadow:0 8px 30px rgba(42,39,36,0.1);
-    transition:transform .3s,box-shadow .3s;
+    background:var(--ink);border-radius:20px;overflow:hidden;
+    transition:transform .35s cubic-bezier(.25,.46,.45,.94),box-shadow .35s;
+    box-shadow:0 4px 24px rgba(42,39,36,0.12);
   }
-  .proof-result-card:hover{transform:translateY(-4px);box-shadow:0 12px 40px rgba(237,92,37,0.15);}
-  .proof-result-card img{width:100%;height:100%;object-fit:cover;display:block;}
-  .proof-result-card .pr-overlay{
-    position:absolute;left:0;right:0;bottom:0;
-    padding:16px;
-    background:linear-gradient(to top,rgba(42,39,36,0.88) 0%,rgba(42,39,36,0.4) 60%,transparent 100%);
-    color:var(--cream);text-align:left;
+  .proof-result-card:hover{transform:translateY(-6px) scale(1.02);box-shadow:0 20px 50px rgba(237,92,37,0.18);}
+  .proof-result-card .pr-img{
+    position:relative;overflow:hidden;aspect-ratio:1;
   }
-  .proof-result-card .pr-name{font-family:'Inter',sans-serif;font-size:16px;font-weight:700;}
-  .proof-result-card .pr-meta{font-size:12px;opacity:0.8;margin-top:2px;}
+  .proof-result-card .pr-img img{width:100%;height:100%;object-fit:cover;display:block;transition:transform .5s;}
+  .proof-result-card:hover .pr-img img{transform:scale(1.05);}
+  .proof-result-card .pr-img::after{
+    content:'';position:absolute;inset:0;
+    background:linear-gradient(to top,var(--ink) 0%,transparent 40%);
+    pointer-events:none;
+  }
+  .proof-result-card .pr-body{
+    padding:0 20px 20px;margin-top:-20px;position:relative;z-index:1;color:var(--cream);
+  }
+  .proof-result-card .pr-name{
+    font-family:'Inter',sans-serif;font-size:18px;font-weight:700;letter-spacing:-0.01em;
+  }
+  .proof-result-card .pr-meta{
+    font-size:13px;opacity:0.6;margin-top:4px;
+  }
   .proof-result-card .pr-lost{
-    display:inline-block;margin-top:6px;padding:3px 10px;
+    display:inline-block;margin-top:10px;padding:5px 14px;
     background:var(--sage);color:#fff;border-radius:999px;
-    font-size:12px;font-weight:700;letter-spacing:0.02em;
+    font-size:13px;font-weight:700;letter-spacing:0.03em;
   }
 
   /* =========================================================
@@ -1473,32 +1482,32 @@
 
     <div class="proof-results">
       <div class="proof-result-card">
-        <img src="assets/ba-mark.jpg" alt="Mark's transformation" loading="lazy">
-        <div class="pr-overlay">
+        <div class="pr-img"><img src="assets/ba-mark.jpg" alt="Mark — before and after" loading="lazy"></div>
+        <div class="pr-body">
           <div class="pr-name">Mark</div>
           <div class="pr-meta">Age: 40s · 12 weeks</div>
           <span class="pr-lost">−14kg</span>
         </div>
       </div>
       <div class="proof-result-card">
-        <img src="assets/ba-megan.jpg" alt="Megan's transformation" loading="lazy">
-        <div class="pr-overlay">
+        <div class="pr-img"><img src="assets/ba-megan.jpg" alt="Megan — before and after" loading="lazy"></div>
+        <div class="pr-body">
           <div class="pr-name">Megan</div>
           <div class="pr-meta">Age: 30s · 12 weeks</div>
           <span class="pr-lost">−12kg</span>
         </div>
       </div>
       <div class="proof-result-card">
-        <img src="assets/ba-matt.jpg" alt="Matt's transformation" loading="lazy">
-        <div class="pr-overlay">
+        <div class="pr-img"><img src="assets/ba-matt.jpg" alt="Matt — before and after" loading="lazy"></div>
+        <div class="pr-body">
           <div class="pr-name">Matt</div>
           <div class="pr-meta">Age: 40s · 12 weeks</div>
           <span class="pr-lost">−12kg</span>
         </div>
       </div>
       <div class="proof-result-card">
-        <img src="assets/ba-claire.jpg" alt="Claire's transformation" loading="lazy">
-        <div class="pr-overlay">
+        <div class="pr-img"><img src="assets/ba-claire.jpg" alt="Claire — before and after" loading="lazy"></div>
+        <div class="pr-body">
           <div class="pr-name">Claire</div>
           <div class="pr-meta">Age: 50s · 12 weeks</div>
           <span class="pr-lost">−11kg</span>
