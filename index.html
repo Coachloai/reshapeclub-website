@@ -410,13 +410,17 @@
   }
   .path:hover{background:var(--cream-2);}
   .path .path-icon{
-    width:56px;height:56px;margin-bottom:20px;
-    border-radius:14px;
+    width:100%;aspect-ratio:16/9;margin-bottom:28px;
+    border-radius:16px;
     display:flex;align-items:center;justify-content:center;
-    background:linear-gradient(135deg,rgba(237,92,37,0.08),rgba(237,92,37,0.03));
-    border:1px solid rgba(237,92,37,0.1);
+    background:linear-gradient(145deg,var(--ink) 0%,#3a3530 100%);
+    overflow:hidden;position:relative;
   }
-  .path .path-icon svg{width:28px;height:28px;}
+  .path .path-icon::before{
+    content:'';position:absolute;inset:0;
+    background:radial-gradient(ellipse at 50% 80%,rgba(237,92,37,0.15),transparent 70%);
+  }
+  .path .path-icon svg{width:100%;height:100%;position:relative;z-index:1;}
   .path .n{
     font-family:'Inter', sans-serif;
     font-size:48px;font-weight:300;
@@ -1427,11 +1431,26 @@
 
     <article class="path">
       <div class="path-icon">
-        <svg viewBox="0 0 28 28" fill="none" xmlns="http://www.w3.org/2000/svg">
-          <path d="M3 22L10 10L14 16L19 8L25 22" stroke="#ED5C25" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"/>
-          <path d="M3 22H25" stroke="#ED5C25" stroke-width="1.8" stroke-linecap="round"/>
-          <circle cx="14" cy="16" r="2" fill="#ED5C25" opacity=".25"/>
-          <path d="M14 16V10" stroke="#ED5C25" stroke-width="1.2" stroke-linecap="round" stroke-dasharray="2 2"/>
+        <svg viewBox="0 0 320 180" fill="none" xmlns="http://www.w3.org/2000/svg">
+          <!-- Grid lines -->
+          <line x1="40" y1="30" x2="40" y2="150" stroke="#4a4540" stroke-width=".5"/>
+          <line x1="40" y1="150" x2="300" y2="150" stroke="#4a4540" stroke-width=".5"/>
+          <line x1="40" y1="110" x2="300" y2="110" stroke="#4a4540" stroke-width=".3" stroke-dasharray="4 4"/>
+          <line x1="40" y1="70" x2="300" y2="70" stroke="#4a4540" stroke-width=".3" stroke-dasharray="4 4"/>
+          <!-- Progress line going up then flat -->
+          <path d="M50 140 L80 120 L110 95 L140 80 L160 75" stroke="#ED5C25" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round" opacity=".3"/>
+          <!-- Flat plateau line -->
+          <path d="M160 75 L190 76 L220 75 L250 76 L280 75" stroke="#ED5C25" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"/>
+          <!-- Glow on plateau -->
+          <circle cx="220" cy="75" r="20" fill="#ED5C25" opacity=".08"/>
+          <circle cx="220" cy="75" r="8" fill="#ED5C25" opacity=".12"/>
+          <!-- Pulse dot -->
+          <circle cx="280" cy="75" r="5" fill="#ED5C25" opacity=".9"/>
+          <circle cx="280" cy="75" r="9" stroke="#ED5C25" stroke-width="1" opacity=".3"/>
+          <!-- Labels -->
+          <text x="50" y="165" fill="#6a6560" font-family="DM Sans,sans-serif" font-size="9" letter-spacing=".05em">EFFORT</text>
+          <text x="250" y="165" fill="#ED5C25" font-family="DM Sans,sans-serif" font-size="9" font-weight="600" letter-spacing=".05em">STUCK</text>
+          <text x="28" y="78" fill="#6a6560" font-family="DM Sans,sans-serif" font-size="7" text-anchor="end" transform="rotate(-90,28,78)">RESULTS</text>
         </svg>
       </div>
       <span class="n">01</span>
@@ -1442,11 +1461,24 @@
 
     <article class="path">
       <div class="path-icon">
-        <svg viewBox="0 0 28 28" fill="none" xmlns="http://www.w3.org/2000/svg">
-          <path d="M14 24V14" stroke="#ED5C25" stroke-width="1.8" stroke-linecap="round"/>
-          <path d="M14 14C14 14 8 12 8 7C8 4 10.5 3 12 3C13.5 3 14 5 14 5C14 5 14.5 3 16 3C17.5 3 20 4 20 7C20 12 14 14 14 14Z" fill="#ED5C25" opacity=".15" stroke="#ED5C25" stroke-width="1.8" stroke-linejoin="round"/>
-          <path d="M9 22C9 22 11 19 14 19C17 19 19 22 19 22" stroke="#ED5C25" stroke-width="1.8" stroke-linecap="round"/>
-          <path d="M7 25C7 25 10 21 14 21C18 21 21 25 21 25" stroke="#ED5C25" stroke-width="1.2" stroke-linecap="round" opacity=".4"/>
+        <svg viewBox="0 0 320 180" fill="none" xmlns="http://www.w3.org/2000/svg">
+          <!-- Body silhouette before -->
+          <path d="M95 55 C95 45 100 38 110 38 C120 38 125 45 125 55 L125 58 C125 58 130 62 130 72 L130 110 C130 115 127 118 122 118 L98 118 C93 118 90 115 90 110 L90 72 C90 62 95 58 95 58Z" fill="#5a5550" opacity=".4"/>
+          <circle cx="110" cy="28" r="12" fill="#5a5550" opacity=".4"/>
+          <text x="110" y="140" fill="#6a6560" font-family="DM Sans,sans-serif" font-size="9" text-anchor="middle" letter-spacing=".05em">BEFORE</text>
+          <!-- Arrow -->
+          <path d="M150 75 L170 75" stroke="#ED5C25" stroke-width="2" stroke-linecap="round"/>
+          <path d="M165 70 L172 75 L165 80" stroke="#ED5C25" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/>
+          <!-- Scattered fragments -->
+          <rect x="155" y="55" width="8" height="3" rx="1" fill="#ED5C25" opacity=".15" transform="rotate(-20,159,56)"/>
+          <rect x="152" y="90" width="10" height="3" rx="1" fill="#ED5C25" opacity=".1" transform="rotate(15,157,91)"/>
+          <circle cx="162" cy="65" r="2" fill="#ED5C25" opacity=".12"/>
+          <!-- Body silhouette after — stronger -->
+          <path d="M195 55 C195 47 200 40 210 40 C220 40 225 47 225 55 L225 57 C225 57 228 60 228 68 L228 108 C228 113 225 116 221 116 L199 116 C195 116 192 113 192 108 L192 68 C192 60 195 57 195 57Z" fill="#ED5C25" opacity=".2" stroke="#ED5C25" stroke-width="1.5"/>
+          <circle cx="210" cy="30" r="11" fill="#ED5C25" opacity=".2" stroke="#ED5C25" stroke-width="1.5"/>
+          <text x="210" y="140" fill="#ED5C25" font-family="DM Sans,sans-serif" font-size="9" text-anchor="middle" font-weight="600" letter-spacing=".05em">RESET</text>
+          <!-- Glow -->
+          <circle cx="210" cy="75" r="35" fill="#ED5C25" opacity=".04"/>
         </svg>
       </div>
       <span class="n">02</span>
@@ -1457,13 +1489,24 @@
 
     <article class="path">
       <div class="path-icon">
-        <svg viewBox="0 0 28 28" fill="none" xmlns="http://www.w3.org/2000/svg">
-          <circle cx="14" cy="14" r="9" stroke="#ED5C25" stroke-width="1.8" opacity=".2"/>
-          <path d="M14 5C18.97 5 23 9.03 23 14" stroke="#ED5C25" stroke-width="1.8" stroke-linecap="round"/>
-          <path d="M14 23C9.03 23 5 18.97 5 14" stroke="#ED5C25" stroke-width="1.8" stroke-linecap="round"/>
-          <path d="M21 12L23 14L25 12" stroke="#ED5C25" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"/>
-          <path d="M7 16L5 14L3 16" stroke="#ED5C25" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"/>
-          <circle cx="14" cy="14" r="2.5" fill="#ED5C25" opacity=".2"/>
+        <svg viewBox="0 0 320 180" fill="none" xmlns="http://www.w3.org/2000/svg">
+          <!-- Hormone wave — erratic -->
+          <path d="M30 110 C45 110 50 45 65 45 C80 45 75 130 95 130 C115 130 110 35 130 35 C145 35 140 120 155 120" stroke="#5a5550" stroke-width="2" stroke-linecap="round" opacity=".35"/>
+          <!-- Arrow transition -->
+          <path d="M165 90 L175 90" stroke="#ED5C25" stroke-width="1.5" stroke-linecap="round"/>
+          <path d="M172 86 L177 90 L172 94" stroke="#ED5C25" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"/>
+          <!-- Hormone wave — balanced -->
+          <path d="M185 95 C195 95 200 70 210 70 C220 70 225 95 235 95 C245 95 250 70 260 70 C270 70 275 95 285 95" stroke="#ED5C25" stroke-width="2.5" stroke-linecap="round"/>
+          <!-- Glow behind balanced wave -->
+          <ellipse cx="235" cy="82" rx="55" ry="25" fill="#ED5C25" opacity=".06"/>
+          <!-- Labels -->
+          <text x="90" y="165" fill="#6a6560" font-family="DM Sans,sans-serif" font-size="9" text-anchor="middle" letter-spacing=".05em">CHAOTIC</text>
+          <text x="235" y="165" fill="#ED5C25" font-family="DM Sans,sans-serif" font-size="9" text-anchor="middle" font-weight="600" letter-spacing=".05em">BALANCED</text>
+          <!-- Axis markers -->
+          <text x="22" y="50" fill="#6a6560" font-family="DM Sans,sans-serif" font-size="7">E₂</text>
+          <text x="22" y="90" fill="#6a6560" font-family="DM Sans,sans-serif" font-size="7">P₄</text>
+          <text x="22" y="125" fill="#6a6560" font-family="DM Sans,sans-serif" font-size="7">T</text>
+          <line x1="32" y1="30" x2="32" y2="150" stroke="#4a4540" stroke-width=".5"/>
         </svg>
       </div>
       <span class="n">03</span>
