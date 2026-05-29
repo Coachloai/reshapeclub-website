@@ -252,10 +252,10 @@ async function loadBookingSlots(loc) {
 async function applyConflictCalendarFiltering() {
   if (!__bookingSlots || __bookingSlots.length === 0) return;
   try {
-    // Location-specific conflict calendars
+    // Location-specific conflict calendars (prefixed for calendar-freebusy edge function)
     var locConflicts = {
-      'Colchester': ['Colchester consults ', 'Sean'],
-      'Ipswich':    ['Ipswich consults ', 'Sara ']
+      'Colchester': ['icloud:Colchester consults ', 'icloud:Sean'],
+      'Ipswich':    ['icloud:Ipswich consults ', 'icloud:Sara ']
     };
     var cals = locConflicts[__selectedLoc];
     if (!cals || cals.length === 0) return; // no conflict calendars for this location
