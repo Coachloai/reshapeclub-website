@@ -1702,61 +1702,70 @@ async function forgotPassword(){
         </button>
       </div>
       <!-- LEADS VIEW FILTER BAR -->
-      <div class="lv-filters fade-in" style="margin-bottom:16px">
+      <div class="filters fade-in" style="margin-bottom:16px">
         <div class="filter-group">
-          <label class="filter-label">From</label>
-          <input type="date" class="filter-input" id="lv-from" autocomplete="off">
+          <span class="filter-label">📅</span>
+          <input type="date" class="filter-input" id="lv-from" autocomplete="off" style="min-width:120px">
         </div>
         <div class="filter-group">
-          <label class="filter-label">To</label>
-          <input type="date" class="filter-input" id="lv-to" autocomplete="off">
+          <div class="seg-toggle period" id="lv-seg-period">
+            <button class="active" onclick="setLVPeriod('all',this)">All</button>
+            <button onclick="setLVPeriod('day',this)">Day</button>
+            <button onclick="setLVPeriod('week',this)">Week</button>
+            <button onclick="setLVPeriod('month',this)">Month</button>
+            <button onclick="setLVPeriod('year',this)">Year</button>
+          </div>
         </div>
+        <div class="filter-divider"></div>
         <div class="filter-group">
-          <label class="filter-label">Location</label>
-          <select class="filter-select" id="lv-location">
+          <span class="filter-label">Location</span>
+          <div class="seg-toggle loc" id="lv-seg-location">
+            <button class="active" onclick="setLVLoc('',this)">All</button>
+            <button onclick="setLVLoc('Ipswich',this)">Ipswich</button>
+            <button onclick="setLVLoc('Colchester',this)">Colchester</button>
+          </div>
+          <select class="filter-select" id="lv-location" style="display:none">
             <option value="">All Locations</option>
             <option>Colchester</option>
             <option>Ipswich</option>
           </select>
         </div>
+        <div class="filter-divider"></div>
         <div class="filter-group">
-          <label class="filter-label">Gender</label>
-          <select class="filter-select" id="lv-gender">
+          <span class="filter-label">Funnel</span>
+          <select class="filter-select" id="lv-form" style="min-width:140px">
+            <option value="">All</option>
+            <option value="Main Landing Page">reshape.fit</option>
+            <option value="Revamp Landing Page">reshapeclub.com</option>
+            <option value="Hormonal Assessment">Hormonal Assessment</option>
+            <option value="Seminar Application">Seminar Application</option>
+            <option value="Meta-Leads-05/26">Meta Leads</option>
+          </select>
+        </div>
+        <div class="filter-group">
+          <span class="filter-label">Gender</span>
+          <select class="filter-select" id="lv-gender" style="min-width:80px">
             <option value="">All</option>
             <option>Male</option>
             <option>Female</option>
           </select>
         </div>
         <div class="filter-group">
-          <label class="filter-label">Quality</label>
-          <select class="filter-select" id="lv-quality">
+          <span class="filter-label">Quality</span>
+          <select class="filter-select" id="lv-quality" style="min-width:80px">
             <option value="">All</option>
             <option>High</option>
             <option>Med</option>
             <option>Low</option>
           </select>
         </div>
-        <div class="filter-group">
-          <label class="filter-label">Website</label>
-          <select class="filter-select" id="lv-form">
-            <option value="">All Pages</option>
-            <option value="Main Landing Page">reshapeclub.com</option>
-            <option value="Men Landing Page">reshapeclub.com/men</option>
-            <option value="Women Landing Page">reshapeclub.com/women</option>
-            <option value="Seminar Application">reshapeclub.com/seminar-application</option>
-            <option value="ReShape Club">reshapeclub.com</option>
-          </select>
-        </div>
         <div class="filter-divider"></div>
         <div class="filter-group wide">
-          <label class="filter-label">Search</label>
-          <input type="text" class="filter-input" id="lv-search" placeholder="Name or email…">
+          <input type="text" class="filter-input" id="lv-search" placeholder="Search…" style="padding-left:28px;width:100%">
         </div>
         <div class="filter-actions">
-          <button class="btn btn-primary" onclick="applyLVFilters()">Apply</button>
-          <button class="btn btn-ghost" onclick="clearLVFilters()">
-            <svg width="11" height="11" fill="none" stroke="currentColor" stroke-width="2.5" viewBox="0 0 24 24"><line x1="18" y1="6" x2="6" y2="18"/><line x1="6" y1="6" x2="18" y2="18"/></svg>
-          </button>
+          <button class="btn btn-primary btn-sm" onclick="applyLVFilters()">Apply</button>
+          <button class="btn btn-ghost btn-sm" onclick="clearLVFilters()" style="font-size:11px">Clear</button>
         </div>
       </div>
       <div class="table-card fade-in">
@@ -3060,7 +3069,7 @@ async function fetchLeads() {
 
 async function initDashboard() {
   // Clear any browser-autocompleted or leftover filter values
-  ['filter-date','filter-search','table-search','lv-from','lv-to','lv-search'].forEach(id => {
+  ['filter-date','filter-search','table-search','lv-from','lv-search'].forEach(id => {
     var el = document.getElementById(id);
     if (el) el.value = '';
   });
@@ -7995,9 +8004,31 @@ function initDrawerCharts(type) {
   }
 }
 /* ══ LEADS VIEW FILTERS ══════════════ */
+let __lvActivePeriod='all', __lvActiveLoc='';
+function setLVPeriod(p,btn){
+  __lvActivePeriod=p;
+  btn.parentElement.querySelectorAll('button').forEach(b=>b.classList.remove('active'));
+  btn.classList.add('active');
+  const dateEl=document.getElementById('lv-from');
+  if(p==='all'){dateEl.value='';return;}
+  const now=new Date(),y=now.getFullYear(),m=now.getMonth(),d=now.getDate();
+  let from;
+  if(p==='day')from=new Date(y,m,d);
+  else if(p==='week'){from=new Date(y,m,d);from.setDate(from.getDate()-from.getDay()+1);}
+  else if(p==='month')from=new Date(y,m,1);
+  else if(p==='year')from=new Date(y,0,1);
+  dateEl.value=from.toISOString().slice(0,10);
+}
+function setLVLoc(loc,btn){
+  __lvActiveLoc=loc;
+  btn.parentElement.querySelectorAll('button').forEach(b=>b.classList.remove('active'));
+  btn.classList.add('active');
+  const sel=document.getElementById('lv-location');if(sel)sel.value=loc;
+}
 function applyLVFilters() {
-  const from=document.getElementById('lv-from')?.value, to=document.getElementById('lv-to')?.value;
-  const loc=document.getElementById('lv-location')?.value, gen=document.getElementById('lv-gender')?.value;
+  const from=document.getElementById('lv-from')?.value;
+  const to=__lvActivePeriod==='all'?'':new Date().toISOString().slice(0,10);
+  const loc=__lvActiveLoc, gen=document.getElementById('lv-gender')?.value;
   const qual=document.getElementById('lv-quality')?.value, frm=document.getElementById('lv-form')?.value;
   const srch=(document.getElementById('lv-search')?.value||'').toLowerCase();
   filtered=ALL_LEADS.filter(l=>{
@@ -8011,8 +8042,12 @@ function applyLVFilters() {
   showToast(filtered.length+' lead'+(filtered.length!==1?'s':'')+' found');
 }
 function clearLVFilters() {
-  ['lv-from','lv-to','lv-search'].forEach(id=>{const el=document.getElementById(id);if(el)el.value='';});
+  __lvActivePeriod='all'; __lvActiveLoc='';
+  ['lv-from','lv-search'].forEach(id=>{const el=document.getElementById(id);if(el)el.value='';});
   ['lv-location','lv-gender','lv-quality','lv-form'].forEach(id=>{const el=document.getElementById(id);if(el)el.selectedIndex=0;});
+  document.querySelectorAll('#lv-seg-period button, #lv-seg-location button').forEach(b=>b.classList.remove('active'));
+  document.querySelector('#lv-seg-period button')?.classList.add('active');
+  document.querySelector('#lv-seg-location button')?.classList.add('active');
   filtered=[...ALL_LEADS]; currentPage=1; renderLeadsView();
 }
 /* ══ KEYBOARD CLOSE ══════════════════ */

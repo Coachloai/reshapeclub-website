@@ -27,8 +27,14 @@ const LIFE_STAGE_LABEL: Record<string, string> = {
   "20s":            "In her 20s",
   "30s":            "In her 30s",
   "40s":            "In her 40s",
+  "50s":            "In her 50s",
   "perimenopausal": "Perimenopausal",
   "menopausal":     "Menopausal / post-menopausal",
+};
+
+const LIFE_STAGE_AGE: Record<string, number> = {
+  "20s": 25, "30s": 35, "40s": 45, "50s": 55,
+  "perimenopausal": 45, "menopausal": 55,
 };
 
 const STRUGGLE_LABEL: Record<string, string> = {
@@ -174,6 +180,8 @@ Deno.serve(async (req) => {
         last_name:    last_name || "-",
         email,
         phone,
+        age:          LIFE_STAGE_AGE[life_stage] || null,
+        gender:       "Female",
         location:     "Colchester",
         looking_for:  LIFE_STAGE_LABEL[life_stage] || life_stage,
         reason:       STRUGGLE_LABEL[top_struggle] || top_struggle,
