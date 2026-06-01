@@ -262,11 +262,24 @@ async function fetchLeadsBy(opts: { ids?: string[]; filter?: any }, channel: str
     if (a.age_max != null) params.append('age', `lte.${Number(a.age_max)}`);
   }
 
-  const res = await fetch(`${SUPABASE_URL}/rest/v1/leads?${params.toString()}`, {
-    headers: srHeaders(),
-  });
-  const rows = await res.json();
-  return Array.isArray(rows) ? rows : [];
+  // Paginate to get all results (PostgREST default max is 1000)
+  const PAGE = 1000;
+  let all: any[] = [];
+  let offset = 0;
+  while (true) {
+    const pageParams = new URLSearchParams(params);
+    pageParams.set('limit', String(PAGE));
+    pageParams.set('offset', String(offset));
+    const res = await fetch(`${SUPABASE_URL}/rest/v1/leads?${pageParams.toString()}`, {
+      headers: srHeaders(),
+    });
+    const rows = await res.json();
+    if (!Array.isArray(rows) || rows.length === 0) break;
+    all = all.concat(rows);
+    if (rows.length < PAGE) break;
+    offset += PAGE;
+  }
+  return all;
 }
 
 function fillTokens(text: string, lead: any): string {
