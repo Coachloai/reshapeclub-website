@@ -3689,8 +3689,8 @@ async function msgLoadLists() {
          +     '<input type="checkbox" value="' + msgEsc(name) + '">'
          +     '<span>' + msgEsc(name) + ' <span style="color:var(--text3)">(' + counts[name] + ')</span></span>'
          +   '</label>'
-         +   '<button onclick="msgRenameList(\'' + msgEsc(name).replace(/'/g, "\\'") + '\')" title="Rename" style="background:none;border:none;color:var(--text3);cursor:pointer;font-size:12px;padding:2px 4px;opacity:0.6">✏️</button>'
-         +   '<button onclick="msgDeleteList(\'' + msgEsc(name).replace(/'/g, "\\'") + '\')" title="Delete" style="background:none;border:none;color:var(--red);cursor:pointer;font-size:12px;padding:2px 4px;opacity:0.6">🗑</button>'
+         +   '<button onclick="msgRenameList(\'' + msgEsc(name).replace(/'/g, "\\'") + '\')" title="Rename" style="background:none;border:none;color:var(--text2);cursor:pointer;font-size:14px;padding:4px 6px;line-height:1">✏️</button>'
+         +   '<button onclick="msgDeleteList(\'' + msgEsc(name).replace(/'/g, "\\'") + '\')" title="Delete" style="background:none;border:none;color:var(--red);cursor:pointer;font-size:14px;padding:4px 6px;line-height:1">🗑</button>'
          + '</div>';
   }).join('');
   document.getElementById('msg-lists').innerHTML = html || '<div style="font-size:12px;color:var(--text3);padding:4px">No leads yet.</div>';
