@@ -256,7 +256,7 @@ async function fetchLeadsBy(opts: { ids?: string[]; filter?: any }, channel: str
     if (a.location_q && String(a.location_q).trim()) {
       params.append('location', `ilike.*${String(a.location_q).trim()}*`);
     }
-    const genders = toArr(a.gender);
+    const genders = toArr(a.gender).map((g: string) => g.charAt(0).toUpperCase() + g.slice(1).toLowerCase());
     if (genders.length) params.append('gender', `in.(${genders.map(quote).join(',')})`);
     if (a.age_min != null) params.append('age', `gte.${Number(a.age_min)}`);
     if (a.age_max != null) params.append('age', `lte.${Number(a.age_max)}`);
