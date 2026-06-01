@@ -2839,12 +2839,13 @@ async function forgotPassword(){
           <div class="csv-section">
             <h4>Map columns</h4>
             <div class="csv-mapping">
-              <label>Email column<select class="msg-select" id="csv-map-email" data-required="1"></select></label>
+              <label>Email<select class="msg-select" id="csv-map-email"></select></label>
               <label>First name<select class="msg-select" id="csv-map-first_name"></select></label>
               <label>Last name<select class="msg-select" id="csv-map-last_name"></select></label>
               <label>Phone<select class="msg-select" id="csv-map-phone"></select></label>
               <label>Location<select class="msg-select" id="csv-map-location"></select></label>
               <label>Age<select class="msg-select" id="csv-map-age"></select></label>
+              <label>Gender<select class="msg-select" id="csv-map-gender"></select></label>
             </div>
           </div>
 
@@ -2860,7 +2861,7 @@ async function forgotPassword(){
           </div>
 
           <div class="csv-summary" id="csv-summary">
-            <span><strong id="csv-summary-valid">0</strong> valid rows · <strong id="csv-summary-invalid">0</strong> skipped (missing email)</span>
+            <span><strong id="csv-summary-valid">0</strong> valid rows · <strong id="csv-summary-invalid">0</strong> skipped (empty rows)</span>
             <span id="csv-summary-existing" style="color:var(--text3)"></span>
           </div>
 
@@ -4411,7 +4412,7 @@ function csvBindOnce() {
   });
   document.getElementById('csv-attest').addEventListener('change', csvValidate);
   document.getElementById('csv-list-name').addEventListener('input', csvValidate);
-  ['email','first_name','last_name','phone','location','age'].forEach(function(k){
+  ['email','first_name','last_name','phone','location','age','gender'].forEach(function(k){
     document.getElementById('csv-map-' + k).addEventListener('change', csvApplyMapping);
   });
   document.getElementById('csv-import-btn').addEventListener('click', csvDoImport);
@@ -4491,7 +4492,7 @@ function csvRenderPreview(headers, rows) {
 function csvFillMappingSelects(headers) {
   var opts = '<option value="">— skip —</option>'
            + headers.map(function(h, i){ return '<option value="' + i + '">' + msgEsc(h) + '</option>'; }).join('');
-  ['email','first_name','last_name','phone','location','age'].forEach(function(k){
+  ['email','first_name','last_name','phone','location','age','gender'].forEach(function(k){
     document.getElementById('csv-map-' + k).innerHTML = opts;
   });
 }
@@ -4505,6 +4506,7 @@ function csvAutoMap(headers) {
     phone:      ['phone','mobile','cell','tel','telephone','phonenumber','mobilenumber','phonenum'],
     location:   ['location','city','town','area','postcode','zip','country'],
     age:        ['age','years','agerange'],
+    gender:     ['gender','sex'],
   };
   Object.keys(pats).forEach(function(key){
     for (var i = 0; i < headers.length; i++) {
@@ -4517,13 +4519,8 @@ function csvAutoMap(headers) {
 }
 
 function csvApplyMapping() {
-  var emailIdx = document.getElementById('csv-map-email').value;
-  if (emailIdx === '') {
-    CSV_STATE.parsedRows = []; CSV_STATE.validCount = 0; CSV_STATE.invalidCount = CSV_STATE.rowTotal;
-    csvUpdateSummary(); csvValidate(); return;
-  }
   var map = {};
-  ['email','first_name','last_name','phone','location','age'].forEach(function(k){
+  ['email','first_name','last_name','phone','location','age','gender'].forEach(function(k){
     var v = document.getElementById('csv-map-' + k).value;
     if (v !== '') map[k] = parseInt(v, 10);
   });
@@ -4531,15 +4528,21 @@ function csvApplyMapping() {
   var emailRe = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
   for (var i = 0; i < CSV_STATE.rows.length; i++) {
     var r = CSV_STATE.rows[i];
-    var email = (r[map.email] || '').trim().toLowerCase();
-    if (!email || !emailRe.test(email)) { invalid++; continue; }
+    var email = map.email != null ? (r[map.email] || '').trim().toLowerCase() : '';
+    var firstName = map.first_name != null ? (r[map.first_name] || '').trim() : '';
+    var phone = map.phone != null ? (r[map.phone] || '').trim() : '';
+    // Skip rows that have no email AND no first_name AND no phone
+    if (!email && !firstName && !phone) { invalid++; continue; }
+    // If email is present but invalid format, skip
+    if (email && !emailRe.test(email)) { invalid++; continue; }
     parsed.push({
-      email:      email,
-      first_name: map.first_name != null ? (r[map.first_name] || '').trim() : '',
+      email:      email || null,
+      first_name: firstName,
       last_name:  map.last_name  != null ? (r[map.last_name]  || '').trim() : '',
-      phone:      map.phone      != null ? (r[map.phone]      || '').trim() : '',
+      phone:      phone || '',
       location:   map.location   != null ? (r[map.location]   || '').trim() : '',
       age:        map.age        != null ? (parseInt(r[map.age], 10) || null) : null,
+      gender:     map.gender     != null ? (r[map.gender]      || '').trim() : '',
     });
     valid++;
   }
@@ -4554,7 +4557,7 @@ function csvUpdateSummary() {
   document.getElementById('csv-import-count').textContent = CSV_STATE.validCount;
   var emailSet = new Set();
   (window.ALL_LEADS || []).forEach(function(l){ if (l.email) emailSet.add(l.email.toLowerCase()); });
-  var dup = CSV_STATE.parsedRows.filter(function(r){ return emailSet.has(r.email); }).length;
+  var dup = CSV_STATE.parsedRows.filter(function(r){ return r.email && emailSet.has(r.email); }).length;
   document.getElementById('csv-summary-existing').textContent = dup
     ? (dup + ' email(s) already in your leads — duplicates will be created')
     : '';
@@ -4581,12 +4584,13 @@ async function csvDoImport() {
       form_name:            listName,
       first_name:           r.first_name || '(none)',
       last_name:            r.last_name || '',
-      email:                r.email,
+      email:                r.email || null,
       phone:                hasPhone ? r.phone : null,
       location:             r.location || null,
       age:                  r.age,
-      email_consent_status: 'opted_in',
-      email_consent_source: 'csv_import_self_attest',
+      gender:               r.gender || null,
+      email_consent_status: r.email ? 'opted_in' : 'opted_out',
+      email_consent_source: r.email ? 'csv_import_self_attest' : null,
       sms_consent_status:   hasPhone ? 'opted_in' : 'opted_out',
       sms_consent_source:   hasPhone ? 'csv_import_self_attest' : null,
       wa_consent_status:    hasPhone ? 'opted_in' : 'opted_out',
