@@ -1378,6 +1378,10 @@ async function forgotPassword(){
       <span class="sb-icon">👥</span>
       <span class="sb-label">Leads</span>
     </button>
+    <button class="sb-btn" data-view="analytics" title="Analytics" onclick="switchView('analytics', this)">
+      <span class="sb-icon">📈</span>
+      <span class="sb-label">Analytics</span>
+    </button>
     <button class="sb-btn" data-view="performance" title="Performance" onclick="switchView('performance', this)">
       <span class="sb-icon">⚡</span>
       <span class="sb-label">Performance</span>
@@ -1390,14 +1394,22 @@ async function forgotPassword(){
       <span class="sb-icon">🕐</span>
       <span class="sb-label">Appointments</span>
     </button>
-    <button class="sb-btn" data-view="comms" title="Comms" onclick="switchView('comms', this)">
-      <span class="sb-icon">✉️</span>
-      <span class="sb-label">Comms</span>
+    <button class="sb-btn" data-view="inbox" title="Inbox" onclick="switchView('inbox', this)">
+      <span class="sb-icon">📨</span>
+      <span class="sb-label">Inbox</span>
       <span id="inbox-unread-dot" class="sb-dot" style="display:none"></span>
+    </button>
+    <button class="sb-btn" data-view="hormonal" title="Assessments" onclick="switchView('hormonal', this)">
+      <span class="sb-icon">🩺</span>
+      <span class="sb-label">Assessments</span>
     </button>
     <button class="sb-btn" data-view="automations" title="Automations" onclick="switchView('automations', this)">
       <span class="sb-icon">🤖</span>
       <span class="sb-label">Automations</span>
+    </button>
+    <button class="sb-btn" data-view="messaging" title="Messaging" onclick="switchView('messaging', this)">
+      <span class="sb-icon">✉️</span>
+      <span class="sb-label">Messaging</span>
     </button>
     <button class="sb-btn" data-view="content" title="Content" onclick="switchView('content', this)">
       <span class="sb-icon">🎬</span>
@@ -1653,6 +1665,7 @@ async function forgotPassword(){
               <th onclick="sortTable('location')" data-col="location"><div class="th-inner">Location<span class="sort-icon">↕</span></div></th>
               <th onclick="sortTable('form')" data-col="form"><div class="th-inner">Page<span class="sort-icon">↕</span></div></th>
               <th onclick="sortTable('quality')" data-col="quality"><div class="th-inner">Quality<span class="sort-icon">↕</span></div></th>
+              <th onclick="sortTable('booked')" data-col="booked"><div class="th-inner">Booked<span class="sort-icon">↕</span></div></th>
               <th onclick="sortTable('date')" data-col="date"><div class="th-inner">Date<span class="sort-icon">↕</span></div></th>
               <th onclick="sortTable('time')" data-col="time"><div class="th-inner">Time<span class="sort-icon">↕</span></div></th>
               <th></th>
@@ -1750,7 +1763,7 @@ async function forgotPassword(){
         </div>
         <div class="filter-divider"></div>
         <div class="filter-group wide">
-          <input type="text" class="filter-input" id="lv-search" placeholder="Search…" style="padding-left:28px;width:100%">
+          <input type="text" class="filter-input" id="lv-search" placeholder="Search…" style="padding-left:12px;width:100%">
         </div>
         <div class="filter-actions">
           <button class="btn btn-primary btn-sm" onclick="applyLVFilters()">Apply</button>
@@ -1784,6 +1797,7 @@ async function forgotPassword(){
                 <th onclick="sortTable('location')" data-col="location"><div class="th-inner">Location<span class="sort-icon">↕</span></div></th>
                 <th onclick="sortTable('form')" data-col="form"><div class="th-inner">Page<span class="sort-icon">↕</span></div></th>
                 <th onclick="sortTable('quality')" data-col="quality"><div class="th-inner">Quality<span class="sort-icon">↕</span></div></th>
+                <th onclick="sortTable('booked')" data-col="booked"><div class="th-inner">Booked<span class="sort-icon">↕</span></div></th>
                 <th onclick="sortTable('date')" data-col="date"><div class="th-inner">Date<span class="sort-icon">↕</span></div></th>
                 <th onclick="sortTable('time')" data-col="time"><div class="th-inner">Time<span class="sort-icon">↕</span></div></th>
                 <th></th>
@@ -1791,6 +1805,64 @@ async function forgotPassword(){
             </thead>
             <tbody id="leads-view-tbody"></tbody>
           </table>
+        </div>
+      </div>
+    </div>
+    <!-- ── VIEW: ANALYTICS ── -->
+    <div id="view-analytics" class="view" style="display:none">
+      <div class="page-header fade-in" style="margin-bottom:20px">
+        <div>
+          <div class="page-title">Analytics</div>
+          <div class="page-sub">Performance deep-dive</div>
+        </div>
+      </div>
+      <div class="charts-row fade-in" style="margin-bottom:20px">
+        <div class="chart-card">
+          <div class="chart-header">
+            <div>
+              <div class="chart-title">Leads Over Time</div>
+              <div class="chart-meta">Full history</div>
+            </div>
+            <div class="chart-tabs">
+              <button class="chart-tab" onclick="setPeriod('7d',this)">7D</button>
+              <button class="chart-tab active" onclick="setPeriod('30d',this)">30D</button>
+              <button class="chart-tab" onclick="setPeriod('90d',this)">90D</button>
+            </div>
+          </div>
+          <div class="chart-wrap"><canvas id="chart-time-2"></canvas></div>
+        </div>
+        <div class="chart-card">
+          <div class="chart-header"><div class="chart-title">Referral Sources</div></div>
+          <div class="chart-wrap"><canvas id="chart-sources-2"></canvas></div>
+        </div>
+      </div>
+      <div class="charts-bottom fade-in">
+        <div class="chart-card">
+          <div class="chart-header"><div class="chart-title">Gender Split</div></div>
+          <div class="donut-wrap">
+            <canvas id="chart-gender-2"></canvas>
+            <div class="donut-center">
+              <div class="donut-center-num" id="analytics-total">0</div>
+              <div class="donut-center-lbl">Total</div>
+            </div>
+          </div>
+          <div class="chart-legend" id="gender-legend-2"></div>
+        </div>
+        <div class="chart-card">
+          <div class="chart-header"><div class="chart-title">Location Split</div></div>
+          <div class="chart-wrap" style="height:160px"><canvas id="chart-location-2"></canvas></div>
+          <div class="chart-legend" id="location-legend-2"></div>
+        </div>
+        <div class="chart-card">
+          <div class="chart-header"><div class="chart-title">Quality Breakdown</div></div>
+          <div class="donut-wrap">
+            <canvas id="chart-quality"></canvas>
+            <div class="donut-center">
+              <div class="donut-center-num" id="quality-pct">83%</div>
+              <div class="donut-center-lbl">High fit</div>
+            </div>
+          </div>
+          <div class="chart-legend" id="quality-legend"></div>
         </div>
       </div>
     </div>
@@ -2152,9 +2224,9 @@ async function forgotPassword(){
             <div class="appt-form-group" style="margin-bottom:16px">
               <label class="appt-form-label">Show On Funnels</label>
               <div class="funnel-chips" id="appt-funnels">
-                <button class="funnel-chip selected" data-funnel="Main Landing Page">reshapeclub.com</button>
-                <button class="funnel-chip selected" data-funnel="Men Landing Page">reshapeclub.com/men</button>
-                <button class="funnel-chip selected" data-funnel="Women Landing Page">reshapeclub.com/women</button>
+                <button class="funnel-chip selected" data-funnel="Main Landing Page">reshape.fit</button>
+                <button class="funnel-chip selected" data-funnel="Men Landing Page">reshape.fit/men</button>
+                <button class="funnel-chip selected" data-funnel="Women Landing Page">reshape.fit/women</button>
                 <button class="funnel-chip" data-funnel="ReShape Club">reshapeclub.com</button>
               </div>
             </div>
@@ -2462,52 +2534,154 @@ async function forgotPassword(){
         <div id="appts-empty" style="display:none;text-align:center;padding:40px;color:var(--text3);font-size:13px">No appointments in this range.</div>
       </div>
     </div>
-    <!-- ── VIEW: COMMS (Inbox + Messaging) ── -->
-    <div id="view-comms" class="view" style="display:none">
+    <!-- ── VIEW: INBOX ── -->
+    <div id="view-inbox" class="view" style="display:none">
       <div class="page-header fade-in" style="margin-bottom:20px">
         <div>
-          <div class="page-title">Comms</div>
-          <div class="page-sub" id="comms-sub">Inbox &amp; broadcast messaging</div>
+          <div class="page-title">Inbox</div>
+          <div class="page-sub" id="inbox-sub">SMS, WhatsApp &amp; email replies from leads</div>
         </div>
         <div class="header-actions">
-          <div class="appts-tabs" style="margin:0;border:none">
-            <button class="appts-tab selected" id="comms-tab-inbox" onclick="switchCommsTab('inbox')">Inbox</button>
-            <button class="appts-tab" id="comms-tab-messaging" onclick="switchCommsTab('messaging')">Broadcast</button>
-          </div>
-        </div>
-      </div>
-
-      <!-- ── INBOX PANEL ── -->
-      <div id="comms-inbox-panel">
-        <div style="display:flex;align-items:center;gap:10px;margin-bottom:14px">
-          <div class="appts-tabs" style="margin:0;border-bottom:1px solid var(--border);flex:1">
-            <button class="appts-tab selected" data-channel="all" onclick="setInboxChannel('all')">All</button>
-            <button class="appts-tab" data-channel="whatsapp" onclick="setInboxChannel('whatsapp')">WhatsApp</button>
-            <button class="appts-tab" data-channel="sms" onclick="setInboxChannel('sms')">SMS</button>
-            <button class="appts-tab" data-channel="email" onclick="setInboxChannel('email')">Email</button>
-          </div>
-          <label style="display:flex;align-items:center;gap:6px;font-size:12px;color:var(--text2);cursor:pointer;white-space:nowrap">
+          <label style="display:flex;align-items:center;gap:6px;font-size:12px;color:var(--text2);cursor:pointer;margin-right:6px">
             <input type="checkbox" id="inbox-unread-only" onchange="renderInbox()" style="margin:0">
             Unread only
           </label>
-          <button class="btn btn-ghost" onclick="refreshInbox()" style="white-space:nowrap">Refresh</button>
-        </div>
-        <div class="chart-card fade-in inbox-shell">
-          <div class="inbox-list" id="inbox-list"></div>
-          <div class="inbox-thread" id="inbox-thread">
-            <div class="inbox-empty" id="inbox-empty">Select a conversation on the left.</div>
-          </div>
+          <button class="btn btn-ghost" onclick="refreshInbox()">Refresh</button>
         </div>
       </div>
-
-      <!-- ── MESSAGING PANEL ── -->
-      <div id="comms-messaging-panel" style="display:none">
-        <div style="display:flex;justify-content:flex-end;margin-bottom:14px">
+      <div class="appts-tabs" style="margin-bottom:14px;border-bottom:1px solid var(--border)">
+        <button class="appts-tab selected" data-channel="all" onclick="setInboxChannel('all')">All</button>
+        <button class="appts-tab" data-channel="whatsapp" onclick="setInboxChannel('whatsapp')">WhatsApp</button>
+        <button class="appts-tab" data-channel="sms" onclick="setInboxChannel('sms')">SMS</button>
+        <button class="appts-tab" data-channel="email" onclick="setInboxChannel('email')">Email</button>
+      </div>
+      <div class="chart-card fade-in inbox-shell">
+        <div class="inbox-list" id="inbox-list"></div>
+        <div class="inbox-thread" id="inbox-thread">
+          <div class="inbox-empty" id="inbox-empty">Select a conversation on the left.</div>
+        </div>
+      </div>
+    </div>
+    <!-- ── VIEW: HORMONAL ASSESSMENTS ── -->
+    <div id="view-hormonal" class="view" style="display:none">
+      <div class="page-header fade-in" style="margin-bottom:20px">
+        <div>
+          <div class="page-title">Hormonal Assessments</div>
+          <div class="page-sub" id="horm-sub">Loading…</div>
+        </div>
+        <div class="header-actions">
+          <button class="btn btn-ghost" onclick="loadHormonalView()">Refresh</button>
+          <button class="btn btn-export btn-sm" onclick="exportHormonalCSV()">
+            <svg width="12" height="12" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><path d="M21 15v4a2 2 0 01-2 2H5a2 2 0 01-2-2v-4"/><polyline points="7 10 12 15 17 10"/><line x1="12" y1="15" x2="12" y2="3"/></svg>
+            Export CSV
+          </button>
+        </div>
+      </div>
+      <!-- STAT CARDS -->
+      <div class="stats-row fade-in">
+        <div class="stat-card primary">
+          <div class="stat-top">
+            <span class="stat-label">Total Assessments</span>
+          </div>
+          <div class="stat-num" id="horm-stat-total">0</div>
+          <div class="stat-sub" id="horm-stat-total-sub">All time</div>
+        </div>
+        <div class="stat-card">
+          <div class="stat-top"><span class="stat-label">Completion Rate</span></div>
+          <div class="stat-num" id="horm-stat-rate">—</div>
+          <div class="stat-sub">Finished vs started</div>
+        </div>
+        <div class="stat-card">
+          <div class="stat-top"><span class="stat-label">Top Archetype</span></div>
+          <div class="stat-num" id="horm-stat-top" style="font-size:22px;line-height:1.2">—</div>
+          <div class="stat-sub" id="horm-stat-top-sub">—</div>
+        </div>
+        <div class="stat-card">
+          <div class="stat-top"><span class="stat-label">Last 7 Days</span></div>
+          <div class="stat-num" id="horm-stat-week">0</div>
+          <div class="stat-sub">Completed in window</div>
+        </div>
+      </div>
+      <!-- FILTER -->
+      <div class="filters fade-in">
+        <div class="filter-group">
+          <label class="filter-label">Archetype</label>
+          <select class="filter-select" id="horm-filter-archetype" onchange="renderHormonalTable()">
+            <option value="">All archetypes</option>
+            <option value="stress_driven_plateau">Stress-Driven Plateau</option>
+            <option value="hormonal_shift">Hormonal Shift Pattern</option>
+            <option value="metabolic_resistance">Metabolic Resistance</option>
+            <option value="compound_pattern">Compound Pattern</option>
+          </select>
+        </div>
+        <div class="filter-group">
+          <label class="filter-label">Status</label>
+          <select class="filter-select" id="horm-filter-status" onchange="renderHormonalTable()">
+            <option value="">All</option>
+            <option value="completed">Completed</option>
+            <option value="abandoned">Abandoned (email captured, no completion)</option>
+            <option value="in_progress">In progress (no email yet)</option>
+          </select>
+        </div>
+        <div class="filter-divider"></div>
+        <div class="filter-group wide">
+          <label class="filter-label">Search</label>
+          <input type="text" class="filter-input" id="horm-filter-search" placeholder="Search name or email…" oninput="renderHormonalTable()">
+        </div>
+      </div>
+      <!-- TABLE -->
+      <div class="table-card fade-in">
+        <div class="table-header">
+          <div>
+            <div class="table-title">Submissions</div>
+            <div class="table-sub" id="horm-count">0 results</div>
+          </div>
+        </div>
+        <div class="table-wrap">
+          <table class="leads-table">
+            <thead>
+              <tr>
+                <th>#</th>
+                <th>Date</th>
+                <th>Name</th>
+                <th>Email</th>
+                <th>Archetype</th>
+                <th>Secondary</th>
+                <th>Flags</th>
+                <th>Status</th>
+                <th></th>
+              </tr>
+            </thead>
+            <tbody id="horm-tbody"></tbody>
+          </table>
+        </div>
+        <div id="horm-empty" style="display:none;text-align:center;padding:32px;color:var(--text3);font-size:14px">No hormonal assessments yet.</div>
+      </div>
+    </div>
+    <!-- HORMONAL DETAIL MODAL -->
+    <div class="drawer-overlay" id="horm-drawer" onclick="if(event.target===this)closeHormonalDetail()">
+      <div class="drawer-panel" style="max-width:640px">
+        <div class="drawer-header">
+          <div class="drawer-title" id="horm-detail-title">Assessment</div>
+          <button class="drawer-close" onclick="closeHormonalDetail()">&times;</button>
+        </div>
+        <div class="drawer-body" id="horm-detail-body" style="padding:20px"></div>
+      </div>
+    </div>
+    <!-- ── VIEW: MESSAGING (BROADCAST COMPOSER) ── -->
+    <div id="view-messaging" class="view" style="display:none">
+      <div class="page-header fade-in" style="margin-bottom:20px">
+        <div>
+          <div class="page-title">Messaging</div>
+          <div class="page-sub">Send email, SMS, and WhatsApp to filtered prospects — consent-checked at send time.</div>
+        </div>
+        <div class="header-actions">
           <button type="button" class="btn-secondary" onclick="csvOpen()">
             <svg fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><path d="M21 15v4a2 2 0 01-2 2H5a2 2 0 01-2-2v-4M17 8l-5-5-5 5M12 3v12"/></svg>
             Import CSV
           </button>
         </div>
+      </div>
 
       <div class="msg-grid fade-in">
         <!-- ── AUDIENCE PANEL ── -->
@@ -2784,8 +2958,7 @@ async function forgotPassword(){
           <button type="button" class="msg-send-btn" id="msg-confirm-send">Yes, send it</button>
         </div>
       </div>
-    </div><!-- /comms-messaging-panel -->
-    </div><!-- /view-comms -->
+    </div>
 
     <!-- ── VIEW: SETTINGS ── -->
     <div id="view-settings" class="view" style="display:none">
@@ -2959,7 +3132,7 @@ async function fetchLeads() {
 
 async function initDashboard() {
   // Clear any browser-autocompleted or leftover filter values
-  ['filter-date','filter-search','table-search','lv-from','lv-search'].forEach(id => {
+  ['filter-date','filter-search','table-search','lv-from','lv-to','lv-search'].forEach(id => {
     var el = document.getElementById(id);
     if (el) el.value = '';
   });
@@ -2968,6 +3141,12 @@ async function initDashboard() {
     if (el) el.selectedIndex = 0;
   });
   ALL_LEADS = await fetchLeads();
+  // Fetch booked emails for the "Booked" column
+  try {
+    var bkRes = await sb.from('bookings').select('email');
+    window.__bookedEmails = new Set();
+    (bkRes.data || []).forEach(function(b) { if (b.email) window.__bookedEmails.add(b.email.toLowerCase()); });
+  } catch (e) { window.__bookedEmails = new Set(); }
   filtered = [...ALL_LEADS];
   renderTable();
   initCharts();
@@ -3014,7 +3193,6 @@ function bootDashboard() {
   initDashboard();
   // Restore last viewed tab from URL hash
   var hash = window.location.hash.replace('#', '');
-  if (hash === 'inbox' || hash === 'messaging' || hash === 'analytics') hash = 'comms';
   if (hash && document.getElementById('view-' + hash)) {
     switchView(hash, null);
   }
@@ -3065,6 +3243,7 @@ function renderTable() {
         <td><span class="tag tag-location">${l.location}</span></td>
         <td><span class="tag tag-form">${l.formLabel}</span></td>
         <td><span class="tag tag-quality ${qClass}">${l.quality}</span></td>
+        <td style="text-align:center">${window.__bookedEmails && l.email && window.__bookedEmails.has(l.email.toLowerCase()) ? '✅' : '❌'}</td>
         <td style="color:var(--text3);white-space:nowrap">${d}</td>
         <td style="color:var(--text3);white-space:nowrap;font-variant-numeric:tabular-nums">${t}</td>
         <td><button class="btn-view" onclick="event.stopPropagation();openLeadModal('${l.id}')">View →</button></td>
@@ -3098,6 +3277,9 @@ function sortTable(col) {
     if (col === 'date' || col === 'time') {
       va = a.createdAt ? new Date(a.createdAt).getTime() : 0;
       vb = b.createdAt ? new Date(b.createdAt).getTime() : 0;
+    } else if (col === 'booked') {
+      va = window.__bookedEmails && a.email && window.__bookedEmails.has(a.email.toLowerCase()) ? 1 : 0;
+      vb = window.__bookedEmails && b.email && window.__bookedEmails.has(b.email.toLowerCase()) ? 1 : 0;
     } else {
       va = (a[col] || '').toString().toLowerCase();
       vb = (b[col] || '').toString().toLowerCase();
@@ -3562,29 +3744,20 @@ function switchView(view, btn) {
     el.classList.add('active-view');
   }
   // Update nav title
+  const titles = { dashboard: 'Leads Overview', leads: 'All Leads', analytics: 'Analytics', content: 'Content Calendar', settings: 'Settings' };
+  document.querySelector('.page-title') && null; // already in each view
   // Init view-specific content
-  if (view === 'leads') renderLeadsView();
+  if (view === 'leads') { filtered = [...ALL_LEADS]; currentPage = 1; renderLeadsView(); }
+  if (view === 'analytics') initAnalyticsCharts();
   if (view === 'performance') initPerfCharts();
   if (view === 'bookings') initBookingsView();
   if (view === 'appointments') initAppointmentsView();
-  if (view === 'comms') { initInboxView(); initMessagingView(); switchCommsTab('inbox'); }
+  if (view === 'inbox') initInboxView();
   if (view === 'automations') initAutomationsView();
   if (view === 'content') initContentView();
+  if (view === 'hormonal') loadHormonalView();
+  if (view === 'messaging') initMessagingView();
   if (view === 'settings') loadTeamUsers();
-}
-
-function switchCommsTab(tab) {
-  var inboxPanel = document.getElementById('comms-inbox-panel');
-  var msgPanel   = document.getElementById('comms-messaging-panel');
-  var tabInbox   = document.getElementById('comms-tab-inbox');
-  var tabMsg     = document.getElementById('comms-tab-messaging');
-  if (tab === 'inbox') {
-    inboxPanel.style.display = ''; msgPanel.style.display = 'none';
-    tabInbox.classList.add('selected'); tabMsg.classList.remove('selected');
-  } else {
-    inboxPanel.style.display = 'none'; msgPanel.style.display = '';
-    tabMsg.classList.add('selected'); tabInbox.classList.remove('selected');
-  }
 }
 
 /* ══════════════════════════════════════
@@ -4667,11 +4840,110 @@ function renderLeadsView() {
         <td><span class="tag tag-location">${l.location}</span></td>
         <td><span class="tag tag-form">${l.formLabel}</span></td>
         <td><span class="tag tag-quality ${qClass}">${l.quality}</span></td>
+        <td style="text-align:center">${window.__bookedEmails && l.email && window.__bookedEmails.has(l.email.toLowerCase()) ? '✅' : '❌'}</td>
         <td style="color:var(--text3);white-space:nowrap">${d}</td>
         <td style="color:var(--text3);white-space:nowrap;font-variant-numeric:tabular-nums">${t}</td>
         <td><button class="btn-view" onclick="event.stopPropagation();openLeadModal('${l.id}')">View →</button></td>
       </tr>`;
   }).join('');
+}
+/* ── ANALYTICS CHARTS ── */
+function initAnalyticsCharts() {
+  setTimeout(() => {
+    // Time chart clone
+    const ctx1 = document.getElementById('chart-time-2');
+    if (ctx1) {
+      if (charts['time-2']) charts['time-2'].destroy();
+      const {labels, data} = getTimeData('30d');
+      charts['time-2'] = new Chart(ctx1.getContext('2d'), {
+        type:'line',
+        data:{ labels, datasets:[{ data, borderColor:COLORS.orange, borderWidth:2,
+          pointRadius:3, pointBackgroundColor:COLORS.orange, tension:0.4, fill:true,
+          backgroundColor:(ctx)=>{ const g=ctx.chart.ctx.createLinearGradient(0,0,0,200);
+            g.addColorStop(0,'rgba(237,92,37,0.18)');g.addColorStop(1,'rgba(237,92,37,0.00)');return g;}}]},
+        options:{ responsive:true, maintainAspectRatio:false,
+          plugins:{legend:{display:false}, tooltip:{backgroundColor:'#1C1D1F',borderColor:'rgba(237,92,37,0.3)',borderWidth:1,padding:10,titleColor:'#F0EDE8',bodyColor:'rgba(240,237,232,0.65)'}},
+          scales:{ x:{grid:{color:COLORS.grid},ticks:{maxTicksLimit:8}}, y:{grid:{color:COLORS.grid},beginAtZero:true,ticks:{stepSize:1}} }}
+      });
+    }
+    // Sources clone
+    const ctx2 = document.getElementById('chart-sources-2');
+    if (ctx2) {
+      if (charts['sources-2']) charts['sources-2'].destroy();
+      const counts={};
+      filtered.forEach(l=>counts[l.source]=(counts[l.source]||0)+1);
+      const sorted=Object.entries(counts).sort((a,b)=>b[1]-a[1]);
+      charts['sources-2'] = new Chart(ctx2.getContext('2d'),{
+        type:'bar',
+        data:{labels:sorted.map(e=>e[0]),datasets:[{data:sorted.map(e=>e[1]),
+          backgroundColor:[COLORS.orange,COLORS.orange2,COLORS.orange3,COLORS.orange4,COLORS.orange5],
+          borderRadius:6,borderSkipped:false}]},
+        options:{responsive:true,maintainAspectRatio:false,indexAxis:'y',
+          plugins:{legend:{display:false},tooltip:{backgroundColor:'#1C1D1F',borderColor:'rgba(237,92,37,0.3)',borderWidth:1,padding:10,titleColor:'#F0EDE8',bodyColor:'rgba(240,237,232,0.65)'}},
+          scales:{x:{grid:{color:COLORS.grid},ticks:{stepSize:1}},y:{grid:{display:false}}}}
+      });
+    }
+    // Gender clone
+    const ctx3 = document.getElementById('chart-gender-2');
+    if (ctx3) {
+      if (charts['gender-2']) charts['gender-2'].destroy();
+      const male=filtered.filter(l=>l.gender==='Male').length;
+      const female=filtered.filter(l=>l.gender==='Female').length;
+      charts['gender-2'] = new Chart(ctx3.getContext('2d'),{
+        type:'doughnut',
+        data:{labels:['Male','Female'],datasets:[{data:[male,female],
+          backgroundColor:[COLORS.orange,COLORS.orange3],borderColor:'#111213',borderWidth:3,hoverOffset:4}]},
+        options:{responsive:true,maintainAspectRatio:false,cutout:'68%',
+          plugins:{legend:{display:false},tooltip:{backgroundColor:'#1C1D1F',borderColor:'rgba(237,92,37,0.3)',borderWidth:1,padding:10,titleColor:'#F0EDE8',bodyColor:'rgba(240,237,232,0.65)'}}}
+      });
+      document.getElementById('analytics-total').textContent = filtered.length;
+      const leg2=document.getElementById('gender-legend-2');
+      const total=male+female||1;
+      leg2.innerHTML=[{label:'Male',val:male,color:COLORS.orange},{label:'Female',val:female,color:COLORS.orange3}]
+        .map(({label,val,color})=>`<div class="legend-item"><span class="legend-left"><span class="legend-dot" style="background:${color}"></span>${label}</span><span class="legend-val">${val} <span style="color:var(--text3);font-weight:400">(${Math.round(val/total*100)}%)</span></span></div>`).join('');
+    }
+    // Location clone
+    const ctx4 = document.getElementById('chart-location-2');
+    if (ctx4) {
+      if (charts['location-2']) charts['location-2'].destroy();
+      const counts={};
+      filtered.forEach(l=>counts[l.location]=(counts[l.location]||0)+1);
+      const sorted=Object.entries(counts).sort((a,b)=>b[1]-a[1]);
+      charts['location-2']=new Chart(ctx4.getContext('2d'),{
+        type:'bar',
+        data:{labels:sorted.map(e=>e[0]),datasets:[{data:sorted.map(e=>e[1]),
+          backgroundColor:sorted.map((_,i)=>[COLORS.orange,COLORS.orange2,COLORS.orange3,COLORS.orange4][i]||COLORS.orange5),
+          borderRadius:6,borderSkipped:false}]},
+        options:{responsive:true,maintainAspectRatio:false,
+          plugins:{legend:{display:false},tooltip:{backgroundColor:'#1C1D1F',borderColor:'rgba(237,92,37,0.3)',borderWidth:1,padding:10,titleColor:'#F0EDE8',bodyColor:'rgba(240,237,232,0.65)'}},
+          scales:{x:{grid:{display:false}},y:{grid:{color:COLORS.grid},ticks:{stepSize:1}}}}
+      });
+      const leg4=document.getElementById('location-legend-2');
+      const clrs=[COLORS.orange,COLORS.orange2,COLORS.orange3,COLORS.orange4];
+      leg4.innerHTML=sorted.map(([loc,val],i)=>`<div class="legend-item"><span class="legend-left"><span class="legend-dot" style="background:${clrs[i]||COLORS.orange5}"></span>${loc}</span><span class="legend-val">${val}</span></div>`).join('');
+    }
+    // Quality donut
+    const ctx5 = document.getElementById('chart-quality');
+    if (ctx5) {
+      if (charts['quality']) charts['quality'].destroy();
+      const high=filtered.filter(l=>l.quality==='High').length;
+      const med=filtered.filter(l=>l.quality==='Med').length;
+      const low=filtered.filter(l=>l.quality==='Low').length;
+      charts['quality']=new Chart(ctx5.getContext('2d'),{
+        type:'doughnut',
+        data:{labels:['High','Med','Low'],datasets:[{data:[high,med,low],
+          backgroundColor:[COLORS.orange,'rgba(237,92,37,0.5)','rgba(237,92,37,0.2)'],
+          borderColor:'#111213',borderWidth:3,hoverOffset:4}]},
+        options:{responsive:true,maintainAspectRatio:false,cutout:'68%',
+          plugins:{legend:{display:false},tooltip:{backgroundColor:'#1C1D1F',borderColor:'rgba(237,92,37,0.3)',borderWidth:1,padding:10,titleColor:'#F0EDE8',bodyColor:'rgba(240,237,232,0.65)'}}}
+      });
+      const total=filtered.length||1;
+      document.getElementById('quality-pct').textContent=Math.round(high/total*100)+'%';
+      document.getElementById('quality-legend').innerHTML=
+        [{label:'High',val:high,color:COLORS.orange},{label:'Med',val:med,color:'rgba(237,92,37,0.5)'},{label:'Low',val:low,color:'rgba(237,92,37,0.2)'}]
+        .map(({label,val,color})=>`<div class="legend-item"><span class="legend-left"><span class="legend-dot" style="background:${color}"></span>${label}</span><span class="legend-val">${val} <span style="color:var(--text3);font-weight:400">(${Math.round(val/total*100)}%)</span></span></div>`).join('');
+    }
+  }, 50);
 }
 /* ══════════════════════════════════════
    PERFORMANCE VIEW
@@ -4680,7 +4952,7 @@ function initPerfCharts() {
   setTimeout(() => {
     const d = filtered;
     const pages = ['Main Landing Page', 'Men Landing Page', 'Women Landing Page', 'ReShape Club'];
-    const pageLabels = ['reshapeclub.com', '/men', '/women', 'reshapeclub.com'];
+    const pageLabels = ['reshape.fit', '/men', '/women', 'reshapeclub.com'];
     const byPage = pages.map(p => d.filter(l => l.form === p));
 
     // ── KPI CARDS ──
@@ -5005,7 +5277,7 @@ function renderApptCards() {
         '<div class="appt-card-row" style="font-size:11px;line-height:1.5"><svg width="14" height="14" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><rect x="3" y="4" width="18" height="18" rx="2"/><line x1="16" y1="2" x2="16" y2="6"/><line x1="8" y1="2" x2="8" y2="6"/><line x1="3" y1="10" x2="21" y2="10"/></svg>' + schedLabel + '</div>' +
         '<div class="appt-card-row"><svg width="14" height="14" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><path d="M17 21v-2a4 4 0 00-4-4H5a4 4 0 00-4 4v2"/><circle cx="9" cy="7" r="4"/></svg>Max ' + a.max_attendees + ' per slot \u00b7 ' + modeLabel + '</div>' +
         '<div class="appt-card-days">' + [1,2,3,4,5,6,0].map(function(d) { return '<div class="appt-day' + (days.includes(d) ? ' on' : '') + '">' + DAY_SHORT[d] + '</div>'; }).join('') + '</div>' +
-        '<div class="appt-card-funnels">' + (a.funnels || []).map(function(f) { var lbl = ({'Main Landing Page':'reshapeclub.com','Men Landing Page':'/men','Women Landing Page':'/women','ReShape Club':'reshapeclub.com'})[f] || f; return '<span class="appt-funnel-tag">' + lbl + '</span>'; }).join('') + '</div>' +
+        '<div class="appt-card-funnels">' + (a.funnels || []).map(function(f) { var lbl = ({'Main Landing Page':'reshape.fit','Men Landing Page':'/men','Women Landing Page':'/women','ReShape Club':'reshapeclub.com'})[f] || f; return '<span class="appt-funnel-tag">' + lbl + '</span>'; }).join('') + '</div>' +
       '</div>' +
       '<div class="appt-card-actions">' +
         '<button class="btn btn-ghost btn-sm" onclick="editApptType(\'' + a.id + '\')" style="border-color:rgba(237,92,37,.3);color:var(--orange)">Edit</button>' +
@@ -5889,7 +6161,7 @@ async function initInboxView() {
   await refreshInbox();
   if (__inboxPollTimer) clearInterval(__inboxPollTimer);
   __inboxPollTimer = setInterval(function() {
-    if (document.getElementById('view-comms') && document.getElementById('view-comms').classList.contains('active-view')) {
+    if (document.getElementById('view-inbox').classList.contains('active-view')) {
       refreshInbox(true);
     } else {
       clearInterval(__inboxPollTimer); __inboxPollTimer = null;
@@ -5899,7 +6171,7 @@ async function initInboxView() {
 
 function setInboxChannel(ch) {
   __inboxChannel = ch;
-  document.querySelectorAll('#comms-inbox-panel .appts-tab').forEach(function(b) {
+  document.querySelectorAll('#view-inbox .appts-tab').forEach(function(b) {
     b.classList.toggle('selected', b.dataset.channel === ch);
   });
   __inboxSelected = null;
@@ -8057,6 +8329,221 @@ async function exchangeGCalCode(code) {
   showToast('Google Calendar connected');
 }
 
+/* ── HORMONAL ASSESSMENTS ── */
+var HORMONAL_ASSESSMENTS = [];
+var HORMONAL_ANSWERS = {};
+
+var ARCHETYPE_LABELS = {
+  stress_driven_plateau: 'Stress-Driven Plateau',
+  hormonal_shift: 'Hormonal Shift',
+  metabolic_resistance: 'Metabolic Resistance',
+  compound_pattern: 'Compound Pattern'
+};
+var ARCHETYPE_COLORS = {
+  stress_driven_plateau: '#FF6B35',
+  hormonal_shift: '#9B59B6',
+  metabolic_resistance: '#E67E22',
+  compound_pattern: '#3498DB'
+};
+
+async function loadHormonalView() {
+  try {
+    var res = await sb.from('assessments').select('*').order('started_at', { ascending: false }).limit(500);
+    HORMONAL_ASSESSMENTS = res.data || [];
+  } catch (e) { HORMONAL_ASSESSMENTS = []; }
+  updateHormonalStats();
+  renderHormonalTable();
+}
+
+function hormonalStatusOf(a) {
+  if (a.completed_at) return 'completed';
+  if (a.email_captured_at) return 'abandoned';
+  return 'in_progress';
+}
+
+function updateHormonalStats() {
+  var all = HORMONAL_ASSESSMENTS;
+  var completed = all.filter(function(a){ return !!a.completed_at; });
+  var withEmail = all.filter(function(a){ return !!a.email_captured_at; });
+  var rate = withEmail.length > 0 ? Math.round((completed.length / withEmail.length) * 100) : 0;
+  document.getElementById('horm-stat-total').textContent = all.length;
+  document.getElementById('horm-stat-total-sub').textContent = completed.length + ' completed · ' + (all.length - withEmail.length) + ' anonymous';
+  document.getElementById('horm-stat-rate').textContent = withEmail.length > 0 ? rate + '%' : '—';
+  // Top archetype
+  var counts = {};
+  completed.forEach(function(a){ if (a.primary_archetype) counts[a.primary_archetype] = (counts[a.primary_archetype] || 0) + 1; });
+  var top = Object.keys(counts).sort(function(a,b){ return counts[b] - counts[a]; })[0];
+  document.getElementById('horm-stat-top').textContent = top ? ARCHETYPE_LABELS[top] : '—';
+  document.getElementById('horm-stat-top-sub').textContent = top ? counts[top] + ' women' : 'No completions yet';
+  // Last 7 days
+  var weekAgo = Date.now() - 7 * 24 * 60 * 60 * 1000;
+  var weekCount = completed.filter(function(a){ return new Date(a.completed_at).getTime() >= weekAgo; }).length;
+  document.getElementById('horm-stat-week').textContent = weekCount;
+  document.getElementById('horm-sub').textContent = all.length + ' total · ' + completed.length + ' completed · ' + withEmail.length + ' captured email';
+}
+
+function renderHormonalTable() {
+  var arch = document.getElementById('horm-filter-archetype').value;
+  var status = document.getElementById('horm-filter-status').value;
+  var search = (document.getElementById('horm-filter-search').value || '').toLowerCase().trim();
+
+  var rows = HORMONAL_ASSESSMENTS.filter(function(a){
+    if (arch && a.primary_archetype !== arch) return false;
+    if (status && hormonalStatusOf(a) !== status) return false;
+    if (search) {
+      // Search by email or name via the linked lead — we don't have leads loaded here
+      // but email is stored via the lead. For search we resolve lazily from ALL_LEADS.
+      var lead = (window.ALL_LEADS || []).find(function(l){ return l.id === a.lead_id; });
+      var hay = ((lead && lead.email) || '').toLowerCase() + ' ' + ((lead && lead.first_name) || '').toLowerCase();
+      if (hay.indexOf(search) < 0) return false;
+    }
+    return true;
+  });
+
+  var tbody = document.getElementById('horm-tbody');
+  var empty = document.getElementById('horm-empty');
+  document.getElementById('horm-count').textContent = rows.length + ' result' + (rows.length === 1 ? '' : 's');
+
+  if (rows.length === 0) { tbody.innerHTML = ''; empty.style.display = 'block'; return; }
+  empty.style.display = 'none';
+
+  tbody.innerHTML = rows.map(function(a, i){
+    var lead = (window.ALL_LEADS || []).find(function(l){ return l.id === a.lead_id; });
+    var name = lead ? ((lead.first_name || '') + ' ' + (lead.last_name || '')).trim() : '—';
+    var email = lead ? (lead.email || '') : '—';
+    var d = new Date(a.started_at).toLocaleDateString('en-GB', { day: 'numeric', month: 'short', year: 'numeric' });
+    var primaryLbl = a.primary_archetype ? ARCHETYPE_LABELS[a.primary_archetype] : '—';
+    var color = a.primary_archetype ? ARCHETYPE_COLORS[a.primary_archetype] : 'rgba(255,255,255,0.10)';
+    var secondaryLbl = a.secondary_archetype ? ARCHETYPE_LABELS[a.secondary_archetype] : '—';
+    var flagsArr = Array.isArray(a.flags) ? a.flags : [];
+    var flagsHtml = flagsArr.length === 0 ? '<span style="color:var(--text3)">—</span>' :
+      flagsArr.slice(0,2).map(function(f){ return '<span class="tag tag-form" style="margin-right:4px">' + f.replace(/_/g,' ') + '</span>'; }).join('') +
+      (flagsArr.length > 2 ? ' <span style="color:var(--text3);font-size:11px">+' + (flagsArr.length - 2) + '</span>' : '');
+    var st = hormonalStatusOf(a);
+    var stClass = st === 'completed' ? 'tag-high' : st === 'abandoned' ? 'tag-med' : 'tag-low';
+    var stLbl = st === 'completed' ? 'Completed' : st === 'abandoned' ? 'Abandoned' : 'In progress';
+
+    return '<tr>' +
+      '<td style="color:var(--text3)">' + (i + 1) + '</td>' +
+      '<td style="white-space:nowrap;color:var(--text3)">' + d + '</td>' +
+      '<td class="td-name">' + (name || '—') + '</td>' +
+      '<td class="td-email">' + email + '</td>' +
+      '<td><span class="tag" style="background:' + color + '20;color:' + color + ';border:1px solid ' + color + '40">' + primaryLbl + '</span></td>' +
+      '<td><span style="color:var(--text2);font-size:13px">' + secondaryLbl + '</span></td>' +
+      '<td>' + flagsHtml + '</td>' +
+      '<td><span class="tag tag-quality ' + stClass + '">' + stLbl + '</span></td>' +
+      '<td><button class="btn-view" onclick="openHormonalDetail(\'' + a.session_id + '\')">View →</button></td>' +
+    '</tr>';
+  }).join('');
+}
+
+async function openHormonalDetail(sessionId) {
+  var a = HORMONAL_ASSESSMENTS.find(function(x){ return x.session_id === sessionId; });
+  if (!a) return;
+  var lead = (window.ALL_LEADS || []).find(function(l){ return l.id === a.lead_id; });
+  var name = lead ? ((lead.first_name || '') + ' ' + (lead.last_name || '')).trim() : 'Anonymous';
+  var email = lead ? (lead.email || '') : '—';
+
+  // Fetch answers for this session
+  var ansRes = await sb.from('assessment_answers').select('question_id, answer_value, answered_at').eq('session_id', sessionId).order('answered_at', { ascending: true });
+  var answers = (ansRes.data || []).reduce(function(m, r){ m[r.question_id] = r.answer_value; return m; }, {});
+
+  document.getElementById('horm-detail-title').textContent = name + ' — ' + (a.primary_archetype ? ARCHETYPE_LABELS[a.primary_archetype] : 'Incomplete');
+
+  var hormonesHtml = '';
+  if (a.hormone_scores) {
+    var entries = Object.entries(a.hormone_scores).sort(function(x,y){ return y[1] - x[1]; });
+    hormonesHtml = '<div style="display:grid;grid-template-columns:repeat(2,1fr);gap:8px;margin-top:8px">' +
+      entries.map(function(e){
+        var pct = Math.min(100, (Number(e[1]) / 10) * 100);
+        return '<div style="background:var(--s3);border:1px solid var(--border);border-radius:8px;padding:10px 12px">' +
+          '<div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:6px"><span style="font-size:12px;color:var(--text2);text-transform:capitalize">' + e[0] + '</span><strong style="font-size:13px;color:var(--text)">' + e[1] + '/10</strong></div>' +
+          '<div style="height:4px;background:var(--s4);border-radius:2px;overflow:hidden"><div style="height:100%;width:' + pct + '%;background:var(--orange);border-radius:2px"></div></div>' +
+        '</div>';
+      }).join('') +
+    '</div>';
+  }
+
+  var clusterHtml = '';
+  if (a.cluster_scores) {
+    clusterHtml = '<div style="display:flex;gap:8px;margin-top:8px">' +
+      Object.entries(a.cluster_scores).map(function(e){
+        return '<div style="flex:1;background:var(--s3);border:1px solid var(--border);border-radius:8px;padding:10px 12px;text-align:center">' +
+          '<div style="font-size:11px;color:var(--text3);text-transform:uppercase;letter-spacing:0.1em;margin-bottom:4px">' + e[0].replace(/_/g,' ') + '</div>' +
+          '<div style="font-size:18px;font-weight:700;color:var(--text)">' + e[1] + '</div>' +
+        '</div>';
+      }).join('') +
+    '</div>';
+  }
+
+  var answersHtml = Object.keys(answers).sort(function(a,b){
+    var na = parseInt(a.replace('Q','')); var nb = parseInt(b.replace('Q','')); return na - nb;
+  }).map(function(qid){
+    return '<div style="padding:8px 0;border-bottom:1px solid var(--border2);display:flex;justify-content:space-between;gap:12px">' +
+      '<span style="color:var(--text3);font-size:13px;font-weight:600;min-width:36px">' + qid + '</span>' +
+      '<span style="color:var(--text2);font-size:13px;text-align:right">' + answers[qid] + '</span>' +
+    '</div>';
+  }).join('');
+
+  var flagsArr = Array.isArray(a.flags) ? a.flags : [];
+  var flagsHtml = flagsArr.length === 0 ? '<span style="color:var(--text3);font-size:13px">No flags.</span>' :
+    flagsArr.map(function(f){ return '<span class="tag tag-form" style="margin-right:4px">' + f.replace(/_/g,' ') + '</span>'; }).join('');
+
+  document.getElementById('horm-detail-body').innerHTML =
+    '<div style="margin-bottom:20px">' +
+      '<div style="font-size:12px;color:var(--text3);text-transform:uppercase;letter-spacing:0.12em;margin-bottom:4px">Contact</div>' +
+      '<div style="color:var(--text);font-size:15px;font-weight:600">' + name + '</div>' +
+      '<div style="color:var(--text2);font-size:14px">' + email + '</div>' +
+      '<div style="color:var(--text3);font-size:12px;margin-top:6px">Started ' + new Date(a.started_at).toLocaleString('en-GB') + (a.completed_at ? ' · Completed ' + new Date(a.completed_at).toLocaleString('en-GB') : ' · Not completed') + '</div>' +
+    '</div>' +
+    '<div style="margin-bottom:20px">' +
+      '<div style="font-size:12px;color:var(--text3);text-transform:uppercase;letter-spacing:0.12em;margin-bottom:8px">Pattern</div>' +
+      '<div style="color:var(--text);font-size:18px;font-weight:700">' + (a.primary_archetype ? ARCHETYPE_LABELS[a.primary_archetype] : 'Not scored') + '</div>' +
+      (a.secondary_archetype ? '<div style="color:var(--text2);font-size:13px;margin-top:2px">+ secondary: ' + ARCHETYPE_LABELS[a.secondary_archetype] + '</div>' : '') +
+    '</div>' +
+    (clusterHtml ? '<div style="margin-bottom:20px"><div style="font-size:12px;color:var(--text3);text-transform:uppercase;letter-spacing:0.12em;margin-bottom:6px">Cluster scores</div>' + clusterHtml + '</div>' : '') +
+    (hormonesHtml ? '<div style="margin-bottom:20px"><div style="font-size:12px;color:var(--text3);text-transform:uppercase;letter-spacing:0.12em;margin-bottom:6px">Hormone signals (0–10)</div>' + hormonesHtml + '</div>' : '') +
+    '<div style="margin-bottom:20px">' +
+      '<div style="font-size:12px;color:var(--text3);text-transform:uppercase;letter-spacing:0.12em;margin-bottom:6px">Flags</div>' +
+      flagsHtml +
+    '</div>' +
+    '<div>' +
+      '<div style="font-size:12px;color:var(--text3);text-transform:uppercase;letter-spacing:0.12em;margin-bottom:6px">Answers</div>' +
+      (answersHtml || '<span style="color:var(--text3);font-size:13px">No answers recorded.</span>') +
+    '</div>';
+
+  document.getElementById('horm-drawer').classList.add('open');
+}
+
+function closeHormonalDetail() {
+  document.getElementById('horm-drawer').classList.remove('open');
+}
+
+function exportHormonalCSV() {
+  if (HORMONAL_ASSESSMENTS.length === 0) { showToast('No assessments to export'); return; }
+  var rows = [['Started', 'Completed', 'Email', 'Name', 'Primary archetype', 'Secondary', 'Flags', 'Stress', 'Hormonal shift', 'Metabolic']];
+  HORMONAL_ASSESSMENTS.forEach(function(a){
+    var lead = (window.ALL_LEADS || []).find(function(l){ return l.id === a.lead_id; });
+    var name = lead ? ((lead.first_name || '') + ' ' + (lead.last_name || '')).trim() : '';
+    var email = lead ? (lead.email || '') : '';
+    var c = a.cluster_scores || {};
+    rows.push([
+      a.started_at,
+      a.completed_at || '',
+      email, name,
+      a.primary_archetype || '', a.secondary_archetype || '',
+      (Array.isArray(a.flags) ? a.flags.join('|') : ''),
+      c.stress != null ? c.stress : '', c.hormonal_shift != null ? c.hormonal_shift : '', c.metabolic != null ? c.metabolic : ''
+    ]);
+  });
+  var csv = rows.map(function(r){ return r.map(function(v){ return '"' + String(v).replace(/"/g,'""') + '"'; }).join(','); }).join('\n');
+  var blob = new Blob([csv], { type: 'text/csv;charset=utf-8' });
+  var url = URL.createObjectURL(blob);
+  var a = document.createElement('a');
+  a.href = url; a.download = 'hormonal-assessments-' + new Date().toISOString().slice(0,10) + '.csv';
+  document.body.appendChild(a); a.click(); a.remove();
+  URL.revokeObjectURL(url);
+}
 </script>
 </body>
 </html>
