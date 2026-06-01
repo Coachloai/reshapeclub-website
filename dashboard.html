@@ -3672,7 +3672,10 @@ async function initMessagingView() {
 }
 
 async function msgLoadLists() {
-  // Pull distinct form_name values from ALL_LEADS (already loaded by initial fetch).
+  // Ensure leads are loaded before building lists.
+  if (!ALL_LEADS || ALL_LEADS.length === 0) {
+    try { ALL_LEADS = await fetchLeads(); } catch (_) {}
+  }
   var counts = {};
   if (typeof ALL_LEADS !== 'undefined' && Array.isArray(ALL_LEADS)) {
     ALL_LEADS.forEach(function(l){
