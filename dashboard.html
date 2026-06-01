@@ -3684,12 +3684,73 @@ async function msgLoadLists() {
   MSG_STATE.lists = lists;
 
   var html = lists.map(function(name){
-    return '<label class="msg-check" data-list="' + msgEsc(name) + '">'
-         +   '<input type="checkbox" value="' + msgEsc(name) + '">'
-         +   '<span>' + msgEsc(name) + ' <span style="color:var(--text3)">(' + counts[name] + ')</span></span>'
-         + '</label>';
+    return '<div class="msg-list-row" data-list="' + msgEsc(name) + '" style="display:flex;align-items:center;gap:6px">'
+         +   '<label class="msg-check" style="flex:1;margin:0">'
+         +     '<input type="checkbox" value="' + msgEsc(name) + '">'
+         +     '<span>' + msgEsc(name) + ' <span style="color:var(--text3)">(' + counts[name] + ')</span></span>'
+         +   '</label>'
+         +   '<button onclick="msgRenameList(\'' + msgEsc(name).replace(/'/g, "\\'") + '\')" title="Rename" style="background:none;border:none;color:var(--text3);cursor:pointer;font-size:12px;padding:2px 4px;opacity:0.6">✏️</button>'
+         +   '<button onclick="msgDeleteList(\'' + msgEsc(name).replace(/'/g, "\\'") + '\')" title="Delete" style="background:none;border:none;color:var(--red);cursor:pointer;font-size:12px;padding:2px 4px;opacity:0.6">🗑</button>'
+         + '</div>';
   }).join('');
   document.getElementById('msg-lists').innerHTML = html || '<div style="font-size:12px;color:var(--text3);padding:4px">No leads yet.</div>';
+}
+
+async function msgRenameList(oldName) {
+  var newName = prompt('Rename "' + oldName + '" to:', oldName);
+  if (!newName || newName.trim() === '' || newName.trim() === oldName) return;
+  newName = newName.trim();
+  try {
+    var res = await fetch(SUPABASE_URL + '/rest/v1/leads?form_name=eq.' + encodeURIComponent(oldName), {
+      method: 'PATCH',
+      headers: {
+        'apikey': SUPABASE_ANON_KEY,
+        'Authorization': 'Bearer ' + SUPABASE_ANON_KEY,
+        'Content-Type': 'application/json',
+        'Prefer': 'return=minimal',
+      },
+      body: JSON.stringify({ form_name: newName }),
+    });
+    if (!res.ok) throw new Error(await res.text());
+    // Update local data
+    ALL_LEADS.forEach(function(l){
+      if ((l.formName || l.form_name || l.form) === oldName) {
+        l.form_name = newName; l.formName = newName; l.form = newName;
+      }
+    });
+    MSG_STATE.selectedLists.delete(oldName);
+    await msgLoadLists();
+    msgBindFilters();
+    msgRefreshCount();
+    if (typeof showToast === 'function') showToast('Renamed to "' + newName + '"');
+  } catch (e) {
+    alert('Rename failed: ' + (e.message || e));
+  }
+}
+
+async function msgDeleteList(listName) {
+  var count = ALL_LEADS.filter(function(l){ return (l.formName || l.form_name || l.form) === listName; }).length;
+  if (!confirm('Delete "' + listName + '" and all ' + count + ' leads in it? This cannot be undone.')) return;
+  try {
+    var res = await fetch(SUPABASE_URL + '/rest/v1/leads?form_name=eq.' + encodeURIComponent(listName), {
+      method: 'DELETE',
+      headers: {
+        'apikey': SUPABASE_ANON_KEY,
+        'Authorization': 'Bearer ' + SUPABASE_ANON_KEY,
+        'Prefer': 'return=minimal',
+      },
+    });
+    if (!res.ok) throw new Error(await res.text());
+    // Remove from local data
+    ALL_LEADS = ALL_LEADS.filter(function(l){ return (l.formName || l.form_name || l.form) !== listName; });
+    MSG_STATE.selectedLists.delete(listName);
+    await msgLoadLists();
+    msgBindFilters();
+    msgRefreshCount();
+    if (typeof showToast === 'function') showToast('"' + listName + '" deleted (' + count + ' leads removed)');
+  } catch (e) {
+    alert('Delete failed: ' + (e.message || e));
+  }
 }
 
 function msgBindFilters() {
