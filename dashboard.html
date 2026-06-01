@@ -2727,6 +2727,46 @@ async function forgotPassword(){
       </div>
     </div>
 
+    <!-- ── EDIT LIST MODAL ── -->
+    <div class="csv-modal-overlay" id="edit-list-overlay">
+      <div class="csv-modal" style="max-width:480px">
+        <h3 id="edit-list-title">Edit list</h3>
+        <p class="csv-sub">Changes apply to all leads in this list.</p>
+
+        <div class="csv-section">
+          <h4>List name</h4>
+          <input type="text" class="msg-input" id="edit-list-name" placeholder="List name">
+        </div>
+
+        <div class="csv-section">
+          <h4>Gender (apply to all)</h4>
+          <select class="msg-select" id="edit-list-gender">
+            <option value="">— don't change —</option>
+            <option value="Female">Female</option>
+            <option value="Male">Male</option>
+          </select>
+        </div>
+
+        <div class="csv-section">
+          <h4>Age bracket (apply to all)</h4>
+          <select class="msg-select" id="edit-list-age">
+            <option value="">— don't change —</option>
+            <option value="25">20s</option>
+            <option value="35">30s</option>
+            <option value="45">40s</option>
+            <option value="55">50s</option>
+          </select>
+        </div>
+
+        <div class="csv-error" id="edit-list-error" style="display:none"></div>
+
+        <div class="csv-actions">
+          <button type="button" class="btn btn-ghost" onclick="editListClose()">Cancel</button>
+          <button type="button" class="msg-send-btn" id="edit-list-save" onclick="editListSave()">Save changes</button>
+        </div>
+      </div>
+    </div>
+
     <!-- ── CONFIRMATION MODAL ── -->
     <div class="msg-confirm-overlay" id="msg-confirm-overlay">
       <div class="msg-confirm">
@@ -3712,19 +3752,62 @@ async function msgLoadLists() {
          +     '<input type="checkbox" value="' + msgEsc(name) + '">'
          +     '<span>' + msgEsc(name) + ' <span style="color:var(--text3)">(' + counts[name] + ')</span></span>'
          +   '</label>'
-         +   '<button onclick="msgRenameList(\'' + msgEsc(name).replace(/'/g, "\\'") + '\')" title="Rename" style="background:none;border:none;color:var(--text2);cursor:pointer;font-size:14px;padding:4px 6px;line-height:1">✏️</button>'
+         +   '<button onclick="msgEditList(\'' + msgEsc(name).replace(/'/g, "\\'") + '\')" title="Rename" style="background:none;border:none;color:var(--text2);cursor:pointer;font-size:14px;padding:4px 6px;line-height:1">✏️</button>'
          +   '<button onclick="msgDeleteList(\'' + msgEsc(name).replace(/'/g, "\\'") + '\')" title="Delete" style="background:none;border:none;color:var(--red);cursor:pointer;font-size:14px;padding:4px 6px;line-height:1">🗑</button>'
          + '</div>';
   }).join('');
   document.getElementById('msg-lists').innerHTML = html || '<div style="font-size:12px;color:var(--text3);padding:4px">No leads yet.</div>';
 }
 
-async function msgRenameList(oldName) {
-  var newName = prompt('Rename "' + oldName + '" to:', oldName);
-  if (!newName || newName.trim() === '' || newName.trim() === oldName) return;
-  newName = newName.trim();
+var __editListOrigName = '';
+
+function msgEditList(listName) {
+  __editListOrigName = listName;
+  document.getElementById('edit-list-title').textContent = 'Edit "' + listName + '"';
+  document.getElementById('edit-list-name').value = listName;
+  document.getElementById('edit-list-gender').value = '';
+  document.getElementById('edit-list-age').value = '';
+  document.getElementById('edit-list-error').style.display = 'none';
+  document.getElementById('edit-list-save').disabled = false;
+  document.getElementById('edit-list-save').textContent = 'Save changes';
+  document.getElementById('edit-list-overlay').classList.add('open');
+}
+
+function editListClose() {
+  document.getElementById('edit-list-overlay').classList.remove('open');
+}
+
+async function editListSave() {
+  var btn = document.getElementById('edit-list-save');
+  var errEl = document.getElementById('edit-list-error');
+  errEl.style.display = 'none';
+  btn.disabled = true;
+  btn.textContent = 'Saving…';
+
+  var newName = document.getElementById('edit-list-name').value.trim();
+  var gender = document.getElementById('edit-list-gender').value || null;
+  var age = document.getElementById('edit-list-age').value ? parseInt(document.getElementById('edit-list-age').value, 10) : null;
+
+  if (!newName) {
+    errEl.textContent = 'List name is required.';
+    errEl.style.display = 'block';
+    btn.disabled = false;
+    btn.textContent = 'Save changes';
+    return;
+  }
+
+  var patch = {};
+  if (newName !== __editListOrigName) patch.form_name = newName;
+  if (gender) patch.gender = gender;
+  if (age) patch.age = age;
+
+  if (Object.keys(patch).length === 0) {
+    editListClose();
+    return;
+  }
+
   try {
-    var res = await fetch(SUPABASE_URL + '/rest/v1/leads?form_name=eq.' + encodeURIComponent(oldName), {
+    var res = await fetch(SUPABASE_URL + '/rest/v1/leads?form_name=eq.' + encodeURIComponent(__editListOrigName), {
       method: 'PATCH',
       headers: {
         'apikey': SUPABASE_ANON_KEY,
@@ -3732,22 +3815,29 @@ async function msgRenameList(oldName) {
         'Content-Type': 'application/json',
         'Prefer': 'return=minimal',
       },
-      body: JSON.stringify({ form_name: newName }),
+      body: JSON.stringify(patch),
     });
     if (!res.ok) throw new Error(await res.text());
+
     // Update local data
     ALL_LEADS.forEach(function(l){
-      if ((l.formName || l.form_name || l.form) === oldName) {
-        l.form_name = newName; l.formName = newName; l.form = newName;
+      if ((l.formName || l.form_name || l.form) === __editListOrigName) {
+        if (patch.form_name) { l.form_name = patch.form_name; l.formName = patch.form_name; l.form = patch.form_name; }
+        if (patch.gender) l.gender = patch.gender;
+        if (patch.age) l.age = patch.age;
       }
     });
-    MSG_STATE.selectedLists.delete(oldName);
+    MSG_STATE.selectedLists.delete(__editListOrigName);
     await msgLoadLists();
     msgBindFilters();
     msgRefreshCount();
-    if (typeof showToast === 'function') showToast('Renamed to "' + newName + '"');
+    editListClose();
+    if (typeof showToast === 'function') showToast('List updated');
   } catch (e) {
-    alert('Rename failed: ' + (e.message || e));
+    errEl.textContent = 'Save failed: ' + (e.message || e);
+    errEl.style.display = 'block';
+    btn.disabled = false;
+    btn.textContent = 'Save changes';
   }
 }
 
