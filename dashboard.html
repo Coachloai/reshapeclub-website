@@ -2522,8 +2522,8 @@ async function forgotPassword(){
           <h4>Gender</h4>
           <div class="msg-radios" id="msg-gender">
             <button type="button" class="msg-radio active" data-gender="">All</button>
-            <button type="button" class="msg-radio" data-gender="female">Female</button>
-            <button type="button" class="msg-radio" data-gender="male">Male</button>
+            <button type="button" class="msg-radio" data-gender="Female">Female</button>
+            <button type="button" class="msg-radio" data-gender="Male">Male</button>
           </div>
 
           <h4>Age</h4>
@@ -2681,6 +2681,25 @@ async function forgotPassword(){
             <h4>List name (form_name)</h4>
             <input type="text" class="msg-input" id="csv-list-name" placeholder="e.g. Spring Promo List 2026">
             <div class="msg-token-hint">This appears as a 'list' in the messaging filter so you can target these leads later.</div>
+          </div>
+
+          <div class="csv-section">
+            <h4>Assign to all rows (optional overrides)</h4>
+            <div class="csv-mapping">
+              <label>Gender<select class="msg-select" id="csv-assign-gender">
+                <option value="">— don't set —</option>
+                <option value="Female">Female</option>
+                <option value="Male">Male</option>
+              </select></label>
+              <label>Age bracket<select class="msg-select" id="csv-assign-age">
+                <option value="">— don't set —</option>
+                <option value="25">20s</option>
+                <option value="35">30s</option>
+                <option value="45">40s</option>
+                <option value="55">50s</option>
+              </select></label>
+            </div>
+            <div class="msg-token-hint">These apply to every row in the CSV. Per-row values from column mapping take priority if set.</div>
           </div>
 
           <div class="csv-attest">
@@ -4293,6 +4312,8 @@ function csvReset() {
   var att = document.getElementById('csv-attest');           if (att) att.checked = false;
   var ln = document.getElementById('csv-list-name');         if (ln) ln.value = '';
   var er = document.getElementById('csv-error');             if (er) er.style.display = 'none';
+  var ag = document.getElementById('csv-assign-gender');     if (ag) ag.value = '';
+  var aa = document.getElementById('csv-assign-age');        if (aa) aa.value = '';
   var dt = document.getElementById('csv-drop-title');        if (dt) dt.textContent = 'Drop your CSV here, or click to choose a file';
   var ds = document.getElementById('csv-drop-sub');          if (ds) ds.textContent = 'Comma-separated. First row should be column headers (email, first_name, etc.). Max 5,000 rows.';
 }
@@ -4481,6 +4502,8 @@ async function csvDoImport() {
   btn.textContent = 'Importing…';
 
   var listName = document.getElementById('csv-list-name').value.trim();
+  var assignGender = document.getElementById('csv-assign-gender').value || null;
+  var assignAge = document.getElementById('csv-assign-age').value ? parseInt(document.getElementById('csv-assign-age').value, 10) : null;
   var rows = CSV_STATE.parsedRows.map(function(r){
     var hasPhone = !!r.phone;
     return {
@@ -4490,8 +4513,8 @@ async function csvDoImport() {
       email:                r.email || null,
       phone:                hasPhone ? r.phone : null,
       location:             r.location || null,
-      age:                  r.age,
-      gender:               r.gender || null,
+      age:                  r.age || assignAge,
+      gender:               r.gender || assignGender,
       email_consent_status: r.email ? 'opted_in' : 'opted_out',
       email_consent_source: r.email ? 'csv_import_self_attest' : null,
       sms_consent_status:   hasPhone ? 'opted_in' : 'opted_out',
