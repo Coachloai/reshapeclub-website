@@ -496,12 +496,15 @@
     transition:transform .35s var(--ease), border-color .35s;
   }
   .step:hover{transform:translateY(-3px);border-color:var(--sage-light);}
-  .step .step-icon{
-    width:52px;height:52px;border-radius:14px;
-    display:flex;align-items:center;justify-content:center;
-    background:rgba(237,92,37,0.1);margin-bottom:20px;
+  .step .step-top{
+    display:flex;align-items:center;gap:14px;margin-bottom:28px;
   }
-  .step .step-icon svg{width:26px;height:26px;}
+  .step .step-icon{
+    width:48px;height:48px;border-radius:12px;flex-shrink:0;
+    display:flex;align-items:center;justify-content:center;
+    background:rgba(237,92,37,0.1);
+  }
+  .step .step-icon svg{width:24px;height:24px;}
   .step .step-num{
     font-family:'Inter', sans-serif;
     font-style:italic;
@@ -509,7 +512,6 @@
     font-weight:300;
     line-height:1;
     color:var(--clay-soft);
-    margin-bottom:42px;
     font-variation-settings:"opsz" 144, "SOFT" 100;
   }
   .step h3{
@@ -1560,45 +1562,28 @@
 
     <div class="steps">
       <article class="step">
-        <div class="step-icon">
-          <svg viewBox="0 0 26 26" fill="none" xmlns="http://www.w3.org/2000/svg">
-            <!-- Body outline with scan lines -->
-            <path d="M13 3 C13 3 10 3 10 6 L10 8 C8.5 8.5 7 10 7 12 L7 17 C7 18 8 19 9 19 L10 19 L10 23 L12 23 L12 19 L14 19 L14 23 L16 23 L16 19 L17 19 C18 19 19 18 19 17 L19 12 C19 10 17.5 8.5 16 8 L16 6 C16 3 13 3 13 3Z" stroke="#ED5C25" stroke-width="1.4" stroke-linejoin="round"/>
-            <circle cx="13" cy="6" r="2.5" stroke="#ED5C25" stroke-width="1.4"/>
-            <!-- Scan lines across body -->
-            <line x1="5" y1="12" x2="21" y2="12" stroke="#ED5C25" stroke-width="1" stroke-dasharray="2 2" opacity=".4"/>
-            <line x1="5" y1="16" x2="21" y2="16" stroke="#ED5C25" stroke-width="1" stroke-dasharray="2 2" opacity=".4"/>
-          </svg>
+        <div class="step-top">
+          <div class="step-icon"><svg viewBox="0 0 26 26" fill="none"><path d="M13 3C10 3 10 6 10 6V8C8.5 8.5 7 10 7 12V17C7 18 8 19 9 19H10V23H12V19H14V23H16V19H17C18 19 19 18 19 17V12C19 10 17.5 8.5 16 8V6C16 3 13 3 13 3Z" stroke="#ED5C25" stroke-width="1.4" stroke-linejoin="round"/><circle cx="13" cy="6" r="2.5" stroke="#ED5C25" stroke-width="1.4"/><line x1="5" y1="12" x2="21" y2="12" stroke="#ED5C25" stroke-width="1" stroke-dasharray="2 2" opacity=".4"/><line x1="5" y1="16" x2="21" y2="16" stroke="#ED5C25" stroke-width="1" stroke-dasharray="2 2" opacity=".4"/></svg></div>
+          <span class="step-num">1</span>
         </div>
-        <span class="step-num">01</span>
         <h3>Scan</h3>
         <p>Evolt360 body composition scan. Fat mass, muscle mass, visceral fat, segmental analysis, metabolic age. Your real starting line — not the bathroom-scale lie.</p>
       </article>
 
       <article class="step">
-        <div class="step-icon">
-          <svg viewBox="0 0 26 26" fill="none" xmlns="http://www.w3.org/2000/svg">
-            <!-- Fork and knife — nutrition -->
-            <path d="M7 4 L7 11 C7 12.5 8.5 13 9.5 13 L9.5 22" stroke="#ED5C25" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"/>
-            <line x1="7" y1="7" x2="12" y2="7" stroke="#ED5C25" stroke-width="1.5" stroke-linecap="round"/>
-            <line x1="12" y1="4" x2="12" y2="11" stroke="#ED5C25" stroke-width="1.5" stroke-linecap="round"/>
-            <!-- Knife -->
-            <path d="M18 4 C18 4 20 5 20 9 C20 11 19 12 18 12.5 L18 22" stroke="#ED5C25" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"/>
-          </svg>
+        <div class="step-top">
+          <div class="step-icon"><svg viewBox="0 0 26 26" fill="none"><path d="M7 4V11C7 12.5 8.5 13 9.5 13V22" stroke="#ED5C25" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"/><line x1="7" y1="7" x2="12" y2="7" stroke="#ED5C25" stroke-width="1.5" stroke-linecap="round"/><line x1="12" y1="4" x2="12" y2="11" stroke="#ED5C25" stroke-width="1.5" stroke-linecap="round"/><path d="M18 4C18 4 20 5 20 9C20 11 19 12 18 12.5V22" stroke="#ED5C25" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"/></svg></div>
+          <span class="step-num">2</span>
         </div>
-        <span class="step-num">02</span>
         <h3>Plan</h3>
         <p>A qualified nutritionist builds your plan around your scan, your life, and the food you'll actually eat. No 1,200-calorie nonsense. No supplements to buy.</p>
       </article>
 
       <article class="step">
-        <div class="step-icon">
-          <svg viewBox="0 0 26 26" fill="none" xmlns="http://www.w3.org/2000/svg">
-            <!-- Lightning bolt — energy/transformation -->
-            <path d="M15 2 L8 14 L13 14 L11 24 L18 12 L13 12 L15 2Z" fill="#ED5C25" opacity=".15" stroke="#ED5C25" stroke-width="1.5" stroke-linejoin="round"/>
-          </svg>
+        <div class="step-top">
+          <div class="step-icon"><svg viewBox="0 0 26 26" fill="none"><path d="M15 2L8 14H13L11 24L18 12H13L15 2Z" fill="#ED5C25" opacity=".15" stroke="#ED5C25" stroke-width="1.5" stroke-linejoin="round"/></svg></div>
+          <span class="step-num">3</span>
         </div>
-        <span class="step-num">03</span>
         <h3>Transform</h3>
         <p>Coach-led sessions, weekly check-ins, progress tracking and adjustments. <em>The accountability layer</em> that turns a good plan into a measurable result.</p>
       </article>
