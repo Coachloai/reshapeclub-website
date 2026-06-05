@@ -2288,13 +2288,32 @@
           valid = false;
         }
       }
+      var rating = step.querySelector('.form-rating');
+      if (rating && !rating.querySelector('input:checked')) valid = false;
+    }
+    // Steps 7 & 8: require all radio/multi-select groups
+    if (stepNum === 7 || stepNum === 8) {
+      step.querySelectorAll('.form-options:not(.multi-select)').forEach(function(group) {
+        if (!group.querySelector('input[type="radio"]:checked')) valid = false;
+      });
+      step.querySelectorAll('.form-options.multi-select').forEach(function(group) {
+        if (!group.querySelector('input:checked')) valid = false;
+      });
     }
     return valid;
   }
 
   form.addEventListener('submit', async function(e) {
     e.preventDefault();
+    // Final validation gate — reject if required fields are missing
     var formData = new FormData(form);
+    var reqRadios = ['gender','looking_for','reason','coachability','ready_for_coach','willing_to_invest','location'];
+    for (var ri = 0; ri < reqRadios.length; ri++) {
+      if (!formData.get(reqRadios[ri])) { alert('Please complete all steps before submitting.'); return; }
+    }
+    if (!formData.get('first_name') || !formData.get('last_name') || !formData.get('email') || !formData.get('phone')) { alert('Please fill in all your contact details.'); return; }
+    if (!formData.get('big_goal')) { alert('Please tell us about your goal.'); return; }
+    if (!formData.get('importance')) { alert('Please rate how important this goal is.'); return; }
     var data = {};
     formData.forEach(function(value, key) {
       if (data[key]) {
