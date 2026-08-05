@@ -7,13 +7,15 @@
   var ANON_KEY     = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6Imx2aXpsZG1kZmljc2ZwZ2VnZWhwIiwicm9sZSI6ImFub24iLCJpYXQiOjE3NzM2OTk4NDQsImV4cCI6MjA4OTI3NTg0NH0.72wHbZaTvqNzW6DTb6Ae1vi9QpOg_-KiEO-Jjm9mn0k';
   var CONFIRM_FN   = SUPABASE_URL + '/functions/v1/consult-confirm';
 
-  var DEFAULT_PATTERN = 'stress_driven_plateau';
+  var DEFAULT_PATTERN_F = 'stress_driven_plateau';
+  var DEFAULT_PATTERN_M = 'cortisol_dominant_decline';
 
   var state = {
     bookingId: null,
     confirmToken: null,
     booking: null,
     assessment: null,
+    leadGender: null,
     members: [],
     selected: new Set()
   };
@@ -56,10 +58,10 @@
     return window.supabase.createClient(SUPABASE_URL, ANON_KEY);
   }
 
-  // Load booking + slot + (optional) assessment.
+  // Load booking + slot + lead gender (for gallery fallback).
   function loadBooking(sb){
     return sb.from('bookings')
-      .select('id, confirm_token, confirmed_at, first_name, last_name, email, location, assessment_session_id, slot_id, booking_slots(date, start_time, end_time, location)')
+      .select('id, confirm_token, confirmed_at, first_name, last_name, email, location, assessment_session_id, slot_id, lead_id, booking_slots(date, start_time, end_time, location)')
       .eq('id', state.bookingId)
       .maybeSingle()
       .then(function(res){
@@ -71,6 +73,12 @@
         }
         state.booking = b;
         return b;
+      })
+      .then(function(b){
+        if (!b.lead_id) return b;
+        return sb.from('leads').select('gender').eq('id', b.lead_id).maybeSingle()
+          .then(function(r){ state.leadGender = (r.data && r.data.gender) || null; return b; })
+          .catch(function(){ return b; });
       });
   }
 
@@ -90,7 +98,8 @@
   }
 
   function loadGallery(sb){
-    var pattern = (state.assessment && state.assessment.primary_archetype) || DEFAULT_PATTERN;
+    var fallback = (state.leadGender === 'Male') ? DEFAULT_PATTERN_M : DEFAULT_PATTERN_F;
+    var pattern = (state.assessment && state.assessment.primary_archetype) || fallback;
     return sb.from('transformation_members')
       .select('id, name, image_url, starting_point, goal')
       .eq('pattern_tag', pattern)
@@ -227,19 +236,44 @@
     };
   }
   function mockMembers(){
+    var IMG = 'https://lvizldmdficsfpgegehp.supabase.co/storage/v1/object/public/images/ba-women';
     return [
-      { id:'m1', name:'Member A',
-        image_url:'https://placehold.co/600x800/E8DDD0/2A2724?text=Member+A',
-        starting_point:"Belly weight that wouldn't shift, despite training 4x/week",
-        goal:'Sleep through the night, drop a stone' },
-      { id:'m2', name:'Member B',
-        image_url:'https://placehold.co/600x800/E8DDD0/2A2724?text=Member+B',
-        starting_point:'Wired all day, knackered all evening, cravings at 4pm',
-        goal:'Get her energy back, lose 8kg' },
-      { id:'m3', name:'Member C',
-        image_url:'https://placehold.co/600x800/E8DDD0/2A2724?text=Member+C',
-        starting_point:'High-stress job, plateaued for 18 months',
-        goal:'Reshape around her stress, not against it' }
+      { id:'m1', name:'Abbey', image_url:IMG+'/Abbey.png',
+        starting_point:"Carrying belly weight that wouldn't shift despite training regularly",
+        goal:'Lose the stubborn midsection weight, feel strong again' },
+      { id:'m2', name:'Stacey', image_url:IMG+'/Stacey.png',
+        starting_point:'Stress-driven weight gain, exhausted by 3pm every day',
+        goal:'Get her energy back, drop a dress size' },
+      { id:'m3', name:'Lisa', image_url:IMG+'/Lisa.png',
+        starting_point:'High-pressure job, weight creeping up despite eating less',
+        goal:'Reshape around her stress, not against it' },
+      { id:'m4', name:'Shelley', image_url:IMG+'/Shelley.png',
+        starting_point:'Same routine, different body — nothing worked after 50',
+        goal:'Find the version of training that works at her age' },
+      { id:'m5', name:'Claire', image_url:IMG+'/Claire.png',
+        starting_point:'Perimenopause symptoms, gaining weight around the middle',
+        goal:'Balance hormones naturally, build lean muscle' },
+      { id:'m6', name:'Barbara', image_url:IMG+'/Barbara.png',
+        starting_point:'Lifelong active but suddenly stuck, energy crashes after meals',
+        goal:'Work with her body\'s changes, not against them' },
+      { id:'m7', name:'Jaime', image_url:IMG+'/Jaime.png',
+        starting_point:'Lost weight three times, regained it three times',
+        goal:'Break the yo-yo cycle for good' },
+      { id:'m8', name:'Nicole', image_url:IMG+'/Nicole.png',
+        starting_point:'Told her metabolism was broken, nothing seemed to work',
+        goal:'A plan that finally responded to her body' },
+      { id:'m9', name:'Becky', image_url:IMG+'/Becky.png',
+        starting_point:'Plateaued for over a year despite calorie counting',
+        goal:'Get her metabolism responding again, feel like herself' },
+      { id:'m10', name:'Gloria', image_url:IMG+'/Gloria.png',
+        starting_point:'Multiple symptoms — stress, poor sleep, cravings, bloating',
+        goal:'Find out what her body actually needs' },
+      { id:'m11', name:'Rose', image_url:IMG+'/Rose.png',
+        starting_point:'Tried every diet going, conflicting advice from three programmes',
+        goal:'One coherent protocol that holds' },
+      { id:'m12', name:'Kimberlee', image_url:IMG+'/Kimberlee.png',
+        starting_point:'Emotional eating, poor sleep, constantly inflamed',
+        goal:'Calm the inflammation, build a sustainable routine' }
     ];
   }
   function runPreview(mode){
@@ -247,10 +281,8 @@
     state.confirmToken = 'preview';
     state.booking = mockBooking();
     var sb = buildClient();
-    loadGallery(sb).catch(function(){ return null; }).then(function(){
-      if (!state.members || state.members.length === 0){
-        state.members = mockMembers();
-      }
+    Promise.resolve().then(function(){
+      state.members = mockMembers();
       renderHero();
       renderGallery();
       $('#submit-btn').addEventListener('click', function(){

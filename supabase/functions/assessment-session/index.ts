@@ -37,7 +37,8 @@ function ipCountry(req: Request): string | null {
   );
 }
 
-const TOTAL_QUESTIONS = 14;
+const TOTAL_QUESTIONS_WOMEN = 14;
+const TOTAL_QUESTIONS_MEN = 12;
 
 // Normalise UK phone numbers to E.164 (+44...) so downstream WhatsApp/SMS
 // always receives a valid international format regardless of how the user
@@ -75,7 +76,7 @@ Deno.serve(async (req) => {
   try {
     const supabaseUrl = Deno.env.get("SUPABASE_URL")!;
     const serviceKey  = Deno.env.get("SUPABASE_SERVICE_ROLE_KEY")!;
-    const siteUrl     = Deno.env.get("SITE_URL") || "https://reshapeclub.com";
+    const siteUrl     = Deno.env.get("SITE_URL") || "https://reshape.fit";
     const supabase    = createClient(supabaseUrl, serviceKey);
 
     const ip = clientIp(req);
@@ -146,18 +147,20 @@ Deno.serve(async (req) => {
       // NOT NULL, so we always preserve richer data and only fill blanks.
       const { data: existing } = await supabase
         .from("leads")
-        .select("id, first_name, last_name, phone")
+        .select("id, first_name, last_name, phone, gender")
         .eq("email", email)
         .order("created_at", { ascending: false })
         .limit(1)
         .maybeSingle();
 
+      const inferredGender = (body.funnel === "mens") ? "Male" : "Female";
       let lead_id: string;
       if (existing) {
         lead_id = existing.id;
         const patch: Record<string, string | number> = {};
         if (!existing.first_name && name) patch.first_name = name;
         if (!existing.phone && phoneCleaned) patch.phone = phoneCleaned;
+        if (!existing.gender) patch.gender = inferredGender;
         if (age != null) patch.age = age;
         if (Object.keys(patch).length) {
           await supabase.from("leads").update(patch).eq("id", lead_id);
@@ -166,7 +169,8 @@ Deno.serve(async (req) => {
         const { data: inserted, error } = await supabase
           .from("leads")
           .insert({
-            form_name:  "Hormonal Assessment",
+            form_name:  (body.funnel === "mens") ? "Men's Performance Assessment" : "Hormonal Assessment",
+            gender:     (body.funnel === "mens") ? "Male" : "Female",
             first_name: name || "Friend",
             last_name:  "-",
             email,
@@ -224,11 +228,12 @@ Deno.serve(async (req) => {
       if (!(question_id in WEIGHTS)) {
         return jsonResponse({ error: `unknown question ${question_id}` }, 400);
       }
-      if (question_id === "Q13") {
+      const multiSelectQ = question_id === "Q13" || question_id === "MQ11";
+      if (multiSelectQ) {
         const keys = answer_value.split(",").map((s) => s.trim()).filter(Boolean);
         for (const k of keys) {
-          if (!(k in WEIGHTS.Q13)) {
-            return jsonResponse({ error: `Q13 unknown answer ${k}` }, 400);
+          if (!(k in WEIGHTS[question_id])) {
+            return jsonResponse({ error: `${question_id} unknown answer ${k}` }, 400);
           }
         }
       } else if (!(answer_value in WEIGHTS[question_id])) {
@@ -258,7 +263,9 @@ Deno.serve(async (req) => {
         .select("question_id", { count: "exact", head: true })
         .eq("session_id", session_id);
 
-      const progress_pct = Math.round(((count || 0) / TOTAL_QUESTIONS) * 100);
+      const isMens = question_id.startsWith("MQ");
+      const totalQ = isMens ? TOTAL_QUESTIONS_MEN : TOTAL_QUESTIONS_WOMEN;
+      const progress_pct = Math.round(((count || 0) / totalQ) * 100);
       return jsonResponse({ ok: true, progress_pct });
     }
 

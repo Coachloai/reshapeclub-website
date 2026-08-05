@@ -218,19 +218,29 @@ Deno.serve(async (req) => {
       const intentHigh = intent === "ready_now";
       const intentMed  = intent === "ready_now" || intent === "within_3m";
 
-      // DEMO FIT: age 35–55 AND life stage in our target band.
-      const lifeStage = (answers as Record<string, string>).Q1 || "";
-      const inTargetStage = lifeStage === "perimenopausal" ||
-                            lifeStage === "menopausal" ||
-                            lifeStage === "postpartum";
+      // DEMO FIT: age + life stage in target band.
+      const isMens = Object.keys(answers).some((k) => k.startsWith("MQ"));
       const { data: leadRow } = await supabase
         .from("leads")
         .select("age")
         .eq("id", assessment.lead_id)
         .maybeSingle();
       const age = leadRow && typeof leadRow.age === "number" ? leadRow.age : null;
-      const ageFit = age != null && age >= 35 && age <= 55;
-      const demoFit = ageFit && inTargetStage;
+
+      let demoFit: boolean;
+      if (isMens) {
+        // Men's: age 30–55
+        const ageFit = age != null && age >= 30 && age <= 55;
+        demoFit = ageFit;
+      } else {
+        // Women's: age 35–55 AND life stage in target band
+        const lifeStage = (answers as Record<string, string>).Q1 || "";
+        const inTargetStage = lifeStage === "perimenopausal" ||
+                              lifeStage === "menopausal" ||
+                              lifeStage === "postpartum";
+        const ageFit = age != null && age >= 35 && age <= 55;
+        demoFit = ageFit && inTargetStage;
+      }
 
       // Map to the 4 dashboard-quality fields. Each truthy field adds +1
       // to the dashboard's score (>=3 = High, >=2 = Med, <2 = Low).
@@ -258,10 +268,14 @@ Deno.serve(async (req) => {
 
     // Fire the post-quiz nurture sequence keyed to the archetype.
     const TRIGGER_MAP: Record<string, string> = {
-      stress_driven_plateau: "hormonal_stress_driven",
-      hormonal_shift:        "hormonal_shift_pattern",
-      metabolic_resistance:  "hormonal_metabolic",
-      compound_pattern:      "hormonal_compound",
+      stress_driven_plateau:     "hormonal_stress_driven",
+      hormonal_shift:            "hormonal_shift_pattern",
+      metabolic_resistance:      "hormonal_metabolic",
+      compound_pattern:          "hormonal_compound",
+      cortisol_dominant_decline: "mens_cortisol_dominant",
+      testosterone_decline:      "mens_testosterone_decline",
+      metabolic_resistance_men:  "mens_metabolic_resistance",
+      compound_pattern_men:      "mens_compound_pattern",
     };
     if (assessment.lead_id) {
       await fireSequence(supabase, TRIGGER_MAP[result.primary_archetype], assessment.lead_id);

@@ -104,9 +104,14 @@ async function icloudBusy(calendarNames: string[], fromIso: string, toIso: strin
   const supabaseUrl = Deno.env.get('SUPABASE_URL');
   if (!supabaseUrl) throw new Error('SUPABASE_URL env missing');
   const fnUrl = supabaseUrl.replace(/\/$/, '') + '/functions/v1/icloud-calendar';
+  const serviceKey = Deno.env.get('SUPABASE_SERVICE_ROLE_KEY') || '';
   const res = await fetch(fnUrl, {
     method: 'POST',
-    headers: { 'Content-Type': 'application/json' },
+    headers: {
+      'Content-Type': 'application/json',
+      'Authorization': 'Bearer ' + serviceKey,
+      'apikey': serviceKey,
+    },
     body: JSON.stringify({ action: 'busy', calendarNames, from: fromIso, to: toIso }),
   });
   const data = await res.json();

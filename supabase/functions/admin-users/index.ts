@@ -24,7 +24,7 @@ const SUPABASE_URL = Deno.env.get('SUPABASE_URL')!;
 const SERVICE_KEY  = Deno.env.get('SUPABASE_SERVICE_ROLE_KEY')!;
 const ANON_KEY     = Deno.env.get('SUPABASE_ANON_KEY')!;
 const SET_PASSWORD_URL =
-  Deno.env.get('SET_PASSWORD_URL') || 'https://reshapeclub.com/set-password/';
+  Deno.env.get('SET_PASSWORD_URL') || 'https://reshape.fit/set-password/';
 
 const ADMIN_EMAILS = (Deno.env.get('ADMIN_EMAILS') || '')
   .split(',')
@@ -54,9 +54,10 @@ Deno.serve(async (req) => {
     const body = await req.json().catch(() => ({}));
     const action = body?.action;
 
-    if (action === 'list')   return await listUsers();
-    if (action === 'invite') return await inviteUser(body?.email);
-    if (action === 'delete') return await deleteUser(body?.id, caller.id);
+    if (action === 'list')       return await listUsers();
+    if (action === 'invite')     return await inviteUser(body?.email, body?.role);
+    if (action === 'set_role')   return await setUserRole(body?.id, body?.role);
+    if (action === 'delete')     return await deleteUser(body?.id, caller.id);
 
     return json({ error: 'unknown action' }, 400);
   } catch (e) {
@@ -87,6 +88,7 @@ async function listUsers() {
     email: u.email,
     created_at: u.created_at,
     last_sign_in_at: u.last_sign_in_at,
+    role: u.user_metadata?.dashboard_role || 'admin',
     status: u.last_sign_in_at
       ? 'active'
       : u.email_confirmed_at || u.confirmed_at
@@ -97,11 +99,13 @@ async function listUsers() {
   return json({ ok: true, users });
 }
 
-async function inviteUser(emailRaw: unknown) {
+async function inviteUser(emailRaw: unknown, roleRaw?: unknown) {
   const email = String(emailRaw || '').trim().toLowerCase();
   if (!email || !/^[^@\s]+@[^@\s]+\.[^@\s]+$/.test(email)) {
     return json({ error: 'A valid email is required.' }, 400);
   }
+  const VALID_ROLES = ['admin', 'consult'];
+  const role = VALID_ROLES.includes(String(roleRaw || '')) ? String(roleRaw) : 'admin';
 
   // 1. Best-effort native invite — creates the user and emails them (if SMTP
   //    is configured on the project).
@@ -111,7 +115,7 @@ async function inviteUser(emailRaw: unknown) {
 
   const inv = await fetch(
     `${SUPABASE_URL}/auth/v1/invite?redirect_to=${encodeURIComponent(SET_PASSWORD_URL)}`,
-    { method: 'POST', headers: srHeaders(), body: JSON.stringify({ email }) },
+    { method: 'POST', headers: srHeaders(), body: JSON.stringify({ email, data: { dashboard_role: role } }) },
   );
   if (inv.ok) {
     emailed = true;
@@ -125,13 +129,52 @@ async function inviteUser(emailRaw: unknown) {
     }
   }
 
-  // 2. Always produce a working copyable link. If the user already exists
+  // 2. Set the role in user_metadata (covers both new and existing users).
+  //    For existing users the invite above may have failed, so we patch directly.
+  if (userExisted) {
+    // Look up the user and patch their metadata
+    const lookup = await fetch(`${SUPABASE_URL}/auth/v1/admin/users?per_page=200`, { headers: srHeaders() });
+    if (lookup.ok) {
+      const all = await lookup.json();
+      const existing = (all.users || []).find((u: any) => (u.email || '').toLowerCase() === email);
+      if (existing) {
+        await fetch(`${SUPABASE_URL}/auth/v1/admin/users/${existing.id}`, {
+          method: 'PUT',
+          headers: srHeaders(),
+          body: JSON.stringify({ user_metadata: { ...existing.user_metadata, dashboard_role: role } }),
+        });
+      }
+    }
+  }
+
+  // 3. Always produce a working copyable link. If the user already exists
   //    (incl. one the invite just created) prefer a recovery link.
   const userExists = inv.ok || userExisted;
   const link = await anyLink(email, !userExists);
   if (!link) return json({ error: 'Could not generate an invite link.' }, 500);
 
-  return json({ ok: true, action_link: link, emailed, note, email });
+  return json({ ok: true, action_link: link, emailed, note, email, role });
+}
+
+async function setUserRole(idRaw: unknown, roleRaw: unknown) {
+  const id = String(idRaw || '').trim();
+  const VALID_ROLES = ['admin', 'consult'];
+  const role = String(roleRaw || '');
+  if (!id) return json({ error: 'user id required' }, 400);
+  if (!VALID_ROLES.includes(role)) return json({ error: 'invalid role' }, 400);
+
+  // Get current metadata to merge
+  const get = await fetch(`${SUPABASE_URL}/auth/v1/admin/users/${id}`, { headers: srHeaders() });
+  if (!get.ok) return json({ error: 'user not found' }, 404);
+  const user = await get.json();
+
+  const res = await fetch(`${SUPABASE_URL}/auth/v1/admin/users/${id}`, {
+    method: 'PUT',
+    headers: srHeaders(),
+    body: JSON.stringify({ user_metadata: { ...user.user_metadata, dashboard_role: role } }),
+  });
+  if (!res.ok) return json({ error: 'failed to update role: ' + (await res.text()) }, 500);
+  return json({ ok: true });
 }
 
 async function deleteUser(id: unknown, callerId: string) {

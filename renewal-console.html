@@ -1,0 +1,1064 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>ReShape — Renewal Console</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Bricolage+Grotesque:opsz,wght@12..96,500;12..96,700;12..96,800&family=Spline+Sans:wght@400;500;600&display=swap" rel="stylesheet">
+<style>
+  :root{
+    --bg:#0d0e11; --surface:#16181d; --surface-2:#1d2027; --line:#2a2e37;
+    --text:#f2f3f5; --muted:#8b909b; --faint:#5b606b;
+    --accent:#ed5c25; --accent-dim:rgba(237,92,37,.13); --accent-line:rgba(237,92,37,.35);
+    --ask:#5fb0ff; --ask-dim:rgba(95,176,255,.12);
+    --warn:#f5a93b; --warn-dim:rgba(245,169,59,.14);
+    --pink:#ff7eb6; --pink-dim:rgba(255,126,182,.13);
+    --exit:#ff7a7a; --exit-dim:rgba(255,122,122,.12);
+    --disp:'Bricolage Grotesque',sans-serif; --body:'Spline Sans',sans-serif;
+  }
+  [data-theme="light"]{
+    --bg:#FAF7F2; --surface:#FFFFFF; --surface-2:#F0EBE3; --line:#E5DFD5;
+    --text:#2A2724; --muted:#5A5550; --faint:rgba(42,39,36,0.5);
+    --accent:#d4481a; --accent-dim:rgba(212,72,26,.10); --accent-line:rgba(212,72,26,.30);
+    --ask:#2563EB; --ask-dim:rgba(37,99,235,.10);
+    --warn:#D97706; --warn-dim:rgba(217,119,6,.10);
+    --pink:#DB2777; --pink-dim:rgba(219,39,119,.10);
+    --exit:#DC2626; --exit-dim:rgba(220,38,38,.10);
+  }
+  [data-theme="light"] body{color-scheme:light; background:var(--bg)}
+  [data-theme="light"] .field input,
+  [data-theme="light"] .mfield input,
+  [data-theme="light"] textarea,
+  [data-theme="light"] .whyinput{color-scheme:light}
+  [data-theme="light"] .step-no{color:#fff}
+  [data-theme="light"] .ask .opt.on,
+  [data-theme="light"] .next,
+  [data-theme="light"] .pack .ribbon,
+  [data-theme="light"] .pay.on,
+  [data-theme="light"] .ub.on{color:#fff}
+  [data-theme="light"] .stage-head{background:linear-gradient(180deg, rgba(0,0,0,.015), transparent)}
+  [data-theme="light"] .scrim.show{background:rgba(0,0,0,.3)}
+  *{box-sizing:border-box;margin:0;padding:0}
+  html,body{height:100%}
+  body{background:radial-gradient(900px 500px at 88% -10%, rgba(194,242,63,.06), transparent 60%), var(--bg);
+    color:var(--text); font-family:var(--body); line-height:1.5; -webkit-font-smoothing:antialiased;}
+  .app{max-width:1080px; margin:0 auto; padding:22px 22px 150px;}
+  button{font-family:var(--body); cursor:pointer; border:none; background:none; color:inherit;}
+
+  header{display:flex; align-items:center; justify-content:space-between; gap:16px; flex-wrap:wrap; padding-bottom:14px;}
+  .brand{display:flex; align-items:baseline; gap:12px;}
+  .brand .dot{width:8px;height:8px;border-radius:50%;background:var(--accent);box-shadow:0 0 12px var(--accent);align-self:center;}
+  .brand h1{font-family:var(--disp); font-weight:800; font-size:22px; letter-spacing:-.02em;}
+  .brand .tag{color:var(--muted); font-size:12px; text-transform:uppercase; letter-spacing:.14em;}
+  .head-tools{display:flex; align-items:center; gap:10px;}
+  .btn{border:1px solid var(--line); background:var(--surface); color:var(--text); padding:9px 14px; border-radius:10px; font-size:13.5px; font-weight:500; transition:.15s;}
+  .btn:hover{border-color:var(--faint); background:var(--surface-2);}
+  .btn.full{width:100%; justify-content:center; display:flex;}
+  .btn.mt{margin-top:10px;}
+  .timer{font-family:var(--disp); font-weight:700; font-size:18px; font-variant-numeric:tabular-nums; background:var(--surface); border:1px solid var(--line); padding:7px 12px; border-radius:10px;}
+  .timer span{color:var(--muted); font-size:11px; font-family:var(--body); margin-right:6px;}
+
+  .rail{display:flex; gap:6px; margin:8px 0 14px; flex-wrap:wrap;}
+  .rail .seg{flex:1 1 56px; min-width:42px; height:5px; border-radius:3px; background:var(--surface-2); cursor:pointer; transition:.2s;}
+  .rail .seg.done{background:var(--accent-line);}
+  .rail .seg.active{background:var(--accent); box-shadow:0 0 10px var(--accent-dim);}
+  .rail .seg:hover{opacity:.8}
+
+  .stage{background:var(--surface); border:1px solid var(--line); border-radius:16px; overflow:hidden;}
+  .stage-head{display:flex; align-items:flex-start; justify-content:space-between; gap:16px; padding:20px 22px 16px; border-bottom:1px solid var(--line); background:linear-gradient(180deg, rgba(255,255,255,.015), transparent);}
+  .step-no{font-family:var(--disp); font-weight:800; font-size:13px; color:var(--bg); background:var(--accent); border-radius:7px; padding:3px 9px;}
+  .meta{display:flex; align-items:center; gap:12px; flex-wrap:wrap;}
+  .stage-head h2{font-family:var(--disp); font-weight:700; font-size:24px; letter-spacing:-.02em; line-height:1.1;}
+  .goal{color:var(--muted); font-size:13.5px; margin-top:6px; max-width:64ch;}
+  .goal b{color:var(--text); font-weight:600;}
+  .mins{white-space:nowrap; color:var(--muted); font-size:12px; border:1px solid var(--line); border-radius:20px; padding:5px 11px; text-transform:uppercase; letter-spacing:.08em;}
+  .stage-body{padding:20px 22px 100px; display:flex; flex-direction:column; gap:15px;}
+
+  .ask{border:1px solid var(--line); border-radius:13px; padding:16px 18px;}
+  .ask .qline{font-family:var(--disp); font-weight:700; font-size:18px; line-height:1.28; color:var(--text);}
+  .ask .foot{font-size:12.5px; color:var(--faint); margin-top:7px; line-height:1.45;}
+  .ask .opts{display:flex; flex-wrap:wrap; gap:9px; margin-top:15px;}
+  .ask .opt{border:1px solid var(--line); background:var(--surface); color:var(--text); border-radius:11px; padding:11px 16px; font-size:14px; font-weight:500; transition:.12s;}
+  .ask .opt:hover{border-color:var(--faint);}
+  .ask .opt.on{background:var(--accent); border-color:var(--accent); color:var(--bg); font-weight:600;}
+  .ask .opt.log.on{background:var(--faint); border-color:var(--faint); color:var(--bg);}
+
+  .note{font-size:13px; color:var(--muted); border-left:2px solid var(--line); padding:3px 0 3px 14px; line-height:1.5;}
+  .note b{color:var(--text); font-weight:600;}
+  .band{font-size:10.5px; letter-spacing:.16em; text-transform:uppercase; color:var(--accent); font-weight:700; margin:6px 0 -3px;}
+  .alert{font-size:13.5px; line-height:1.5; color:var(--warn); background:var(--warn-dim); border:1px solid var(--warn-dim); border-radius:11px; padding:12px 14px;}
+
+  .field{display:flex; flex-direction:column; gap:5px;}
+  .field label{font-size:11px; text-transform:uppercase; letter-spacing:.1em; color:var(--faint);}
+  .field input{width:96px; background:var(--bg); border:1px solid var(--line); color:var(--text); border-radius:8px; padding:8px 10px; font-family:var(--body); font-size:14px;}
+  .field input:focus{outline:none; border-color:var(--accent-line);}
+  .toggle-row{display:flex; align-items:center; gap:9px; margin-left:auto;}
+  .switch{width:42px; height:24px; border-radius:20px; background:var(--surface); border:1px solid var(--line); position:relative; transition:.2s; cursor:pointer;}
+  .switch::after{content:''; position:absolute; top:2px; left:2px; width:18px; height:18px; border-radius:50%; background:var(--faint); transition:.2s;}
+  .switch.on{background:var(--accent-dim); border-color:var(--accent-line);}
+  .switch.on::after{left:21px; background:var(--accent);}
+  .offer-cfg{display:flex; gap:14px; flex-wrap:wrap; align-items:flex-end; background:var(--surface-2); border:1px solid var(--line); border-radius:12px; padding:14px 16px;}
+
+  .wrap{display:grid; grid-template-columns:1fr 1fr; gap:14px;}
+  .wbox{background:var(--surface-2); border:1px solid var(--line); border-radius:12px; padding:14px 16px;}
+  .blabel{font-size:11px; letter-spacing:.13em; text-transform:uppercase; color:var(--faint); margin-bottom:10px;}
+  textarea{width:100%; background:var(--bg); border:1px solid var(--line); color:var(--text); border-radius:10px; padding:11px 13px; font-family:var(--body); font-size:14px; resize:vertical; min-height:84px;}
+  textarea:focus{outline:none; border-color:var(--accent-line);}
+  .copied{color:var(--accent); font-size:13px; margin-left:10px; opacity:0; transition:.2s;}
+  .copied.show{opacity:1;}
+
+  .nav{position:fixed; left:0; right:0; bottom:0; background:linear-gradient(180deg, transparent, var(--bg) 28%); padding:18px 22px calc(22px + env(safe-area-inset-bottom, 0px)); z-index:30; -webkit-tap-highlight-color:transparent;}
+  .nav-inner{max-width:1080px; margin:0 auto; display:flex; align-items:center; justify-content:space-between; gap:12px;}
+  .nav .stage-name{color:var(--muted); font-size:13px; overflow:hidden; text-overflow:ellipsis; white-space:nowrap;}
+  .nav-btns{display:flex; gap:10px;}
+  .big{padding:13px 26px; border-radius:12px; font-size:15px; font-weight:600; font-family:var(--disp); letter-spacing:.01em;}
+  .next{background:var(--accent); color:var(--bg); cursor:pointer; touch-action:manipulation;}
+  .next:hover{filter:brightness(1.06);}
+  .next:disabled{opacity:.4; cursor:default; filter:none;}
+  .back{border:1px solid var(--line); background:var(--surface); color:var(--text);}
+  .back:hover{background:var(--surface-2);}
+  .back:disabled{opacity:.35; cursor:default;}
+
+  .scrim{position:fixed; inset:0; background:rgba(0,0,0,.55); opacity:0; pointer-events:none; transition:.2s; z-index:40;}
+  .scrim.show{opacity:1; pointer-events:auto;}
+  @media(max-width:620px){ .wrap{grid-template-columns:1fr;} .stage-head h2{font-size:20px;} .nav .stage-name{display:none;} }
+
+  .builder{display:flex; flex-direction:column; gap:12px;}
+  .tiles{display:grid; grid-template-columns:repeat(auto-fit,minmax(146px,1fr)); gap:10px;}
+  .tile{border:1px solid var(--line); border-radius:12px; background:var(--surface-2); padding:14px 12px; text-align:center; display:flex; flex-direction:column; align-items:center;}
+  .tile .tname{font-family:var(--disp); font-weight:700; font-size:16px;}
+  .tile .tprice{color:var(--muted); font-size:12.5px; margin:2px 0 10px;}
+  .tile.on{border-color:var(--accent); background:rgba(255,107,53,.08);}
+  .stepper{display:flex; align-items:center; border:1px solid var(--line); border-radius:10px; overflow:hidden; background:var(--surface);}
+  .stepper .st{width:40px; height:38px; font-size:20px; font-weight:700; color:var(--text);}
+  .stepper .st:hover{background:var(--bg);}
+  .stepper .ct{min-width:40px; text-align:center; font-family:var(--disp); font-weight:800; font-size:17px;}
+  .botbar{display:flex; align-items:stretch; gap:10px; flex-wrap:wrap;}
+  .nut{display:flex; align-items:center; gap:14px; border:1px solid var(--line); border-radius:12px; background:var(--surface-2); padding:12px 16px; flex:1 1 220px;}
+  .nut .nl b{font-family:var(--disp); font-weight:700; font-size:15px;}
+  .nut .nl span{display:block; color:var(--muted); font-size:12px; margin-top:2px;}
+  .nut{flex-direction:column; align-items:stretch;}
+  .nutseg{display:flex; gap:6px; margin-top:10px; flex-wrap:wrap;}
+  .nutseg .nutpick{font-size:12px; padding:8px 10px; flex:1; min-width:0;}
+  .price-ref{margin:10px 0 6px; border:1px solid var(--line); border-radius:10px; overflow:hidden;}
+  .price-ref-toggle{padding:10px 14px; font-size:12px; font-weight:700; letter-spacing:.06em; text-transform:uppercase; color:var(--faint); cursor:pointer; user-select:none;}
+  .price-ref.open .price-ref-toggle{color:var(--accent);}
+  .price-ref-body{display:none; padding:0 14px 14px;}
+  .price-ref.open .price-ref-body{display:block;}
+  .price-tbl{width:100%; border-collapse:collapse; font-size:13px;}
+  .price-tbl th{text-align:right; padding:5px 10px; font-size:11px; text-transform:uppercase; letter-spacing:.08em; color:var(--faint); border-bottom:1px solid var(--line);}
+  .price-tbl th:first-child{text-align:left;}
+  .price-tbl td{padding:5px 10px; text-align:right; color:var(--text); border-bottom:1px solid var(--line);}
+  .price-tbl td:first-child{text-align:left; font-weight:600; color:var(--muted);}
+  .price-tbl tr.sec td{font-size:11px; font-weight:700; text-transform:uppercase; letter-spacing:.1em; color:var(--accent); text-align:left; padding-top:12px; border-bottom:none;}
+  .total{flex:1 1 200px; padding:13px 18px; border-radius:12px; background:var(--accent-dim); border:1px solid var(--accent-line); font-family:var(--disp); font-weight:800; font-size:28px; color:var(--accent); display:flex; flex-direction:column; justify-content:center;}
+  .total small{font-family:var(--body); font-weight:400; font-size:13px; color:var(--muted);}
+  .total .brk{font-family:var(--body); font-weight:400; font-size:12px; color:var(--faint); margin-top:2px;}
+  .measure{display:flex; gap:14px; align-items:flex-end; flex-wrap:wrap; margin-top:14px;}
+  .mfield{display:flex; flex-direction:column; gap:5px;}
+  .mfield label{font-size:11px; text-transform:uppercase; letter-spacing:.1em; color:var(--faint);}
+  .mfield input{width:120px; background:var(--bg); border:1px solid var(--line); color:var(--text); border-radius:9px; padding:10px 12px; font-family:var(--body); font-size:15px;}
+  .mfield input:focus{outline:none; border-color:var(--accent-line);}
+  .payseg{display:flex; gap:8px;}
+  .pay{flex:1; border:1px solid var(--line); background:var(--surface); color:var(--muted); border-radius:11px; padding:11px 14px; font-size:14px; font-weight:600; transition:.12s;}
+  .pay:hover{border-color:var(--faint); color:var(--text);}
+  .pay.on{background:var(--accent); border-color:var(--accent); color:var(--bg);}
+  .pay b{font-weight:800;}
+  .unitseg{display:inline-flex; gap:6px; margin-top:14px;}
+  .ub{border:1px solid var(--line); background:var(--surface); color:var(--muted); border-radius:9px; padding:8px 13px; font-size:13px; font-weight:600;}
+  .ub:hover{border-color:var(--faint); color:var(--text);}
+  .ub.on{background:var(--accent); border-color:var(--accent); color:var(--bg);}
+  .dual{display:flex; gap:8px;}
+  .mfield .dual input{width:78px;}
+  .metricout{font-family:var(--disp); font-weight:800; font-size:18px; color:var(--accent); align-self:flex-end; padding-bottom:7px;}
+  .whyinput{width:100%; margin-top:14px; background:var(--bg); border:1px solid var(--line); color:var(--text); border-radius:10px; padding:11px 13px; font-family:var(--body); font-size:14px;}
+  .whyinput:focus{outline:none; border-color:var(--accent-line);}
+
+  /* ---- agreement ---- */
+  .agr-nameinput{width:100%; background:var(--surface-2); border:1px solid var(--line); color:var(--text); border-radius:9px; padding:10px 12px; font-family:var(--body); font-size:14px; outline:none; color-scheme:dark;}
+  .agr-nameinput:focus{border-color:var(--accent);}
+  #agreementPanel{display:none; margin-top:20px;}
+  #agreementPanel.show{display:block;}
+  .agr{ --aps:#16181d; --apl:#2a2e37; --ap2:#1d2027; --apt:#f2f3f5; --apm:#aeb2bb; --apf:#7d828c; --apa:#c2f23f; --apad:rgba(194,242,63,.09); --apal:rgba(194,242,63,.42); --apx:#0d0e11; }
+  .agr.light{ --aps:#ffffff; --apl:#e4e6ea; --ap2:#f5f6f8; --apt:#1a1c20; --apm:#55595f; --apf:#9aa0a8; --apa:#c55a11; --apad:#fff6ee; --apal:#e7c9a8; --apx:#ffffff; }
+  .agr-bar{display:flex; align-items:center; justify-content:space-between; gap:12px; flex-wrap:wrap; margin-bottom:14px;}
+  .agr-barlabel{font-family:var(--disp); font-weight:800; font-size:16px; color:var(--apt);}
+  .agr-btns{display:flex; gap:8px;}
+  .agr-btn{background:var(--ap2); border:1px solid var(--apl); color:var(--apt); font-family:var(--body); font-weight:600; font-size:13px; padding:9px 13px; border-radius:10px; cursor:pointer;}
+  .agr-btn:hover{border-color:var(--apf);}
+  .agr-card{background:var(--aps); border:1px solid var(--apl); border-radius:15px; padding:18px 20px; margin-bottom:13px;}
+  .agr-label{font-size:11px; font-weight:700; letter-spacing:.13em; text-transform:uppercase; color:var(--apa); margin:2px 0 11px;}
+  .agr-label.blk{margin-top:18px;}
+  .agr-title{font-family:var(--disp); font-weight:800; color:var(--apt); font-size:23px; letter-spacing:-.02em; margin-bottom:6px;}
+  .agr-card p{color:var(--apm); margin:0 0 9px; line-height:1.62; font-size:13.5px;} .agr-card p:last-child{margin-bottom:0;} .agr-card p b{color:var(--apt);}
+  .agr-card ul{margin:2px 0 4px; list-style:none; padding:0;} .agr-card li{color:var(--apm); margin:0 0 6px; padding-left:16px; position:relative; font-size:13.5px;}
+  .agr-card li::before{content:"—"; position:absolute; left:0; color:var(--apf);}
+  .agr-fill{color:var(--apt); font-weight:600; border-bottom:1px solid var(--apf); padding:0 3px;}
+  .agr-fillwide{display:inline-block; min-width:100%; min-height:17px;}
+  .agr-lprow{display:flex; gap:10px; flex-wrap:wrap;}
+  .agr-lp{background:var(--ap2); border:1px solid var(--apl); color:var(--apt); font-weight:700; font-size:14px; padding:11px 20px; border-radius:11px; cursor:pointer; transition:.15s;}
+  .agr-lp:hover{border-color:var(--apa);}
+  .agr-lp.on{background:var(--apa); border-color:var(--apa); color:var(--apx);}
+  .agr-mixrow{display:grid; grid-template-columns:repeat(4,1fr); gap:11px; margin:4px 0 12px;}
+  .agr-mtile{background:var(--ap2); border:1px solid var(--apl); border-radius:13px; padding:14px 10px; text-align:center;}
+  .agr-mtile.has{border-color:var(--apal);}
+  .agr-mt{font-family:var(--disp); font-weight:800; font-size:16px; color:var(--apt);}
+  .agr-mp{font-size:11.5px; color:var(--apf); margin:2px 0 9px;}
+  .agr-mv{font-family:var(--disp); font-weight:800; font-size:24px; color:var(--apf);}
+  .agr-mtile.has .agr-mv{color:var(--apa);}
+  .agr-payrow{display:grid; grid-template-columns:1fr 1fr; gap:11px; margin-bottom:11px;}
+  .agr-payb{background:var(--ap2); border:1px solid var(--apl); color:var(--apm); font-weight:700; font-size:14px; padding:13px; border-radius:11px; text-align:center; cursor:pointer; transition:.15s;}
+  .agr-payb:hover{border-color:var(--apa);}
+  .agr-payb.on{background:var(--apa); border-color:var(--apa); color:var(--apx);}
+  .agr-split{display:grid; grid-template-columns:1fr 1fr; gap:11px; margin-bottom:11px;}
+  .agr-nut{background:var(--ap2); border:1px solid var(--apl); border-radius:13px; padding:15px 16px; display:flex; align-items:center; justify-content:space-between;}
+  .agr-nl{font-weight:600; color:var(--apt);} .agr-ns{font-size:12px; color:var(--apf); margin-top:2px;}
+  .agr-total{background:var(--apad); border:1px solid var(--apal); border-radius:13px; padding:15px 18px;}
+  .agr-tn{font-family:var(--disp); font-weight:800; font-size:30px; color:var(--apa); line-height:1;}
+  .agr-tu{font-size:13px; color:var(--apm); margin-top:2px;}
+  .agr-tsub{font-size:12px; color:var(--apf); margin-top:6px;}
+  .agr-feerow{display:flex; align-items:center; gap:14px; flex-wrap:wrap;}
+  .agr-fee{background:var(--ap2); border:1px solid var(--apl); border-radius:11px; padding:9px 15px;}
+  .agr-felab{font-size:10.5px; text-transform:uppercase; letter-spacing:.08em; color:var(--apf);}
+  .agr-feval{font-family:var(--disp); font-weight:800; font-size:17px; color:var(--apt);}
+  .agr-gnote{flex:1; min-width:200px; background:var(--apad); border:1px solid var(--apal); border-radius:11px; padding:10px 13px; font-size:12.5px; color:var(--apt);}
+  .agr-hl{background:var(--apad); border-left:3px solid var(--apal); border-radius:9px; padding:11px 13px; color:var(--apt) !important;}
+  .agr-sigrow{display:flex; gap:34px;} .agr-sigrow>div{flex:1;}
+  .agr-role{color:var(--apa); font-weight:700; font-size:12.5px; margin-bottom:12px; text-transform:uppercase; letter-spacing:.06em;}
+  .agr-sl{color:var(--apm); margin:0 0 14px; font-size:13.5px;}
+  .agr-ddt{width:100%; border-collapse:collapse;}
+  .agr-ddt td{border:1px solid var(--apl); padding:8px 11px; font-size:12.5px; color:var(--apt);}
+  .agr-ddt td.k{background:var(--ap2); color:var(--apm); font-weight:700; width:34%; letter-spacing:.03em;}
+  .agr-secnote{background:var(--apad); border:1px solid var(--apal); border-radius:11px; padding:11px 13px; font-size:12.5px; color:var(--apm); margin-bottom:13px;}
+  .agr-secnote b{color:var(--apt);}
+  @media(max-width:620px){ .agr-mixrow{grid-template-columns:repeat(2,1fr);} .agr-split,.agr-payrow{grid-template-columns:1fr;} .agr-sigrow{flex-direction:column; gap:18px;} }
+  @media print{
+    body *{visibility:hidden !important;}
+    #agreementPanel, #agreementPanel *{visibility:visible !important;}
+    #agreementPanel{position:absolute; left:0; top:0; width:100%; margin:0;}
+    #agreementPanel .agr-bar{display:none !important;}
+    #agreementPanel .hide{display:block !important;}
+    #agreementPanel .agr-agreecard, #agreementPanel .agr-pagebtns{display:none !important;}
+    #agreementPanel.agr{ --aps:#fff; --apl:#e4e6ea; --ap2:#f5f6f8; --apt:#1a1c20; --apm:#55595f; --apf:#9aa0a8; --apa:#c55a11; --apad:#fff6ee; --apal:#e7c9a8; --apx:#fff; }
+    #agreementPanel *{ -webkit-print-color-adjust:exact; print-color-adjust:exact; }
+    #agreementPanel .agr-sigbox{background:#fff !important; border:1px solid #ccc !important; height:auto !important; min-height:78px; page-break-inside:avoid;}
+    #agreementPanel .agr-sigimg{visibility:visible !important; display:block !important; max-height:80px; max-width:90%; -webkit-print-color-adjust:exact; print-color-adjust:exact;}
+    #agreementPanel .agr-sigrow{page-break-inside:avoid; display:flex !important; gap:20px;}
+    #agreementPanel .agr-card:last-child{page-break-inside:avoid;}
+    @page{margin:14mm;}
+  }
+  .agr-sv{color:var(--apt) !important; font-weight:600;}
+  .agr-sigbox{margin-top:5px; height:78px; border:1px dashed var(--apl); border-radius:10px; display:flex; align-items:center; justify-content:center; cursor:pointer;}
+  .agr-sigbox:hover{border-color:var(--apa);}
+  .agr-sigbox.signed{background:#fff; border-style:solid; border-color:var(--apl);}
+  .agr-sigimg{max-height:70px; max-width:94%;}
+  .agr-sigtap{color:var(--apf); font-size:13px;}
+  .sign-scrim{position:fixed; inset:0; background:rgba(0,0,0,.6); opacity:0; pointer-events:none; transition:.18s; z-index:80;}
+  .sign-scrim.show{opacity:1; pointer-events:auto;}
+  .sign-modal{position:fixed; left:50%; top:50%; transform:translate(-50%,-50%) scale(.97); width:min(640px,94vw); background:var(--surface); border:1px solid var(--line); border-radius:16px; padding:18px; z-index:90; opacity:0; pointer-events:none; transition:.18s;}
+  .sign-modal.show{opacity:1; pointer-events:auto; transform:translate(-50%,-50%) scale(1);}
+  .sign-head{display:flex; align-items:center; justify-content:space-between; margin-bottom:12px;}
+  .sign-head span{font-family:var(--disp); font-weight:800; font-size:17px; color:var(--text);}
+  .sign-x{background:none; border:none; color:var(--muted); font-size:24px; cursor:pointer; line-height:1;}
+  .sign-x:hover{color:var(--text);}
+  .sign-pad{width:100%; height:260px; background:#fff; border-radius:12px; touch-action:none; display:block; cursor:crosshair;}
+  .sign-actions{display:flex; justify-content:space-between; gap:10px; margin-top:14px;}
+  .sign-save{background:var(--accent); color:#0d0e11; font-family:var(--disp); font-weight:800; font-size:15px; padding:11px 22px; border-radius:11px; border:none; cursor:pointer;}
+  .sign-save:hover{filter:brightness(1.06);}
+  @media print{ .sign-scrim,.sign-modal{display:none !important;} }
+  .hide{display:none !important;}
+  .agr-ddi{width:100%; background:transparent; border:none; outline:none; color:var(--apt); font-family:var(--body); font-size:13.5px; padding:3px 0;}
+  .agr-ddi::placeholder{color:var(--apf);}
+  .agr-ddi:focus{border-bottom:1px solid var(--apa);}
+  .agr-agreecard{text-align:center;}
+  .agr-agreecard p{color:var(--apm); margin-bottom:12px; font-size:13.5px;}
+  .agr-pagebtns{display:flex; justify-content:space-between; gap:10px; align-items:center; margin-top:2px;}
+  .idgrid{display:grid; grid-template-columns:1fr 1fr; gap:16px; margin-top:6px;}
+  .idcell .idlabel{font-size:11px; text-transform:uppercase; letter-spacing:.09em; color:var(--faint); margin-bottom:7px; display:flex; align-items:center; gap:7px;}
+  .idtag{font-size:9.5px; font-weight:700; letter-spacing:.05em; color:var(--accent); background:rgba(194,242,63,.12); border:1px solid rgba(194,242,63,.3); border-radius:20px; padding:2px 7px;}
+  .idval{font-family:var(--disp); font-weight:800; font-size:17px; color:var(--text); padding:9px 0;}
+  @media(max-width:560px){ .idgrid{grid-template-columns:1fr;} }
+
+  /* renewal badge */
+  .renewal-badge{display:inline-flex;align-items:center;gap:6px;background:rgba(95,176,255,.12);border:1px solid rgba(95,176,255,.3);color:var(--ask);font-size:11px;font-weight:700;letter-spacing:.08em;text-transform:uppercase;padding:4px 12px;border-radius:20px;}
+</style>
+</head>
+<body>
+<div class="app">
+  <header>
+    <div class="brand"><span class="dot"></span><h1>ReShape</h1><span class="tag">Renewal Console</span><span class="renewal-badge">Renewal</span></div>
+    <div class="head-tools">
+      <div class="timer"><span id="callState">paused</span><b id="clock">00:00</b></div>
+      <button class="btn" id="timerBtn">Start</button>
+    </div>
+  </header>
+  <div class="rail" id="rail"></div>
+  <div class="stage">
+    <div class="stage-head">
+      <div><div class="meta"><span class="step-no" id="stepNo">01</span><h2 id="stageTitle"></h2></div><p class="goal" id="stageGoal"></p></div>
+      <span class="mins" id="stageMins"></span>
+    </div>
+    <div class="stage-body" id="stageBody"></div>
+  </div>
+</div>
+<div class="nav"><div class="nav-inner">
+  <div class="stage-name" id="navName"></div>
+  <div class="nav-btns"><button class="big back" id="backBtn">&larr; Back</button><button class="big next" id="nextBtn">Next &rarr;</button></div>
+</div></div>
+<div class="scrim" id="scrim"></div>
+<div class="sign-scrim" id="signScrim"></div>
+<div class="sign-modal" id="signModal">
+  <div class="sign-head"><span id="signTitle">Sign here</span><button class="sign-x" id="signClose">&times;</button></div>
+  <canvas id="signPad" class="sign-pad"></canvas>
+  <div class="sign-actions"><button class="agr-btn" id="signClear">Clear</button><button class="sign-save" id="signSave">Save signature</button></div>
+</div>
+
+<script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+<script>
+const _SB_URL = 'https://lvizldmdficsfpgegehp.supabase.co';
+const _SB_KEY = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6Imx2aXpsZG1kZmljc2ZwZ2VnZWhwIiwicm9sZSI6ImFub24iLCJpYXQiOjE3NzM2OTk4NDQsImV4cCI6MjA4OTI3NTg0NH0.72wHbZaTvqNzW6DTb6Ae1vi9QpOg_-KiEO-Jjm9mn0k';
+const _sb = supabase.createClient(_SB_URL, _SB_KEY);
+const byId = id => document.getElementById(id);
+const esc  = s => String(s).replace(/"/g,'&quot;');
+
+const DURATIONS = {
+  '12': {oneToOne:90, elite:35, octave:25, group:15, transform:60, reinforce:50, maintain:40, online:50},
+  '26': {oneToOne:85, elite:32.5, octave:22.5, group:12.5, transform:50, reinforce:40, maintain:30, online:40},
+  '52': {oneToOne:80, elite:30, octave:20, group:10, transform:45, reinforce:35, maintain:25, online:30}
+};
+const fmtMoney = n => Number.isInteger(n) ? String(n) : n.toFixed(2);
+const STD_RATES = {oneToOne:130, elite:50, octave:35, group:20, transform:85, reinforce:70, maintain:55, online:70};
+const STD_ONEOFF = {nutAssessment:250, nutPlan:400, progDesign:150, admin:50};
+const STD_MEETING = {headCoach:150, coach:100};
+const nutRate = d => (cap.nutritionPlan && cap.nutritionPlan !== 'lifestyle') ? (d[cap.nutritionPlan] || 0) : 0;
+function onlineRate(d){
+  if(!cap.onlinePortal) return 0;
+  const totalSessions = cap.mix.oneToOne + cap.mix.elite + cap.mix.octave + cap.mix.group;
+  if(totalSessions === 0) return 40;
+  if(totalSessions >= 3) return d.online * 0.5;
+  if(totalSessions >= 2) return d.online * 0.7;
+  return d.online;
+}
+const NUT_PLANS = ['transform','reinforce','maintain','lifestyle'];
+const NUT_LABELS = {transform:'Transform',reinforce:'Reinforce',maintain:'Maintain',lifestyle:'Lifestyle'};
+const offer = { joining:0, guarantee:false };
+
+const ACCOUNT = { coach: "Loai Haddad" };
+const cap = {
+  name:'', email:'', phone:'', coach:ACCOUNT.coach, location:'',
+  age:null, dob:'', gender:null, height:'', weight:'', unit:'imperial', imp:{ft:'',inch:'',st:'',lb:''},
+  injuries:null, medical:null, medicalNotes:'', injuryNotes:'',
+  renewalGoals:'', renewalChanges:'',
+  duration:null, mix:{oneToOne:0,elite:0,octave:0,group:0}, onlinePortal:false, nutritionPlan:'transform', payment:'weekly',
+  outcome:null, notes:''
+};
+let idx=0;
+
+/* ---------- builders ---------- */
+function card(q, foot){ return `<div class="ask"><div class="qline">${q}</div>${foot?`<div class="foot">${foot}</div>`:''}</div>`; }
+function pick(q, foot, key, opts){
+  const o = `<div class="opts" data-mode="cap" data-key="${key}" data-multi="0">`
+    + opts.map(x=>`<button class="opt" data-val="${esc(x)}">${x}</button>`).join('') + `</div>`;
+  return `<div class="ask"><div class="qline">${q}</div>${foot?`<div class="foot">${foot}</div>`:''}${o}</div>`;
+}
+const band = (t) => `<div class="band">${t}</div>`;
+
+function agrTile(name, price, n, key){ return `<div class="agr-mtile${n>0?' has':''}" data-mix="${key}"><div class="agr-mt">${name}</div><div class="agr-mp">&pound;${fmtMoney(price)}/session</div><div style="display:flex;align-items:center;justify-content:center;gap:8px"><button class="agr-mix-adj" data-mix="${key}" data-dir="-1" style="width:28px;height:28px;border-radius:50%;border:1px solid var(--apl);background:var(--ap2);color:var(--apt);font-size:16px;font-weight:700;cursor:pointer;line-height:1">−</button><div class="agr-mv">${n}</div><button class="agr-mix-adj" data-mix="${key}" data-dir="1" style="width:28px;height:28px;border-radius:50%;border:1px solid var(--apl);background:var(--ap2);color:var(--apt);font-size:16px;font-weight:700;cursor:pointer;line-height:1">+</button></div></div>`; }
+function agrLp(w, sel){ return `<span class="agr-lp${(''+w)===(''+sel)?' on':''}" data-dur="${w}">${w} weeks</span>`; }
+
+/* ---------- stages ---------- */
+const stages = [
+  { t:"Member Details", mins:"3 min", goal:"Capture or confirm the renewing member's personal details.",
+    body:()=> `<div class="ask"><div class="qline">Member details</div><div class="foot">Enter the member's details for the renewal agreement.</div>
+      <div class="idgrid">
+        <div class="idcell"><div class="idlabel">Coach <span class="idtag">your account</span></div><div class="idval">${cap.coach||'--'}</div></div>
+        <div class="idcell"><div class="idlabel">Member name</div><input type="text" id="clientName" class="agr-nameinput" value="${cap.name||''}" placeholder="Full name"></div>
+      </div>
+      <div class="idgrid" style="margin-top:12px">
+        <div class="idcell"><div class="idlabel">Email</div><input type="email" id="emailIn" class="agr-nameinput" value="${cap.email||''}" placeholder="Email address"></div>
+        <div class="idcell"><div class="idlabel">Phone</div><input type="tel" id="phoneIn" class="agr-nameinput" value="${cap.phone||''}" placeholder="Phone number"></div>
+      </div></div>`
+      + `<div class="ask"><div class="qline">Location</div><div class="foot">Select the studio.</div><div style="display:flex;gap:9px;margin-top:12px"><button class="opt loc-pick${cap.location==='Ipswich'?' on':''}" onclick="cap.location='Ipswich';this.parentElement.querySelectorAll('.loc-pick').forEach(b=>b.classList.remove('on'));this.classList.add('on');updateNav()">Ipswich</button><button class="opt loc-pick${cap.location==='Colchester'?' on':''}" onclick="cap.location='Colchester';this.parentElement.querySelectorAll('.loc-pick').forEach(b=>b.classList.remove('on'));this.classList.add('on');updateNav()">Colchester</button></div></div>`
+      + `<div class="ask"><div class="qline">Age &amp; date of birth</div>
+        <div class="measure"><div class="mfield"><label>Age</label><input type="number" id="ageIn" value="${cap.age||''}"></div><div class="mfield"><label>Date of Birth</label><input type="date" id="dobIn" value="${cap.dob||''}"></div></div></div>`
+      + `<div class="ask"><div class="qline">Gender</div><div style="display:flex;gap:9px;margin-top:12px"><button class="opt gender-pick${cap.gender==='Male'?' on':''}" onclick="cap.gender='Male';this.parentElement.querySelectorAll('.gender-pick').forEach(b=>b.classList.remove('on'));this.classList.add('on');updateNav()">Male</button><button class="opt gender-pick${cap.gender==='Female'?' on':''}" onclick="cap.gender='Female';this.parentElement.querySelectorAll('.gender-pick').forEach(b=>b.classList.remove('on'));this.classList.add('on');updateNav()">Female</button></div></div>`
+      + `<div class="ask"><div class="qline">Height &amp; weight</div><div class="foot">Current stats for the renewal.</div><div class="unitseg"><button class="ub" data-unit="imperial">Imperial (ft / st)</button><button class="ub" data-unit="metric">Metric (cm / kg)</button></div><div id="measureWrap"></div></div>`
+  },
+  { t:"Health Check-in", mins:"2 min", goal:"Quick update on any new injuries, medical changes or goals since the last programme.",
+    body:()=> `<div class="ask"><div class="qline">Any new injuries or physical changes?</div><div class="foot">Has anything changed since their last programme?</div>
+      <div style="display:flex;flex-wrap:wrap;gap:9px;margin-top:15px">
+        <button class="opt inj-pick${cap.injuries==='None'?' on':''}" onclick="cap.injuries='None';this.parentElement.querySelectorAll('.opt').forEach(b=>b.classList.remove('on'));this.classList.add('on');updateNav()">None</button>
+        <button class="opt inj-pick${cap.injuries==='Minor -- manageable'?' on':''}" onclick="cap.injuries='Minor -- manageable';this.parentElement.querySelectorAll('.opt').forEach(b=>b.classList.remove('on'));this.classList.add('on');updateNav()">Minor -- manageable</button>
+        <button class="opt inj-pick${cap.injuries==='Significant -- needs adapting'?' on':''}" onclick="cap.injuries='Significant -- needs adapting';this.parentElement.querySelectorAll('.opt').forEach(b=>b.classList.remove('on'));this.classList.add('on');updateNav()">Significant -- needs adapting</button>
+      </div>
+      <textarea id="injuryNotes" placeholder="Injury details..." style="margin-top:12px;min-height:60px">${cap.injuryNotes||''}</textarea></div>`
+      + `<div class="ask"><div class="qline">Any medical changes?</div><div class="foot">New conditions, medications, or updates to existing ones.</div>
+      <div style="display:flex;flex-wrap:wrap;gap:9px;margin-top:15px">
+        <button class="opt med-pick2${cap.medical==='None'?' on':''}" onclick="cap.medical='None';this.parentElement.querySelectorAll('.opt').forEach(b=>b.classList.remove('on'));this.classList.add('on');updateNav()">No changes</button>
+        <button class="opt med-pick2${cap.medical==='Has conditions'?' on':''}" onclick="cap.medical='Has conditions';this.parentElement.querySelectorAll('.opt').forEach(b=>b.classList.remove('on'));this.classList.add('on');updateNav()">Has updates</button>
+      </div>
+      <textarea id="medicalNotes" placeholder="Medical update details..." style="margin-top:12px;min-height:60px">${cap.medicalNotes||''}</textarea></div>`
+      + `<div class="ask"><div class="qline">Goals for the next phase</div><div class="foot">What does the member want to achieve in their next programme?</div>
+      <textarea id="renewalGoals" placeholder="e.g. Continue fat loss, build muscle, improve mobility..." style="margin-top:12px">${cap.renewalGoals||''}</textarea></div>`
+      + `<div class="ask"><div class="qline">Any changes to routine or lifestyle?</div><div class="foot">Work schedule, travel, support at home -- anything that affects training.</div>
+      <textarea id="renewalChanges" placeholder="e.g. Changed jobs, travelling more, partner now training too..." style="margin-top:12px;min-height:60px">${cap.renewalChanges||''}</textarea></div>`
+  },
+  { t:"Programme Builder", mins:"5 min", goal:"Build the new programme. Same pricing structure -- pick duration, session mix, nutrition tier and online portal.",
+    body:()=> band('1 &middot; Programme length')
+      + `<div class="ask"><div class="opts" data-mode="duration"><button class="opt" data-val="12">12 weeks</button><button class="opt" data-val="26">26 weeks</button><button class="opt" data-val="52">52 weeks</button></div><div class="foot">Longer commitment = lower per-session price.</div></div>`
+      + `<div class="price-ref"><div class="price-ref-toggle" onclick="this.parentElement.classList.toggle('open')">&#9654; Full pricing table</div><div class="price-ref-body"><table class="price-tbl"><thead><tr><th></th><th>12 wks</th><th>26 wks</th><th>52 wks</th></tr></thead><tbody><tr class="sec"><td colspan="4">Sessions (per session / week)</td></tr><tr><td>1:1</td><td>&pound;90</td><td>&pound;85</td><td>&pound;80</td></tr><tr><td>Elite</td><td>&pound;35</td><td>&pound;32.50</td><td>&pound;30</td></tr><tr><td>Octave</td><td>&pound;25</td><td>&pound;22.50</td><td>&pound;20</td></tr><tr><td>Group</td><td>&pound;15</td><td>&pound;12.50</td><td>&pound;10</td></tr><tr class="sec"><td colspan="4">Online Portal (per week)</td></tr><tr><td>Full price</td><td>&pound;50</td><td>&pound;40</td><td>&pound;30</td></tr><tr><td>Hybrid 2+ sessions</td><td>&pound;35</td><td>&pound;28</td><td>&pound;21</td></tr><tr><td>Hybrid 3+ sessions</td><td>&pound;25</td><td>&pound;20</td><td>&pound;15</td></tr><tr class="sec"><td colspan="4">Nutrition (per week)</td></tr><tr><td>Transform</td><td>&pound;60</td><td>&pound;50</td><td>&pound;45</td></tr><tr><td>Reinforce</td><td>&pound;50</td><td>&pound;40</td><td>&pound;35</td></tr><tr><td>Maintain</td><td>&pound;40</td><td>&pound;30</td><td>&pound;25</td></tr></tbody></table></div></div>`
+      + band('2 &middot; Build the weekly mix')
+      + `<div id="builder" class="builder"></div>`
+      + `<div class="offer-cfg"><div class="field"><label>Joining fee &pound;</label><input type="number" id="joinPrice" value="${offer.joining}"></div><div class="toggle-row"><span style="font-size:13px;color:var(--muted)">Guarantee line</span><div class="switch ${offer.guarantee?'on':''}" id="gSwitch"></div></div></div>`
+      + `<div class="ask" id="gLine" style="display:none"><div class="qline" style="color:var(--accent)">Guarantee</div><p style="margin-top:6px;color:var(--muted);font-size:14px">"Stick to the system and you'll hit the result we agree on -- or we keep coaching you free until you do."</p></div>`
+  },
+  { t:"Agreement & Close", mins:"5 min", goal:"Review the renewal agreement, take signatures and confirm the outcome.",
+    body:()=> `<div class="ask"><div class="qline">Member name for agreement</div><input type="text" id="clientName" class="agr-nameinput" placeholder="Full name" value="${cap.name||''}"></div>`
+      + pick('Outcome', '', 'outcome', ["Renewed","Not renewed","Deferred"])
+      + `<div id="agreementPanel" class="agr"></div>`
+      + `<div class="wrap" style="margin-top:20px">
+          <div class="wbox"><div class="blabel">Notes</div><textarea id="notes" placeholder="Anything to follow up, changes agreed...">${cap.notes}</textarea></div>
+          <div class="wbox"><div class="blabel">Wrap up</div>
+            <button class="btn full" id="copyBtn">Copy renewal summary</button><span class="copied" id="copied">copied &check;</span>
+            <button class="btn full mt" id="resetBtn">Reset for next renewal</button></div>
+        </div>`
+  }
+];
+
+/* ---------- render ---------- */
+const railEl = byId('rail');
+stages.forEach((s,i)=>{ const d=document.createElement('div'); d.className='seg'; d.onclick=()=>go(i); railEl.appendChild(d); });
+
+function render(){
+  const s=stages[idx];
+  byId('stepNo').textContent=String(idx+1).padStart(2,'0');
+  byId('stageTitle').textContent=s.t;
+  byId('stageGoal').innerHTML=s.goal;
+  byId('stageMins').textContent=s.mins;
+  byId('navName').textContent=(idx+1)+' / '+stages.length+' &middot; '+s.t;
+  byId('stageBody').innerHTML=s.body();
+  document.querySelectorAll('.rail .seg').forEach((seg,i)=>{ seg.className='seg'+(i<idx?' done':'')+(i===idx?' active':''); });
+  wireStage(); updateNav();
+  window.scrollTo({top:0,behavior:'smooth'});
+}
+
+function stageComplete(i){
+  const t=stages[i].t;
+  if(t==='Member Details') return !!(cap.name && cap.location);
+  if(t==='Health Check-in') return !!(cap.injuries && cap.medical && cap.height && cap.weight);
+  if(t==='Programme Builder') return !!(cap.duration && (cap.mix.oneToOne+cap.mix.elite+cap.mix.octave+cap.mix.group+cap.onlinePortal)>0);
+  if(t==='Agreement & Close') return !!cap.outcome;
+  return true;
+}
+
+function updateNav(){
+  const nb=byId('nextBtn'); byId('backBtn').disabled = idx===0;
+  const incomplete = !stageComplete(idx);
+  nb.disabled = incomplete;
+  nb.textContent = incomplete ? 'Complete to continue' : (idx===stages.length-1 ? 'Done' : 'Next →');
+}
+
+function go(i){ if(i>idx && !stageComplete(idx)) return; idx=Math.max(0,Math.min(stages.length-1,i)); render(); scheduleAutoSave(); }
+byId('nextBtn').onclick=()=>{ if(idx<stages.length-1) go(idx+1); else if(_consultSaved && window.parent && window.parent !== window) window.parent.postMessage({ type: 'consult-close' }, '*'); };
+byId('backBtn').onclick=()=>go(idx-1);
+document.addEventListener('keydown',e=>{ if(e.target.tagName==='TEXTAREA'||e.target.tagName==='INPUT')return; if(e.key==='ArrowRight')go(idx+1); if(e.key==='ArrowLeft')go(idx-1); });
+
+function wireStage(){
+  // Duration picker
+  document.querySelectorAll('[data-mode="duration"] .opt').forEach(b=>{
+    if(cap.duration===b.dataset.val) b.classList.add('on');
+    b.onclick=()=>{ cap.duration=b.dataset.val; document.querySelectorAll('[data-mode="duration"] .opt').forEach(x=>x.classList.remove('on')); b.classList.add('on'); renderBuilder(); };
+  });
+  // Cap pickers (outcome)
+  document.querySelectorAll('[data-mode="cap"]').forEach(group=>{
+    const key=group.dataset.key;
+    group.querySelectorAll('.opt').forEach(b=>{
+      if(cap[key]===b.dataset.val) b.classList.add('on');
+      b.onclick=()=>{
+        cap[key]=b.dataset.val;
+        group.querySelectorAll('.opt').forEach(x=>x.classList.remove('on'));
+        b.classList.add('on');
+        if(key==='outcome'){ maybeRenderAgreement(); saveConsultOutcome(); }
+        updateNav();
+      };
+    });
+  });
+  // Input fields
+  var cn=byId('clientName'); if(cn){ cn.oninput=()=>{ cap.name=cn.value; var ap=byId('agreementPanel'); if(ap && ap.classList.contains('show')) renderAgreement(); }; maybeRenderAgreement(); }
+  var emailIn=byId('emailIn'); if(emailIn){ emailIn.oninput=()=>{ cap.email=emailIn.value; }; }
+  var phoneIn=byId('phoneIn'); if(phoneIn){ phoneIn.oninput=()=>{ cap.phone=phoneIn.value; }; }
+  var ageEl=byId('ageIn'); if(ageEl){ ageEl.oninput=()=>{ cap.age=ageEl.value; updateNav(); }; }
+  var dobEl=byId('dobIn'); if(dobEl){ dobEl.oninput=()=>{ cap.dob=dobEl.value; if(cap.dob && !cap.age){ var bd=new Date(cap.dob); var a=Math.floor((Date.now()-bd.getTime())/31557600000); if(a>0&&a<120){cap.age=a; if(ageEl)ageEl.value=a; updateNav();} } }; }
+  // Unit toggle
+  document.querySelectorAll('.unitseg .ub').forEach(b=>{
+    if(cap.unit===b.dataset.unit) b.classList.add('on');
+    b.onclick=()=>{ cap.unit=b.dataset.unit; document.querySelectorAll('.unitseg .ub').forEach(x=>x.classList.remove('on')); b.classList.add('on'); renderMeasure(); };
+  });
+  var uw=byId('measureWrap'); if(uw) renderMeasure();
+  // Offer config
+  var jp=byId('joinPrice');
+  if(jp){
+    jp.oninput=()=>{ offer.joining=+jp.value||0; };
+    var sw=byId('gSwitch');
+    sw.onclick=()=>{ offer.guarantee=!offer.guarantee; sw.classList.toggle('on',offer.guarantee); byId('gLine').style.display=offer.guarantee?'':'none'; };
+    byId('gLine').style.display=offer.guarantee?'':'none';
+  }
+  // Textareas
+  var injN=byId('injuryNotes'); if(injN) injN.oninput=()=>cap.injuryNotes=injN.value;
+  var medN=byId('medicalNotes'); if(medN) medN.oninput=()=>cap.medicalNotes=medN.value;
+  var rg=byId('renewalGoals'); if(rg) rg.oninput=()=>cap.renewalGoals=rg.value;
+  var rc=byId('renewalChanges'); if(rc) rc.oninput=()=>cap.renewalChanges=rc.value;
+  var notes=byId('notes'); if(notes) notes.oninput=()=>cap.notes=notes.value;
+  var cb=byId('copyBtn'); if(cb) cb.onclick=copySummary;
+  var rb=byId('resetBtn'); if(rb) rb.onclick=resetAll;
+}
+
+function renderMeasure(){
+  const w=byId('measureWrap'); if(!w) return;
+  const bmi=()=>{ const h=+cap.height, wt=+cap.weight; var el=byId('mBmi'); if(el) el.textContent=(h>0&&wt>0)?('BMI = '+(wt/((h/100)*(h/100))).toFixed(1)):''; updateNav(); };
+  if(cap.unit==='imperial'){
+    let ftv='', inv='', stv='', lbv='';
+    if(+cap.height>0){ const ti=cap.height/2.54; ftv=Math.floor(ti/12); inv=Math.round(ti-ftv*12); }
+    if(+cap.weight>0){ const tl=cap.weight/0.453592; stv=Math.floor(tl/14); lbv=Math.round(tl-stv*14); }
+    w.innerHTML=`<div class="measure"><div class="mfield"><label>Height</label><div class="dual"><input type="number" id="ftIn" placeholder="ft" value="${ftv}"><input type="number" id="inIn" placeholder="in" value="${inv}"></div></div><div class="mfield"><label>Weight</label><div class="dual"><input type="number" id="stIn" placeholder="st" value="${stv}"><input type="number" id="lbIn" placeholder="lb" value="${lbv}"></div></div><div class="metricout" id="mBmi"></div></div>`;
+    const calc=()=>{
+      const fv=+byId('ftIn').value||0, iv=+byId('inIn').value||0, sv=+byId('stIn').value||0, lv=+byId('lbIn').value||0;
+      const anyH=byId('ftIn').value||byId('inIn').value, anyW=byId('stIn').value||byId('lbIn').value;
+      cap.height = anyH? Math.round((fv*12+iv)*2.54):'';
+      cap.weight = anyW? Math.round((sv*14+lv)*0.453592):'';
+      bmi();
+    };
+    ['ftIn','inIn','stIn','lbIn'].forEach(id=>byId(id).oninput=calc);
+  } else {
+    w.innerHTML=`<div class="measure"><div class="mfield"><label>Height (cm)</label><input type="number" id="cmIn" value="${cap.height||''}"></div><div class="mfield"><label>Weight (kg)</label><input type="number" id="kgIn" value="${cap.weight||''}"></div><div class="metricout" id="mBmi"></div></div>`;
+    const calc=()=>{ cap.height=byId('cmIn').value?Math.round(+byId('cmIn').value):''; cap.weight=byId('kgIn').value?Math.round(+byId('kgIn').value):''; bmi(); };
+    ['cmIn','kgIn'].forEach(id=>byId(id).oninput=calc);
+  }
+  bmi();
+}
+
+function renderBuilder(){
+  const el=byId('builder'); if(!el) return;
+  if(!cap.duration){ el.innerHTML=`<div class="note">Pick a programme length above to build the weekly mix.</div>`; return; }
+  const d=DURATIONS[cap.duration];
+  const rows=[['oneToOne','1:1',d.oneToOne],['elite','Elite',d.elite],['octave','Octave',d.octave],['group','Group',d.group]];
+  const sessions=rows.reduce((s,r)=>s+cap.mix[r[0]]*r[2],0);
+  const nut=nutRate(d);
+  const olr=onlineRate(d);
+  const weekly=sessions+nut+olr;
+  const totalSessions=cap.mix.oneToOne+cap.mix.elite+cap.mix.octave+cap.mix.group;
+  const weeks=+cap.duration, termFull=weekly*weeks, termUp=termFull*0.9, saving=termFull-termUp;
+  const up=cap.payment==='upfront';
+  const parts=rows.filter(r=>cap.mix[r[0]]>0).map(r=>cap.mix[r[0]]+'x '+r[1]);
+  if(cap.onlinePortal) parts.push('Online £'+fmtMoney(olr));
+  const isLifestyle = cap.nutritionPlan === 'lifestyle';
+  const brk=(parts.join(' + ')||'no sessions yet')+(nut?(' + '+NUT_LABELS[cap.nutritionPlan]+' £'+fmtMoney(nut)):'');
+  const totalHTML = up
+    ? `<div class="total">&pound;${fmtMoney(termUp)}<small> upfront</small><div class="brk">&pound;${fmtMoney(weekly)}/wk x ${weeks} wks = &pound;${fmtMoney(termFull)} &middot; save &pound;${fmtMoney(saving)} (10%)</div></div>`
+    : `<div class="total">&pound;${fmtMoney(weekly)}<small>/week</small><div class="brk">${brk}</div></div>`;
+  const nutBtns = NUT_PLANS.map(p=>`<button class="pay nutpick${cap.nutritionPlan===p?' on':''}" data-nut="${p}">${NUT_LABELS[p]}${p==='lifestyle'?' (sessions only)':' &pound;'+fmtMoney(d[p])}</button>`).join('');
+  const olDiscount = cap.onlinePortal && totalSessions>=3 ? ' (-50%)' : cap.onlinePortal && totalSessions>=2 ? ' (-30%)' : '';
+  const onlineToggle = `<div class="tile${cap.onlinePortal?' on':''}"><div class="tname">Online</div><div class="tprice">&pound;${fmtMoney(d.online)}/wk${olDiscount}</div><button class="st online-tog" style="width:100%;margin-top:8px;font-size:13px;padding:6px 0">${cap.onlinePortal?'&#10003; Included':'Add portal'}</button></div>`;
+  el.innerHTML = `<div class="tiles">` + rows.map(r=>`<div class="tile"><div class="tname">${r[1]}</div><div class="tprice">&pound;${fmtMoney(r[2])}/session</div><div class="stepper" data-k="${r[0]}"><button class="st minus">-</button><span class="ct">${cap.mix[r[0]]}</span><button class="st plus">+</button></div></div>`).join('') + onlineToggle + `</div>`
+    + `<div class="payseg"><button class="pay ${!up?'on':''}" data-pay="weekly">Pay weekly</button><button class="pay ${up?'on':''}" data-pay="upfront">Pay upfront <b>-10%</b></button></div>`
+    + `<div class="botbar"><div class="nut"><div class="nl"><b>Nutrition plan</b></div><div class="nutseg">${nutBtns}</div></div>`
+    + totalHTML + `</div>`;
+  el.querySelector('.online-tog').onclick=()=>{ cap.onlinePortal=!cap.onlinePortal; renderBuilder(); };
+  el.querySelectorAll('.stepper').forEach(stp=>{ const k=stp.dataset.k; stp.querySelector('.plus').onclick=()=>{ cap.mix[k]++; renderBuilder(); }; stp.querySelector('.minus').onclick=()=>{ cap.mix[k]=Math.max(0,cap.mix[k]-1); renderBuilder(); }; });
+  el.querySelectorAll('.nutpick').forEach(b=>{ b.onclick=()=>{ cap.nutritionPlan=b.dataset.nut||'transform'; renderBuilder(); }; });
+  el.querySelectorAll('.pay:not(.nutpick)').forEach(b=>{ b.onclick=()=>{ cap.payment=b.dataset.pay; renderBuilder(); }; });
+  updateNav();
+}
+
+/* ---------- agreement ---------- */
+let sig={participant:null, coach:null};
+let dd={};
+let signTarget=null, _sctx=null, _drawing=false;
+let _onDDPage=false;
+
+function openSign(party){
+  signTarget=party;
+  byId('signTitle').textContent = party==='coach' ? 'Coach signature' : 'Member signature';
+  byId('signScrim').classList.add('show'); byId('signModal').classList.add('show');
+  const c=byId('signPad'); const r=c.getBoundingClientRect(); const dpr=window.devicePixelRatio||1;
+  c.width=Math.round(r.width*dpr); c.height=Math.round(r.height*dpr);
+  _sctx=c.getContext('2d'); _sctx.scale(dpr,dpr); _sctx.lineWidth=2.4; _sctx.lineCap='round'; _sctx.lineJoin='round'; _sctx.strokeStyle='#111';
+}
+function closeSign(){ byId('signScrim').classList.remove('show'); byId('signModal').classList.remove('show'); }
+(function(){
+  const pad=byId('signPad'); if(!pad) return;
+  const pos=e=>{ const r=pad.getBoundingClientRect(); return {x:e.clientX-r.left, y:e.clientY-r.top}; };
+  pad.addEventListener('pointerdown',e=>{ if(!_sctx)return; _drawing=true; pad.setPointerCapture(e.pointerId); const p=pos(e); _sctx.beginPath(); _sctx.moveTo(p.x,p.y); e.preventDefault(); });
+  pad.addEventListener('pointermove',e=>{ if(!_drawing||!_sctx)return; const p=pos(e); _sctx.lineTo(p.x,p.y); _sctx.stroke(); e.preventDefault(); });
+  pad.addEventListener('pointerup',()=>{ _drawing=false; });
+  pad.addEventListener('pointercancel',()=>{ _drawing=false; });
+  byId('signClear').onclick=()=>{ const c=byId('signPad'); if(_sctx) _sctx.clearRect(0,0,c.width,c.height); };
+  byId('signSave').onclick=()=>{ if(!signTarget)return; sig[signTarget]=byId('signPad').toDataURL('image/png'); closeSign(); renderAgreement(); maybeSendContract(); };
+  byId('signClose').onclick=closeSign;
+  byId('signScrim').onclick=closeSign;
+})();
+
+function maybeRenderAgreement(){
+  const p=byId('agreementPanel'); if(!p) return;
+  if(cap.outcome && cap.outcome==='Renewed'){
+    renderAgreement(); p.classList.add('show'); setTimeout(()=>p.scrollIntoView({behavior:'smooth',block:'nearest'}),50);
+  } else {
+    p.classList.remove('show'); p.innerHTML='';
+  }
+}
+
+function renderAgreement(){
+  const p=byId('agreementPanel'); if(!p) return;
+  const dur=cap.duration||'12', d=DURATIONS[dur], m=cap.mix;
+  const sessions=m.oneToOne*d.oneToOne+m.elite*d.elite+m.octave*d.octave+m.group*d.group;
+  const olr=onlineRate(d);
+  const nut=nutRate(d), weekly=sessions+nut+olr, weeks=+dur, full=weekly*weeks, upfront=full*0.9;
+  const up=cap.payment==='upfront';
+  const isLifestyle = cap.nutritionPlan === 'lifestyle';
+  const parts=[]; if(m.oneToOne)parts.push(m.oneToOne+'x 1:1'); if(m.elite)parts.push(m.elite+'x Elite'); if(m.octave)parts.push(m.octave+'x Octave'); if(m.group)parts.push(m.group+'x Group'); if(cap.onlinePortal)parts.push('Online portal'); if(cap.nutritionPlan && !isLifestyle)parts.push(NUT_LABELS[cap.nutritionPlan]+' nutrition');
+  const mixstr=parts.join(' + ')||'no sessions yet';
+  const totalSub= up ? (mixstr+' &middot; full term &pound;'+fmtMoney(full)) : mixstr;
+  const today=new Date().toLocaleDateString('en-GB',{day:'numeric',month:'long',year:'numeric'});
+  const name=cap.name||'........................';
+  const ddDefault = { fullname:(cap.name||''), email:(cap.email||''), phone:(cap.phone||''), amount:('&pound;'+fmtMoney(weekly)+' weekly'), frequency:'Weekly' };
+  var _ddInputs = p.querySelectorAll('.agr-ddi');
+  _ddInputs.forEach(function(inp){ if(inp.value) dd[inp.dataset.k]=inp.value; });
+  delete dd.amount; delete dd.fullname; delete dd.email; delete dd.phone; // never cache auto-filled — always use fresh values
+  const ddv = k => (dd[k]!==undefined ? dd[k] : (ddDefault[k]||''));
+  const ddrow = (label,k,ph) => `<tr><td class="k">${label}</td><td><input class="agr-ddi" data-k="${k}" value="${String(ddv(k)).replace(/"/g,'&quot;')}" placeholder="${ph||''}"></td></tr>`;
+  p.innerHTML = `
+    <div class="agr-bar"><div class="agr-barlabel">Renewal Agreement</div><div class="agr-btns"><button class="agr-btn" id="agrTheme">&#9684; Light (for signing)</button></div></div>
+
+    <div id="agrTerms">
+      <div class="agr-card"><div class="agr-label">1 &middot; About us and this agreement</div><div class="agr-title">Member Agreement &amp; Terms</div>
+        <p>We are <b>ReShape Transformations Ltd</b>, a company registered in England and Wales (company number <span class="agr-fill">14202007</span>), registered office <span class="agr-fill">C/O Consulting Direct Office 42, 70-72 The Havens, Ransomes Europark, Ipswich, England, IP3 9BF</span>. We are referred to as "ReShape", "we", "our" or "us". "You" means the Member named on the signature page: <span class="agr-fill">${name}</span>.</p>
+        <p>This Agreement sets out the terms under which ReShape provides coaching, training, nutrition and related services to you. Together with your selected membership package and payment authorisation, it forms the entire agreement between you and ReShape, and is effective from the date of signing.</p></div>
+
+      <div class="agr-card"><div class="agr-label">2 &middot; Definitions</div>
+        <p><b>Session</b> -- any coaching, training or support session included within your selected membership package. <b>Membership</b> -- the package selected by you and agreed by ReShape. <b>Transformation Phase</b> -- the initial ${weeks}-week period of your programme during which your coaching, nutrition and lifestyle goals are actively pursued.</p></div>
+
+      <div class="agr-card"><div class="agr-label">3 &middot; Services we provide</div>
+        <p>Subject to your selected membership package, ReShape may provide:</p>
+        <ul>${m.oneToOne?'<li>One-to-one coaching sessions</li>':''}${m.elite?'<li>Elite coaching sessions</li>':''}${m.octave?'<li>Octave sessions</li>':''}${m.group?'<li>Group coaching sessions</li>':''}${cap.onlinePortal?'<li>Online video coaching portal</li>':''}${!isLifestyle?'<li>Personalised nutrition plan (created by a qualified nutritionist)</li>':''}${cap.nutritionPlan==='transform'?'<li>Nutrition assessment</li><li>One-to-one nutrition consultation</li>':''}<li>Lifestyle coaching</li>${!isLifestyle?'<li>Evolt body composition scans'+(cap.nutritionPlan==='reinforce'?' (every 8 weeks)':cap.nutritionPlan==='maintain'?' (every 12 weeks)':'')+'</li>':''}<li>Ongoing support by phone, email or messaging</li></ul>
+        <p>All services are delivered with reasonable care and skill by appropriately qualified coaches.${isLifestyle?' Your Lifestyle membership includes coaching sessions and ongoing support. Nutrition planning is not included in this tier but can be added at any time by upgrading your membership.':cap.nutritionPlan==='transform'?' Your nutrition plan is created by a qualified nutritionist and forms part of your Transformation Phase programme. Throughout your programme you have access to a dedicated Coach who guides you through your nutrition and lifestyle goals, providing ongoing support and accountability alongside your coaching sessions.':cap.nutritionPlan==='reinforce'?' Your nutrition plan is created by a qualified nutritionist. Throughout your programme you have access to twice-weekly check-ins with your dedicated Coach, who provides ongoing support, accountability and guidance on your nutrition and lifestyle goals. Evolt body composition scans are included every 8 weeks.':cap.nutritionPlan==='maintain'?' Your nutrition plan is created by a qualified nutritionist. Throughout your programme you have access to a weekly check-in with your dedicated Coach, who provides ongoing support and guidance on your nutrition and lifestyle goals. Evolt body composition scans are included every 12 weeks.':''}</p></div>
+
+      <div class="agr-card">
+        <div class="agr-label">4 &middot; Membership package</div>
+        <div class="agr-lprow">${agrLp(12,dur)}${agrLp(26,dur)}${agrLp(52,dur)}</div>
+        <div class="agr-label blk">Weekly mix</div>
+        <div class="agr-mixrow">${agrTile('1:1',d.oneToOne,m.oneToOne,'oneToOne')}${agrTile('Elite',d.elite,m.elite,'elite')}${agrTile('Octave',d.octave,m.octave,'octave')}${agrTile('Group',d.group,m.group,'group')}</div>
+        ${cap.onlinePortal?`<div class="agr-nut" style="margin:8px 0"><div><div class="agr-nl">Online Video Portal${olr<d.online?' -- Hybrid discount':''}  </div><div class="agr-ns">&pound;${fmtMoney(olr)}/wk${olr<d.online?' (full price &pound;'+fmtMoney(d.online)+')':''}</div></div></div>`:''}
+        <div class="agr-payrow"><div class="agr-payb${!up?' on':''}" data-pay="weekly">Pay weekly</div><div class="agr-payb${up?' on':''}" data-pay="upfront">Pay upfront -10%</div></div>
+        <div class="agr-split">
+          <div class="agr-nut"><div><div class="agr-nl">Nutrition -- ${isLifestyle?'Not included (Lifestyle)':cap.nutritionPlan?NUT_LABELS[cap.nutritionPlan]:'None'}</div><div class="agr-ns">${isLifestyle?'Sessions only':cap.nutritionPlan?'&pound;'+fmtMoney(nutRate(d))+'/wk -- included':'Not included'}</div></div></div>
+          <div class="agr-total"><div class="agr-tn">&pound;${fmtMoney(up?upfront:weekly)}</div><div class="agr-tu">${up?'upfront':'/week'}</div><div class="agr-tsub">${totalSub}</div></div>
+        </div>
+        <div class="agr-feerow"><div class="agr-fee"><div class="agr-felab">Membership fee (one-off)</div><div class="agr-feval">&pound;${fmtMoney(offer.joining)}</div></div>${offer.guarantee?'<div class="agr-gnote">Guarantee: stick to the system and you hit the result we agree over the term -- or we keep coaching you free until you do.</div>':''}</div>
+      </div>
+
+      <div class="agr-card"><div class="agr-label">5 &middot; Your right to change your mind</div>
+        <p>As this contract is made on premises and on a face-to-face basis, it commences from the date of signing and therefore no cooling-off period applies.</p></div>
+
+      <div class="agr-card"><div class="agr-label">6 &middot; Membership fee</div>
+        <p>A non-refundable membership fee of <span class="agr-fill">&pound;${fmtMoney(offer.joining)}</span> is payable upon signing this Agreement. This is a one-off joining fee and does not form part of your weekly membership payments.${cap.nutritionPlan==='transform'?' Your nutrition assessment, nutrition consultation and personalised nutrition plan are included within your weekly membership payments as part of your Transformation Phase programme.':cap.nutritionPlan&&!isLifestyle?' Your personalised nutrition plan is included within your weekly membership payments as part of your Transformation Phase programme.':''}</p></div>
+
+      <div class="agr-card"><div class="agr-label">7 &middot; Payments</div>
+        <p>You agree to pay the weekly membership fee detailed in this Agreement. Payments are collected every Monday using the payment method held on file and continue unless otherwise agreed in writing by ReShape Transformations Ltd. The weekly amount is based on the membership package you selected and agreed at signing.</p>
+        <p>If a Direct Debit payment fails, ReShape Transformations Ltd reserves the right to apply an administration charge to cover the costs incurred in processing the failed payment. Any outstanding balance must be settled before access to sessions, facilities or member benefits can continue.</p></div>
+
+      <div class="agr-card"><div class="agr-label">8 &middot; Coaching sessions</div>
+        <p>We appreciate that unexpected things happen which may prevent your attendance. If you wish to cancel or rearrange a session, a minimum of 24 hours' notice must be given. Should a Coach fail to provide 24 hours' notice of the need to cancel, a complimentary session will be offered.</p>
+        <p>Each week you have access to the agreed number of sessions through our booking application, subject to availability. Sessions remain valid for two weeks and may be rolled over if unused. Sessions at alternative locations must be agreed in advance.</p></div>
+
+      <div class="agr-card"><div class="agr-label">9 &middot; Membership and termination</div>
+        <p>No missed sessions will be reimbursed, regardless of the reason. If you are unable to attend in-person sessions due to travel, work, illness, injury or circumstances outside your control, ReShape may provide online coaching and support as an alternative -- including training programmes, nutritional guidance, accountability support and video consultations. Where online coaching is provided, membership payments continue as normal and in-person access resumes when you are able to attend again.</p>
+        <p>This Agreement is entered into face-to-face on company premises and becomes effective immediately upon signing. Your initial Transformation Phase lasts ${weeks} weeks, during which your coaching sessions${cap.nutritionPlan==='transform'?', nutrition plan, nutrition assessment and nutrition consultation are actively delivered, with a dedicated Coach throughout':cap.nutritionPlan==='reinforce'?' and nutrition plan are actively delivered, with twice-weekly Coach check-ins and body composition scans every 8 weeks':cap.nutritionPlan==='maintain'?' and nutrition plan are actively delivered, with weekly Coach check-ins and body composition scans every 12 weeks':isLifestyle?' and ongoing lifestyle support are actively delivered':' are actively delivered'}. Towards the end of your Transformation Phase, your Head Coach will review your progress and discuss next steps.</p>
+        <p>The Transformation Phase is a minimum ${weeks}-week commitment and the weekly payments for this period are due in full. You may not serve notice to terminate during the Transformation Phase, except as set out below.</p>
+        <p>After the initial ${weeks}-week Transformation Phase, this Agreement continues on a rolling weekly basis at the same weekly price until you have confirmation in writing of the membership being terminated. To terminate your membership you must arrange an Exit Meeting with the Head Coach and provide four weeks' written notice. The notice period commences on the Monday following receipt of your written notice and is charged at the weekly price in this Agreement; any other written or verbal agreement becomes void.</p>
+        <p>If circumstances beyond your control prevent continued participation -- relocation more than 25 miles away, or a medical condition preventing participation -- ReShape will first seek to offer suitable alternatives. If none can be provided, the Agreement may be terminated on receipt of supporting documentation (confirmation of a permanent residency move, or a certificate from a medical professional).</p>
+        <p>All services included in your membership are provided at exclusive member rates. Outside of this Agreement, the standard rates are as follows:</p>
+        <table class="agr-ddt" style="margin:10px 0 14px">
+          <tr><td colspan="2" style="font-weight:700;font-size:11px;text-transform:uppercase;letter-spacing:.08em;color:var(--accent);border-bottom:1px solid var(--line);padding:6px 10px">One-off services</td></tr>
+          ${!isLifestyle?`<tr><td>Nutrition Assessment &amp; Consultation</td><td style="text-align:right">&pound;${STD_ONEOFF.nutAssessment}</td></tr>
+          <tr><td>Custom Nutrition Plan Creation</td><td style="text-align:right">&pound;${STD_ONEOFF.nutPlan}</td></tr>`:''}
+          <tr><td>Programme Design &amp; Setup</td><td style="text-align:right">&pound;${STD_ONEOFF.progDesign}</td></tr>
+          <tr><td>Administration &amp; Onboarding</td><td style="text-align:right">&pound;${STD_ONEOFF.admin}</td></tr>
+          <tr><td colspan="2" style="font-weight:700;font-size:11px;text-transform:uppercase;letter-spacing:.08em;color:var(--accent);border-bottom:1px solid var(--line);padding:10px 10px 6px">Weekly session rates</td></tr>
+          ${m.oneToOne?`<tr><td>1:1 Coaching</td><td style="text-align:right">&pound;${STD_RATES.oneToOne} <span style="color:var(--faint);font-size:11px">/ you pay &pound;${fmtMoney(d.oneToOne)}</span></td></tr>`:''}
+          ${m.elite?`<tr><td>Elite Session</td><td style="text-align:right">&pound;${STD_RATES.elite} <span style="color:var(--faint);font-size:11px">/ you pay &pound;${fmtMoney(d.elite)}</span></td></tr>`:''}
+          ${m.octave?`<tr><td>Octave Session</td><td style="text-align:right">&pound;${STD_RATES.octave} <span style="color:var(--faint);font-size:11px">/ you pay &pound;${fmtMoney(d.octave)}</span></td></tr>`:''}
+          ${m.group?`<tr><td>Group Session</td><td style="text-align:right">&pound;${STD_RATES.group} <span style="color:var(--faint);font-size:11px">/ you pay &pound;${fmtMoney(d.group)}</span></td></tr>`:''}
+          ${cap.nutritionPlan&&!isLifestyle?`<tr><td>${NUT_LABELS[cap.nutritionPlan]} Nutrition</td><td style="text-align:right">&pound;${STD_RATES[cap.nutritionPlan]} <span style="color:var(--faint);font-size:11px">/ you pay &pound;${fmtMoney(d[cap.nutritionPlan])}</span></td></tr>`:''}
+          ${cap.onlinePortal?`<tr><td>Online Portal</td><td style="text-align:right">&pound;${STD_RATES.online} <span style="color:var(--faint);font-size:11px">/ you pay &pound;${fmtMoney(olr)}</span></td></tr>`:''}
+          <tr><td colspan="2" style="font-weight:700;font-size:11px;text-transform:uppercase;letter-spacing:.08em;color:var(--accent);border-bottom:1px solid var(--line);padding:10px 10px 6px">Meetings &amp; consultations</td></tr>
+          <tr><td>Head Coach / Exit Meeting</td><td style="text-align:right">&pound;${STD_MEETING.headCoach}/hr</td></tr>
+          <tr><td>Coach Consultation / Review</td><td style="text-align:right">&pound;${STD_MEETING.coach}/hr</td></tr>
+        </table>
+        <p style="font-size:13px;color:var(--accent);font-weight:600">Total value of your programme at standard rates: &pound;${fmtMoney(
+          (isLifestyle?0:(STD_ONEOFF.nutAssessment + STD_ONEOFF.nutPlan)) + STD_ONEOFF.progDesign + STD_ONEOFF.admin
+          + (m.oneToOne*STD_RATES.oneToOne + m.elite*STD_RATES.elite + m.octave*STD_RATES.octave + m.group*STD_RATES.group + (cap.nutritionPlan&&!isLifestyle?STD_RATES[cap.nutritionPlan]:0) + (cap.onlinePortal?STD_RATES.online:0)) * weeks
+        )} &mdash; your membership saving: &pound;${fmtMoney(
+          (isLifestyle?0:(STD_ONEOFF.nutAssessment + STD_ONEOFF.nutPlan)) + STD_ONEOFF.progDesign + STD_ONEOFF.admin
+          + (m.oneToOne*STD_RATES.oneToOne + m.elite*STD_RATES.elite + m.octave*STD_RATES.octave + m.group*STD_RATES.group + (cap.nutritionPlan&&!isLifestyle?STD_RATES[cap.nutritionPlan]:0) + (cap.onlinePortal?STD_RATES.online:0)) * weeks
+          - weekly * weeks
+        )}</p>
+        <p>Where early termination is agreed under the above circumstances, an administrative exit fee of &pound;500 is payable before the Agreement can be closed. Each ReShape programme is individually designed based on the Member's personal goals, health profile and assessment results; accordingly, any coaching, programming or nutritional work already delivered up to the point of termination remains chargeable at the standard rates above and must be settled in full. Any sessions attended or available during the membership period will, upon early termination, be recalculated at the standard rates listed above, and any difference between those rates and the membership price already paid shall also become due.</p>
+        <p>ReShape Transformations Ltd may terminate this Agreement immediately if a Member refuses to follow agreed programme requirements; behaves disrespectfully towards Coaches, staff or members; or acts in a threatening, abusive or derogatory manner. In the event of immediate termination by ReShape, all work undertaken for your transformation to that date is chargeable and due in full immediately. Termination by either party results in removal from member-only groups and account access at the end of the final payment period.</p>
+        <p>Any request to suspend or pause your membership must be submitted in writing to team@reshapeclub.com or via message to the team. Verbal requests or informal agreements to pause will not be recognised. Suspensions are granted at the sole discretion of ReShape Transformations Ltd and, if approved, the terms (including duration and any conditions) will be confirmed in writing. A suspension fee of &pound;15 per week applies for the duration of the suspension. The maximum suspension allowance is 12 weeks per calendar year.</p></div>
+
+      <div class="agr-card"><div class="agr-label">10 &middot; Member responsibilities</div>
+        <p>The Member agrees:</p>
+        <ul><li>To provide accurate health and lifestyle information;</li><li>To notify ReShape of any injury, illness or condition which may affect participation;</li><li>To follow all reasonable instructions given by Coaches;</li><li>To treat staff and members with respect at all times.</li></ul></div>
+
+      <div class="agr-card"><div class="agr-label">11 &middot; Health and safety</div>
+        <p>Exercise carries inherent risks. By taking part, you accept the ordinary risks that come with training, provided ReShape has taken reasonable care. You confirm the information given about your health is true and complete, and will notify ReShape of any condition, injury, medication or pregnancy that may affect participation. You should consult your doctor before starting any exercise or nutrition programme; nutritional guidance provided is educational and does not constitute medical advice.</p>
+        <p class="agr-hl"><b>Nothing in this Agreement excludes or limits liability for death or personal injury caused by negligence, fraud or fraudulent misrepresentation, or for any other matter that cannot lawfully be limited or excluded under English law.</b></p></div>
+
+      <div class="agr-card"><div class="agr-label">12 &middot; Your legal rights</div>
+        <p>As a consumer you have legal rights, including under the Consumer Rights Act 2015 (for example, that services are provided with reasonable care and skill). Nothing in this Agreement affects those rights. For free, independent advice you can contact Citizens Advice (citizensadvice.org.uk or 0808 223 1133).</p></div>
+
+      <div class="agr-card"><div class="agr-label">13 &middot; Data protection</div>
+        <p>ReShape Transformations Ltd processes personal information in accordance with applicable UK data protection legislation, only for purposes connected with the delivery of services and membership administration. We keep your details secure and do not share them except where necessary to provide the Services (for example our payment processor) or where the law requires it.</p></div>
+
+      <div class="agr-card"><div class="agr-label">14 &middot; Complaints</div>
+        <p>If you are unhappy with any aspect of the services, please contact us at team@reshapeclub.com and a member of our team will respond within seven days. If you wish to give notice to terminate your membership, this must also be submitted in writing to team@reshapeclub.com -- see clause 9 for the full termination process.</p></div>
+
+      <div class="agr-card"><div class="agr-label">15 &middot; Events outside our control</div>
+        <p>Neither party is responsible for failure to perform obligations where caused by circumstances beyond reasonable control. Where such circumstances affect service delivery, ReShape may temporarily amend service delivery methods, including providing online coaching and support.</p></div>
+
+      <div class="agr-card"><div class="agr-label">16 &middot; Changes to these terms</div>
+        <p>We may update these terms from time to time. If a change would materially affect you, we will give reasonable written notice, and you may end this Agreement under clause 9 if you do not accept the change.</p></div>
+
+      <div class="agr-card"><div class="agr-label">17 &middot; General</div>
+        <p>This Agreement constitutes the entire agreement between the parties. If any provision is unenforceable, the remaining provisions remain in effect. This Agreement is governed by the laws of England and Wales, and any dispute is subject to the jurisdiction of its courts.</p></div>
+
+      <div class="agr-card"><div class="agr-label">Declaration</div>
+        <p>By signing below, I confirm that:</p>
+        <ul><li>The information provided by me is accurate and complete to the best of my knowledge.</li><li>I understand that participation in exercise and nutrition programmes carries inherent risks.</li><li>I understand the nutrition advice is a recommendation and is not intended to treat, cure or prevent any illness or replace medical advice.</li><li>I accept the ordinary risks of taking part in exercise, on the basis that ReShape takes reasonable care. Nothing here removes ReShape's responsibility for death or personal injury caused by its negligence.</li><li>I have had the opportunity to ask questions regarding this Agreement.</li><li>I agree to be bound by the terms of this Agreement.</li></ul></div>
+
+      <div class="agr-card"><div class="agr-label">Renewal goals</div>
+        <p><b>Goals for the next phase:</b><br>${cap.renewalGoals?('<span class="agr-fill">'+cap.renewalGoals+'</span>'):'<span class="agr-fill agr-fillwide">&nbsp;</span>'}</p></div>
+
+      <div class="agr-card agr-agreecard">
+        <p>Read the agreement above with the member. When you're both happy, continue to the Direct Debit details and signatures.</p>
+        <button class="sign-save" id="agrAgree">Agree &amp; continue &rarr;</button>
+      </div>
+    </div>
+
+    <div id="agrSign" class="hide">
+      <div class="agr-card"><div class="agr-label">Direct Debit Authorisation</div>
+        <div class="agr-secnote">Your Direct Debit is protected by the Direct Debit Guarantee. A copy is available on your account and on request. Type the member's details straight onto the iPad -- bank details are entered by the member, never filled in for them.</div>
+        <table class="agr-ddt">
+          ${ddrow('FULL NAME','fullname')}
+          ${ddrow('ADDRESS','address')}
+          ${ddrow('POST CODE','postcode')}
+          ${ddrow('EMAIL ADDRESS','email')}
+          ${ddrow('PHONE NUMBER','phone')}
+          ${ddrow('ACCOUNT NUMBER','account')}
+          ${ddrow('SORT CODE','sort','00-00-00')}
+          ${ddrow('STARTING ON','starting','__ / __ / ____')}
+          <tr><td class="k">AMOUNT</td><td>${up?'&pound;'+fmtMoney(upfront)+' (one-off upfront)':'&pound;'+fmtMoney(weekly)+' weekly'}</td></tr>
+          <tr><td class="k">FREQUENCY</td><td>Weekly</td></tr>
+        </table>
+        <div class="agr-label blk" style="margin-top:18px">Card Details</div>
+        <div class="agr-secnote">The member enters their card details below — never enter them on their behalf.</div>
+        <table class="agr-ddt">
+          ${ddrow('CARDHOLDER NAME','card_name')}
+          ${ddrow('CARD NUMBER','card_number','•••• •••• •••• ••••')}
+          ${ddrow('EXPIRY DATE','card_expiry','MM / YY')}
+          ${ddrow('CVC','card_cvc','•••')}
+        </table>
+      </div>
+
+      <div class="agr-card"><div class="agr-label">Signatures</div>
+        <div class="agr-sigrow">
+          <div><div class="agr-role">Member</div><div class="agr-sl">Full name: <b class="agr-sv">${name}</b></div><div class="agr-sl">Date: <b class="agr-sv">${today}</b></div><div class="agr-sl">Signature:</div><div class="agr-sigbox${sig.participant?' signed':''}" data-party="participant">${sig.participant?`<img class="agr-sigimg" src="${sig.participant}">`:'<span class="agr-sigtap">Tap to sign</span>'}</div></div>
+          <div><div class="agr-role">For ReShape Transformations Ltd</div><div class="agr-sl">Full name: <b class="agr-sv">${cap.coach||'........'}</b></div><div class="agr-sl">Date: <b class="agr-sv">${today}</b></div><div class="agr-sl">Signature:</div><div class="agr-sigbox${sig.coach?' signed':''}" data-party="coach">${sig.coach?`<img class="agr-sigimg" src="${sig.coach}">`:'<span class="agr-sigtap">Tap to sign</span>'}</div></div>
+        </div></div>
+
+      <div class="agr-pagebtns"><button class="agr-btn" id="agrBack">&larr; Back to terms</button><button class="sign-save" id="agrPrint">Print / Save PDF</button></div>
+    </div>
+  `;
+  byId('agrTheme').onclick=()=>{ const light=p.classList.toggle('light'); byId('agrTheme').textContent= light?'&#9684; Dark':'&#9684; Light (for signing)'; };
+  byId('agrAgree').onclick=()=>{ _onDDPage=true; byId('agrTerms').classList.add('hide'); byId('agrSign').classList.remove('hide'); setTimeout(()=>p.scrollIntoView({behavior:'smooth',block:'start'}),30); };
+  byId('agrBack').onclick=()=>{ _onDDPage=false; byId('agrSign').classList.add('hide'); byId('agrTerms').classList.remove('hide'); setTimeout(()=>p.scrollIntoView({behavior:'smooth',block:'start'}),30); };
+  if(_onDDPage){ byId('agrTerms').classList.add('hide'); byId('agrSign').classList.remove('hide'); }
+  byId('agrPrint').onclick=()=>{
+    maybeSendContract(); saveConsultOutcome();
+    var inputs = p.querySelectorAll('.agr-ddi');
+    inputs.forEach(function(inp){ inp.style.display='none'; var sp=document.createElement('span'); sp.className='agr-ddi-print'; sp.style.cssText='font-family:var(--body);font-size:13.5px;color:var(--apt);'; sp.textContent=inp.value||''; inp.parentNode.insertBefore(sp,inp.nextSibling); });
+    window.print();
+    p.querySelectorAll('.agr-ddi-print').forEach(function(sp){ sp.previousSibling.style.display=''; sp.remove(); });
+  };
+  p.querySelectorAll('.agr-ddi').forEach(inp=>inp.oninput=()=>{ dd[inp.dataset.k]=inp.value; });
+  p.querySelectorAll('.agr-sigbox').forEach(b=>b.onclick=()=>openSign(b.dataset.party));
+  // Inline editing in agreement — duration pills
+  p.querySelectorAll('.agr-lp[data-dur]').forEach(el=>el.onclick=()=>{ cap.duration=el.dataset.dur; renderBuilder(); renderAgreement(); });
+  // Inline editing — payment toggle
+  p.querySelectorAll('.agr-payb[data-pay]').forEach(el=>el.onclick=()=>{ cap.payment=el.dataset.pay; renderBuilder(); renderAgreement(); });
+  // Inline editing — mix +/- buttons
+  p.querySelectorAll('.agr-mix-adj').forEach(btn=>btn.onclick=function(e){ e.stopPropagation(); var k=btn.dataset.mix, dir=+btn.dataset.dir; cap.mix[k]=Math.max(0,Math.min(7,(cap.mix[k]||0)+dir)); renderBuilder(); renderAgreement(); });
+}
+
+/* ---------- save ---------- */
+let _consultRowId = null;
+let _consultSaved = false;
+let _autoSaveTimer = null;
+
+function buildPayload(){
+  var outcomeClean = (cap.outcome || 'In progress');
+  if(outcomeClean==='Renewed') outcomeClean = 'Renewed';
+  var heightCm = parseFloat(cap.height)||0;
+  var weightKg = parseFloat(cap.weight)||0;
+  var payload = {
+    consult_type: 'renewal',
+    prospect_name: cap.name || '',
+    prospect_email: cap.email || null,
+    prospect_phone: cap.phone || null,
+    coach: cap.coach || '',
+    location: cap.location || '',
+    consult_date: new Date().toISOString().slice(0,10),
+    consult_time: new Date().toLocaleTimeString('en-GB',{hour:'2-digit',minute:'2-digit'}),
+    outcome: outcomeClean,
+    age: parseInt(cap.age)||0,
+    date_of_birth: cap.dob || null,
+    gender: cap.gender || null,
+    height_cm: heightCm,
+    weight_kg: weightKg,
+    injuries: cap.injuryNotes ? (cap.injuries||'None') + ' -- ' + cap.injuryNotes : (cap.injuries || 'None'),
+    medical: cap.medicalNotes ? (cap.medical||'None') + ' -- ' + cap.medicalNotes : (cap.medical || 'None'),
+    emotional_drivers: [],
+    why: cap.renewalGoals || '',
+    programme_duration: cap.duration || '12',
+    mix_one_to_one: cap.mix.oneToOne || 0,
+    mix_elite: cap.mix.elite || 0,
+    mix_octave: cap.mix.octave || 0,
+    mix_group: cap.mix.group || 0,
+    online_portal: cap.onlinePortal || false,
+    nutrition_included: !!cap.nutritionPlan,
+    nutrition_plan: cap.nutritionPlan || null,
+    payment_type: cap.payment || 'weekly',
+    notes: cap.notes || ''
+  };
+  if(_consultRowId) payload.id = _consultRowId;
+  return payload;
+}
+
+function autoSave(){
+  if(_consultSaved) return;
+  var payload = buildPayload();
+  if(!_consultRowId){
+    _consultRowId = crypto.randomUUID();
+    payload.id = _consultRowId;
+  }
+  _sb.from('consults').upsert([payload],{onConflict:'id'}).then(function(res){
+    if(res.error) console.warn('Auto-save error:', res.error.message);
+    else console.log('Auto-saved renewal:', payload.prospect_name, 'stage', idx);
+  });
+}
+
+function scheduleAutoSave(){
+  if(_autoSaveTimer) clearTimeout(_autoSaveTimer);
+  _autoSaveTimer = setTimeout(autoSave, 2000);
+}
+
+function saveConsultOutcome(){
+  if(_consultSaved) return;
+  if(!cap.outcome) return;
+  _consultSaved = true;
+  if(_autoSaveTimer) clearTimeout(_autoSaveTimer);
+  var payload = buildPayload();
+  if(!_consultRowId){
+    _consultRowId = crypto.randomUUID();
+    payload.id = _consultRowId;
+  }
+  _sb.from('consults').upsert([payload],{onConflict:'id'}).then(function(res) {
+    if (res.error) {
+      console.error('Save error:', res.error);
+      _consultSaved = false;
+      alert('Failed to save: ' + (res.error.message || 'Unknown error'));
+    } else {
+      console.log('Renewal saved:', payload.prospect_name, payload.outcome);
+    }
+  });
+  // Clean up calendar event for terminal outcomes
+  var terminalOutcomes = ['No', 'Ended — hesitation', 'Ended', 'Dropped out', 'Deleted'];
+  if (terminalOutcomes.indexOf(cap.outcome) >= 0 && cap.email) {
+    cleanupBookingCalendarEvent(cap.email);
+  }
+  if(window.parent && window.parent !== window){
+    window.parent.postMessage({ type: 'consult-complete', consult: payload }, '*');
+  }
+}
+
+async function cleanupBookingCalendarEvent(email) {
+  try {
+    var res = await _sb.from('bookings')
+      .select('id, calendar_event_id, calendar_event_url, calendar_provider')
+      .eq('email', email).eq('status', 'confirmed')
+      .order('created_at', { ascending: false }).limit(1).maybeSingle();
+    var b = res && res.data;
+    if (!b || (!b.calendar_event_id && !b.calendar_event_url)) return;
+    if (typeof deleteCalendarEventAndClearRef === 'function') {
+      await deleteCalendarEventAndClearRef(b);
+      console.log('[Calendar] Cleaned up event for', email);
+    } else if (typeof deleteCalendarEvent === 'function') {
+      await deleteCalendarEvent(b);
+    }
+  } catch (e) { console.warn('[Calendar] Cleanup failed:', e); }
+}
+
+let _contractSent = false;
+function maybeSendContract(){
+  if(_contractSent) return;
+  if(!sig.participant || !sig.coach) return;
+  _contractSent = true;
+  const dur = cap.duration || '12';
+  const d = DURATIONS[dur];
+  const sessions = cap.mix.oneToOne*d.oneToOne + cap.mix.elite*d.elite + cap.mix.octave*d.octave + cap.mix.group*d.group;
+  const nut = nutRate(d);
+  const olr = onlineRate(d);
+  const weekly = sessions + nut + olr;
+  const weeks = +dur;
+  const full = weekly * weeks;
+  const upfront = full * 0.9;
+  const ld = new Date();
+  const localDate = ld.getFullYear()+'-'+String(ld.getMonth()+1).padStart(2,'0')+'-'+String(ld.getDate()).padStart(2,'0');
+  const contract = {
+    consult_name: cap.name || '',
+    consult_date: localDate,
+    coach: cap.coach || '',
+    duration_weeks: weeks,
+    mix: cap.mix,
+    online_portal: cap.onlinePortal || false,
+    nutrition: !!cap.nutritionPlan,
+    nutrition_plan: cap.nutritionPlan || null,
+    payment: cap.payment || 'weekly',
+    weekly_amount: weekly,
+    upfront_amount: upfront,
+    joining_fee: offer.joining,
+    guarantee: !!offer.guarantee,
+    emotional_goals: [],
+    why: cap.renewalGoals || '',
+    renewal_changes: cap.renewalChanges || '',
+    location: cap.location || '',
+    dd_details: (function(){ var merged = Object.assign({fullname:(cap.name||''),email:(cap.email||''),phone:(cap.phone||'')}, dd); if(merged.card_number){ var n=merged.card_number.replace(/\D/g,''); merged.card_number=n.length>4?'••••'+n.slice(-4):n; } delete merged.card_cvc; return merged; })(),
+    member_signature: sig.participant,
+    coach_signature: sig.coach
+  };
+  _sb.from('consult_contracts').insert([contract]).then(function(res) {
+    if (res.error) console.error('Contract save error:', res.error);
+    else console.log('Renewal contract saved:', contract.consult_name);
+  });
+  if(window.parent && window.parent !== window){
+    window.parent.postMessage({ type: 'contract-signed', contract: contract }, '*');
+  }
+}
+
+function copySummary(){
+  const d=cap.duration?DURATIONS[cap.duration]:null;
+  let mixStr='--', weekly='--';
+  if(d){
+    const rows=[['oneToOne','1:1',d.oneToOne],['elite','Elite',d.elite],['octave','Octave',d.octave],['group','Group',d.group]];
+    const parts=rows.filter(r=>cap.mix[r[0]]>0).map(r=>cap.mix[r[0]]+'x '+r[1]);
+    const nut=nutRate(d);
+    const olr=onlineRate(d);
+    const tot=rows.reduce((s,r)=>s+cap.mix[r[0]]*r[2],0)+nut+olr;
+    mixStr=(parts.join(' + ')||'no sessions')+(nut?(' + nutrition £'+fmtMoney(nut)):'')+(olr?(' + online £'+fmtMoney(olr)):'');
+    weekly='£'+fmtMoney(tot)+'/week';
+  }
+  const t=`RESHAPE RENEWAL SUMMARY
+Member: ${cap.name||'--'}
+Email: ${cap.email||'--'} | Phone: ${cap.phone||'--'}
+Location: ${cap.location||'--'}
+Health: age ${cap.age||'?'} / injuries ${cap.injuries||'?'} / medical ${cap.medical||'?'}
+Goals: ${cap.renewalGoals||'--'}
+Changes: ${cap.renewalChanges||'--'}
+Programme: ${cap.duration?cap.duration+' weeks':'--'}
+Weekly mix: ${mixStr}
+Weekly total: ${weekly}
+Payment: ${cap.payment||'weekly'}
+Outcome: ${cap.outcome||'--'}
+Note: ${cap.notes||'--'}`;
+  navigator.clipboard.writeText(t).then(()=>{ const c=byId('copied'); if(c){c.classList.add('show'); setTimeout(()=>c.classList.remove('show'),1600);} });
+}
+
+function resetAll(){
+  cap.name=''; cap.email=''; cap.phone=''; cap.coach=ACCOUNT.coach; cap.location='';
+  cap.age=null; cap.dob=''; cap.gender=null; cap.height=''; cap.weight=''; cap.unit='imperial'; cap.imp={ft:'',inch:'',st:'',lb:''};
+  cap.injuries=null; cap.medical=null; cap.medicalNotes=''; cap.injuryNotes='';
+  cap.renewalGoals=''; cap.renewalChanges='';
+  cap.duration=null; cap.mix={oneToOne:0,elite:0,octave:0,group:0}; cap.onlinePortal=false; cap.nutritionPlan='transform'; cap.payment='weekly';
+  cap.outcome=null; cap.notes='';
+  sig={participant:null,coach:null}; dd={};
+  _consultRowId=null; _consultSaved=false; if(_autoSaveTimer) clearTimeout(_autoSaveTimer); _contractSent=false;
+  secs=0; running=false; clearInterval(tk); clock.textContent='00:00'; cs.textContent='paused'; tb.textContent='Start';
+  go(0);
+}
+
+render();
+
+// Theme
+(function(){
+  var t = localStorage.getItem('rs-theme') || 'dark';
+  document.documentElement.setAttribute('data-theme', t);
+})();
+window.addEventListener('message', function(e){
+  if(e.data && e.data.type === 'theme-change'){
+    document.documentElement.setAttribute('data-theme', e.data.theme);
+  }
+});
+
+/* ---------- timer ---------- */
+let secs=0, running=false, tk=null;
+const clock=byId('clock'), cs=byId('callState'), tb=byId('timerBtn');
+const fmt=s=>String(Math.floor(s/60)).padStart(2,'0')+':'+String(s%60).padStart(2,'0');
+tb.onclick=()=>{ running=!running; if(running){ cs.textContent='live'; tb.textContent='Pause'; tk=setInterval(()=>{secs++;clock.textContent=fmt(secs);},1000);} else { cs.textContent='paused'; tb.textContent='Resume'; clearInterval(tk);} };
+
+/* ---------- prefill from parent dashboard ---------- */
+function prefillProspect(p) {
+  if (!p) return;
+  if (p.name) { cap.name = p.name; }
+  if (p.coachName) { ACCOUNT.coach = p.coachName; cap.coach = p.coachName; }
+  if (p.email) cap.email = p.email;
+  if (p.phone) cap.phone = p.phone;
+  if (p.location) cap.location = p.location;
+  if (p.age) cap.age = p.age;
+  if (p.gender) cap.gender = p.gender;
+  render();
+}
+
+/* ---------- load existing renewal ---------- */
+async function loadExistingConsult(consultId) {
+  if (!consultId) return;
+  var { data } = await _sb.from('consults').select('*').eq('id', consultId).single();
+  if (!data) return;
+  _consultRowId = data.id;
+  cap.name = data.prospect_name || '';
+  cap.email = data.prospect_email || '';
+  cap.phone = data.prospect_phone || '';
+  cap.coach = data.coach || '';
+  cap.location = data.location || '';
+  cap.age = data.age ? String(data.age) : '';
+  cap.dob = data.date_of_birth || '';
+  cap.gender = data.gender || '';
+  cap.height = data.height_cm ? String(data.height_cm) : '';
+  cap.weight = data.weight_kg ? String(data.weight_kg) : '';
+  cap.injuries = data.injuries || '';
+  cap.medical = data.medical || '';
+  cap.renewalGoals = data.why || '';
+  cap.duration = data.programme_duration || '';
+  cap.mix = { oneToOne: data.mix_one_to_one || 0, elite: data.mix_elite || 0, octave: data.mix_octave || 0, group: data.mix_group || 0 };
+  cap.onlinePortal = data.online_portal || false;
+  cap.nutritionPlan = data.nutrition_plan || '';
+  cap.payment = data.payment_type || 'weekly';
+  cap.outcome = data.outcome || '';
+  cap.notes = data.notes || '';
+  if (cap.outcome === 'In progress') cap.outcome = '';
+  render();
+}
+</script>
+</body>
+</html>

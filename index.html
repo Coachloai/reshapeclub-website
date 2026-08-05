@@ -409,25 +409,13 @@
     display:flex;flex-direction:column;
   }
   .path:hover{background:var(--cream-2);}
-  .path .path-icon{
-    width:100%;aspect-ratio:16/9;margin-bottom:28px;
-    border-radius:16px;
-    display:flex;align-items:center;justify-content:center;
-    background:linear-gradient(145deg,var(--ink) 0%,#3a3530 100%);
-    overflow:hidden;position:relative;
-  }
-  .path .path-icon::before{
-    content:'';position:absolute;inset:0;
-    background:radial-gradient(ellipse at 50% 80%,rgba(237,92,37,0.15),transparent 70%);
-  }
-  .path .path-icon svg{width:100%;height:100%;position:relative;z-index:1;}
   .path .n{
     font-family:'Inter', sans-serif;
     font-size:48px;font-weight:300;
     line-height:1;color:var(--sage);
     font-style:italic;
     font-variation-settings:"opsz" 144, "SOFT" 100;
-    margin-bottom:24px;
+    margin-bottom:50px;
   }
   .path h3{
     font-family:'Inter', sans-serif;
@@ -496,15 +484,6 @@
     transition:transform .35s var(--ease), border-color .35s;
   }
   .step:hover{transform:translateY(-3px);border-color:var(--sage-light);}
-  .step .step-top{
-    display:flex;align-items:center;gap:14px;margin-bottom:28px;
-  }
-  .step .step-icon{
-    width:48px;height:48px;border-radius:12px;flex-shrink:0;
-    display:flex;align-items:center;justify-content:center;
-    background:rgba(237,92,37,0.1);
-  }
-  .step .step-icon svg{width:24px;height:24px;}
   .step .step-num{
     font-family:'Inter', sans-serif;
     font-style:italic;
@@ -512,6 +491,7 @@
     font-weight:300;
     line-height:1;
     color:var(--clay-soft);
+    margin-bottom:42px;
     font-variation-settings:"opsz" 144, "SOFT" 100;
   }
   .step h3{
@@ -547,42 +527,6 @@
   .guarantee p{
     font-size:18px;color:var(--ink-2);max-width:60ch;margin:0 auto 36px;
     line-height:1.6;
-  }
-  .proof-results{
-    display:grid;grid-template-columns:repeat(4,1fr);gap:24px;
-    max-width:1060px;margin:48px auto 48px;
-  }
-  @media(max-width:960px){.proof-results{grid-template-columns:repeat(2,1fr);max-width:540px;}}
-  @media(max-width:480px){.proof-results{grid-template-columns:1fr;max-width:280px;}}
-  .proof-result-card{
-    background:var(--ink);border-radius:20px;overflow:hidden;
-    transition:transform .35s cubic-bezier(.25,.46,.45,.94),box-shadow .35s;
-    box-shadow:0 4px 24px rgba(42,39,36,0.12);
-  }
-  .proof-result-card:hover{transform:translateY(-6px) scale(1.02);box-shadow:0 20px 50px rgba(237,92,37,0.18);}
-  .proof-result-card .pr-img{
-    position:relative;overflow:hidden;aspect-ratio:1;
-  }
-  .proof-result-card .pr-img img{width:100%;height:100%;object-fit:cover;display:block;transition:transform .5s;}
-  .proof-result-card:hover .pr-img img{transform:scale(1.05);}
-  .proof-result-card .pr-img::after{
-    content:'';position:absolute;inset:0;
-    background:linear-gradient(to top,var(--ink) 15%,transparent 55%);
-    pointer-events:none;
-  }
-  .proof-result-card .pr-body{
-    padding:0 20px 20px;margin-top:-20px;position:relative;z-index:1;color:var(--cream);
-  }
-  .proof-result-card .pr-name{
-    font-family:'Inter',sans-serif;font-size:18px;font-weight:700;letter-spacing:-0.01em;
-  }
-  .proof-result-card .pr-meta{
-    font-size:13px;opacity:0.6;margin-top:4px;
-  }
-  .proof-result-card .pr-lost{
-    display:inline-block;margin-top:10px;padding:5px 14px;
-    background:var(--sage);color:#fff;border-radius:999px;
-    font-size:13px;font-weight:700;letter-spacing:0.03em;
   }
 
   /* =========================================================
@@ -773,7 +717,7 @@
     font-size:18px;color:var(--ink-2);max-width:54ch;line-height:1.55;
   }
   .hormones{
-    display:grid;grid-template-columns:repeat(8,1fr);gap:1px;
+    display:grid;grid-template-columns:repeat(7,1fr);gap:1px;
     background:var(--line);
     border:1px solid var(--line);
     border-radius:var(--radius-lg);
@@ -1331,7 +1275,7 @@
     <a href="#reviews">Stories</a>
     <a href="#coaches">Your coach</a>
   </div>
-  <a href="#apply" class="nav-cta">Book free consult</a>
+  <a href="#apply" class="nav-cta" data-open="Book free consult" data-waitlist="Join the waitlist">Book free consult</a>
 </nav>
 
 <!-- ============================ HERO ============================ -->
@@ -1355,11 +1299,11 @@
 
         <div class="hero-cta rise d4">
           <a href="#apply" class="btn btn-primary">
-            Book your free consult
+            <span data-open="Book your free consult" data-waitlist="Join the waitlist">Book your free consult</span>
             <span class="arrow">→</span>
           </a>
           <a href="#reviews" class="btn btn-ghost">See real stories</a>
-          <span class="micro">45 mins · No card · No pressure</span>
+          <span class="micro" data-open="45 mins · No card · No pressure" data-waitlist="We're at capacity — join the queue">45 mins · No card · No pressure</span>
         </div>
       </div>
 
@@ -1438,114 +1382,26 @@
   <div class="paths-grid">
 
     <article class="path">
-      <div class="path-icon">
-        <svg viewBox="0 0 320 180" fill="none" xmlns="http://www.w3.org/2000/svg">
-          <!-- Line going up — progress -->
-          <path d="M40 145 C60 140 80 120 100 100 C120 80 135 65 155 58" stroke="#ED5C25" stroke-width="3" stroke-linecap="round" opacity=".35"/>
-          <!-- Flatline — stuck -->
-          <path d="M155 58 L280 58" stroke="#ED5C25" stroke-width="3" stroke-linecap="round"/>
-          <!-- Dot at the end -->
-          <circle cx="280" cy="58" r="5" fill="#ED5C25"/>
-        </svg>
-      </div>
       <span class="n">01</span>
       <h3>Stuck on a plateau, despite the work</h3>
       <p>You're doing the diet, the workouts, the "right things" — and the scale won't move. Not a willpower problem. A pattern problem.</p>
-      <a href="/hormonal-assessment/quiz" class="linkout">Take the hormonal quiz →</a>
+      <a href="#apply" class="linkout">See what's driving it →</a>
     </article>
 
     <article class="path">
-      <div class="path-icon">
-        <svg viewBox="0 0 320 180" fill="none" xmlns="http://www.w3.org/2000/svg">
-          <!-- Battery icon — drained -->
-          <rect x="88" y="55" width="144" height="70" rx="14" stroke="#ED5C25" stroke-width="2.5" opacity=".25"/>
-          <rect x="232" y="75" width="12" height="30" rx="5" fill="#ED5C25" opacity=".15"/>
-          <!-- Tiny sliver of charge left -->
-          <rect x="98" y="65" width="24" height="50" rx="8" fill="#ED5C25" opacity=".2"/>
-          <!-- Empty charge blocks (ghosted) -->
-          <rect x="130" y="65" width="24" height="50" rx="8" stroke="#ED5C25" stroke-width="1" stroke-dasharray="3 3" opacity=".1"/>
-          <rect x="162" y="65" width="24" height="50" rx="8" stroke="#ED5C25" stroke-width="1" stroke-dasharray="3 3" opacity=".1"/>
-          <rect x="194" y="65" width="24" height="50" rx="8" stroke="#ED5C25" stroke-width="1" stroke-dasharray="3 3" opacity=".1"/>
-          <!-- Low energy bolt -->
-          <path d="M156 78 L148 92 L156 92 L150 106" stroke="#ED5C25" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" opacity=".4"/>
-        </svg>
-      </div>
       <span class="n">02</span>
       <h3>Postpartum, and still not yourself</h3>
       <p>The body changed. Some of it came back. Most of it didn't. The exhaustion, the belly, the fog — it's addressable. It's a system, not a sacrifice.</p>
-      <a href="/hormonal-assessment/quiz" class="linkout">Take the hormonal quiz →</a>
+      <a href="#apply" class="linkout">Take the reset →</a>
     </article>
 
     <article class="path">
-      <div class="path-icon">
-        <svg viewBox="0 0 320 180" fill="none" xmlns="http://www.w3.org/2000/svg">
-          <!-- Hourglass outline -->
-          <line x1="120" y1="30" x2="200" y2="30" stroke="#ED5C25" stroke-width="3" stroke-linecap="round" opacity=".6"/>
-          <line x1="120" y1="150" x2="200" y2="150" stroke="#ED5C25" stroke-width="3" stroke-linecap="round" opacity=".6"/>
-          <path d="M122 30 L122 55 C122 70 160 90 160 90 C160 90 122 110 122 125 L122 150" stroke="#ED5C25" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round" opacity=".4"/>
-          <path d="M198 30 L198 55 C198 70 160 90 160 90 C160 90 198 110 198 125 L198 150" stroke="#ED5C25" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round" opacity=".4"/>
-          <!-- Sand accumulated at bottom -->
-          <path d="M135 150 L135 130 C135 120 160 108 160 108 C160 108 185 120 185 130 L185 150Z" fill="#ED5C25" opacity=".2"/>
-          <!-- Few grains still falling through the neck -->
-          <circle cx="160" cy="96" r="1.5" fill="#ED5C25" opacity=".5"/>
-          <circle cx="160" cy="104" r="1.5" fill="#ED5C25" opacity=".35"/>
-          <circle cx="160" cy="112" r="1.5" fill="#ED5C25" opacity=".2"/>
-          <!-- Top nearly empty — just a thin layer -->
-          <path d="M140 52 C140 48 160 42 160 42 C160 42 180 48 180 52" stroke="#ED5C25" stroke-width="1.5" stroke-linecap="round" opacity=".25"/>
-        </svg>
-      </div>
       <span class="n">03</span>
       <h3>40s shift — and the rules changed</h3>
       <p>The cycle changed. The mood changed. Weight settled where it never did before. You're not imagining it — and there's a protocol for it.</p>
-      <a href="/hormonal-assessment/quiz" class="linkout">Take the hormonal quiz →</a>
+      <a href="#apply" class="linkout">Map your shift →</a>
     </article>
 
-  </div>
-</section>
-
-<!-- ============================ GUARANTEE ============================ -->
-<section class="guarantee">
-  <div class="guarantee-inner">
-    <span class="eyebrow plain" style="display:inline-flex;justify-content:center;">The promise</span>
-    <h2 class="h-display">Drop 8–12kg in 12 weeks — <em>or we coach you free until you do.</em></h2>
-
-    <div class="proof-results">
-      <div class="proof-result-card">
-        <div class="pr-img"><img src="assets/ba-luke.jpg" alt="Luke — before and after" loading="lazy"></div>
-        <div class="pr-body">
-          <div class="pr-name">Luke</div>
-          <div class="pr-meta">Age: 20s · 12 weeks</div>
-          <span class="pr-lost">−16kg</span>
-        </div>
-      </div>
-      <div class="proof-result-card">
-        <div class="pr-img"><img src="assets/ba-jo.jpg" alt="Jo — before and after" loading="lazy"></div>
-        <div class="pr-body">
-          <div class="pr-name">Jo</div>
-          <div class="pr-meta">Age: 50s · 12 weeks</div>
-          <span class="pr-lost">−14kg</span>
-        </div>
-      </div>
-      <div class="proof-result-card">
-        <div class="pr-img"><img src="assets/ba-mark.jpg" alt="Mark — before and after" loading="lazy"></div>
-        <div class="pr-body">
-          <div class="pr-name">Mark</div>
-          <div class="pr-meta">Age: 40s · 12 weeks</div>
-          <span class="pr-lost">−14kg</span>
-        </div>
-      </div>
-      <div class="proof-result-card">
-        <div class="pr-img"><img src="assets/ba-annabel.jpg" alt="Annabel — before and after" loading="lazy"></div>
-        <div class="pr-body">
-          <div class="pr-name">Annabel</div>
-          <div class="pr-meta">Age: 20s · 12 weeks</div>
-          <span class="pr-lost">−11kg</span>
-        </div>
-      </div>
-    </div>
-
-    <p>Complete the programme. Follow the system. Your result is guaranteed. No catches, no asterisks. We've delivered this guarantee 1,200+ times across our Ipswich and Colchester studios.</p>
-    <a href="#apply" class="btn btn-sage">Book your free consult →</a>
   </div>
 </section>
 
@@ -1562,32 +1418,33 @@
 
     <div class="steps">
       <article class="step">
-        <div class="step-top">
-          <div class="step-icon"><svg viewBox="0 0 26 26" fill="none"><path d="M13 3C10 3 10 6 10 6V8C8.5 8.5 7 10 7 12V17C7 18 8 19 9 19H10V23H12V19H14V23H16V19H17C18 19 19 18 19 17V12C19 10 17.5 8.5 16 8V6C16 3 13 3 13 3Z" stroke="#ED5C25" stroke-width="1.4" stroke-linejoin="round"/><circle cx="13" cy="6" r="2.5" stroke="#ED5C25" stroke-width="1.4"/><line x1="5" y1="12" x2="21" y2="12" stroke="#ED5C25" stroke-width="1" stroke-dasharray="2 2" opacity=".4"/><line x1="5" y1="16" x2="21" y2="16" stroke="#ED5C25" stroke-width="1" stroke-dasharray="2 2" opacity=".4"/></svg></div>
-          <span class="step-num">1</span>
-        </div>
+        <span class="step-num">01</span>
         <h3>Scan</h3>
         <p>Evolt360 body composition scan. Fat mass, muscle mass, visceral fat, segmental analysis, metabolic age. Your real starting line — not the bathroom-scale lie.</p>
       </article>
 
       <article class="step">
-        <div class="step-top">
-          <div class="step-icon"><svg viewBox="0 0 26 26" fill="none"><path d="M7 4V11C7 12.5 8.5 13 9.5 13V22" stroke="#ED5C25" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"/><line x1="7" y1="7" x2="12" y2="7" stroke="#ED5C25" stroke-width="1.5" stroke-linecap="round"/><line x1="12" y1="4" x2="12" y2="11" stroke="#ED5C25" stroke-width="1.5" stroke-linecap="round"/><path d="M18 4C18 4 20 5 20 9C20 11 19 12 18 12.5V22" stroke="#ED5C25" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"/></svg></div>
-          <span class="step-num">2</span>
-        </div>
+        <span class="step-num">02</span>
         <h3>Plan</h3>
         <p>A qualified nutritionist builds your plan around your scan, your life, and the food you'll actually eat. No 1,200-calorie nonsense. No supplements to buy.</p>
       </article>
 
       <article class="step">
-        <div class="step-top">
-          <div class="step-icon"><svg viewBox="0 0 26 26" fill="none"><path d="M15 2L8 14H13L11 24L18 12H13L15 2Z" fill="#ED5C25" opacity=".15" stroke="#ED5C25" stroke-width="1.5" stroke-linejoin="round"/></svg></div>
-          <span class="step-num">3</span>
-        </div>
+        <span class="step-num">03</span>
         <h3>Transform</h3>
         <p>Coach-led sessions, weekly check-ins, progress tracking and adjustments. <em>The accountability layer</em> that turns a good plan into a measurable result.</p>
       </article>
     </div>
+  </div>
+</section>
+
+<!-- ============================ GUARANTEE ============================ -->
+<section class="guarantee">
+  <div class="guarantee-inner">
+    <span class="eyebrow plain" style="display:inline-flex;justify-content:center;">The promise</span>
+    <h2 class="h-display">Drop 8–12kg in 12 weeks — <em>or we coach you free until you do.</em></h2>
+    <p>Complete the programme. Follow the system. Your result is guaranteed. No catches, no asterisks. We've delivered this guarantee 1,200+ times across our Ipswich and Colchester studios.</p>
+    <a href="#apply" class="btn btn-sage" data-open="Book your free consult →" data-waitlist="Join the waitlist →">Book your free consult →</a>
   </div>
 </section>
 
@@ -1752,7 +1609,7 @@
         </svg>
         <p class="lede">Seven hormones decide whether your body burns fat or stores it, whether you feel full or hungry, and where weight settles. Every plan that ignores them eventually fails — yours included. The consult maps which are driving your specific pattern.</p>
         <p style="font-size:15px;color:var(--ink-2);margin-top:20px;">For women in their <strong style="color:var(--ink);">30s, 40s &amp; 50s</strong> — take our free 2-minute hormonal assessment to find out which hormones may be working against you.</p>
-        <a href="/hormonal-assessment/quiz" class="btn btn-sage" style="margin-top:16px;">Take the Hormonal Quiz →</a>
+        <a href="/hormonal-assessment/" class="btn btn-sage" style="margin-top:16px;">Take the Hormonal Quiz →</a>
       </div>
     </div>
 
@@ -1785,10 +1642,6 @@
         <div class="hicon"><svg viewBox="0 0 24 24"><path d="M18 8h1a4 4 0 0 1 0 8h-1M2 8h16v9a4 4 0 0 1-4 4H6a4 4 0 0 1-4-4V8z"/><line x1="6" y1="1" x2="6" y2="4"/><line x1="10" y1="1" x2="10" y2="4"/><line x1="14" y1="1" x2="14" y2="4"/></svg></div>
         <div class="hname">Ghrelin</div><div class="htag">Hunger signal</div>
       </div>
-      <a href="/hormonal-assessment/quiz" class="hormone" style="text-decoration:none;background:var(--sage);cursor:pointer;transition:transform .2s;">
-        <div class="hicon" style="background:rgba(255,255,255,.35);"><svg viewBox="0 0 24 24" stroke="#fff" fill="none" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M9 11l3 3L22 4"/><path d="M21 12v7a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h11"/></svg></div>
-        <div class="hname" style="color:#fff;">Take the Quiz</div><div class="htag" style="color:rgba(255,255,255,.8);">2-min assessment</div>
-      </a>
     </div>
   </div>
 </section>
@@ -1882,7 +1735,7 @@
     <span class="eyebrow on-dark plain" style="display:inline-flex;justify-content:center;">Last thing</span>
     <h2 class="h-display on-dark" style="color:var(--cream);">Stop fighting your body. <em>Start working with it.</em></h2>
     <p>Free 45-minute body scan &amp; nutritionist consult in Ipswich or Colchester. You'll leave knowing exactly what your body's doing and exactly what would change it. Whether you join is up to you.</p>
-    <a href="#apply" class="btn btn-sage">Apply for the next intake →</a>
+    <a href="#apply" class="btn btn-sage" data-open="Apply for the next intake →" data-waitlist="Join the waitlist →">Apply for the next intake →</a>
     <span class="micro">2-min form · No card · Reviewed in 24 hours</span>
   </div>
 </section>
@@ -1892,10 +1745,10 @@
   <div class="apply-inner">
 
     <div class="apply-head">
-      <span class="eyebrow plain" style="display:inline-flex;">Apply now</span>
-      <h2 class="h-display">Apply for the next <em>ReShape intake.</em></h2>
-      <p>We only take a limited number of applicants each round to protect coaching quality and results. Complete the short form and we will review whether you are a fit.</p>
-      <div class="apply-pills">
+      <span class="eyebrow plain" style="display:inline-flex;" data-open="Apply now" data-waitlist="Join the waitlist">Apply now</span>
+      <h2 class="h-display" data-open="Apply for the next ReShape intake." data-waitlist="We're at full capacity.">Apply for the next <em>ReShape intake.</em></h2>
+      <p data-open="We only take a limited number of applicants each round to protect coaching quality and results. Complete the short form and we will review whether you are a fit." data-waitlist="Spots open up regularly. Drop your details and we'll work through the queue in order. When it's your turn, you'll get a booking link to come meet the team.">We only take a limited number of applicants each round to protect coaching quality and results. Complete the short form and we will review whether you are a fit.</p>
+      <div class="apply-pills" data-waitlist-hide>
         <div class="apply-pill">Short application — takes 2 minutes</div>
         <div class="apply-pill">Quick review by the team within 24 hours</div>
         <div class="apply-pill">Next-step in-person consult for suitable applicants</div>
@@ -1963,7 +1816,7 @@
             <div class="form-input-group"><label class="form-label" for="lastName">Last Name</label><input type="text" id="lastName" name="last_name" class="form-input" placeholder="Smith" required><div class="form-error-msg">Please enter your last name</div></div>
           </div>
           <div class="form-input-row">
-            <div class="form-input-group"><label class="form-label" for="age">Age</label><input type="number" id="age" name="age" class="form-input" placeholder="28" min="16" max="99" required><div class="form-error-msg">Please enter your age</div></div>
+            <div class="form-input-group"><label class="form-label" for="age">Age</label><input type="number" id="age" name="age" class="form-input" placeholder="28" min="20" max="99" required><div class="form-error-msg">Please enter your age</div></div>
             <div class="form-input-group"><label class="form-label" for="phone">Phone Number</label><input type="tel" id="phone" name="phone" class="form-input" placeholder="07700 000000" required><div class="form-error-msg">Please enter your phone number</div></div>
           </div>
           <div class="form-input-group"><label class="form-label" for="email">Email</label><input type="email" id="email" name="email" class="form-input" placeholder="john@example.com" required><div class="form-error-msg">Please enter a valid email</div></div>
@@ -1987,11 +1840,16 @@
         <!-- STEP 7: Ready -->
         <div class="form-step" data-step="7">
           <div class="form-step-number">Step 7 of 8</div>
-          <div class="form-step-question">Please Read!</div>
-          <p style="color:var(--ink-2);margin-bottom:24px;font-size:16px;line-height:1.7;">This is a premium transformation programme with a dedicated coach who will be with you every step of the way. This is NOT a standard gym membership.</p>
+          <div class="form-step-question">Before you continue</div>
+          <div style="color:var(--ink-2);margin-bottom:28px;font-size:15px;line-height:1.75;">
+            <p style="margin:0 0 6px"><strong>1.</strong> Every session is coached. We tell you exactly what to do, every rep, until the result is delivered.</p>
+            <p style="margin:0 0 6px"><strong>2.</strong> Your nutrition is built for your body, your hormones, and your goal — not a generic plan.</p>
+            <p style="margin:0 0 6px"><strong>3.</strong> We deliver accountability, coaching, and structure — not gym access.</p>
+            <p style="margin:0"><strong>4.</strong> A complete transformation in as little as 12 weeks, with pricing tailored to your goal in your consultation.</p>
+          </div>
           <div class="form-options" data-field="ready_for_coach">
-            <label class="form-option"><input type="radio" name="ready_for_coach" value="Yes I'm ready to work with a transformation coach"><span class="form-option-icon">&#128640;</span><span class="form-option-label">Yes, I'm ready to work with a transformation coach</span><span class="form-option-check"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="3"><path d="M5 13l4 4L19 7"/></svg></span></label>
-            <label class="form-option"><input type="radio" name="ready_for_coach" value="No I'm looking for a standard gym"><span class="form-option-icon">&#127947;</span><span class="form-option-label">No, I'm looking for a standard gym</span><span class="form-option-check"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="3"><path d="M5 13l4 4L19 7"/></svg></span></label>
+            <label class="form-option"><input type="radio" name="ready_for_coach" value="Yes I'm ready to work with a transformation coach"><span class="form-option-icon">&#128640;</span><span class="form-option-label">Yes, I'm ready for coached transformation</span><span class="form-option-check"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="3"><path d="M5 13l4 4L19 7"/></svg></span></label>
+            <label class="form-option"><input type="radio" name="ready_for_coach" value="No I'm looking for a standard gym"><span class="form-option-icon">&#127947;</span><span class="form-option-label">No, I'm just looking for gym access</span><span class="form-option-check"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="3"><path d="M5 13l4 4L19 7"/></svg></span></label>
           </div>
           <div class="form-step-question">Would you achieve your goal in...?</div>
           <div class="form-options multi-select" data-field="timeline" style="grid-template-columns:1fr 1fr 1fr;margin-bottom:32px;">
@@ -2025,8 +1883,15 @@
         </div>
       </form>
       <div class="form-success" id="formSuccess">
+        <!-- WAITLIST MODE: show confirmation + redirect to Instagram -->
+        <div id="waitlistSuccess" data-waitlist-show style="display:none;text-align:center;padding:40px 20px;animation:formFadeIn .5s ease">
+          <div class="form-success-icon" style="margin-bottom:16px"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M5 13l4 4L19 7"/></svg></div>
+          <h3>You're on the waitlist!</h3>
+          <p style="color:var(--text2);margin-bottom:16px">We've added you to the queue and will be in touch as soon as a spot opens. Keep an eye on your WhatsApp and email.</p>
+          <p style="font-size:13px;color:var(--text3)">Redirecting you to our Instagram in <span class="ig-countdown">5</span>s…</p>
+        </div>
         <!-- BOOKING CALENDAR -->
-        <div class="booking-wrap" id="bookingWrap">
+        <div class="booking-wrap" id="bookingWrap" data-waitlist-hide>
           <div class="booking-header">
             <div class="form-success-icon" style="margin-bottom:16px"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M5 13l4 4L19 7"/></svg></div>
             <h3>Application Submitted!</h3>
@@ -2082,7 +1947,7 @@
       <h4>Programme</h4>
       <ul>
         <li><a href="#how">How it works</a></li>
-        <li><a href="#apply">Book a consult</a></li>
+        <li><a href="#apply" data-open="Book a consult" data-waitlist="Join the waitlist">Book a consult</a></li>
         <li><a href="#reviews">Stories</a></li>
         <li><a href="#science">The science</a></li>
       </ul>
@@ -2244,6 +2109,13 @@
           field.classList.add('error');
           if (errorMsg) { errorMsg.textContent = 'Please enter a valid email address'; errorMsg.classList.add('visible'); }
           valid = false;
+        } else if (field.type === 'number' && field.name === 'age') {
+          var ageVal = parseInt(field.value);
+          if (isNaN(ageVal) || ageVal < 20) {
+            field.classList.add('error');
+            if (errorMsg) errorMsg.classList.add('visible');
+            valid = false;
+          }
         } else if (field.type === 'tel') {
           var phone = field.value.trim().replace(/[\s\-\(\)]/g, '');
           if (!/^(\+\d{10,15}|0[1-9]\d{8,10}|44\d{10,11})$/.test(phone)) {
@@ -2288,32 +2160,13 @@
           valid = false;
         }
       }
-      var rating = step.querySelector('.form-rating');
-      if (rating && !rating.querySelector('input:checked')) valid = false;
-    }
-    // Steps 7 & 8: require all radio/multi-select groups
-    if (stepNum === 7 || stepNum === 8) {
-      step.querySelectorAll('.form-options:not(.multi-select)').forEach(function(group) {
-        if (!group.querySelector('input[type="radio"]:checked')) valid = false;
-      });
-      step.querySelectorAll('.form-options.multi-select').forEach(function(group) {
-        if (!group.querySelector('input:checked')) valid = false;
-      });
     }
     return valid;
   }
 
   form.addEventListener('submit', async function(e) {
     e.preventDefault();
-    // Final validation gate — reject if required fields are missing
     var formData = new FormData(form);
-    var reqRadios = ['gender','looking_for','reason','coachability','ready_for_coach','willing_to_invest','location'];
-    for (var ri = 0; ri < reqRadios.length; ri++) {
-      if (!formData.get(reqRadios[ri])) { alert('Please complete all steps before submitting.'); return; }
-    }
-    if (!formData.get('first_name') || !formData.get('last_name') || !formData.get('email') || !formData.get('phone')) { alert('Please fill in all your contact details.'); return; }
-    if (!formData.get('big_goal')) { alert('Please tell us about your goal.'); return; }
-    if (!formData.get('importance')) { alert('Please rate how important this goal is.'); return; }
     var data = {};
     formData.forEach(function(value, key) {
       if (data[key]) {
@@ -2351,11 +2204,16 @@
     console.log(JSON.stringify(leadData, null, 2));
     try {
       if (typeof window.__supabaseClient !== 'undefined') {
-        var result = await window.__supabaseClient.from('leads').insert([leadData]);
-        if (result.error) {
-          console.error('Supabase error:', result.error.message);
-        } else {
-          console.log('Lead saved to database successfully');
+        if (window.__leadSubmitted) { console.log('Duplicate submit blocked'); return; }
+        window.__leadSubmitted = true;
+        {
+          var result = await window.__supabaseClient.from('leads').insert([leadData]);
+          if (result.error) {
+            console.error('Supabase error:', result.error.message);
+            window.__leadSubmitted = false;
+          } else {
+            console.log('Lead saved to database successfully');
+          }
         }
       }
     } catch (err) {
@@ -2374,7 +2232,8 @@
     if (leadData.location) selectBookingLoc(leadData.location);
     else selectBookingLoc('Ipswich');
     if (typeof queueSequence === 'function' && window.__supabaseClient) {
-      queueSequence('form_submitted', leadData, null, window.__supabaseClient);
+      var seqName = window.__waitlistEnabled ? 'waitlist_joined' : 'form_submitted';
+      queueSequence(seqName, leadData, null, window.__supabaseClient);
     }
   });
 
@@ -2518,13 +2377,38 @@ function selectBookingTime(slotId) {
   document.getElementById('bookingConfirmBtn').disabled = false;
 }
 
+var _bookingInFlight = false;
 async function confirmBooking() {
+  if (_bookingInFlight) return;
   var btn = document.getElementById('bookingConfirmBtn');
   btn.disabled = true;
-  btn.textContent = 'Booking...';
+  btn.textContent = 'Checking…';
+  _bookingInFlight = true;
   var lead = window.__bookingLead || {};
   try {
     if (typeof window.__supabaseClient !== 'undefined') {
+      // Block duplicate booking
+      var today = new Date().toISOString().slice(0,10);
+      var dupRes = await window.__supabaseClient.from('bookings')
+        .select('id, confirm_token, booking_slots(date, start_time, end_time), location')
+        .eq('email', (lead.email||'').toLowerCase()).neq('status', 'cancelled')
+        .order('created_at', { ascending: false }).limit(1).maybeSingle();
+      var dup = dupRes && dupRes.data;
+      if (dup && dup.booking_slots && dup.booking_slots.date >= today) {
+        var dSlot = dup.booking_slots;
+        var dDate = new Date(dSlot.date + 'T12:00:00').toLocaleDateString('en-GB', { weekday:'long', day:'numeric', month:'long' });
+        var dTime = dSlot.start_time ? dSlot.start_time.substring(0,5) : '';
+        btn.textContent = 'Already booked';
+        document.getElementById('bookingWrap').style.display = 'none';
+        document.getElementById('bookingDone').style.display = 'block';
+        document.getElementById('bookingDoneDetail').innerHTML =
+          '<div class="booking-done-row"><span>Existing booking</span><span>' + dDate + ' at ' + dTime + '</span></div>' +
+          '<div class="booking-done-row"><span>Location</span><span>' + (dup.location||'') + '</span></div>' +
+          '<div style="text-align:center;margin-top:12px"><a href="/booking/?reschedule=' + dup.id + '&token=' + (dup.confirm_token||'') + '" style="color:#ED5C25;font-weight:700;font-size:14px">Need to reschedule? Click here →</a></div>';
+        _bookingInFlight = false;
+        return;
+      }
+      btn.textContent = 'Booking...';
       var res = await window.__supabaseClient.from('bookings').insert([{
         slot_id: __selectedSlotId,
         first_name: lead.first_name || '',
@@ -2574,6 +2458,7 @@ async function confirmBooking() {
       }
     }
   } catch (e) {
+    _bookingInFlight = false;
     console.error('Booking error:', e);
     btn.disabled = false;
     btn.textContent = 'Book My Visit';
@@ -2600,7 +2485,7 @@ function skipBooking() {
 
 <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
 <script src="api/config.js?v=2"></script>
-<script src="api/automations.js?v=12"></script>
+<script src="api/automations.js?v=16"></script>
 <script>
 /* Supabase client init */
 (function(){
@@ -2609,6 +2494,7 @@ function skipBooking() {
   window.__supabaseClient = supabase.createClient(U, K);
 })();
 </script>
+<script src="api/waitlist-mode.js?v=2"></script>
 
 </body>
 </html>

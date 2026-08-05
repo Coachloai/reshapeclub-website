@@ -1,0 +1,410 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>ReShape — Hormonal Assessments</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Bricolage+Grotesque:opsz,wght@12..96,500;12..96,700;12..96,800&family=Spline+Sans:wght@400;500;600&display=swap" rel="stylesheet">
+<style>
+  :root{
+    --bg:#0a0b0d; --surface:#141519; --surface-2:#1c1d22; --line:#2a2c34;
+    --text:#f2f3f5; --muted:#8b909b; --faint:#5b606b;
+    --accent:#c2f23f; --accent-dim:rgba(194,242,63,.13); --accent-line:rgba(194,242,63,.35);
+    --accent2:#e8742c; --accent2-soft:rgba(232,116,44,.35);
+    --ask:#5fb0ff; --ask-dim:rgba(95,176,255,.13);
+    --warn:#f5a93b; --warn-dim:rgba(245,169,59,.14);
+    --exit:#ff7a7a; --exit-dim:rgba(255,122,122,.13);
+    --pink:#ff7eb6; --green:#4ade80; --red:#f87171;
+    --disp:'Bricolage Grotesque',sans-serif; --body:'Spline Sans',sans-serif;
+  }
+  [data-theme="light"]{
+    --bg:#FAF7F2; --surface:#FFFFFF; --surface-2:#F0EBE3; --line:#E5DFD5;
+    --text:#2A2724; --muted:#5A5550; --faint:rgba(42,39,36,0.5);
+    --accent:#4d7a0f; --accent-dim:rgba(77,122,15,.10); --accent-line:rgba(77,122,15,.30);
+    --accent2:#ED5C25; --accent2-soft:rgba(237,92,37,.25);
+    --ask:#2563EB; --ask-dim:rgba(37,99,235,.10);
+    --warn:#D97706; --warn-dim:rgba(217,119,6,.10);
+    --exit:#DC2626; --exit-dim:rgba(220,38,38,.10);
+    --pink:#DB2777; --green:#16a34a; --red:#DC2626;
+  }
+  [data-theme="light"] body{color-scheme:light}
+  [data-theme="light"] .datebox input, [data-theme="light"] .dd{color-scheme:light}
+  [data-theme="light"] .scrim.show{background:rgba(0,0,0,.3)}
+  *{box-sizing:border-box;margin:0;padding:0}
+  body{background:var(--bg); color:var(--text); font-family:var(--body); line-height:1.5; -webkit-font-smoothing:antialiased; min-height:100vh;}
+  .app{max-width:1280px; margin:0 auto; padding:26px 22px 60px;}
+  button{font-family:var(--body); cursor:pointer; border:none; background:none; color:inherit;}
+
+  /* Header */
+  .page-head{display:flex; align-items:center; gap:16px; margin-bottom:22px;}
+  .icontile{width:54px;height:54px;border-radius:15px;background:linear-gradient(150deg,#1a2840,#0d1520);display:flex;align-items:center;justify-content:center;font-size:25px;box-shadow:inset 0 0 0 1px rgba(255,255,255,.06), 0 6px 18px rgba(0,0,0,.45);}
+  [data-theme="light"] .icontile{background:linear-gradient(150deg,#dbeafe,#eff6ff); box-shadow:inset 0 0 0 1px rgba(0,0,0,.06), 0 3px 10px rgba(0,0,0,.08)}
+  .page-head h1{font-family:var(--disp); font-weight:800; font-size:29px; letter-spacing:-.02em;}
+  .page-head .sub{color:var(--muted); font-size:14.5px; margin-top:2px;}
+
+  /* Filter bar */
+  .bar{display:flex; align-items:center; background:var(--surface); border:1px solid var(--line); border-radius:16px; padding:9px 8px; flex-wrap:wrap; row-gap:10px; margin-bottom:26px;}
+  .grp{display:flex; align-items:center; gap:11px; padding:0 15px;}
+  .grp + .grp{border-left:1px solid var(--line);}
+  .glabel{font-size:11px; font-weight:700; letter-spacing:.12em; text-transform:uppercase; color:var(--faint); white-space:nowrap;}
+  .seg{display:inline-flex; align-items:center; gap:2px;}
+  .seg button{padding:8px 15px; border-radius:9px; font-size:13.5px; font-weight:600; color:var(--muted); white-space:nowrap;}
+  .seg button:hover{color:var(--text);}
+  .seg button.on{background:var(--accent2); color:#2a1206; box-shadow:0 2px 9px var(--accent2-soft);}
+  .dd{background:var(--surface-2); border:1px solid var(--line); color:var(--text); border-radius:11px; padding:9px 13px; font-family:var(--body); font-size:14px; outline:none; color-scheme:dark; cursor:pointer;}
+  .dd:focus{border-color:var(--accent2);}
+  .searchbox{margin-left:auto; display:flex; align-items:center; gap:9px; background:var(--surface-2); border:1px solid var(--line); border-radius:11px; padding:0 14px; min-width:190px;}
+  .searchbox svg{opacity:.5; flex:none;}
+  .searchbox input{flex:1; background:none; border:none; color:var(--text); font-family:var(--body); font-size:14px; padding:10px 0; outline:none;}
+  .clear{margin-left:12px; color:var(--muted); font-size:13px; text-decoration:underline; text-underline-offset:3px;}
+  .clear:hover{color:var(--text);}
+
+  /* Summary row */
+  .summary{display:flex; gap:12px; margin-bottom:26px; flex-wrap:wrap;}
+  .scard{flex:1; min-width:140px; background:var(--surface); border:1px solid var(--line); border-radius:14px; padding:16px 18px; text-align:center;}
+  .scard .sv{font-family:var(--disp); font-weight:800; font-size:24px; line-height:1;}
+  .scard .sl{font-size:10px; color:var(--faint); margin-top:5px; letter-spacing:.08em; text-transform:uppercase;}
+
+  /* Applicant rows */
+  .grid{display:flex; flex-direction:column; gap:12px;}
+  .arow{background:var(--surface); border:1px solid var(--line); border-radius:15px; padding:16px 20px; display:flex; align-items:center; gap:16px; transition:.15s;}
+  .arow:hover{border-color:var(--faint); background:var(--surface-2);}
+  .arow-info{min-width:180px; flex:none;}
+  .arow-info .name{font-family:var(--disp); font-weight:700; font-size:15px; letter-spacing:-.01em; margin-bottom:2px;}
+  .arow-info .ameta{color:var(--muted); font-size:11px; line-height:1.4;}
+  .badge{font-size:10px; font-weight:700; letter-spacing:.04em; padding:4px 10px; border-radius:20px; white-space:nowrap; flex:none;}
+  .b-stress{background:var(--exit-dim); color:var(--exit); border:1px solid var(--exit-dim);}
+  .b-hormonal{background:rgba(167,139,250,.13); color:#a78bfa; border:1px solid rgba(167,139,250,.25);}
+  .b-metabolic{background:var(--warn-dim); color:var(--warn); border:1px solid var(--warn-dim);}
+  .b-compound{background:rgba(255,126,182,.13); color:var(--pink); border:1px solid rgba(255,126,182,.25);}
+  .b-benign{background:var(--accent-dim); color:var(--accent); border:1px solid var(--accent-line);}
+  .arow-hormones{display:flex; gap:10px; flex:1; justify-content:center; flex-wrap:wrap;}
+  .hring-wrap{text-align:center; width:62px;}
+  .hring-label{font-size:9px; color:var(--faint); margin-top:3px; letter-spacing:.04em; text-transform:uppercase; line-height:1.2;}
+  .btn-view{padding:8px 16px; border-radius:9px; background:var(--accent2); color:#fff; font-weight:700; font-size:12px; cursor:pointer; border:none; white-space:nowrap; flex:none; transition:.15s;}
+  .btn-view:hover{opacity:.85;}
+  .empty{text-align:center; color:var(--muted); padding:60px 20px; font-size:15px;}
+  @media(max-width:900px){.arow{flex-wrap:wrap;} .arow-info{min-width:100%; order:-1;} .arow-hormones{width:100%;}}
+
+  /* Side drawer */
+  .scrim{position:fixed; inset:0; background:rgba(0,0,0,.6); opacity:0; pointer-events:none; transition:.2s; z-index:40;}
+  .scrim.show{opacity:1; pointer-events:auto;}
+  .modal{position:fixed; top:0; right:0; height:100%; width:min(620px,96vw); background:var(--surface); border-left:1px solid var(--line); z-index:50; transform:translateX(100%); transition:.28s cubic-bezier(.4,0,.2,1); overflow-y:auto;}
+  .modal.show{transform:none;}
+  .mhead{position:sticky; top:0; background:var(--surface); border-bottom:1px solid var(--line); padding:22px 24px 18px; z-index:2;}
+  .mhead .mtop{display:flex; align-items:flex-start; justify-content:space-between; gap:12px;}
+  .mhead h2{font-family:var(--disp); font-weight:800; font-size:23px; letter-spacing:-.02em;}
+  .mhead .msub{color:var(--muted); font-size:13px; margin-top:5px;}
+  .closeX{font-size:26px; color:var(--muted); line-height:1; flex:none;}
+  .closeX:hover{color:var(--text);}
+  .mbody{padding:8px 24px 50px;}
+  .sec{padding:18px 0 6px; border-bottom:1px solid var(--line);}
+  .sec:last-child{border-bottom:none;}
+  .sec .sh{font-size:11px; font-weight:700; letter-spacing:.14em; text-transform:uppercase; color:var(--accent2); margin-bottom:13px;}
+
+  /* Hormone detail bars */
+  .hd-row{display:flex; align-items:center; gap:10px; margin-bottom:10px;}
+  .hd-label{font-size:12px; font-weight:600; width:100px; text-transform:capitalize; flex:none;}
+  .hd-track{flex:1; height:10px; background:var(--surface-2); border-radius:5px; overflow:hidden;}
+  .hd-fill{height:100%; border-radius:5px; transition:width .4s;}
+  .hd-val{font-size:12px; font-weight:700; width:28px; text-align:right; flex:none;}
+
+  /* Cluster scores */
+  .cluster-row{display:flex; gap:12px; margin-bottom:16px; flex-wrap:wrap;}
+  .cluster-card{flex:1; min-width:100px; background:var(--surface-2); border:1px solid var(--line); border-radius:10px; padding:12px; text-align:center;}
+  .cluster-card .cv{font-family:var(--disp); font-weight:800; font-size:20px;}
+  .cluster-card .cl{font-size:10px; color:var(--faint); margin-top:3px; letter-spacing:.06em; text-transform:uppercase;}
+
+  /* Readout */
+  .readout-mirror{font-size:14px; line-height:1.65; color:var(--text); background:var(--surface-2); border-left:3px solid var(--pink); border-radius:10px; padding:14px 16px; margin-bottom:16px;}
+  .readout-mirror p{margin-bottom:10px;}
+  .readout-mirror p:last-child{margin-bottom:0;}
+  .obj-list{display:flex; flex-direction:column; gap:10px;}
+  .obj-card{background:var(--surface-2); border:1px solid var(--line); border-radius:10px; padding:13px 15px;}
+  .obj-card .ot{font-weight:700; font-size:13px; margin-bottom:4px;}
+  .obj-card .ob{font-size:13px; color:var(--muted); line-height:1.5;}
+  .closer-text{font-size:14px; color:var(--accent); font-weight:600; margin-top:14px; line-height:1.5;}
+  .flags{display:flex; gap:7px; flex-wrap:wrap; margin-top:8px;}
+  .flag{font-size:11px; background:var(--warn-dim); color:var(--warn); border:1px solid var(--warn-dim); border-radius:7px; padding:3px 9px; text-transform:capitalize;}
+
+  /* PDF button */
+  .btn-pdf{display:inline-flex; align-items:center; gap:8px; padding:10px 18px; border-radius:10px; background:var(--accent2); color:#fff; font-weight:700; font-size:13px; cursor:pointer; border:none; margin-top:12px; transition:.15s;}
+  .btn-pdf:hover{opacity:.85;}
+
+  @media(max-width:600px){ .searchbox{margin-left:0;} .summary{flex-direction:column;} }
+  @media print{
+    .app{display:none!important;}
+    .scrim{display:none!important;}
+    .modal{position:static!important; transform:none!important; width:100%!important; border:none!important; overflow:visible!important; height:auto!important;}
+    .mhead{position:static!important;}
+    .btn-pdf{display:none!important;}
+    .closeX{display:none!important;}
+    body{background:#fff!important; color:#222!important; -webkit-print-color-adjust:exact!important; print-color-adjust:exact!important;}
+    *{-webkit-print-color-adjust:exact!important; print-color-adjust:exact!important;}
+    .mbody{padding:8px 24px 20px!important;}
+    .sec{break-inside:avoid;}
+    .readout-mirror{background:#f5f5f5!important; border-left-color:#d946ef!important;}
+    .obj-card{background:#f5f5f5!important; border-color:#ddd!important;}
+    .cluster-card{background:#f5f5f5!important; border-color:#ddd!important;}
+    .hd-track{background:#eee!important;}
+  }
+</style>
+</head>
+<body>
+<div class="app">
+  <div class="page-head">
+    <div class="icontile">🧬</div>
+    <div><h1>Hormonal Assessments</h1><div class="sub" id="sub">Loading...</div></div>
+  </div>
+
+  <div class="bar">
+    <div class="grp"><span class="glabel">Archetype</span>
+      <select class="dd" id="fArch"><option value="">All</option><optgroup label="Women"><option value="stress_driven_plateau">Stress-Driven</option><option value="hormonal_shift">Hormonal Shift</option><option value="metabolic_resistance">Metabolic Resistance</option><option value="compound_pattern">Compound</option></optgroup><optgroup label="Men"><option value="cortisol_dominant_decline">Cortisol Dominant</option><option value="testosterone_decline">Testosterone Decline</option><option value="metabolic_resistance_men">Metabolic Resistance</option><option value="compound_pattern_men">Compound</option></optgroup></select></div>
+    <div class="grp"><span class="glabel">Gender</span>
+      <select class="dd" id="fGender"><option value="">All</option><option value="women">Women</option><option value="men">Men</option></select></div>
+    <div class="searchbox">
+      <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="11" cy="11" r="7"/><path d="m21 21-4.3-4.3"/></svg>
+      <input id="q" placeholder="Search name or email...">
+    </div>
+    <button class="clear" id="clear">Clear</button>
+  </div>
+
+  <div class="summary" id="summary"></div>
+  <div class="grid" id="grid"></div>
+  <div class="empty" id="empty" style="display:none">No assessments match those filters.</div>
+</div>
+
+<div class="scrim" id="scrim"></div>
+<div class="modal" id="modal"><div id="modalInner"></div></div>
+
+<script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+<script>
+var SUPABASE_URL = 'https://lvizldmdficsfpgegehp.supabase.co';
+var SUPABASE_ANON_KEY = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6Imx2aXpsZG1kZmljc2ZwZ2VnZWhwIiwicm9sZSI6ImFub24iLCJpYXQiOjE3NzM2OTk4NDQsImV4cCI6MjA4OTI3NTg0NH0.72wHbZaTvqNzW6DTb6Ae1vi9QpOg_-KiEO-Jjm9mn0k';
+var sb = supabase.createClient(SUPABASE_URL, SUPABASE_ANON_KEY);
+
+var ALL = [];
+var HORMONES = ['cortisol','ghrelin','estrogen','progesterone','testosterone','insulin','leptin'];
+var HCOLORS = {cortisol:'#f87171',ghrelin:'#fb923c',estrogen:'#a78bfa',progesterone:'#f472b6',testosterone:'#38bdf8',insulin:'#fbbf24',leptin:'#4ade80'};
+var ARCH_LABEL = {stress_driven_plateau:'Stress-Driven Plateau',hormonal_shift:'Hormonal Shift',metabolic_resistance:'Metabolic Resistance',compound_pattern:'Compound Pattern',cortisol_dominant_decline:'Cortisol Dominant Decline',testosterone_decline:'Testosterone Decline',metabolic_resistance_men:'Metabolic Resistance (Men)',compound_pattern_men:'Compound Pattern (Men)'};
+var ARCH_CLASS = {stress_driven_plateau:'b-stress',hormonal_shift:'b-hormonal',metabolic_resistance:'b-metabolic',compound_pattern:'b-compound',cortisol_dominant_decline:'b-stress',testosterone_decline:'b-hormonal',metabolic_resistance_men:'b-metabolic',compound_pattern_men:'b-compound'};
+var WOMEN_ARCHETYPES = ['stress_driven_plateau','hormonal_shift','metabolic_resistance','compound_pattern'];
+var MEN_ARCHETYPES = ['cortisol_dominant_decline','testosterone_decline','metabolic_resistance_men','compound_pattern_men'];
+
+function dateNice(d){ return new Date(d).toLocaleDateString('en-GB',{day:'numeric',month:'short',year:'numeric',hour:'2-digit',minute:'2-digit'}); }
+function flagLabel(f){ return f.replace(/_/g,' '); }
+
+async function load(){
+  // Fetch assessments joined with lead name/email
+  var {data:assessments, error} = await sb.from('assessments')
+    .select('id,session_id,lead_id,completed_at,primary_archetype,secondary_archetype,hormone_scores,cluster_scores,flags,readout')
+    .not('completed_at','is',null)
+    .order('completed_at',{ascending:false});
+  if(error){ console.error(error); return; }
+
+  // Fetch associated leads
+  var leadIds = [...new Set(assessments.map(a=>a.lead_id).filter(Boolean))];
+  var leads = {};
+  if(leadIds.length){
+    var {data:leadRows} = await sb.from('leads').select('id,first_name,last_name,email,form_name').in('id',leadIds);
+    (leadRows||[]).forEach(l=>{ leads[l.id] = l; });
+  }
+
+  ALL = assessments.map(a=>{
+    var lead = leads[a.lead_id] || {};
+    var name = (lead.first_name||'Unknown') + (lead.last_name && lead.last_name !== '-' ? ' '+lead.last_name : '');
+    var isMen = MEN_ARCHETYPES.includes(a.primary_archetype) || (lead.form_name||'').includes("Men's");
+    return { ...a, name: name, email: lead.email||'', gender: isMen ? 'men' : 'women' };
+  });
+
+  applyFilters();
+}
+
+var qEl=document.getElementById('q'), fA=document.getElementById('fArch'), fG=document.getElementById('fGender');
+var grid=document.getElementById('grid'), empty=document.getElementById('empty'), sub=document.getElementById('sub');
+
+function applyFilters(){
+  var q = qEl.value.trim().toLowerCase();
+  var arch = fA.value;
+  var gen = fG.value;
+  var rows = ALL.filter(r=>{
+    if(q && !r.name.toLowerCase().includes(q) && !(r.email||'').toLowerCase().includes(q)) return false;
+    if(arch && r.primary_archetype !== arch) return false;
+    if(gen && r.gender !== gen) return false;
+    return true;
+  });
+  render(rows);
+}
+
+function hRing(value, size, thick, color){
+  var cx=size/2, cy=size/2, r=(size-thick)/2-1;
+  var circ=2*Math.PI*r, pct=Math.min(Math.max(value/10,0),1);
+  var fs=Math.round(size*0.24);
+  return '<svg width="'+size+'" height="'+size+'">'+
+    '<circle cx="'+cx+'" cy="'+cy+'" r="'+r+'" fill="none" stroke="rgba(128,128,128,0.10)" stroke-width="'+thick+'"/>'+
+    '<circle cx="'+cx+'" cy="'+cy+'" r="'+r+'" fill="none" stroke="'+color+'"'+
+    ' stroke-width="'+thick+'" stroke-linecap="round"'+
+    ' stroke-dasharray="'+(pct*circ)+' '+circ+'" stroke-dashoffset="'+(circ*0.25)+'"/>'+
+    '</svg>'+
+    '<div style="position:absolute;inset:0;display:flex;align-items:center;justify-content:center">'+
+    '<span style="font-size:'+fs+'px;font-weight:900;color:'+color+';line-height:1">'+value+'</span></div>';
+}
+
+var HSHORT = {cortisol:'CORT',ghrelin:'GHRL',estrogen:'ESTR',progesterone:'PROG',testosterone:'TEST',insulin:'INS',leptin:'LEPT'};
+
+function render(rows){
+  sub.textContent = rows.length + ' completed assessment' + (rows.length===1?'':'s');
+  empty.style.display = rows.length ? 'none' : 'block';
+  renderSummary(rows);
+
+  grid.innerHTML = rows.map(r=>{
+    var hs = r.hormone_scores||{};
+    var archLabel = ARCH_LABEL[r.primary_archetype]||'Unknown';
+    var archClass = ARCH_CLASS[r.primary_archetype]||'b-benign';
+
+    var rings = HORMONES.map(h=>{
+      var v = hs[h]||0;
+      return '<div class="hring-wrap"><div style="position:relative;width:52px;height:52px;margin:0 auto">'+hRing(v,52,5,HCOLORS[h])+'</div><div class="hring-label">'+HSHORT[h]+'</div></div>';
+    }).join('');
+
+    return '<div class="arow" data-id="'+r.id+'">'+
+      '<div class="arow-info"><div class="name">'+r.name+'</div><div class="ameta">'+dateNice(r.completed_at)+'</div>'+(r.email?'<div class="ameta">'+r.email+'</div>':'')+'</div>'+
+      '<span class="badge '+archClass+'">'+archLabel+'</span>'+
+      '<div class="arow-hormones">'+rings+'</div>'+
+      '<button class="btn-view" data-id="'+r.id+'">View</button>'+
+    '</div>';
+  }).join('');
+
+  grid.querySelectorAll('.btn-view').forEach(b=>b.onclick=function(e){ e.stopPropagation(); openDetail(this.dataset.id); });
+  grid.querySelectorAll('.arow').forEach(c=>c.onclick=function(){ openDetail(this.dataset.id); });
+}
+
+function renderSummary(rows){
+  var total = rows.length;
+  var stress = rows.filter(r=>r.primary_archetype==='stress_driven_plateau').length;
+  var hormonal = rows.filter(r=>r.primary_archetype==='hormonal_shift').length;
+  var metabolic = rows.filter(r=>r.primary_archetype==='metabolic_resistance').length;
+  var compound = rows.filter(r=>r.primary_archetype==='compound_pattern').length;
+
+  document.getElementById('summary').innerHTML =
+    '<div class="scard"><div class="sv" style="color:var(--text)">'+total+'</div><div class="sl">Total</div></div>'+
+    '<div class="scard"><div class="sv" style="color:var(--red)">'+stress+'</div><div class="sl">Stress-Driven</div></div>'+
+    '<div class="scard"><div class="sv" style="color:#a78bfa">'+hormonal+'</div><div class="sl">Hormonal Shift</div></div>'+
+    '<div class="scard"><div class="sv" style="color:var(--warn)">'+metabolic+'</div><div class="sl">Metabolic</div></div>'+
+    '<div class="scard"><div class="sv" style="color:var(--pink)">'+compound+'</div><div class="sl">Compound</div></div>';
+}
+
+function openDetail(id){
+  var r = ALL.find(x=>x.id===id);
+  if(!r) return;
+  var hs = r.hormone_scores||{};
+  var cs = r.cluster_scores||{};
+  var rd = r.readout||{};
+  var archLabel = ARCH_LABEL[r.primary_archetype]||'Unknown';
+  var archClass = ARCH_CLASS[r.primary_archetype]||'b-benign';
+
+  var hormoneBars = HORMONES.map(h=>{
+    var v = hs[h]||0;
+    var pct = v*10;
+    var col = HCOLORS[h];
+    return '<div class="hd-row"><div class="hd-label" style="color:'+col+'">'+h+'</div><div class="hd-track"><div class="hd-fill" style="width:'+pct+'%;background:'+col+'"></div></div><div class="hd-val" style="color:'+col+'">'+v+'</div></div>';
+  }).join('');
+
+  var clusterHtml =
+    '<div class="cluster-card"><div class="cv" style="color:var(--red)">'+(cs.stress||0)+'</div><div class="cl">Stress</div></div>'+
+    '<div class="cluster-card"><div class="cv" style="color:#a78bfa">'+(cs.hormonal_shift||0)+'</div><div class="cl">Hormonal Shift</div></div>'+
+    '<div class="cluster-card"><div class="cv" style="color:var(--warn)">'+(cs.metabolic||0)+'</div><div class="cl">Metabolic</div></div>';
+
+  var flagsHtml = (r.flags||[]).length ? '<div class="flags">'+r.flags.map(f=>'<span class="flag">'+flagLabel(f)+'</span>').join('')+'</div>' : '';
+
+  var readoutHtml = '';
+  if(rd.mirror){
+    readoutHtml += '<div class="sec"><div class="sh">Pattern Readout</div>';
+    if(rd.headline) readoutHtml += '<div style="font-family:var(--disp);font-weight:800;font-size:18px;margin-bottom:6px">'+rd.headline+'</div>';
+    if(rd.secondary) readoutHtml += '<div style="font-size:13px;color:var(--muted);margin-bottom:12px">'+rd.secondary+'</div>';
+    readoutHtml += '<div class="readout-mirror">'+rd.mirror+'</div></div>';
+  }
+
+  var objectionsHtml = '';
+  if(rd.objections && rd.objections.length){
+    objectionsHtml = '<div class="sec"><div class="sh">Why Past Approaches Failed</div><div class="obj-list">'+
+      rd.objections.map(o=>'<div class="obj-card"><div class="ot">'+o.title+'</div><div class="ob">'+o.body+'</div></div>').join('')+
+    '</div></div>';
+  }
+
+  var closerHtml = rd.closer ? '<div class="sec"><div class="sh">Next Step</div><div class="closer-text">'+rd.closer+'</div></div>' : '';
+
+  document.getElementById('modalInner').innerHTML =
+    '<div class="mhead"><div class="mtop"><div><h2>'+r.name+'</h2><div class="msub">'+dateNice(r.completed_at)+(r.email?' · '+r.email:'')+'</div></div><button class="closeX" id="cx">&times;</button></div>'+
+    '<div style="margin-top:10px;display:flex;gap:8px;flex-wrap:wrap"><span class="badge '+archClass+'">'+archLabel+'</span>'+(r.secondary_archetype?'<span class="badge" style="background:var(--surface-2);color:var(--muted);border:1px solid var(--line)">Secondary: '+(ARCH_LABEL[r.secondary_archetype]||'')+'</span>':'')+'</div>'+
+    flagsHtml+'</div>'+
+    '<div class="mbody">'+
+      '<div class="sec"><div class="sh">Cluster Scores</div><div class="cluster-row">'+clusterHtml+'</div></div>'+
+      '<div class="sec"><div class="sh">Hormone Signal Map</div>'+hormoneBars+'</div>'+
+      readoutHtml+
+      objectionsHtml+
+      closerHtml+
+      '<div class="sec"><button class="btn-pdf" onclick="exportPDF()">Download Report</button></div>'+
+    '</div>';
+
+  document.getElementById('cx').onclick = closeDetail;
+  document.getElementById('modal').classList.add('show');
+  document.getElementById('scrim').classList.add('show');
+}
+
+function closeDetail(){ document.getElementById('modal').classList.remove('show'); document.getElementById('scrim').classList.remove('show'); }
+document.getElementById('scrim').onclick = closeDetail;
+document.addEventListener('keydown', e=>{ if(e.key==='Escape') closeDetail(); });
+
+function exportPDF(){
+  var modal = document.getElementById('modalInner');
+  // Clone the drawer content, strip buttons
+  var clone = modal.cloneNode(true);
+  clone.querySelectorAll('.btn-pdf, .closeX').forEach(el=>el.remove());
+
+  var html = '<!doctype html><html><head><meta charset="utf-8"><title>Hormonal Assessment Report</title>'+
+    '<link href="https://fonts.googleapis.com/css2?family=Bricolage+Grotesque:opsz,wght@12..96,500;12..96,700;12..96,800&family=Spline+Sans:wght@400;500;600&display=swap" rel="stylesheet">'+
+    '<style>'+document.querySelector('style').textContent+'</style>'+
+    '<style>body{background:#fff!important;color:#222!important;padding:20px 30px;font-family:var(--body);}'+
+    '.mhead{position:static!important;border-bottom:2px solid #ddd!important;padding:16px 0!important;background:#fff!important;}'+
+    '.mbody{padding:8px 0!important;}'+
+    '.sec{border-color:#ddd!important;}'+
+    '.readout-mirror{background:#f8f8f8!important;border-left-color:#d946ef!important;color:#333!important;}'+
+    '.obj-card{background:#f8f8f8!important;border-color:#ddd!important;}'+
+    '.obj-card .ot{color:#222!important;} .obj-card .ob{color:#555!important;}'+
+    '.cluster-card{background:#f8f8f8!important;border-color:#ddd!important;}'+
+    '.hd-track{background:#eee!important;}'+
+    '.badge{border:1px solid #ccc!important;}'+
+    '.sec .sh{color:#e8742c!important;}'+
+    '.closer-text{color:#4d7a0f!important;}'+
+    '.flags .flag{background:#fff3e0!important;color:#e65100!important;border-color:#ffcc80!important;}'+
+    '*{-webkit-print-color-adjust:exact!important;print-color-adjust:exact!important;}'+
+    '</style></head><body>'+clone.innerHTML+'</body></html>';
+
+  var blob = new Blob([html], {type:'text/html'});
+  var url = URL.createObjectURL(blob);
+  var a = document.createElement('a');
+  a.href = url;
+  a.download = 'assessment-report.html';
+  a.click();
+  URL.revokeObjectURL(url);
+}
+
+[qEl, fA, fG].forEach(el=>el.addEventListener('input', applyFilters));
+document.getElementById('clear').onclick = ()=>{
+  qEl.value=''; fA.value=''; fG.value='';
+  applyFilters();
+};
+
+load();
+
+// Inherit theme
+(function(){
+  var t = localStorage.getItem('rs-theme') || 'dark';
+  document.documentElement.setAttribute('data-theme', t);
+})();
+</script>
+</body>
+</html>

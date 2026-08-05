@@ -285,15 +285,37 @@
       });
   }
 
-  // Hide slots that overlap busy events on location-specific conflict calendars.
+  // Hide slots that overlap busy events on conflict calendars (DB-driven with hardcoded fallback).
   function applyConflictFiltering() {
     var ctx = __bookingCtx;
     if (!ctx.slots || ctx.slots.length === 0) return Promise.resolve();
-    var locConflicts = {
+    // Try DB-driven conflict calendars first, fall back to hardcoded
+    return loadConflictCalendars(ctx).then(function(cals) {
+      if (!cals || cals.length === 0) return;
+      return fetchAndFilterBusy(ctx, cals);
+    }).catch(function(e) {
+      console.warn('Conflict-calendar filtering skipped:', e.message);
+    });
+  }
+
+  function loadConflictCalendars(ctx) {
+    var locFallback = {
       'Colchester': ['icloud:Colchester consults ', 'icloud:Sean'],
       'Ipswich':    ['icloud:Ipswich consults ', 'icloud:Sara ']
     };
-    var cals = locConflicts[ctx.loc];
+    // Try loading from calendar_settings global config
+    return ctx.sb.from('calendar_settings').select('conflict_calendars').eq('id', 'global').maybeSingle()
+      .then(function(res) {
+        if (res.data && Array.isArray(res.data.conflict_calendars) && res.data.conflict_calendars.length > 0) {
+          return res.data.conflict_calendars;
+        }
+        return locFallback[ctx.loc] || [];
+      }).catch(function() {
+        return locFallback[ctx.loc] || [];
+      });
+  }
+
+  function fetchAndFilterBusy(ctx, cals) {
     if (!cals || cals.length === 0) return Promise.resolve();
     var fromIso = new Date().toISOString();
     var lastSlot = ctx.slots[ctx.slots.length - 1];
@@ -376,6 +398,13 @@
   function renderTimes(){
     var ctx = __bookingCtx;
     var slots = ctx.slots.filter(function(s){ return s.date === ctx.selectedDate; });
+    // Hide slots whose start time is less than 2 hours from now (matches booking page logic)
+    var minLeadMs = 2 * 60 * 60 * 1000;
+    var nowMs = Date.now();
+    slots = slots.filter(function(s){
+      var slotStartMs = new Date(s.date + 'T' + s.start_time).getTime();
+      return slotStartMs >= nowMs + minLeadMs;
+    });
     var label = new Date(ctx.selectedDate + 'T12:00:00').toLocaleDateString('en-GB', { weekday: 'short', day: 'numeric', month: 'short' });
     $('#cal-times-label').textContent = label + ' — available times';
 
@@ -401,7 +430,7 @@
     });
   }
 
-  function confirmBooking(){
+  async function confirmBooking(){
     var ctx = __bookingCtx;
     if (!ctx.selectedSlotId) return;
     var slot = ctx.slots.find(function(x){ return x.id === ctx.selectedSlotId; });
@@ -412,13 +441,33 @@
       return;
     }
     var btn = $('#cal-confirm');
-    btn.disabled = true; btn.textContent = 'Booking…';
+    btn.disabled = true; btn.textContent = 'Checking…';
 
     var firstName = (ctx.lead.name || '').split(' ')[0] || ctx.lead.name || '';
     var lastName = (ctx.lead.name || '').split(' ').slice(1).join(' ') || '-';
 
     var phone = ctx.lead.phone || null;
 
+    // Block duplicate booking — check for existing future consult
+    try {
+      var today = new Date().toISOString().slice(0,10);
+      var dupRes = await ctx.sb.from('bookings')
+        .select('id, confirm_token, booking_slots(date, start_time, end_time), location')
+        .eq('email', ctx.lead.email.toLowerCase()).neq('status', 'cancelled')
+        .order('created_at', { ascending: false }).limit(1).maybeSingle();
+      var dup = dupRes && dupRes.data;
+      if (dup && dup.booking_slots && dup.booking_slots.date >= today) {
+        var dSlot = dup.booking_slots;
+        var dDate = new Date(dSlot.date + 'T12:00:00').toLocaleDateString('en-GB', { weekday:'long', day:'numeric', month:'long' });
+        var dTime = dSlot.start_time ? dSlot.start_time.substring(0,5) : '';
+        btn.textContent = 'Already booked';
+        $('#cal-times-label').textContent = "You're already booked for " + dDate + ' at ' + dTime + ' in ' + (dup.location || '') + '.';
+        $('#cal-times').innerHTML = '<div style="text-align:center;margin-top:12px"><a href="/booking/?reschedule=' + dup.id + '&token=' + (dup.confirm_token||'') + '" style="color:#ED5C25;font-weight:700;font-size:14px">Need to reschedule? Click here →</a></div>';
+        return;
+      }
+    } catch(e) { /* proceed if check fails */ }
+
+    btn.textContent = 'Booking…';
     // Fresh slot availability check — prevent double-booking
     var __bookRow = {};
     ctx.sb.from('booking_slots').select('booked_count, max_attendees').eq('id', ctx.selectedSlotId).single().then(function(freshRes){
@@ -449,6 +498,8 @@
       $('#cal-times-label').textContent = "We'll see you on " + when + ' at ' + slot.start_time.substring(0,5) + '.';
       $('#cal-times').innerHTML = '';
 
+      // Backfill location on the lead row (hormonal leads have null location)
+      try { ctx.sb.from('leads').update({ location: ctx.loc }).eq('email', ctx.lead.email).is('location', null); } catch(e){}
       // Queue booking_confirmed sequence via the existing browser helper.
       if (typeof queueSequence === 'function'){
         queueSequence('booking_confirmed', {

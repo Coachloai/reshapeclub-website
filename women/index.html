@@ -791,7 +791,7 @@ textarea.form-input{min-height:100px;resize:vertical}
 <nav class="nav" id="nav">
   <a href="#" class="nav-logo">Re<span>Shape</span></a>
   <div class="nav-right">
-    <button class="btn btn-primary" style="padding:10px 22px;font-size:14px;" onclick="document.getElementById('apply').scrollIntoView({behavior:'smooth'})">Apply Now</button>
+    <button class="btn btn-primary" style="padding:10px 22px;font-size:14px;" onclick="document.getElementById('apply').scrollIntoView({behavior:'smooth'})" data-open="Apply Now" data-waitlist="Join the Waitlist">Apply Now</button>
   </div>
 </nav>
 <!-- ══════════════════════════════════════
@@ -821,7 +821,7 @@ textarea.form-input{min-height:100px;resize:vertical}
           A high-accountability transformation programme for busy men and women who are tired of starting over and ready for a structured system that gets results.
         </p>
         <div class="hero-btns">
-          <a href="#apply" class="btn btn-primary btn-lg">
+          <a href="#apply" class="btn btn-primary btn-lg" data-open="Apply For Your Spot" data-waitlist="Join the Waitlist">
             Apply For Your Spot
             <svg width="16" height="16" fill="none" stroke="currentColor" stroke-width="2.5" viewBox="0 0 24 24"><path d="M5 12h14M12 5l7 7-7 7"/></svg>
           </a>
@@ -905,8 +905,8 @@ textarea.form-input{min-height:100px;resize:vertical}
     <div class="apply-grid">
       <!-- LEFT -->
       <div class="rv">
-        <p class="eyebrow" style="margin-bottom:14px">Apply now</p>
-        <h2 class="h2" style="margin-bottom:16px">Apply for the next ReShape intake</h2>
+        <p class="eyebrow" style="margin-bottom:14px" data-open="Apply now" data-waitlist="Join the waitlist">Apply now</p>
+        <h2 class="h2" style="margin-bottom:16px" data-open="Apply for the next ReShape intake" data-waitlist="Join the waitlist">Apply for the next ReShape intake</h2>
         <p style="font-size:17px;line-height:1.75;color:var(--text2);max-width:420px">
           We only take a limited number of applicants each round to protect coaching quality and results. Complete the short form and we will review whether you are a fit.
         </p>
@@ -994,7 +994,7 @@ textarea.form-input{min-height:100px;resize:vertical}
                 <div class="form-input-group"><label class="form-label" for="lastName">Last Name</label><input type="text" id="lastName" name="last_name" class="form-input" placeholder="Smith" required><div class="form-error-msg">Please enter your last name</div></div>
               </div>
               <div class="form-input-row">
-                <div class="form-input-group"><label class="form-label" for="age">Age</label><input type="number" id="age" name="age" class="form-input" placeholder="28" min="16" max="99" required><div class="form-error-msg">Please enter your age</div></div>
+                <div class="form-input-group"><label class="form-label" for="age">Age</label><input type="number" id="age" name="age" class="form-input" placeholder="28" min="20" max="99" required><div class="form-error-msg">Please enter your age</div></div>
                 <div class="form-input-group"><label class="form-label" for="phone">Phone Number</label><input type="tel" id="phone" name="phone" class="form-input" placeholder="07700 000000" required><div class="form-error-msg">Please enter your phone number</div></div>
               </div>
               <div class="form-input-group"><label class="form-label" for="email">Email</label><input type="email" id="email" name="email" class="form-input" placeholder="john@example.com" required><div class="form-error-msg">Please enter a valid email</div></div>
@@ -1018,11 +1018,16 @@ textarea.form-input{min-height:100px;resize:vertical}
             <!-- STEP 7: Ready -->
             <div class="form-step" data-step="7">
               <div class="form-step-number">Step 7 of 8</div>
-              <div class="form-step-question">Please Read!</div>
-              <p style="color:var(--text2);margin-bottom:24px;font-size:16px;line-height:1.7;">This is a premium transformation programme with a dedicated coach who will be with you every step of the way. This is NOT a standard gym membership.</p>
+              <div class="form-step-question">Before you continue</div>
+              <div style="color:var(--text2);margin-bottom:28px;font-size:15px;line-height:1.75;">
+                <p style="margin:0 0 6px"><strong>1.</strong> Every session is coached. We tell you exactly what to do, every rep, until the result is delivered.</p>
+                <p style="margin:0 0 6px"><strong>2.</strong> Your nutrition is built for your body, your hormones, and your goal — not a generic plan.</p>
+                <p style="margin:0 0 6px"><strong>3.</strong> We deliver accountability, coaching, and structure — not gym access.</p>
+                <p style="margin:0"><strong>4.</strong> A complete transformation in as little as 12 weeks, with pricing tailored to your goal in your consultation.</p>
+              </div>
               <div class="form-options" data-field="ready_for_coach">
-                <label class="form-option"><input type="radio" name="ready_for_coach" value="Yes I'm ready to work with a transformation coach"><span class="form-option-icon">&#128640;</span><span class="form-option-label">Yes, I'm ready to work with a transformation coach</span><span class="form-option-check"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="3"><path d="M5 13l4 4L19 7"/></svg></span></label>
-                <label class="form-option"><input type="radio" name="ready_for_coach" value="No I'm looking for a standard gym"><span class="form-option-icon">&#127947;</span><span class="form-option-label">No, I'm looking for a standard gym</span><span class="form-option-check"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="3"><path d="M5 13l4 4L19 7"/></svg></span></label>
+                <label class="form-option"><input type="radio" name="ready_for_coach" value="Yes I'm ready to work with a transformation coach"><span class="form-option-icon">&#128640;</span><span class="form-option-label">Yes, I'm ready for coached transformation</span><span class="form-option-check"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="3"><path d="M5 13l4 4L19 7"/></svg></span></label>
+                <label class="form-option"><input type="radio" name="ready_for_coach" value="No I'm looking for a standard gym"><span class="form-option-icon">&#127947;</span><span class="form-option-label">No, I'm just looking for gym access</span><span class="form-option-check"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="3"><path d="M5 13l4 4L19 7"/></svg></span></label>
               </div>
               <div class="form-step-question">Would you achieve your goal in...?</div>
               <div class="form-options multi-select" data-field="timeline" style="grid-template-columns:1fr 1fr 1fr;margin-bottom:32px;">
@@ -1056,7 +1061,14 @@ textarea.form-input{min-height:100px;resize:vertical}
             </div>
           </form>
           <div class="form-success" id="formSuccess">
-            <div class="booking-wrap" id="bookingWrap">
+            <!-- WAITLIST MODE: show confirmation + redirect to Instagram -->
+            <div id="waitlistSuccess" data-waitlist-show style="display:none;text-align:center;padding:40px 20px;animation:formFadeIn .5s ease">
+              <div class="form-success-icon" style="margin-bottom:16px"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M5 13l4 4L19 7"/></svg></div>
+              <h3>You're on the waitlist!</h3>
+              <p style="color:var(--text2);margin-bottom:16px">We've added you to the queue and will be in touch as soon as a spot opens. Keep an eye on your WhatsApp and email.</p>
+              <p style="font-size:13px;color:var(--text3)">Redirecting you to our Instagram in <span class="ig-countdown">5</span>s…</p>
+            </div>
+            <div class="booking-wrap" id="bookingWrap" data-waitlist-hide>
               <div class="booking-header">
                 <div class="form-success-icon" style="margin-bottom:16px"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M5 13l4 4L19 7"/></svg></div>
                 <h3>Application Submitted!</h3>
@@ -1472,7 +1484,7 @@ textarea.form-input{min-height:100px;resize:vertical}
 </style>
 <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
 <script src="../api/config.js?v=2"></script>
-<script src="../api/automations.js?v=14"></script>
+<script src="../api/automations.js?v=16"></script>
 <script>
 /* ── SUPABASE INIT ── */
 (function() {
@@ -1655,6 +1667,13 @@ window.addEventListener('scroll',()=>{
           field.classList.add('error');
           if (errorMsg) { errorMsg.textContent = 'Please enter a valid email address'; errorMsg.classList.add('visible'); }
           valid = false;
+        } else if (field.type === 'number' && field.name === 'age') {
+          var ageVal = parseInt(field.value);
+          if (isNaN(ageVal) || ageVal < 20) {
+            field.classList.add('error');
+            if (errorMsg) errorMsg.classList.add('visible');
+            valid = false;
+          }
         } else if (field.type === 'tel') {
           var phone = field.value.trim().replace(/[\s\-\(\)]/g, '');
           if (!/^(\+\d{10,15}|0[1-9]\d{8,10}|44\d{10,11})$/.test(phone)) {
@@ -1699,16 +1718,6 @@ window.addEventListener('scroll',()=>{
           valid = false;
         }
       }
-      var rating = step.querySelector('.form-rating');
-      if (rating && !rating.querySelector('input:checked')) valid = false;
-    }
-    if (stepNum === 7 || stepNum === 8) {
-      step.querySelectorAll('.form-options:not(.multi-select)').forEach(function(group) {
-        if (!group.querySelector('input[type="radio"]:checked')) valid = false;
-      });
-      step.querySelectorAll('.form-options.multi-select').forEach(function(group) {
-        if (!group.querySelector('input:checked')) valid = false;
-      });
     }
     return valid;
   }
@@ -1716,13 +1725,6 @@ window.addEventListener('scroll',()=>{
   form.addEventListener('submit', async function(e) {
     e.preventDefault();
     var formData = new FormData(form);
-    var reqRadios = ['gender','looking_for','reason','coachability','ready_for_coach','willing_to_invest','location'];
-    for (var ri = 0; ri < reqRadios.length; ri++) {
-      if (!formData.get(reqRadios[ri])) { alert('Please complete all steps before submitting.'); return; }
-    }
-    if (!formData.get('first_name') || !formData.get('last_name') || !formData.get('email') || !formData.get('phone')) { alert('Please fill in all your contact details.'); return; }
-    if (!formData.get('big_goal')) { alert('Please tell us about your goal.'); return; }
-    if (!formData.get('importance')) { alert('Please rate how important this goal is.'); return; }
     var data = {};
     formData.forEach(function(value, key) {
       if (data[key]) {
@@ -1760,11 +1762,16 @@ window.addEventListener('scroll',()=>{
     console.log(JSON.stringify(leadData, null, 2));
     try {
       if (typeof window.__supabaseClient !== 'undefined') {
-        var result = await window.__supabaseClient.from('leads').insert([leadData]);
-        if (result.error) {
-          console.error('Supabase error:', result.error.message);
-        } else {
-          console.log('Lead saved to database successfully');
+        if (window.__leadSubmitted) { console.log('Duplicate submit blocked'); return; }
+        window.__leadSubmitted = true;
+        {
+          var result = await window.__supabaseClient.from('leads').insert([leadData]);
+          if (result.error) {
+            console.error('Supabase error:', result.error.message);
+            window.__leadSubmitted = false;
+          } else {
+            console.log('Lead saved to database successfully');
+          }
         }
       } else {
         console.warn('Supabase not configured — lead logged to console only');
@@ -1799,7 +1806,8 @@ window.addEventListener('scroll',()=>{
     else selectBookingLoc('Ipswich');
     /* ── Queue nurture sequence ── */
     if (typeof queueSequence === 'function' && window.__supabaseClient) {
-      queueSequence('form_submitted', leadData, null, window.__supabaseClient);
+      var seqName = window.__waitlistEnabled ? 'waitlist_joined' : 'form_submitted';
+      queueSequence(seqName, leadData, null, window.__supabaseClient);
     }
   });
 
@@ -1919,12 +1927,37 @@ function selectBookingTime(slotId) {
   document.getElementById('bookingConfirmBtn').disabled = false;
 }
 
+var _bookingInFlight = false;
 async function confirmBooking() {
+  if (_bookingInFlight) return;
   var btn = document.getElementById('bookingConfirmBtn');
-  btn.disabled = true; btn.textContent = 'Booking...';
+  btn.disabled = true; btn.textContent = 'Checking…';
+  _bookingInFlight = true;
   var lead = window.__bookingLead || {};
   try {
     if (typeof window.__supabaseClient !== 'undefined') {
+      // Block duplicate booking
+      var today = new Date().toISOString().slice(0,10);
+      var dupRes = await window.__supabaseClient.from('bookings')
+        .select('id, confirm_token, booking_slots(date, start_time, end_time), location')
+        .eq('email', (lead.email||'').toLowerCase()).neq('status', 'cancelled')
+        .order('created_at', { ascending: false }).limit(1).maybeSingle();
+      var dup = dupRes && dupRes.data;
+      if (dup && dup.booking_slots && dup.booking_slots.date >= today) {
+        var dSlot = dup.booking_slots;
+        var dDate = new Date(dSlot.date + 'T12:00:00').toLocaleDateString('en-GB', { weekday:'long', day:'numeric', month:'long' });
+        var dTime = dSlot.start_time ? dSlot.start_time.substring(0,5) : '';
+        btn.textContent = 'Already booked';
+        document.getElementById('bookingWrap').style.display = 'none';
+        document.getElementById('bookingDone').style.display = 'block';
+        document.getElementById('bookingDoneDetail').innerHTML =
+          '<div class="booking-done-row"><span>Existing booking</span><span>' + dDate + ' at ' + dTime + '</span></div>' +
+          '<div class="booking-done-row"><span>Location</span><span>' + (dup.location||'') + '</span></div>' +
+          '<div style="text-align:center;margin-top:12px"><a href="/booking/?reschedule=' + dup.id + '&token=' + (dup.confirm_token||'') + '" style="color:#ED5C25;font-weight:700;font-size:14px">Need to reschedule? Click here →</a></div>';
+        _bookingInFlight = false;
+        return;
+      }
+      btn.textContent = 'Booking...';
       var __bookRes = await window.__supabaseClient.from('bookings').insert([{ slot_id: __selectedSlotId, first_name: lead.first_name || '', last_name: lead.last_name || '', email: lead.email || '', phone: lead.phone || '', location: __selectedLoc || '' }]).select('id, confirm_token').single();
       var __bookRow = (__bookRes && __bookRes.data) || {};
       var slot = __bookingSlots.find(function(s) { return s.id === __selectedSlotId; });
@@ -1958,7 +1991,7 @@ async function confirmBooking() {
         queueSequence('booking_confirmed', lead, bookingData, window.__supabaseClient);
       }
     }
-  } catch (e) { console.error('Booking error:', e); btn.disabled = false; btn.textContent = 'Book My Visit'; }
+  } catch (e) { _bookingInFlight = false; console.error('Booking error:', e); btn.disabled = false; btn.textContent = 'Book My Visit'; }
 }
 
 function skipBooking() {
@@ -1966,5 +1999,6 @@ function skipBooking() {
   document.getElementById('bookingSkipped').style.display = 'block';
 }
 </script>
+<script src="../api/waitlist-mode.js?v=2"></script>
 </body>
 </html>

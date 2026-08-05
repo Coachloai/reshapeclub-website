@@ -20,10 +20,14 @@ export type Readout = {
 };
 
 const ARCHETYPE_LABEL: Record<string, string> = {
-  stress_driven_plateau: "Stress-Driven Plateau",
-  hormonal_shift:        "Hormonal Shift Pattern",
-  metabolic_resistance:  "Metabolic Resistance Pattern",
-  compound_pattern:      "Compound Pattern",
+  stress_driven_plateau:     "Stress-Driven Plateau",
+  hormonal_shift:            "Hormonal Shift Pattern",
+  metabolic_resistance:      "Metabolic Resistance Pattern",
+  compound_pattern:          "Compound Pattern",
+  cortisol_dominant_decline: "Cortisol-Dominant Decline",
+  testosterone_decline:      "Testosterone Decline Pattern",
+  metabolic_resistance_men:  "Metabolic Resistance Pattern",
+  compound_pattern_men:      "Compound Pattern",
 };
 
 // ── Public entry point ────────────────────────────────────────────────
@@ -31,14 +35,24 @@ export function buildReadout(
   score: ScoringResult,
   answers: Record<string, string>,
 ): Readout {
+  const mens = Object.keys(answers).some((k) => k.startsWith("MQ"));
+
   // Catch the all-zero / mostly-benign case before forcing an archetype script.
   if (isBenign(score)) {
-    return benignReadout(answers);
+    return mens ? benignReadoutMen(answers) : benignReadout(answers);
   }
 
   const primary   = score.primary_archetype;
   const headline  = `You're a ${ARCHETYPE_LABEL[primary]}.`;
   const secondary = secondaryLine(score);
+
+  if (mens) {
+    const mirror     = buildMirrorMen(score, answers);
+    const objections = buildObjectionsMen(score, answers);
+    const closer     = buildCloserMen(answers);
+    return { headline, secondary, mirror, objections, closer };
+  }
+
   const mirror    = buildMirror(score, answers);
   const objections = buildObjections(score, answers);
   const closer    = buildCloser(answers);
@@ -594,5 +608,347 @@ function buildCloser(answers: Record<string, string>): string {
       return "On your call we'll cut the noise and build the smallest set of changes that hold long-term — given your specific pattern.";
     default:
       return "On your call we'll turn this map into the next 12 weeks of work — whether you choose to work with us or not.";
+  }
+}
+
+// ══════════════════════════════════════════════════════════════════════
+// MEN'S READOUT FUNCTIONS
+// ══════════════════════════════════════════════════════════════════════
+
+function benignReadoutMen(answers: Record<string, string>): Readout {
+  return {
+    headline: "Your pattern is mostly clear.",
+    secondary: null,
+    mirror:
+      "<p>Based on what you shared, none of the major hormone-driven patterns " +
+      "are showing up strongly. Your stress, testosterone, GH, and insulin signals " +
+      "all read in a relatively quiet range.</p>" +
+      "<p>That doesn't mean there's nothing to work on — it means the standard " +
+      "'low-T' or 'adrenal fatigue' scripts don't apply to you. On a consult we'd " +
+      "find the actual friction points, not force-fit a hormonal narrative.</p>",
+    objections: [
+      {
+        title: "If you're plateauing, it's tactical not hormonal",
+        body: "When the hormone signals are quiet, plateau usually comes from training programming, protein timing, or sleep architecture — not endocrine dysfunction.",
+      },
+      {
+        title: "You probably don't need a full hormone panel yet",
+        body: "We only recommend bloods when the signal map points there. Yours doesn't — so we'd save you the spend.",
+      },
+      {
+        title: "A generic plan still won't cut it",
+        body: "A clear screen doesn't mean a clear plan. The 45-minute consult is where we'd identify the specific levers that move the needle for you.",
+      },
+    ],
+    closer: buildCloserMen(answers),
+  };
+}
+
+function buildMirrorMen(
+  score: ScoringResult,
+  answers: Record<string, string>,
+): string {
+  switch (score.primary_archetype) {
+    case "cortisol_dominant_decline":
+      return mirrorCortisolMen(score, answers);
+    case "testosterone_decline":
+      return mirrorTestosteroneMen(score, answers);
+    case "metabolic_resistance_men":
+      return mirrorMetabolicMen(score, answers);
+    case "compound_pattern_men":
+      return mirrorCompoundMen(score, answers);
+    default:
+      return mirrorCortisolMen(score, answers);
+  }
+}
+
+function mirrorCortisolMen(
+  score: ScoringResult,
+  answers: Record<string, string>,
+): string {
+  const phrases: string[] = [];
+
+  if (answers.MQ5 === "relentless")
+    phrases.push("your stress has been <strong>relentless</strong> for months");
+  else if (answers.MQ5 === "high_managed")
+    phrases.push("you're managing high stress but <strong>running on reserves</strong>");
+
+  if (answers.MQ4 === "wake_3am")
+    phrases.push("you're waking at <strong>3–4am</strong> with a racing mind");
+  else if (answers.MQ4 === "wired_cant_sleep")
+    phrases.push("you're wired at night and <strong>can't switch off</strong>");
+
+  if (answers.MQ3 === "belly")
+    phrases.push("fat is locking onto your <strong>midsection</strong>");
+
+  if (answers.MQ2 === "crashed_by_2pm")
+    phrases.push("your energy <strong>crashes by 2pm</strong>");
+
+  const stitched = joinPhrases(phrases);
+  const para1 = stitched
+    ? `<p>Based on what you shared, ${stitched}. That's not a coincidence — it's a textbook <strong>cortisol-dominant pattern</strong>.</p>`
+    : `<p>Based on what you shared, the strongest signals you're sending are stress-driven — your nervous system is the lever, not the training.</p>`;
+
+  const para2 =
+    `<p>What's likely happening: chronic stress is keeping your <strong>cortisol</strong> elevated around the clock. That suppresses testosterone production, fragments deep sleep (killing GH output), drives belly fat storage, and leaves you running on adrenaline and caffeine. Your body isn't failing — it's in survival mode.</p>`;
+
+  return para1 + para2;
+}
+
+function mirrorTestosteroneMen(
+  score: ScoringResult,
+  answers: Record<string, string>,
+): string {
+  const phrases: string[] = [];
+
+  if (answers.MQ9 === "nonexistent")
+    phrases.push("your <strong>libido has basically disappeared</strong>");
+  else if (answers.MQ9 === "noticeably_lower")
+    phrases.push("your <strong>libido is noticeably lower</strong> than it was");
+
+  if (answers.MQ7 === "gone")
+    phrases.push("the <strong>competitive drive</strong> you used to have is gone");
+  else if (answers.MQ7 === "dulled")
+    phrases.push("your motivation and edge have <strong>dulled</strong>");
+
+  if (answers.MQ6 === "regressing")
+    phrases.push("you're <strong>getting weaker</strong> despite training");
+  else if (answers.MQ6 === "going_no_results")
+    phrases.push("the gym <strong>isn't producing results</strong> anymore");
+
+  if (answers.MQ8 === "days")
+    phrases.push("recovery takes <strong>3+ days</strong> instead of hours");
+
+  const stitched = joinPhrases(phrases);
+  const para1 = stitched
+    ? `<p>Based on what you shared, ${stitched}. This is the classic <strong>testosterone decline pattern</strong> — and it's not just age.</p>`
+    : `<p>Based on what you shared, the strongest signals are coming from your anabolic hormones — testosterone and growth hormone are both running low.</p>`;
+
+  const para2 =
+    `<p>What's likely happening: <strong>testosterone</strong> is the loudest signal — declining output is pulling your drive, muscle response, libido, and recovery down together. Growth hormone is following it, which is why sleep doesn't restore you the way it used to. This isn't inevitable ageing. It's a pattern that responds to the right protocol.</p>`;
+
+  return para1 + para2;
+}
+
+function mirrorMetabolicMen(
+  score: ScoringResult,
+  answers: Record<string, string>,
+): string {
+  const phrases: string[] = [];
+
+  if (answers.MQ10 === "food_coma")
+    phrases.push("you're hitting a <strong>food coma</strong> after most meals");
+  else if (answers.MQ10 === "wired")
+    phrases.push("you spike after eating then <strong>crash hard</strong>");
+
+  if (answers.MQ3 === "belly")
+    phrases.push("fat is locked around your <strong>midsection</strong>");
+  else if (answers.MQ3 === "all_over")
+    phrases.push("you're <strong>thickening everywhere</strong> gradually");
+
+  if (answers.MQ2 === "crashed_by_2pm")
+    phrases.push("your energy <strong>crashes mid-afternoon</strong>");
+
+  const stitched = joinPhrases(phrases);
+  const para1 = stitched
+    ? `<p>Based on what you shared, ${stitched}. Your body has stopped responding to insulin the way it should — that's the <strong>metabolic resistance</strong> signature.</p>`
+    : `<p>Based on what you shared, your metabolic signalling has shifted — insulin isn't doing its job efficiently, and your body composition is paying the price.</p>`;
+
+  const para2 =
+    `<p>What's likely happening: <strong>insulin resistance</strong> is the loudest signal — your cells aren't reading the message clearly, so blood sugar swings drive crashes, belly storage, and fatigue. On top of that, chronically elevated insulin suppresses both testosterone and GH, creating a compounding loop. The fix isn't eating less — it's changing the signal.</p>`;
+
+  return para1 + para2;
+}
+
+function mirrorCompoundMen(
+  score: ScoringResult,
+  answers: Record<string, string>,
+): string {
+  const phrases: string[] = [];
+  if (answers.MQ3 === "belly") phrases.push("belly fat that won't shift");
+  if (answers.MQ4 === "wake_3am" || answers.MQ4 === "wired_cant_sleep") phrases.push("broken sleep");
+  if (answers.MQ10 === "food_coma" || answers.MQ10 === "wired") phrases.push("post-meal crashes");
+  if (answers.MQ9 === "nonexistent" || answers.MQ9 === "noticeably_lower") phrases.push("declining libido");
+  if (answers.MQ7 === "gone" || answers.MQ7 === "dulled") phrases.push("lost drive");
+  if (answers.MQ6 === "regressing") phrases.push("declining performance");
+
+  const stitched = joinPhrases(phrases) || "cortisol, testosterone and metabolic signals all firing at once";
+
+  const para1 =
+    `<p>Based on what you shared, your symptoms span <strong>all three patterns</strong> — ${stitched}. About <strong>1 in 8 men</strong> score this way. It almost always means the same thing: the systems that should be working independently have started feeding off each other.</p>`;
+
+  const para2 =
+    `<p>What's likely happening: when patterns compound, the <strong>order of intervention matters more than the intensity</strong>. Fix all three at once and nothing moves. For your specific scores, this is also the pattern where bloodwork usually pays for itself before we set the plan — to confirm which lever to pull first.</p>`;
+
+  return para1 + para2;
+}
+
+function buildObjectionsMen(
+  score: ScoringResult,
+  answers: Record<string, string>,
+): Objection[] {
+  const tried = parseMQ11(answers.MQ11);
+  const base = baseObjectionsMen(score.primary_archetype);
+
+  const extras: Objection[] = [];
+  for (const t of tried) {
+    const o = mq11Objection(t, score.primary_archetype);
+    if (o && !extras.some((x) => x.title === o.title)) extras.push(o);
+  }
+
+  if (extras.length === 0) return base;
+  const result = base.slice(0, 2);
+  result.push(extras[0]);
+  if (extras.length > 1) result.push(extras[1]);
+  else result.push(base[2]);
+  return result;
+}
+
+function parseMQ11(raw: string | undefined): string[] {
+  if (!raw) return [];
+  return raw.split(",").map((s) => s.trim()).filter(Boolean);
+}
+
+function baseObjectionsMen(primary: string): Objection[] {
+  switch (primary) {
+    case "cortisol_dominant_decline":
+      return [
+        {
+          title: "Training harder made it worse",
+          body: "More volume and intensity spikes cortisol further. For your pattern, you need structured strength work with managed recovery — not more punishment.",
+        },
+        {
+          title: "Your sleep is doing more damage than your diet",
+          body: "The 3am wake-ups are crushing your GH and testosterone recovery window. Sleep architecture is the first lever, not the last.",
+        },
+        {
+          title: "Caffeine was masking the signal",
+          body: "Coffee at 2pm isn't energy — it's borrowed adrenaline layered on top of a cortisol system that's already redlining.",
+        },
+      ];
+    case "testosterone_decline":
+      return [
+        {
+          title: "Supplements didn't move the needle",
+          body: "Ashwagandha and ZMA work on the margins. Your pattern needs the fundamentals fixed first — sleep, protein, training load, and stress management.",
+        },
+        {
+          title: "More gym time wasn't the answer",
+          body: "Overtraining on declining testosterone accelerates the decline. Smarter programming with proper recovery is what shifts the signal.",
+        },
+        {
+          title: "This isn't just 'getting older'",
+          body: "Age-related decline is real but it's 1–2% per year. What you're describing is a pattern-driven drop that responds to protocol changes.",
+        },
+      ];
+    case "metabolic_resistance_men":
+      return [
+        {
+          title: "Calorie cutting hit a wall",
+          body: "Deficits work until insulin resistance takes over. Then eating less just lowers your metabolic rate and makes the gut harder to shift.",
+        },
+        {
+          title: "Cardio wasn't the lever",
+          body: "Running and cycling burn calories but don't fix insulin sensitivity. Resistance training is the metabolic reset your body needs.",
+        },
+        {
+          title: "The gut fat is a symptom, not the problem",
+          body: "Belly storage is insulin's signature. Until you fix the signalling, the fat stays regardless of the deficit.",
+        },
+      ];
+    case "compound_pattern_men":
+      return [
+        {
+          title: "Fixing everything at once failed",
+          body: "When you attacked all fronts simultaneously, nothing held. The compound pattern needs sequencing — one lever at a time, in the right order.",
+        },
+        {
+          title: "Generic plans treated the symptom you noticed most",
+          body: "Your pattern has three layers. Most programmes only address the most visible one and ignore what's underneath.",
+        },
+        {
+          title: "You probably need bloodwork",
+          body: "This is the one pattern where a full panel usually pays for itself — testosterone, cortisol, fasting insulin, and thyroid — to confirm which lever to pull first.",
+        },
+      ];
+  }
+  return [];
+}
+
+function mq11Objection(tried: string, primary: string): Objection | null {
+  if (tried === "trt") {
+    return {
+      title: "TRT without fixing the pattern is a band-aid",
+      body: "Testosterone replacement can help — but if cortisol, sleep, and insulin are still broken, you're masking the signal without fixing the source. We'd want the full picture first.",
+    };
+  }
+  if (tried === "supplements") {
+    return {
+      title: "Test boosters work on the margins, not the root",
+      body: "Ashwagandha, ZMA, and tongkat ali can nudge levels 5–10%. Your pattern needs the 50% fix: sleep, stress, training load, and nutrition fundamentals.",
+    };
+  }
+  if (tried === "calorie_cutting") {
+    if (primary === "cortisol_dominant_decline") {
+      return {
+        title: "Calorie cutting raised your cortisol further",
+        body: "Restriction is a stressor. For a cortisol-dominant pattern, eating less pushes cortisol higher — your body holds fat harder, not softer.",
+      };
+    }
+    return {
+      title: "The deficit was right, the signal was wrong",
+      body: "The maths was correct. The problem is your body stopped obeying the equation — that's a signalling issue, not a discipline one.",
+    };
+  }
+  if (tried === "keto_carnivore") {
+    return {
+      title: "Keto bought time, not a solution",
+      body: "Low-carb often delivers 4–6 weeks of wins. Then the underlying resistance reasserts itself and the plateau feels worse than before.",
+    };
+  }
+  if (tried === "fasting") {
+    if (primary === "cortisol_dominant_decline") {
+      return {
+        title: "Fasting spiked the cortisol you already had too much of",
+        body: "Skipping meals raises morning cortisol — fasting on a cortisol-dominant pattern pours fuel on the fire.",
+      };
+    }
+    return {
+      title: "Fasting didn't fix the signalling",
+      body: "It compressed eating windows but didn't change what your body was doing with the fuel. That's why the early wins flattened.",
+    };
+  }
+  if (tried === "gym_more") {
+    if (primary === "testosterone_decline") {
+      return {
+        title: "More volume on declining testosterone backfired",
+        body: "Extra sessions without recovery capacity just accelerate the decline. Smarter, not harder, is the fix.",
+      };
+    }
+    return null;
+  }
+  if (tried === "personal_trainer") {
+    return {
+      title: "The trainer programmed for a younger version of you",
+      body: "Most PTs default to hypertrophy splits that assume your hormones are cooperating. Yours aren't — the programming needs to match the pattern.",
+    };
+  }
+  return null;
+}
+
+function buildCloserMen(answers: Record<string, string>): string {
+  switch (answers.MQ12) {
+    case "lose_gut":
+      return "On your consult we'll map the fat-loss protocol that works with your hormone pattern — not against it.";
+    case "energy_back":
+      return "On your consult we'll start with the energy fix — what's draining it, what shifts first, and what you should feel within two weeks.";
+    case "build_strength":
+      return "On your consult we'll build the strength protocol that matches your recovery capacity and hormone status — not a generic PPL split.";
+    case "sleep_recover":
+      return "On your consult we'll fix the sleep architecture first — because until recovery works, nothing else holds.";
+    case "all_of_it":
+      return "On your consult we'll sequence the full reset — which lever first, which second, and what the next 12 weeks look like.";
+    default:
+      return "On your consult we'll turn this pattern map into the next 12 weeks of work — whether you choose to work with us or not.";
   }
 }

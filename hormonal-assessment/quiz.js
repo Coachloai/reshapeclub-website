@@ -1,6 +1,6 @@
-/* ReShape Hormonal Assessment — quiz controller.
-   Renders Q1–Q14 into the .assess-question card structure from the
-   approved reference. Posts each answer to the assessment-session
+/* ReShape Hormonal Assessment — quiz controller v3.
+   Renders Q1–Q14 with icons, auto-advance on single-select,
+   segmented progress bar. Posts each answer to the assessment-session
    Edge Function. No scoring or archetype logic in the browser.
 */
 (function(){
@@ -22,6 +22,9 @@
     intent: null
   };
 
+  // Track in-flight answer submissions so we can await them before scoring.
+  var pendingSubmits = [];
+
   function $(s, root){ return (root || document).querySelector(s); }
   function utm(name){ try { return new URLSearchParams(window.location.search).get(name); } catch(e){ return null; } }
 
@@ -42,14 +45,25 @@
   function progressUpdate(){
     var done = state.queueIdx;
     var total = state.displayQuestions.length || 15;
-    var pct = Math.min(100, Math.round((done / total) * 100));
-    var fill = $('#bar-fill');
-    if (fill) fill.style.width = pct + '%';
+
+    // Segmented progress bar
+    var bar = $('#progress-bar');
+    if (bar) {
+      var segs = '';
+      for (var i = 0; i < total; i++) {
+        var cls = 'progress-segment';
+        if (i < done) cls += ' done';
+        else if (i === done) cls += ' active';
+        segs += '<div class="' + cls + '"></div>';
+      }
+      bar.innerHTML = segs;
+    }
+
     var text = $('#progress-text');
     if (text){
       var qNum = Math.min(state.queueIdx + 1, total);
       var minsLeft = Math.max(1, Math.ceil((total - done) * 0.18));
-      text.innerHTML = '<strong>Question ' + qNum + '</strong> of ' + total + ' · about ' + minsLeft + ' min remaining';
+      text.innerHTML = '<strong>Question ' + qNum + '</strong> of ' + total + ' &middot; about ' + minsLeft + ' min remaining';
     }
   }
 
@@ -59,7 +73,9 @@
         if (q.skipValue && !state.answers[q.id]){
           state.answers[q.id] = q.skipValue;
           sessionStorage.setItem(ANSWERS_KEY, JSON.stringify(state.answers));
-          fetchEdge(SESSION_FN, { action: 'submit_answer', session_id: state.sessionId, question_id: q.id, answer_value: q.skipValue });
+          var sp = fetchEdge(SESSION_FN, { action: 'submit_answer', session_id: state.sessionId, question_id: q.id, answer_value: q.skipValue })
+            .catch(function(){});
+          pendingSubmits.push(sp);
         }
         return false;
       }
@@ -72,16 +88,25 @@
     }
   }
 
+  function submitAnswer(q, value){
+    state.answers[q.id] = value;
+    sessionStorage.setItem(ANSWERS_KEY, JSON.stringify(state.answers));
+    var p = fetchEdge(SESSION_FN, { action: 'submit_answer', session_id: state.sessionId, question_id: q.id, answer_value: value })
+      .catch(function(){ /* network error — will retry before scoring */ });
+    pendingSubmits.push(p);
+    state.queueIdx += 1;
+    buildQueue();
+    renderQuestion();
+  }
+
   function renderQuestion(){
     progressUpdate();
     var q = state.displayQuestions[state.queueIdx];
     if (!q) {
-      // Out of questions. Capture investment intent before scoring.
       if (!state.intent) return renderIntent();
       return submitFinal();
     }
 
-    // Email gate fires the moment we move past the gate question.
     var gateIdx = state.displayQuestions.findIndex(function(qq){ return qq.id === window.RESHAPE_GATE_AFTER; });
     if (!state.emailCaptured && state.queueIdx > gateIdx) {
       return renderGate();
@@ -93,24 +118,27 @@
     var multiSel = (q.type === 'multi' && existing) ? existing.split(',') : [];
     state.pickedMulti = multiSel.slice();
 
+    var getIcon = window.RESHAPE_GET_ICON;
     var optsHtml = q.options.map(function(opt){
       var isSel = q.type === 'multi'
         ? multiSel.indexOf(opt.value) > -1
         : existing === opt.value;
+      var iconSvg = getIcon(q.id, opt.value);
       return ''
         + '<button class="q-opt' + (isSel ? ' selected' : '') + '" data-value="' + opt.value + '">'
-        +   '<div class="q-opt-marker' + (q.type === 'multi' ? ' square' : '') + '"></div>'
-        +   '<div>'
+        +   '<div class="q-opt-icon">' + iconSvg + '</div>'
+        +   '<div class="q-opt-text">'
         +     '<div class="q-opt-title">' + opt.label + '</div>'
         +     (opt.sub ? '<div class="q-opt-sub">' + opt.sub + '</div>' : '')
         +   '</div>'
+        +   '<div class="q-opt-marker' + (q.type === 'multi' ? ' square' : '') + '"></div>'
         + '</button>';
     }).join('');
 
     var hasSelection = q.type === 'multi' ? multiSel.length > 0 : !!existing;
     var html = ''
       + '<div class="assess-question">'
-      +   '<div class="q-counter">' + pad(idx) + ' / ' + pad(total) + ' · ' + (q.category || '') + '</div>'
+      +   '<div class="q-counter">Step ' + pad(idx) + ' of ' + pad(total) + ' &middot; ' + (q.category || '') + '</div>'
       +   '<h2 class="q-title">' + q.text + '</h2>'
       +   (q.why ? '<p class="q-why">' + q.why + '</p>' : '')
       +   '<div class="q-options">' + optsHtml + '</div>'
@@ -118,7 +146,7 @@
       +     (state.queueIdx > 0
               ? '<button class="q-back" id="q-back-btn"><svg width="14" height="14" viewBox="0 0 24 24" fill="none"><path d="M19 12H5M11 18l-6-6 6-6" stroke="currentColor" stroke-width="2" stroke-linecap="round"/></svg> Back</button>'
               : '<span></span>')
-      +     '<button class="q-next" id="q-next-btn"' + (hasSelection ? '' : ' disabled') + '>'
+      +     '<button class="q-next" id="q-next-btn"' + (hasSelection ? '' : ' disabled') + (q.type !== 'multi' ? ' style="display:none"' : '') + '>'
       +       'Continue'
       +       '<svg width="14" height="14" viewBox="0 0 24 24" fill="none"><path d="M5 12h14M13 6l6 6-6 6" stroke="currentColor" stroke-width="2" stroke-linecap="round"/></svg>'
       +     '</button>'
@@ -140,26 +168,17 @@
         } else {
           sec.querySelectorAll('.q-opt').forEach(function(o){ o.classList.remove('selected'); });
           btn.classList.add('selected');
-          $('#q-next-btn').disabled = false;
+          // Auto-advance after brief highlight
+          setTimeout(function(){ submitAnswer(q, btn.getAttribute('data-value')); }, 250);
         }
       });
     });
     var nextBtn = $('#q-next-btn');
     nextBtn.addEventListener('click', function(){
-      var value;
       if (q.type === 'multi'){
         if (state.pickedMulti.length === 0) return;
-        value = state.pickedMulti.join(',');
-      } else {
-        var sel = sec.querySelector('.q-opt.selected');
-        if (!sel) return;
-        value = sel.getAttribute('data-value');
+        submitAnswer(q, state.pickedMulti.join(','));
       }
-      state.answers[q.id] = value;
-      sessionStorage.setItem(ANSWERS_KEY, JSON.stringify(state.answers));
-      fetchEdge(SESSION_FN, { action: 'submit_answer', session_id: state.sessionId, question_id: q.id, answer_value: value });
-      state.queueIdx += 1;
-      renderQuestion();
     });
     var backBtn = $('#q-back-btn');
     if (backBtn) backBtn.addEventListener('click', function(){
@@ -172,18 +191,18 @@
   function renderGate(){
     progressUpdate();
     var html = ''
-      + '<div class="assess-question" style="max-width:560px">'
+      + '<div class="assess-question" style="max-width:520px">'
       +   '<div class="gate">'
-      +     '<div class="gate-icon">✦</div>'
+      +     '<div class="gate-icon"><svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round"><path d="M4 4h16c1.1 0 2 .9 2 2v12c0 1.1-.9 2-2 2H4c-1.1 0-2-.9-2-2V6c0-1.1.9-2 2-2z"/><path d="M22 6l-10 7L2 6"/></svg></div>'
       +     '<h3>Where should we send your full pattern report?</h3>'
-      +     "<p>You're 40% through. We'll email your archetype reveal, the protocol guidance, and your free in-person consult link the moment you finish.</p>"
+      +     "<p>You're 40% through. We'll email your archetype reveal, protocol guidance, and free consult link the moment you finish.</p>"
       +     '<div class="gate-fields">'
       +       '<input type="text" id="gate-name" placeholder="First name" autocomplete="given-name">'
       +       '<input type="email" id="gate-email" placeholder="you@example.com" autocomplete="email">'
       +       '<input type="tel" id="gate-phone" placeholder="07700 000000" autocomplete="tel">'
-      +       '<input type="number" id="gate-age" placeholder="Age" min="18" max="99" inputmode="numeric">'
+      +       '<input type="number" id="gate-age" placeholder="Age" min="20" max="99" inputmode="numeric">'
       +     '</div>'
-      +     '<button class="cal-confirm" id="gate-submit" style="background:var(--terracotta)">Continue</button>'
+      +     '<button class="gate-btn" id="gate-submit">Continue</button>'
       +     '<label class="gate-consent"><input type="checkbox" id="gate-consent" checked><span>I\'d like Jaime to send me my pattern report and follow-up emails. Unsubscribe anytime.</span></label>'
       +     '<div class="gate-error" id="gate-error"></div>'
       +     '<div class="gate-disclaimer">We never share your data. Encrypted in transit and at rest.</div>'
@@ -193,7 +212,6 @@
     var root = $('#screen-root');
     root.innerHTML = html;
 
-    // Pre-fill if the user is resuming a session.
     var savedName  = sessionStorage.getItem('reshape_hormonal_name');
     var savedEmail = sessionStorage.getItem('reshape_hormonal_email');
     var savedPhone = sessionStorage.getItem('reshape_hormonal_phone');
@@ -218,13 +236,13 @@
       if (!phoneCleaned || !/^(\+\d{10,15}|0[1-9]\d{8,10}|44\d{10,11})$/.test(phoneCleaned)) {
         return err.textContent = 'Please enter a valid phone number (e.g. 07700 000000).';
       }
-      if (!ageStr || isNaN(age) || age < 18 || age > 99) {
-        return err.textContent = 'Please enter your age (18–99).';
+      if (!ageStr || isNaN(age) || age < 20 || age > 99) {
+        return err.textContent = 'Please enter a valid age.';
       }
       if (!consent) return err.textContent = 'Please tick the consent box to continue.';
 
       var btn = $('#gate-submit');
-      btn.disabled = true; btn.textContent = 'Sending…';
+      btn.disabled = true; btn.textContent = 'Sending\u2026';
       fetchEdge(SESSION_FN, {
         action: 'capture_email',
         session_id: state.sessionId,
@@ -252,18 +270,18 @@
   function renderIntent(){
     var root = $('#screen-root');
     root.innerHTML = ''
-      + '<div class="assess-question" style="max-width:560px">'
+      + '<div class="assess-question" style="max-width:520px">'
       +   '<div class="gate">'
-      +     '<div class="gate-icon">✦</div>'
+      +     '<div class="gate-icon"><svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round"><path d="M22 11.08V12a10 10 0 11-5.93-9.14"/><path d="M22 4L12 14.01l-3-3"/></svg></div>'
       +     '<h3>One last thing before your pattern report</h3>'
       +     '<p>If your assessment reveals a clear pattern, how ready are you to actually work on it?</p>'
       +     '<div class="form-options" id="intent-options" style="margin-top:1.25rem">'
-      +       '<label class="form-option"><input type="radio" name="intent" value="ready_now"><span><strong>Ready now</strong> · I want to start as soon as I find the right fit</span></label>'
-      +       '<label class="form-option"><input type="radio" name="intent" value="within_3m"><span><strong>Within 3 months</strong> · I want progress this quarter</span></label>'
-      +       '<label class="form-option"><input type="radio" name="intent" value="exploring"><span><strong>Just exploring</strong> · Gathering information for now</span></label>'
-      +       '<label class="form-option"><input type="radio" name="intent" value="not_budgeting"><span><strong>Not budgeting for coaching</strong> · Free resources only</span></label>'
+      +       '<label class="form-option"><input type="radio" name="intent" value="ready_now"><span><strong>Ready now</strong> &middot; I want to start as soon as I find the right fit</span></label>'
+      +       '<label class="form-option"><input type="radio" name="intent" value="within_3m"><span><strong>Within 3 months</strong> &middot; I want progress this quarter</span></label>'
+      +       '<label class="form-option"><input type="radio" name="intent" value="exploring"><span><strong>Just exploring</strong> &middot; Gathering information for now</span></label>'
+      +       '<label class="form-option"><input type="radio" name="intent" value="not_budgeting"><span><strong>Not budgeting for coaching</strong> &middot; Free resources only</span></label>'
       +     '</div>'
-      +     '<button class="cal-confirm" id="intent-submit" style="background:var(--terracotta);margin-top:1rem" disabled>See my pattern</button>'
+      +     '<button class="gate-btn" id="intent-submit" style="margin-top:1rem" disabled>See my pattern</button>'
       +     '<div class="gate-error" id="intent-error"></div>'
       +   '</div>'
       + '</div>';
@@ -288,20 +306,42 @@
     root.innerHTML = ''
       + '<div class="loading-state">'
       +   '<div class="loading-spinner"></div>'
-      +   '<h3>Reading your pattern…</h3>'
+      +   '<h3>Reading your pattern\u2026</h3>'
       +   '<p>Cross-checking your answers across 7 hormone signals.</p>'
       + '</div>';
 
-    fetchEdge(SCORE_FN, { session_id: state.sessionId, intent: state.intent }).then(function(r){
+    // Wait for all in-flight answer submissions to finish before scoring.
+    var pending = pendingSubmits.slice();
+    pendingSubmits = [];
+
+    Promise.all(pending).then(function(){
+      return doScore(0);
+    }).catch(function(){
+      alert('Network error. Please try again.');
+      root.innerHTML = '<div class="loading-state"><h3>Something went wrong.</h3><p>Please refresh and try again.</p></div>';
+    });
+  }
+
+  function doScore(attempt){
+    return fetchEdge(SCORE_FN, { session_id: state.sessionId, intent: state.intent }).then(function(r){
       if (r.status !== 200){
         var errBody = r.body || {};
-        if (errBody.error === 'incomplete'){
-          alert('Some answers are missing — let me take you back.');
-          buildQueue();
-          renderQuestion();
-          return;
+        if (errBody.error === 'incomplete' && attempt < 2){
+          // Re-submit all answers from local state, then retry scoring.
+          var resubmits = Object.keys(state.answers).map(function(qid){
+            return fetchEdge(SESSION_FN, { action: 'submit_answer', session_id: state.sessionId, question_id: qid, answer_value: state.answers[qid] })
+              .catch(function(){});
+          });
+          return Promise.all(resubmits).then(function(){
+            return doScore(attempt + 1);
+          });
         }
-        alert(errBody.error || 'Something went wrong. Please try again.');
+        if (errBody.error === 'incomplete'){
+          alert('Some answers didn\u2019t save. Please refresh and try again.');
+        } else {
+          alert(errBody.error || 'Something went wrong. Please try again.');
+        }
+        $('#screen-root').innerHTML = '<div class="loading-state"><h3>Something went wrong.</h3><p>Please refresh and try again.</p></div>';
         return;
       }
       try { sessionStorage.setItem('reshape_hormonal_result_' + state.sessionId, JSON.stringify(r.body)); } catch(e){}
@@ -315,8 +355,6 @@
         }, { eventID: state.sessionId });
       }
       window.location.href = './result.html?session_id=' + encodeURIComponent(state.sessionId);
-    }).catch(function(){
-      alert('Network error. Please try again.');
     });
   }
 

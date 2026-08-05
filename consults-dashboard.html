@@ -1,0 +1,665 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>ReShape — Consults</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Bricolage+Grotesque:opsz,wght@12..96,500;12..96,700;12..96,800&family=Spline+Sans:wght@400;500;600&display=swap" rel="stylesheet">
+<style>
+  :root{
+    --bg:#0a0b0d; --surface:#141519; --surface-2:#1c1d22; --line:#2a2c34;
+    --text:#f2f3f5; --muted:#8b909b; --faint:#5b606b;
+    --accent:#c2f23f; --accent-dim:rgba(194,242,63,.13); --accent-line:rgba(194,242,63,.35);
+    --accent2:#e8742c; --accent2-soft:rgba(232,116,44,.35);
+    --ask:#5fb0ff; --ask-dim:rgba(95,176,255,.13);
+    --warn:#f5a93b; --warn-dim:rgba(245,169,59,.14);
+    --exit:#ff7a7a; --exit-dim:rgba(255,122,122,.13);
+    --pink:#ff7eb6;
+    --disp:'Bricolage Grotesque',sans-serif; --body:'Spline Sans',sans-serif;
+  }
+  [data-theme="light"]{
+    --bg:#FAF7F2; --surface:#FFFFFF; --surface-2:#F0EBE3; --line:#E5DFD5;
+    --text:#2A2724; --muted:#5A5550; --faint:rgba(42,39,36,0.5);
+    --accent:#4d7a0f; --accent-dim:rgba(77,122,15,.10); --accent-line:rgba(77,122,15,.30);
+    --accent2:#ED5C25; --accent2-soft:rgba(237,92,37,.25);
+    --ask:#2563EB; --ask-dim:rgba(37,99,235,.10);
+    --warn:#D97706; --warn-dim:rgba(217,119,6,.10);
+    --exit:#DC2626; --exit-dim:rgba(220,38,38,.10);
+    --pink:#DB2777;
+  }
+  [data-theme="light"] body{color-scheme:light}
+  [data-theme="light"] .datebox input,
+  [data-theme="light"] .dd{color-scheme:light}
+  [data-theme="light"] .scrim.show{background:rgba(0,0,0,.3)}
+  [data-theme="light"] .icontile{background:linear-gradient(150deg,#f5d0c4,#fce8e0); box-shadow:inset 0 0 0 1px rgba(0,0,0,.06), 0 3px 10px rgba(0,0,0,.08)}
+  *{box-sizing:border-box;margin:0;padding:0}
+  body{background:var(--bg); color:var(--text); font-family:var(--body); line-height:1.5; -webkit-font-smoothing:antialiased; min-height:100vh;}
+  .app{max-width:1280px; margin:0 auto; padding:26px 22px 60px;}
+  button{font-family:var(--body); cursor:pointer; border:none; background:none; color:inherit;}
+
+  /* header copied from Leads Overview */
+  .lead-head{display:flex; align-items:center; gap:16px; margin-bottom:22px;}
+  .icontile{width:54px;height:54px;border-radius:15px;background:linear-gradient(150deg,#4a1d16,#231012);display:flex;align-items:center;justify-content:center;font-size:25px;box-shadow:inset 0 0 0 1px rgba(255,255,255,.06), 0 6px 18px rgba(0,0,0,.45);}
+  .lead-head h1{font-family:var(--disp); font-weight:800; font-size:29px; letter-spacing:-.02em;}
+  .lead-head .sub{color:var(--muted); font-size:14.5px; margin-top:2px;}
+
+  /* filter bar copied from Leads Overview */
+  .bar{display:flex; align-items:center; background:var(--surface); border:1px solid var(--line); border-radius:16px; padding:9px 8px; flex-wrap:wrap; row-gap:10px; margin-bottom:26px;}
+  .grp{display:flex; align-items:center; gap:11px; padding:0 15px;}
+  .grp + .grp{border-left:1px solid var(--line);}
+  .glabel{font-size:11px; font-weight:700; letter-spacing:.12em; text-transform:uppercase; color:var(--faint); white-space:nowrap;}
+  .datebox{display:flex; align-items:center; gap:9px; background:var(--surface-2); border:1px solid var(--line); border-radius:11px; padding:8px 13px;}
+  .datebox svg{opacity:.55; flex:none;}
+  .datebox input{background:none; border:none; color:var(--text); font-family:var(--body); font-size:14px; outline:none; color-scheme:dark; width:120px;}
+  .seg{display:inline-flex; align-items:center; gap:2px;}
+  .seg button{padding:8px 15px; border-radius:9px; font-size:13.5px; font-weight:600; color:var(--muted); white-space:nowrap;}
+  .seg button:hover{color:var(--text);}
+  .seg button.on{background:var(--accent2); color:#2a1206; box-shadow:0 2px 9px var(--accent2-soft);}
+  .dd{background:var(--surface-2); border:1px solid var(--line); color:var(--text); border-radius:11px; padding:9px 13px; font-family:var(--body); font-size:14px; outline:none; color-scheme:dark; cursor:pointer;}
+  .dd:focus{border-color:var(--accent2);}
+  .searchbox{margin-left:auto; display:flex; align-items:center; gap:9px; background:var(--surface-2); border:1px solid var(--line); border-radius:11px; padding:0 14px; min-width:190px;}
+  .searchbox svg{opacity:.5; flex:none;}
+  .searchbox input{flex:1; background:none; border:none; color:var(--text); font-family:var(--body); font-size:14px; padding:10px 0; outline:none;}
+  .clear{margin-left:12px; color:var(--muted); font-size:13px; text-decoration:underline; text-underline-offset:3px;}
+  .clear:hover{color:var(--text);}
+
+  .grid{display:grid; grid-template-columns:repeat(auto-fill,minmax(280px,1fr)); gap:14px;}
+  .card{background:var(--surface); border:1px solid var(--line); border-radius:15px; padding:17px 18px; cursor:pointer; transition:.15s; display:flex; flex-direction:column; gap:11px;}
+  .card:hover{border-color:var(--faint); transform:translateY(-2px); background:var(--surface-2);}
+  .ctop{display:flex; align-items:flex-start; justify-content:space-between; gap:10px;}
+  .card .name{font-family:var(--disp); font-weight:700; font-size:18px; letter-spacing:-.01em;}
+  .badge{font-size:11px; font-weight:700; letter-spacing:.04em; padding:4px 10px; border-radius:20px; white-space:nowrap;}
+  .o-joined{background:var(--accent-dim); color:var(--accent); border:1px solid var(--accent-line);}
+  .o-follow{background:var(--ask-dim); color:var(--ask); border:1px solid rgba(95,176,255,.3);}
+  .o-waiting{background:var(--warn-dim); color:var(--warn); border:1px solid var(--warn-dim);}
+  .o-no, .o-ended{background:var(--exit-dim); color:var(--exit); border:1px solid var(--exit-dim);}
+  .cmeta{color:var(--muted); font-size:12.5px;}
+  .cpills{display:flex; gap:7px; flex-wrap:wrap;}
+  .pill{font-size:11px; font-weight:600; padding:4px 9px; border-radius:7px; background:var(--surface-2); border:1px solid var(--line); color:var(--muted);}
+  .pill b{font-weight:700;}
+  .pill .v-High{color:var(--accent);} .pill .v-Med{color:var(--warn);} .pill .v-Low{color:var(--exit);}
+  .cfoot{color:var(--text); font-size:13px; border-top:1px solid var(--line); padding-top:11px; margin-top:1px;}
+  .cfoot b{font-family:var(--disp); font-weight:800;}
+  .empty{text-align:center; color:var(--muted); padding:60px 20px; font-size:15px;}
+
+  /* Close Rate Cards */
+  .close-wrap{background:var(--surface); border:1px solid var(--line); border-radius:20px; padding:22px 24px; margin-bottom:26px;}
+  .close-wrap-head{margin-bottom:18px;}
+  .close-wrap-head h3{font-family:var(--disp); font-weight:800; font-size:15px;}
+  .close-wrap-head .cw-sub{font-size:12px; color:var(--muted); margin-top:2px;}
+  .close-row{display:flex; gap:12px; flex-wrap:wrap;}
+  .close-card{flex:1; min-width:220px; background:var(--surface-2); border:1px solid var(--line); border-radius:16px; padding:18px; display:flex; flex-direction:column; align-items:center; gap:10px; cursor:pointer; transition:border-color .15s;}
+  .close-card:hover{border-color:var(--faint);}
+  .close-coach{display:flex; align-items:center; gap:10px; align-self:stretch; margin-bottom:4px;}
+  .close-avatar{width:34px; height:34px; border-radius:50%; display:flex; align-items:center; justify-content:center; font-size:12px; font-weight:800; color:#fff; flex:none;}
+  .close-name{font-family:var(--disp); font-weight:700; font-size:13px;}
+  .close-loc{font-size:11px; color:var(--muted);}
+  .close-ring{position:relative; flex:none;}
+  .close-center{position:absolute; inset:0; display:flex; flex-direction:column; align-items:center; justify-content:center;}
+  .close-pct{font-family:var(--disp); font-weight:900; font-size:22px; line-height:1;}
+  .close-lbl{font-size:10px; color:var(--muted); margin-top:2px; letter-spacing:.06em;}
+  .close-stats{display:flex; gap:16px; flex-wrap:wrap; justify-content:center; width:100%; padding-top:10px; border-top:1px solid var(--line);}
+  .close-stat{text-align:center;}
+  .close-stat .cs-val{font-family:var(--disp); font-weight:800; font-size:16px; line-height:1;}
+  .close-stat .cs-label{font-size:10px; color:var(--faint); margin-top:3px; letter-spacing:.06em; text-transform:uppercase;}
+
+  /* Coach drawer attendee list */
+  .att-list{list-style:none; display:flex; flex-direction:column; gap:6px;}
+  .att-item{display:flex; align-items:center; justify-content:space-between; padding:10px 14px; background:var(--surface-2); border:1px solid var(--line); border-radius:11px; gap:12px; cursor:pointer; transition:.12s;}
+  .att-item:hover{border-color:var(--faint); background:var(--surface);}
+  .att-left{display:flex; align-items:center; gap:10px; min-width:0;}
+  .att-left .att-name{font-size:14px; font-weight:600; white-space:nowrap; overflow:hidden; text-overflow:ellipsis;}
+  .att-left .att-date{font-size:11px; color:var(--muted);}
+  .att-badge{font-size:10px; font-weight:700; letter-spacing:.04em; padding:3px 9px; border-radius:20px; white-space:nowrap; flex:none;}
+  .coach-drawer-summary{display:flex; gap:14px; flex-wrap:wrap; margin-bottom:18px;}
+  .cds{text-align:center; background:var(--surface-2); border:1px solid var(--line); border-radius:10px; padding:8px 14px; flex:1; min-width:60px; cursor:pointer; transition:.15s;}
+  .cds:hover{border-color:var(--faint);}
+  .cds.active{border-color:var(--accent2); background:rgba(232,116,44,.08);}
+  .cds .cds-v{font-family:var(--disp); font-weight:800; font-size:18px;}
+  .cds .cds-l{font-size:10px; color:var(--faint); margin-top:2px; letter-spacing:.06em; text-transform:uppercase;}
+
+  .scrim{position:fixed; inset:0; background:rgba(0,0,0,.6); opacity:0; pointer-events:none; transition:.2s; z-index:40;}
+  .scrim.show{opacity:1; pointer-events:auto;}
+  .modal{position:fixed; top:0; right:0; height:100%; width:min(560px,96vw); background:var(--surface); border-left:1px solid var(--line); z-index:50; transform:translateX(100%); transition:.28s cubic-bezier(.4,0,.2,1); overflow-y:auto;}
+  .modal.show{transform:none;}
+  .mhead{position:sticky; top:0; background:var(--surface); border-bottom:1px solid var(--line); padding:22px 24px 18px; z-index:2;}
+  .mhead .mtop{display:flex; align-items:flex-start; justify-content:space-between; gap:12px;}
+  .mhead h2{font-family:var(--disp); font-weight:800; font-size:23px; letter-spacing:-.02em;}
+  .mhead .msub{color:var(--muted); font-size:13px; margin-top:5px;}
+  .closeX{font-size:26px; color:var(--muted); line-height:1; flex:none;}
+  .closeX:hover{color:var(--text);}
+  .mbody{padding:8px 24px 50px;}
+  .sec{padding:18px 0 6px; border-bottom:1px solid var(--line);}
+  .sec:last-child{border-bottom:none;}
+  .sec .sh{font-size:11px; font-weight:700; letter-spacing:.14em; text-transform:uppercase; color:var(--accent); margin-bottom:13px;}
+  .rows{display:grid; grid-template-columns:1fr 1fr; gap:13px 18px;}
+  .row .k{font-size:11px; text-transform:uppercase; letter-spacing:.07em; color:var(--faint); margin-bottom:3px;}
+  .row .vv{font-size:15px; color:var(--text);}
+  .row.full{grid-column:1 / -1;}
+  .tags{display:flex; gap:7px; flex-wrap:wrap;}
+  .tag{font-size:12.5px; background:var(--accent-dim); color:var(--accent); border:1px solid var(--accent-line); border-radius:7px; padding:4px 9px;}
+  .quote{font-size:15px; line-height:1.55; color:var(--text); background:var(--surface-2); border-left:3px solid var(--pink); border-radius:10px; padding:12px 15px;}
+  .totalbig{font-family:var(--disp); font-weight:800; font-size:30px; color:var(--accent);}
+  .totalbig small{font-family:var(--body); font-weight:400; font-size:14px; color:var(--muted);}
+  .alert{font-size:13px; line-height:1.5; color:var(--warn); background:var(--warn-dim); border:1px solid var(--warn-dim); border-radius:10px; padding:11px 13px; margin-top:8px; grid-column:1/-1;}
+  /* Edit package inline form */
+  .edit-pkg-btn{display:inline-flex;align-items:center;gap:5px;font-size:12px;font-weight:600;color:var(--accent2);background:rgba(232,116,44,.1);border:1px solid rgba(232,116,44,.25);border-radius:8px;padding:5px 12px;margin-left:10px;cursor:pointer;transition:.15s;}
+  .edit-pkg-btn:hover{background:rgba(232,116,44,.2);border-color:var(--accent2);}
+  .edit-pkg-form{margin-top:14px;display:grid;grid-template-columns:1fr 1fr;gap:12px 16px;padding:16px;background:var(--surface-2);border:1px solid var(--line);border-radius:12px;}
+  .edit-pkg-form label{font-size:11px;text-transform:uppercase;letter-spacing:.07em;color:var(--faint);display:flex;flex-direction:column;gap:5px;}
+  .edit-pkg-form select,.edit-pkg-form input[type="number"]{background:var(--bg);border:1px solid var(--line);color:var(--text);border-radius:8px;padding:8px 10px;font-family:var(--body);font-size:14px;outline:none;}
+  .edit-pkg-form select:focus,.edit-pkg-form input[type="number"]:focus{border-color:var(--accent2);}
+  .edit-pkg-actions{grid-column:1/-1;display:flex;gap:10px;justify-content:flex-end;margin-top:4px;}
+  .edit-pkg-save{font-size:13px;font-weight:700;color:#2a1206;background:var(--accent2);border-radius:9px;padding:8px 20px;cursor:pointer;border:none;font-family:var(--body);transition:.15s;}
+  .edit-pkg-save:hover{filter:brightness(1.1);}
+  .edit-pkg-save:disabled{opacity:.5;cursor:not-allowed;}
+  .edit-pkg-cancel{font-size:13px;font-weight:600;color:var(--muted);background:var(--surface);border:1px solid var(--line);border-radius:9px;padding:8px 16px;cursor:pointer;font-family:var(--body);}
+  .edit-pkg-cancel:hover{color:var(--text);border-color:var(--faint);}
+  .edit-pkg-preview{grid-column:1/-1;font-family:var(--disp);font-weight:800;font-size:24px;color:var(--accent);margin-top:4px;}
+  .edit-pkg-preview small{font-family:var(--body);font-weight:400;font-size:13px;color:var(--muted);}
+  @media(max-width:600px){ .rows{grid-template-columns:1fr;} .searchbox{margin-left:0;} .edit-pkg-form{grid-template-columns:1fr;} }
+  /* Embed mode: show only close-rate matrix */
+  html.embed-mode,html.embed-mode body{background:#0B0B0E!important}
+  [data-theme="light"].embed-mode,[data-theme="light"].embed-mode body{background:#FAF7F2!important}
+  html.embed-mode .lead-head,html.embed-mode .bar,html.embed-mode #grid,html.embed-mode #empty{display:none!important}
+  html.embed-mode .app{padding:0;max-width:none}
+  html.embed-mode .close-wrap{background:transparent;border:none;border-radius:0;padding:0;margin:0}
+</style>
+</head>
+<script>if(location.search.indexOf('embed')!==-1){document.documentElement.classList.add('embed-mode')}</script>
+<body>
+<div class="app">
+  <div class="lead-head">
+    <div class="icontile">🎯</div>
+    <div><h1>Consults</h1><div class="sub" id="sub">All time · — consults</div></div>
+  </div>
+
+  <div class="bar">
+    <div class="grp">
+      <div class="datebox">
+        <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="3" y="4" width="18" height="18" rx="2"/><path d="M16 2v4M8 2v4M3 10h18"/></svg>
+        <input type="date" id="anchor">
+      </div>
+    </div>
+    <div class="grp">
+      <div class="seg" id="rangeSeg"><button data-g="all" class="on">All</button><button data-g="day">Day</button><button data-g="week">Week</button><button data-g="month">Month</button><button data-g="year">Year</button></div>
+    </div>
+    <div class="grp">
+      <span class="glabel">Location</span>
+      <div class="seg" id="locSeg"><button data-l="" class="on">All</button><button data-l="Ipswich">Ipswich</button><button data-l="Colchester">Colchester</button></div>
+    </div>
+    <div class="grp"><span class="glabel">Outcome</span>
+      <select class="dd" id="fOutcome"><option value="">All</option><option>Joined</option><option>Follow-up booked</option><option>Waiting list</option><option>No</option><option>Ended — hesitation</option></select></div>
+    <div class="grp"><span class="glabel">Coach</span>
+      <select class="dd" id="fCoach"><option value="">All</option></select></div>
+    <div class="grp"><span class="glabel">Pain</span>
+      <select class="dd" id="fPain"><option value="">All</option><option>High</option><option>Med</option><option>Low</option></select></div>
+    <div class="grp"><span class="glabel">Afford</span>
+      <select class="dd" id="fAfford"><option value="">All</option><option>High</option><option>Med</option><option>Low</option></select></div>
+    <div class="searchbox">
+      <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="11" cy="11" r="7"/><path d="m21 21-4.3-4.3"/></svg>
+      <input id="q" placeholder="Search…">
+    </div>
+    <button class="clear" id="clear">Clear</button>
+  </div>
+
+  <div class="close-wrap" id="closeWrap">
+    <div class="close-wrap-head"><h3>Coach Close Rates</h3><div class="cw-sub">Conversion breakdown per coach — filtered view</div></div>
+    <div class="close-row" id="closeRow"></div>
+  </div>
+
+  <div class="grid" id="grid"></div>
+  <div class="empty" id="empty" style="display:none">No consults match those filters.</div>
+</div>
+
+<div class="scrim" id="scrim"></div>
+<div class="modal" id="modal"><div id="modalInner"></div></div>
+<script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+<script>
+const TODAY=(function(){var d=new Date();return d.getFullYear()+'-'+String(d.getMonth()+1).padStart(2,'0')+'-'+String(d.getDate()).padStart(2,'0')})();
+const DURATIONS={'12':{oneToOne:90,elite:35,octave:25,group:15,transform:60,reinforce:50,maintain:40},'26':{oneToOne:85,elite:32.5,octave:22.5,group:12.5,transform:50,reinforce:40,maintain:30},'52':{oneToOne:80,elite:30,octave:20,group:10,transform:45,reinforce:35,maintain:25}};
+const fmt=n=>Number.isInteger(n)?String(n):n.toFixed(2);
+const calc=r=>{const d=DURATIONS[r.duration];const s=r.mix.oneToOne*d.oneToOne+r.mix.elite*d.elite+r.mix.octave*d.octave+r.mix.group*d.group;const np=r.nutritionPlan;const nut=(np&&np!=='lifestyle')?(d[np]||0):0;const weekly=s+nut;const wk=+r.duration;return{sessions:s,nut,weekly,weeks:wk,full:weekly*wk,upfront:weekly*wk*0.9};};
+const mixStr=r=>{const m=r.mix;const p=[];if(m.oneToOne)p.push(m.oneToOne+'× 1:1');if(m.elite)p.push(m.elite+'× Elite');if(m.octave)p.push(m.octave+'× Octave');if(m.group)p.push(m.group+'× Group');return p.join(' + ')||'—';};
+const bmi=r=>(r.height>0&&r.weight>0)?(r.weight/((r.height/100)*(r.height/100))).toFixed(1):'—';
+const dateNice=d=>new Date(d+'T00:00:00').toLocaleDateString('en-GB',{day:'numeric',month:'short',year:'numeric'});
+
+var SUPABASE_URL = 'https://lvizldmdficsfpgegehp.supabase.co';
+var SUPABASE_ANON_KEY = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6Imx2aXpsZG1kZmljc2ZwZ2VnZWhwIiwicm9sZSI6ImFub24iLCJpYXQiOjE3NzM2OTk4NDQsImV4cCI6MjA4OTI3NTg0NH0.72wHbZaTvqNzW6DTb6Ae1vi9QpOg_-KiEO-Jjm9mn0k';
+var sb = supabase.createClient(SUPABASE_URL, SUPABASE_ANON_KEY);
+
+var contractCache = {};
+async function loadContracts(){
+  var res = await sb.from('consult_contracts').select('*').order('signed_at',{ascending:false});
+  if(res.data) res.data.forEach(function(c){ var key=(c.consult_name||'').toLowerCase()+'|'+c.consult_date; contractCache[key]=c; });
+}
+loadContracts();
+
+function mapConsult(row) {
+  return {
+    id: row.id,
+    name: row.prospect_name,
+    coach: row.coach,
+    loc: row.location || 'Unknown',
+    date: row.consult_date,
+    time: row.consult_time || '',
+    outcome: row.outcome || '',
+    age: row.age || 0,
+    height: row.height_cm || 0,
+    weight: row.weight_kg || 0,
+    injuries: row.injuries || 'None',
+    medical: row.medical || 'None',
+    drivers: row.emotional_drivers || [],
+    pain: { urgency: row.pain_urgency || '', depth: row.pain_depth || '', cost: row.pain_cost || '' },
+    painBand: row.pain_band || 'Low',
+    support: row.support || '',
+    afford: { work: row.afford_work || '', holidays: row.afford_holidays || '', takeaways: row.afford_takeaways || '', alcohol: row.afford_alcohol || '', smoke: row.afford_smoke || '', pt: row.afford_pt || '' },
+    affordBand: row.afford_band || 'Low',
+    why: row.why || '',
+    coachable: row.coachable || '',
+    followplan: row.follow_plan || '',
+    communicate: row.communicate || '',
+    commit1: row.commit1 || '',
+    ready: row.ready || '',
+    duration: row.programme_duration || '12',
+    mix: { oneToOne: row.mix_one_to_one || 0, elite: row.mix_elite || 0, octave: row.mix_octave || 0, group: row.mix_group || 0 },
+    nutrition: row.nutrition_included !== false,
+    nutritionPlan: row.nutrition_plan || (row.nutrition_included !== false ? 'transform' : null),
+    payment: row.payment_type || 'weekly',
+    rec: row.recommendation || '',
+    notes: row.notes || ''
+  };
+}
+
+var CONSULTS = [];
+
+async function loadConsults() {
+  var result = await sb.from('consults').select('*').order('consult_date', { ascending: false });
+  if (result.error) { console.error('Supabase error:', result.error); return; }
+  CONSULTS = (result.data || []).map(mapConsult);
+  populateCoachDropdown();
+  applyFilters();
+}
+
+function populateCoachDropdown() {
+  var coaches = {};
+  CONSULTS.forEach(function(c) { if (c.coach) coaches[c.coach] = true; });
+  var sel = document.getElementById('fCoach');
+  var cur = sel.value;
+  // Keep "All" option, rebuild rest
+  sel.innerHTML = '<option value="">All</option>';
+  Object.keys(coaches).sort().forEach(function(name) {
+    var opt = document.createElement('option');
+    opt.value = name; opt.textContent = name;
+    if (name === cur) opt.selected = true;
+    sel.appendChild(opt);
+  });
+}
+
+// Realtime: auto-refresh on INSERT / UPDATE / DELETE
+sb.channel('consults-realtime')
+  .on('postgres_changes', { event: 'INSERT', schema: 'public', table: 'consults' }, function(payload) {
+    CONSULTS.unshift(mapConsult(payload.new));
+    applyFilters();
+  })
+  .on('postgres_changes', { event: 'UPDATE', schema: 'public', table: 'consults' }, function(payload) {
+    var mapped = mapConsult(payload.new);
+    var idx = CONSULTS.findIndex(function(c){ return c.id === mapped.id; });
+    if (idx !== -1) CONSULTS[idx] = mapped; else CONSULTS.unshift(mapped);
+    applyFilters();
+  })
+  .on('postgres_changes', { event: 'DELETE', schema: 'public', table: 'consults' }, function(payload) {
+    CONSULTS = CONSULTS.filter(function(c){ return c.id !== payload.old.id; });
+    applyFilters();
+  })
+  .subscribe();
+
+const grid=document.getElementById('grid'), empty=document.getElementById('empty'), sub=document.getElementById('sub');
+const qEl=document.getElementById('q'), fO=document.getElementById('fOutcome'), fP=document.getElementById('fPain'), fA=document.getElementById('fAfford'), fC=document.getElementById('fCoach'), anchor=document.getElementById('anchor');
+let gran='all', loc='';
+anchor.value=TODAY;
+
+function oClass(o){ if(o==='Joined')return 'o-joined'; if(o==='Follow-up booked')return 'o-follow'; if(o==='Waiting list')return 'o-waiting'; if(o==='No')return 'o-no'; return 'o-ended'; }
+function weekBounds(d){ const dt=new Date(d+'T00:00:00'); const off=(dt.getDay()+6)%7; const s=new Date(dt); s.setDate(dt.getDate()-off); const e=new Date(s); e.setDate(s.getDate()+6); return [s.toISOString().slice(0,10), e.toISOString().slice(0,10)]; }
+function inPeriod(d){ const a=anchor.value||TODAY;
+  if(gran==='all') return true;
+  if(gran==='day') return d===a;
+  if(gran==='week'){ const [s,e]=weekBounds(a); return d>=s&&d<=e; }
+  if(gran==='month') return d.slice(0,7)===a.slice(0,7);
+  if(gran==='year') return d.slice(0,4)===a.slice(0,4);
+  return true; }
+function periodLabel(){ const a=anchor.value||TODAY;
+  if(gran==='all') return 'All time';
+  if(gran==='day') return dateNice(a);
+  if(gran==='week'){ const [s,e]=weekBounds(a); return dateNice(s)+' – '+dateNice(e); }
+  if(gran==='month') return new Date(a+'T00:00:00').toLocaleDateString('en-GB',{month:'long',year:'numeric'});
+  if(gran==='year') return a.slice(0,4);
+  return 'All time'; }
+
+function applyFilters(){
+  const q=qEl.value.trim().toLowerCase();
+  const rows=CONSULTS.filter(r=>{
+    if(q && !r.name.toLowerCase().includes(q)) return false;
+    if(loc && r.loc!==loc) return false;
+    if(fO.value && r.outcome!==fO.value) return false;
+    if(fP.value && r.painBand!==fP.value) return false;
+    if(fA.value && r.affordBand!==fA.value) return false;
+    if(fC.value && r.coach!==fC.value) return false;
+    if(!inPeriod(r.date)) return false;
+    return true;
+  }).sort((a,b)=> b.date.localeCompare(a.date) || b.time.localeCompare(a.time));
+  render(rows);
+}
+
+// ── Close Rate Donuts (per coach) ────────────────────────────────────
+const COACH_COLORS = {Loai:'#f97316',Sean:'#22d3ee',Lucy:'#a78bfa',Fred:'#f472b6',Shams:'#facc15',Claudiu:'#34d399'};
+function coachColor(name){ var first=(name||'').split(/\s+/)[0]; return COACH_COLORS[first]||'#f97316'; }
+function coachInitials(n){ return n.split(/\s+/).map(w=>w[0]).join('').toUpperCase().slice(0,2); }
+
+function donutSVG(joined, total, size, thick){
+  const cx=size/2, cy=size/2, r=(size-thick)/2-1, circ=2*Math.PI*r;
+  const jFrac=total?joined/total:0, nFrac=total?(total-joined)/total:0;
+  const green='#4ade80', red='#f87171';
+  const gap = (jFrac > 0 && jFrac < 1) ? thick * 0.4 : 0;
+  return `<svg width="${size}" height="${size}">
+    <circle cx="${cx}" cy="${cy}" r="${r}" fill="none" stroke="rgba(128,128,128,0.10)" stroke-width="${thick}"/>
+    <circle cx="${cx}" cy="${cy}" r="${r}" fill="none" stroke="${green}"
+      stroke-width="${thick}" stroke-linecap="round"
+      stroke-dasharray="${jFrac*circ - gap} ${circ - jFrac*circ + gap}" stroke-dashoffset="${circ*0.25}"/>
+    ${nFrac > 0 ? `<circle cx="${cx}" cy="${cy}" r="${r}" fill="none" stroke="${red}"
+      stroke-width="${thick}" stroke-linecap="round"
+      stroke-dasharray="${nFrac*circ - gap} ${circ - nFrac*circ + gap}" stroke-dashoffset="${circ*0.25 - jFrac*circ - gap/2}"/>` : ''}
+  </svg>`;
+}
+
+function renderCloseCard(rows){
+  const el=document.getElementById('closeRow');
+  const byCoach={};
+  rows.forEach(r=>{
+    if(!byCoach[r.coach]) byCoach[r.coach]={name:r.coach, locs:new Set(), total:0, joined:0, followUp:0, waiting:0, no:0, ended:0};
+    const c=byCoach[r.coach]; c.total++; c.locs.add(r.loc);
+    if(r.outcome==='Joined') c.joined++;
+    else if(r.outcome==='Follow-up booked') c.followUp++;
+    else if(r.outcome==='Waiting list') c.waiting++;
+    else if(r.outcome==='No') c.no++;
+    else if(r.outcome==='Ended — hesitation') c.ended++;
+  });
+  const coaches=Object.values(byCoach).sort((a,b)=>b.total-a.total);
+  if(!coaches.length){ el.innerHTML='<div style="color:var(--muted);font-size:13px;padding:10px 0">No consults in current filter.</div>'; return; }
+  const green='#4ade80', red='#f87171', size=100, thick=11;
+  el.innerHTML=coaches.map(c=>{
+    const pct=c.total?Math.round(c.joined/c.total*100):0;
+    const bg=coachColor(c.name);
+    const locs=[...c.locs].join(', ');
+    return `<div class="close-card" data-coach="${c.name}">
+      <div class="close-coach">
+        <div class="close-avatar" style="background:${bg}">${coachInitials(c.name)}</div>
+        <div><div class="close-name">Coach ${c.name}</div><div class="close-loc">${locs}</div></div>
+      </div>
+      <div class="close-ring" style="width:${size}px;height:${size}px">
+        ${donutSVG(c.joined,c.total,size,thick)}
+        <div class="close-center">
+          <div class="close-pct" style="color:${pct>=50?green:red}">${pct}%</div>
+          <div class="close-lbl">closed</div>
+        </div>
+      </div>
+      <div class="close-stats">
+        <div class="close-stat"><div class="cs-val" style="color:var(--text)">${c.total}</div><div class="cs-label">Total</div></div>
+        <div class="close-stat"><div class="cs-val" style="color:${green}">${c.joined}</div><div class="cs-label">Joined</div></div>
+        <div class="close-stat"><div class="cs-val" style="color:var(--ask)">${c.followUp}</div><div class="cs-label">Follow-up</div></div>
+        <div class="close-stat"><div class="cs-val" style="color:var(--warn)">${c.waiting}</div><div class="cs-label">Waiting</div></div>
+        <div class="close-stat"><div class="cs-val" style="color:${red}">${c.no}</div><div class="cs-label">No</div></div>
+        <div class="close-stat"><div class="cs-val" style="color:var(--pink)">${c.ended}</div><div class="cs-label">Ended</div></div>
+      </div>
+    </div>`;
+  }).join('');
+  el.querySelectorAll('.close-card').forEach(card=>{
+    card.onclick=()=>openCoachDrawer(card.dataset.coach, rows);
+  });
+}
+
+let _drawerCoach='', _drawerRows=[], _drawerFilter='';
+const OUTCOME_MAP={Total:'',Joined:'Joined','Follow-up':'Follow-up booked',Waiting:'Waiting list',No:'No',Ended:'Ended — hesitation'};
+
+function openCoachDrawer(coachName, rows){
+  _drawerCoach=coachName; _drawerRows=rows; _drawerFilter='';
+  renderCoachDrawer();
+}
+
+function renderCoachDrawer(){
+  const all=_drawerRows.filter(r=>r.coach===_drawerCoach).sort((a,b)=>b.date.localeCompare(a.date));
+  const visible=_drawerFilter?all.filter(r=>r.outcome===_drawerFilter):all;
+  const joined=all.filter(r=>r.outcome==='Joined').length;
+  const pct=all.length?Math.round(joined/all.length*100):0;
+  const green='#4ade80', red='#f87171';
+
+  const pills=[
+    {key:'Total',val:all.length,color:'var(--text)'},
+    {key:'Joined',val:joined,color:green},
+    {key:'Follow-up',val:all.filter(r=>r.outcome==='Follow-up booked').length,color:'var(--ask)'},
+    {key:'Waiting',val:all.filter(r=>r.outcome==='Waiting list').length,color:'var(--warn)'},
+    {key:'No',val:all.filter(r=>r.outcome==='No').length,color:red},
+    {key:'Ended',val:all.filter(r=>r.outcome==='Ended — hesitation').length,color:'var(--pink)'},
+  ];
+  const activeOutcome=_drawerFilter;
+  const activeKey=Object.entries(OUTCOME_MAP).find(([,v])=>v===activeOutcome);
+  const activeLabel=activeKey?activeKey[0]:'Total';
+
+  document.getElementById('modalInner').innerHTML=`
+    <div class="mhead">
+      <div class="mtop">
+        <div><h2>Coach ${_drawerCoach}</h2><div class="msub">${all.length} consult${all.length===1?'':'s'} · ${pct}% close rate</div></div>
+        <button class="closeX" id="cx">×</button>
+      </div>
+    </div>
+    <div class="mbody">
+      <div class="coach-drawer-summary">
+        ${pills.map(p=>`<div class="cds${activeLabel===p.key?' active':''}" data-filter="${p.key}"><div class="cds-v" style="color:${p.color}">${p.val}</div><div class="cds-l">${p.key}</div></div>`).join('')}
+      </div>
+      <ul class="att-list">
+        ${visible.map(r=>`<li class="att-item" data-id="${r.id}">
+          <div class="att-left">
+            <div><div class="att-name">${r.name}</div><div class="att-date">${dateNice(r.date)} · ${r.time} · ${r.loc}</div></div>
+          </div>
+          <span class="att-badge badge ${oClass(r.outcome)}">${r.outcome}</span>
+        </li>`).join('')}
+      </ul>
+    </div>`;
+  document.getElementById('cx').onclick=closeDetail;
+  document.querySelectorAll('.cds[data-filter]').forEach(pill=>{
+    pill.onclick=()=>{
+      const key=pill.dataset.filter;
+      _drawerFilter=(activeLabel===key||key==='Total')?'':OUTCOME_MAP[key];
+      renderCoachDrawer();
+    };
+  });
+  document.querySelectorAll('.att-item').forEach(item=>{
+    item.onclick=()=>openDetail(+item.dataset.id);
+  });
+  document.getElementById('modal').classList.add('show');
+  document.getElementById('scrim').classList.add('show');
+}
+
+function render(rows){
+  sub.textContent = `${periodLabel()} · ${rows.length} consult${rows.length===1?'':'s'}`;
+  empty.style.display = rows.length? 'none':'block';
+  renderCloseCard(rows);
+  grid.innerHTML = rows.map(r=>{
+    const c=calc(r);
+    return `<div class="card" data-id="${r.id}">
+      <div class="ctop"><span class="name">${r.name}</span><span class="badge ${oClass(r.outcome)}">${r.outcome}</span></div>
+      <div class="cmeta">${dateNice(r.date)} · ${r.time} · ${r.coach} · ${r.loc}</div>
+      <div class="cpills"><span class="pill">Pain <b class="v-${r.painBand}">${r.painBand}</b></span><span class="pill">Afford <b class="v-${r.affordBand}">${r.affordBand}</b></span></div>
+      <div class="cfoot">${r.duration} wk · <b>£${fmt(r.payment==='upfront'?c.upfront:c.weekly)}</b>${r.payment==='upfront'?' upfront':'/wk'} · ${mixStr(r)}</div>
+    </div>`;
+  }).join('');
+  grid.querySelectorAll('.card').forEach(c=>c.onclick=()=>openDetail(+c.dataset.id));
+}
+
+function R(k,v){ return `<div class="row"><div class="k">${k}</div><div class="vv">${v||'—'}</div></div>`; }
+
+function openDetail(id){
+  const r=CONSULTS.find(x=>x.id===id); const c=calc(r);
+  const drivers = r.drivers.length? `<div class="tags">${r.drivers.map(d=>`<span class="tag">${d}</span>`).join('')}</div>` : '—';
+  const injuryAlert = (r.injuries||'').startsWith('Significant') ? `<div class="alert">⚠️ Significant injury flagged — programming adapted.</div>` : '';
+  const medAlert = r.medical==='Needs GP clearance' ? `<div class="alert">⚠️ GP clearance required before onboarding.</div>` : '';
+  document.getElementById('modalInner').innerHTML = `
+    <div class="mhead"><div class="mtop"><div><h2>${r.name}</h2><div class="msub">${dateNice(r.date)} · ${r.time} · with ${r.coach} · ${r.loc}</div></div><button class="closeX" id="cx">×</button></div>
+      <div style="margin-top:13px;display:flex;gap:8px;flex-wrap:wrap"><span class="badge ${oClass(r.outcome)}">${r.outcome}</span><span class="pill">Pain <b class="v-${r.painBand}">${r.painBand}</b></span><span class="pill">Afford <b class="v-${r.affordBand}">${r.affordBand}</b></span><span class="pill">Rec: ${r.rec}</span></div>
+    </div>
+    <div class="mbody">
+      <div class="sec"><div class="sh">Health & Suitability</div><div class="rows">
+        ${R('Age',r.age)}${R('BMI',bmi(r))}${R('Height',r.height+' cm')}${R('Weight',r.weight+' kg')}${R('Injuries',r.injuries)}${R('Medical',r.medical)}${injuryAlert}${medAlert}</div></div>
+      <div class="sec"><div class="sh">Their why</div><div class="quote">${r.why||'—'}</div></div>
+      <div class="sec"><div class="sh">Goal & Pain — ${r.painBand}</div><div class="rows">
+        <div class="row full"><div class="k">Emotional drivers</div><div class="vv">${drivers}</div></div>
+        ${R('Why now (trigger)',r.pain.urgency)}${R('Goal depth',r.pain.depth)}${R('Cost of inaction',r.pain.cost)}</div></div>
+      <div class="sec"><div class="sh">Relationship & Affordability — ${r.affordBand}</div><div class="rows">
+        ${R('Lives with',r.support)}${R('Work',r.afford.work)}${R('Holidays/yr',r.afford.holidays)}${R('Eating out/wk',r.afford.takeaways)}${R('Alcohol/wk',r.afford.alcohol)}${R('Smokes',r.afford.smoke)}${R('Past PTs',r.afford.pt)}</div></div>
+      <div class="sec"><div class="sh">Commitments</div><div class="rows">
+        ${R('Coachable',r.coachable)}${R('Follow plan',r.followplan)}${R('Communicate',r.communicate)}${R('Should I start',r.commit1)}${R('Ready',r.ready)}</div></div>
+      <div class="sec"><div class="sh">Programme & Offer<button class="edit-pkg-btn" onclick="toggleEditPkg(${r.id})">&#9998; Edit</button></div><div class="rows" id="pkgReadonly">
+        ${R('Length',r.duration+' weeks')}${R('Weekly mix',mixStr(r))}${R('Nutrition',r.nutritionPlan?({transform:'Transform',reinforce:'Reinforce',maintain:'Maintain',lifestyle:'Lifestyle'}[r.nutritionPlan]||'Included'):'Not included')}${R('Payment',r.payment==='upfront'?'Upfront (−10%)':'Weekly')}</div>
+        <div style="margin-top:14px" class="totalbig" id="pkgTotal">£${fmt(r.payment==='upfront'?c.upfront:c.weekly)}<small>${r.payment==='upfront'?' upfront · full term £'+fmt(c.full):'/week'}</small></div>
+        <div id="pkgEditForm" style="display:none"></div></div>
+      <div class="sec"><div class="sh">Coach note</div><div class="vv" style="font-size:14px;color:var(--muted)">${r.notes||'—'}</div></div>
+      <div class="sec" id="contractSec" style="display:none"></div>
+    </div>`;
+  document.getElementById('cx').onclick=closeDetail;
+  // Show contract if this is a Joined consult
+  if(r.outcome==='Joined'){
+    const key=(r.name||'').toLowerCase()+'|'+r.date;
+    const ct=contractCache[key];
+    const sec=document.getElementById('contractSec');
+    if(ct){
+      const ddInfo=ct.dd_details||{};
+      sec.style.display='';
+      sec.innerHTML=`<div class="sh">Contract / Agreement</div>
+        <div class="rows">
+          ${R('Signed',new Date(ct.signed_at).toLocaleDateString('en-GB',{day:'numeric',month:'short',year:'numeric',hour:'2-digit',minute:'2-digit'}))}
+          ${R('Duration',ct.duration_weeks+' weeks')}
+          ${R('Payment',ct.payment==='upfront'?'Upfront':'Weekly')}
+          ${R('Weekly','\u00A3'+fmt(ct.weekly_amount))}
+          ${R('Upfront','\u00A3'+fmt(ct.upfront_amount))}
+          ${R('Joining fee','\u00A3'+fmt(ct.joining_fee))}
+          ${R('Guarantee',ct.guarantee?'Yes':'No')}
+          ${R('Nutrition',ct.nutrition?'Included':'Not included')}
+        </div>
+        ${ddInfo.fullname?'<div style="margin-top:14px"><div class="k" style="font-size:11px;text-transform:uppercase;letter-spacing:.07em;color:var(--faint);margin-bottom:6px">Direct Debit</div><div class="rows">'+R('Name',ddInfo.fullname)+R('Email',ddInfo.email)+R('Phone',ddInfo.phone)+R('Starting',ddInfo.starting)+R('Amount',ddInfo.amount)+R('Frequency',ddInfo.frequency)+'</div></div>':''}
+        <div style="margin-top:16px;display:flex;gap:20px;flex-wrap:wrap">
+          ${ct.member_signature?'<div><div class="k" style="font-size:11px;text-transform:uppercase;letter-spacing:.07em;color:var(--faint);margin-bottom:4px">Member signature</div><img src="'+ct.member_signature+'" style="height:60px;border-radius:6px;background:var(--surface-2);padding:6px"></div>':''}
+          ${ct.coach_signature?'<div><div class="k" style="font-size:11px;text-transform:uppercase;letter-spacing:.07em;color:var(--faint);margin-bottom:4px">Coach signature</div><img src="'+ct.coach_signature+'" style="height:60px;border-radius:6px;background:var(--surface-2);padding:6px"></div>':''}
+        </div>`;
+    } else {
+      sec.style.display='';
+      sec.innerHTML='<div class="sh">Contract / Agreement</div><div style="color:var(--muted);font-size:13px">No signed contract on file yet.</div>';
+    }
+  }
+  document.getElementById('modal').classList.add('show');
+  document.getElementById('scrim').classList.add('show');
+}
+function toggleEditPkg(id){
+  var form=document.getElementById('pkgEditForm');
+  var ro=document.getElementById('pkgReadonly');
+  var total=document.getElementById('pkgTotal');
+  if(form.style.display!=='none'){ form.style.display='none'; ro.style.display=''; total.style.display=''; return; }
+  var r=CONSULTS.find(function(x){return x.id===id;});
+  ro.style.display='none'; total.style.display='none'; form.style.display='';
+  form.innerHTML='<div class="edit-pkg-form">'+
+    '<label>Duration<select id="epDur"><option value="12"'+(r.duration==='12'?' selected':'')+'>12 weeks</option><option value="26"'+(r.duration==='26'?' selected':'')+'>26 weeks</option><option value="52"'+(r.duration==='52'?' selected':'')+'>52 weeks</option></select></label>'+
+    '<label>Payment<select id="epPay"><option value="weekly"'+(r.payment==='weekly'?' selected':'')+'>Weekly</option><option value="upfront"'+(r.payment==='upfront'?' selected':'')+'>Upfront (−10%)</option></select></label>'+
+    '<label>1:1 sessions/wk<input type="number" id="epM1" min="0" max="7" value="'+r.mix.oneToOne+'"></label>'+
+    '<label>Elite sessions/wk<input type="number" id="epME" min="0" max="7" value="'+r.mix.elite+'"></label>'+
+    '<label>Octave sessions/wk<input type="number" id="epMO" min="0" max="7" value="'+r.mix.octave+'"></label>'+
+    '<label>Group sessions/wk<input type="number" id="epMG" min="0" max="7" value="'+r.mix.group+'"></label>'+
+    '<label>Nutrition<select id="epNut"><option value="transform"'+(r.nutritionPlan==='transform'?' selected':'')+'>Transform</option><option value="reinforce"'+(r.nutritionPlan==='reinforce'?' selected':'')+'>Reinforce</option><option value="maintain"'+(r.nutritionPlan==='maintain'?' selected':'')+'>Maintain</option><option value="lifestyle"'+(r.nutritionPlan==='lifestyle'?' selected':'')+ '>Lifestyle (sessions only)</option><option value=""'+(!r.nutritionPlan?' selected':'')+'>Not included</option></select></label>'+
+    '<div class="edit-pkg-preview" id="epPreview"></div>'+
+    '<div class="edit-pkg-actions"><button class="edit-pkg-cancel" onclick="toggleEditPkg('+id+')">Cancel</button><button class="edit-pkg-save" id="epSaveBtn" onclick="saveEditPkg('+id+')">Save changes</button></div>'+
+  '</div>';
+  function updatePreview(){
+    var dur=document.getElementById('epDur').value;
+    var pay=document.getElementById('epPay').value;
+    var m={oneToOne:+(document.getElementById('epM1').value)||0,elite:+(document.getElementById('epME').value)||0,octave:+(document.getElementById('epMO').value)||0,group:+(document.getElementById('epMG').value)||0};
+    var np=document.getElementById('epNut').value;
+    var d=DURATIONS[dur];var s=m.oneToOne*d.oneToOne+m.elite*d.elite+m.octave*d.octave+m.group*d.group;var n=(np&&np!=='lifestyle')?(d[np]||0):0;var weekly=s+n;var wk=+dur;var full=weekly*wk;var upfront=full*0.9;
+    var prev=document.getElementById('epPreview');
+    if(pay==='upfront') prev.innerHTML='£'+fmt(upfront)+'<small> upfront · full term £'+fmt(full)+'</small>';
+    else prev.innerHTML='£'+fmt(weekly)+'<small>/week</small>';
+  }
+  ['epDur','epPay','epM1','epME','epMO','epMG','epNut'].forEach(function(id){document.getElementById(id).addEventListener('input',updatePreview);});
+  updatePreview();
+}
+
+async function saveEditPkg(id){
+  var btn=document.getElementById('epSaveBtn'); btn.disabled=true; btn.textContent='Saving…';
+  var dur=document.getElementById('epDur').value;
+  var pay=document.getElementById('epPay').value;
+  var m1=+(document.getElementById('epM1').value)||0;
+  var mE=+(document.getElementById('epME').value)||0;
+  var mO=+(document.getElementById('epMO').value)||0;
+  var mG=+(document.getElementById('epMG').value)||0;
+  var nutVal=document.getElementById('epNut').value;
+  var nutIncluded=nutVal!=='';
+  var nutPlanSave=nutVal||null;
+  var update={programme_duration:dur,payment_type:pay,mix_one_to_one:m1,mix_elite:mE,mix_octave:mO,mix_group:mG,nutrition_included:nutIncluded,nutrition_plan:nutPlanSave};
+  var res=await sb.from('consults').update(update).eq('id',id);
+  if(res.error){ alert('Save failed: '+res.error.message); btn.disabled=false; btn.textContent='Save changes'; return; }
+  // Update local data
+  var r=CONSULTS.find(function(x){return x.id===id;});
+  r.duration=dur; r.payment=pay; r.mix={oneToOne:m1,elite:mE,octave:mO,group:mG}; r.nutrition=nutIncluded; r.nutritionPlan=nutPlanSave;
+  // Also update contract if one exists
+  var key=(r.name||'').toLowerCase()+'|'+r.date;
+  var ct=contractCache[key];
+  if(ct){
+    var c=calc(r);
+    var ctUpdate={duration_weeks:+dur,payment:pay,nutrition:nut,weekly_amount:c.weekly,upfront_amount:c.upfront};
+    await sb.from('consult_contracts').update(ctUpdate).eq('id',ct.id);
+    Object.assign(ct,ctUpdate);
+  }
+  // Refresh grid cards and re-open detail
+  applyFilters();
+  openDetail(id);
+}
+
+function closeDetail(){
+  document.getElementById('modal').classList.remove('show');
+  document.getElementById('scrim').classList.remove('show');
+  if(document.documentElement.classList.contains('embed-mode')) window.parent.postMessage({type:'matrix-drawer',open:false},'*');
+}
+// Notify parent when drawer opens
+var _origModalShow=HTMLElement.prototype.classList.add;
+(function(){
+  var modal=document.getElementById('modal');
+  var origAdd=modal.classList.add.bind(modal.classList);
+  var obs=new MutationObserver(function(){
+    if(modal.classList.contains('show')&&document.documentElement.classList.contains('embed-mode')){
+      window.parent.postMessage({type:'matrix-drawer',open:true},'*');
+    }
+  });
+  obs.observe(modal,{attributes:true,attributeFilter:['class']});
+})();
+document.getElementById('scrim').onclick=closeDetail;
+document.addEventListener('keydown',e=>{ if(e.key==='Escape') closeDetail(); });
+
+document.querySelectorAll('#rangeSeg button').forEach(b=>b.onclick=()=>{ document.querySelectorAll('#rangeSeg button').forEach(x=>x.classList.remove('on')); b.classList.add('on'); gran=b.dataset.g; applyFilters(); });
+document.querySelectorAll('#locSeg button').forEach(b=>b.onclick=()=>{ document.querySelectorAll('#locSeg button').forEach(x=>x.classList.remove('on')); b.classList.add('on'); loc=b.dataset.l; applyFilters(); });
+[qEl,fO,fP,fA,fC,anchor].forEach(el=>el.addEventListener('input',applyFilters));
+document.getElementById('clear').onclick=()=>{
+  qEl.value=''; fO.value=''; fP.value=''; fA.value=''; fC.value=''; anchor.value=TODAY; gran='all'; loc='';
+  document.querySelectorAll('#rangeSeg button').forEach(x=>x.classList.remove('on')); document.querySelector('#rangeSeg [data-g="all"]').classList.add('on');
+  document.querySelectorAll('#locSeg button').forEach(x=>x.classList.remove('on')); document.querySelector('#locSeg [data-l=""]').classList.add('on');
+  applyFilters();
+};
+
+loadConsults();
+
+// Inherit theme from parent dashboard
+(function(){
+  var t = localStorage.getItem('rs-theme') || 'dark';
+  document.documentElement.setAttribute('data-theme', t);
+})();
+</script>
+</body>
+</html>

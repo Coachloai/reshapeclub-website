@@ -6,7 +6,7 @@ const corsHeaders = {
 
 const SUPABASE_URL    = Deno.env.get('SUPABASE_URL')!;
 const SERVICE_KEY     = Deno.env.get('SUPABASE_SERVICE_ROLE_KEY')!;
-const UNSUBSCRIBE_URL = Deno.env.get('UNSUBSCRIBE_URL') || 'https://reshapeclub.com/unsubscribe';
+const UNSUBSCRIBE_URL = Deno.env.get('UNSUBSCRIBE_URL') || 'https://reshape.fit/unsubscribe';
 
 Deno.serve(async (req: Request) => {
   if (req.method === 'OPTIONS') {
@@ -22,7 +22,6 @@ Deno.serve(async (req: Request) => {
     if (action === 'process_queue')      return ok(await processQueue());
     if (action === 'list_wa_templates')  return ok(await listWhatsAppTemplates());
     if (action === 'submit_wa_template') return ok(await submitWhatsAppTemplate(body));
-    if (action === 'create_wa_template') return ok(await createWhatsAppTemplate(body));
     if (action === 'preview_audience')   return ok(await previewAudience(body));
     if (action === 'send_broadcast')     return ok(await sendBroadcast(body));
 
@@ -62,8 +61,10 @@ async function sendMessage(body: any) {
 async function processQueue() {
   const now = new Date().toISOString();
 
+  // Fetch only 'queued' messages (not 'sending' — those are being handled by
+  // another invocation). We limit to 20 per run.
   const fetchRes = await fetch(
-    `${SUPABASE_URL}/rest/v1/message_queue?status=in.(queued,sending)&send_at=lte.${now}&order=send_at.asc&limit=20`,
+    `${SUPABASE_URL}/rest/v1/message_queue?status=eq.queued&send_at=lte.${now}&order=send_at.asc&limit=20`,
     { headers: srHeaders() }
   );
   const messages = await fetchRes.json();
@@ -71,8 +72,54 @@ async function processQueue() {
 
   let processed = 0;
   for (const msg of messages) {
+    // Atomically claim this message: set status='sending' only if still 'queued'.
+    // If another invocation already claimed it, this PATCH updates 0 rows and we skip.
+    const claimRes = await fetch(
+      `${SUPABASE_URL}/rest/v1/message_queue?id=eq.${msg.id}&status=eq.queued`,
+      {
+        method: 'PATCH',
+        headers: { ...srHeaders(), 'Prefer': 'return=representation' },
+        body: JSON.stringify({ status: 'sending' }),
+      }
+    );
+    const claimed = await claimRes.json();
+    if (!Array.isArray(claimed) || claimed.length === 0) continue; // already claimed
+
     let result;
     try {
+      // Confirmation-gated check: if this message is tied to a booking and has
+      // skip_if_confirmed or skip_if_not_confirmed, look up the booking's
+      // confirmed_at and decide whether to skip.
+      if (msg.booking_id && (msg.skip_if_confirmed || msg.skip_if_not_confirmed)) {
+        const bookingRes = await fetch(
+          `${SUPABASE_URL}/rest/v1/bookings?id=eq.${msg.booking_id}&select=confirmed_at&limit=1`,
+          { headers: srHeaders() }
+        );
+        const bookingRows = await bookingRes.json();
+        const isConfirmed = Array.isArray(bookingRows) && bookingRows.length > 0 && !!bookingRows[0].confirmed_at;
+
+        if (msg.skip_if_confirmed && isConfirmed) {
+          // Chase message but prospect already confirmed — skip it
+          await fetch(`${SUPABASE_URL}/rest/v1/message_queue?id=eq.${msg.id}`, {
+            method: 'PATCH',
+            headers: { ...srHeaders(), 'Prefer': 'return=minimal' },
+            body: JSON.stringify({ status: 'cancelled', error: 'skipped — booking already confirmed' }),
+          });
+          processed++;
+          continue;
+        }
+        if (msg.skip_if_not_confirmed && !isConfirmed) {
+          // Day-of reminder but prospect hasn't confirmed — skip it
+          await fetch(`${SUPABASE_URL}/rest/v1/message_queue?id=eq.${msg.id}`, {
+            method: 'PATCH',
+            headers: { ...srHeaders(), 'Prefer': 'return=minimal' },
+            body: JSON.stringify({ status: 'cancelled', error: 'skipped — booking not confirmed' }),
+          });
+          processed++;
+          continue;
+        }
+      }
+
       // Re-check consent at send time so a same-second opt-out wins.
       const consent = await getConsent(msg.lead_email, msg.lead_phone, msg.channel);
       if (consent === 'opted_out') {
@@ -107,11 +154,6 @@ async function processQueue() {
       }),
     });
 
-    if (msg.send_id) {
-      // sent_count / failed_count are maintained by the trg_mq_update_send_counters
-      // trigger added in migration 20260519200000.
-    }
-
     processed++;
   }
   return { processed };
@@ -126,6 +168,17 @@ async function sendBroadcast(body: any) {
 
   if (!['email','sms','whatsapp'].includes(channel))
     return { success: false, error: 'invalid channel' };
+
+  // Guard: reject duplicate sends within 5 minutes (same channel + audience size)
+  const fiveMinAgo = new Date(Date.now() - 5 * 60 * 1000).toISOString();
+  const dupeCheck = await fetch(
+    `${SUPABASE_URL}/rest/v1/message_sends?channel=eq.${channel}&created_at=gte.${fiveMinAgo}&status=neq.cancelled&limit=1`,
+    { headers: srHeaders() },
+  );
+  const recentSends = await dupeCheck.json();
+  if (Array.isArray(recentSends) && recentSends.length > 0) {
+    return { success: false, error: 'A broadcast was already sent in the last 5 minutes. Wait before sending again.' };
+  }
 
   const leads = await fetchAudience(audience, channel);
   if (!leads.length) return { success: false, error: 'no recipients match' };
@@ -160,7 +213,7 @@ async function sendBroadcast(body: any) {
   const rows = leads.map((l: any) => ({
     send_id:       sendId,
     lead_email:    l.email,
-    lead_phone:    l.phone,
+    lead_phone:    normalizePhone(l.phone),
     lead_name:     [l.first_name, l.last_name].filter(Boolean).join(' '),
     sequence:      'broadcast',
     step_index:    0,
@@ -229,13 +282,53 @@ async function fetchAudience(audience: any, channel: string): Promise<any[]> {
     leads = await fetchLeadsBy({ filter: audience }, channel);
   }
 
+  // Dedup by the delivery address for the channel — same email or same phone
+  // should only receive one copy, even if the person has multiple lead rows.
   const seen = new Set<string>();
-  return leads.filter((l) => {
+  leads = leads.filter((l) => {
     if (!l || !l.id) return false;
-    if (seen.has(l.id)) return false;
-    seen.add(l.id);
+    let key: string;
+    if ((channel === 'sms' || channel === 'whatsapp') && l.phone) {
+      // Normalize: strip whitespace/dashes/parens, convert bare 07/7 to +44
+      let p = l.phone.replace(/[\s\-\(\)]/g, '');
+      if (/^0[1-9]/.test(p)) p = '+44' + p.substring(1);
+      else if (/^[1-9]\d{9,}$/.test(p)) p = '+' + p;
+      key = 'phone:' + p;
+    } else if (l.email) {
+      key = 'email:' + l.email.toLowerCase();
+    } else {
+      key = 'id:' + l.id;
+    }
+    if (seen.has(key)) return false;
+    seen.add(key);
     return true;
   });
+
+  // Consult status filter: cross-reference with bookings table
+  const cs = audience.consult_status;
+  if (cs === 'booked' || cs === 'not_booked') {
+    const bookedEmails = await fetchBookedEmails();
+    if (cs === 'booked') {
+      leads = leads.filter((l) => l.email && bookedEmails.has(l.email.toLowerCase()));
+    } else {
+      leads = leads.filter((l) => !l.email || !bookedEmails.has(l.email.toLowerCase()));
+    }
+  }
+
+  return leads;
+}
+
+async function fetchBookedEmails(): Promise<Set<string>> {
+  const res = await fetch(
+    `${SUPABASE_URL}/rest/v1/bookings?select=email&status=eq.confirmed&limit=5000`,
+    { headers: srHeaders() },
+  );
+  const rows = await res.json();
+  const emails = new Set<string>();
+  if (Array.isArray(rows)) {
+    rows.forEach((r: any) => { if (r.email) emails.add(r.email.toLowerCase()); });
+  }
+  return emails;
 }
 
 async function fetchLeadsBy(opts: { ids?: string[]; filter?: any }, channel: string): Promise<any[]> {
@@ -294,6 +387,14 @@ function fillTokens(text: string, lead: any): string {
     form_name:  lead.form_name  || '',
   };
   return text.replace(/\{(\w+)\}/g, (m, k) => (k in map ? map[k] : m));
+}
+
+function normalizePhone(p: string | null): string | null {
+  if (!p) return null;
+  let c = p.replace(/[\s\-\(\)]/g, '');
+  if (/^0[1-9]/.test(c)) c = '+44' + c.substring(1);
+  else if (/^[1-9]\d{9,}$/.test(c)) c = '+' + c;
+  return c;
 }
 
 function toArr(v: any): string[] {
@@ -405,10 +506,10 @@ async function sendSMS(to: string, body: string) {
 async function sendWhatsApp(to: string, body: string, templateSid?: string | null, templateVars?: any) {
   const sid   = Deno.env.get('TWILIO_SID');
   const auth  = Deno.env.get('TWILIO_AUTH');
-  const phone = Deno.env.get('TWILIO_PHONE');
+  const phone = Deno.env.get('TWILIO_WA_PHONE') || Deno.env.get('TWILIO_PHONE');
   if (!sid)   return { success: false, error: 'TWILIO_SID not set in Edge Function secrets' };
   if (!auth)  return { success: false, error: 'TWILIO_AUTH not set in Edge Function secrets' };
-  if (!phone) return { success: false, error: 'TWILIO_PHONE not set in Edge Function secrets' };
+  if (!phone) return { success: false, error: 'TWILIO_WA_PHONE not set in Edge Function secrets' };
 
   // Normalise phone: strip spaces/dashes, ensure + prefix
   const cleanTo = to.replace(/[\s\-\(\)]/g, '').replace(/^(\d)/, '+$1');
@@ -441,30 +542,6 @@ async function sendWhatsApp(to: string, body: string, templateSid?: string | nul
   const errMsg = data.message || 'Failed';
   const errCode = data.code ? ` (Twilio ${data.code})` : '';
   return { success: false, error: errMsg + errCode };
-}
-
-// ── CREATE A WHATSAPP CONTENT TEMPLATE (Twilio Content API) ─────────────────
-async function createWhatsAppTemplate(body: any) {
-  const sid  = Deno.env.get('TWILIO_SID');
-  const auth = Deno.env.get('TWILIO_AUTH');
-  if (!sid || !auth) return { success: false, error: 'Twilio credentials not set' };
-
-  const { friendly_name, language, variables, types } = body;
-  if (!friendly_name) return { success: false, error: 'friendly_name required' };
-  if (!types)         return { success: false, error: 'types required' };
-
-  const credentials = btoa(`${sid}:${auth}`);
-  const payload: any = { friendly_name, language: language || 'en', types };
-  if (variables && Object.keys(variables).length) payload.variables = variables;
-
-  const res = await fetch('https://content.twilio.com/v1/Content', {
-    method: 'POST',
-    headers: { 'Authorization': `Basic ${credentials}`, 'Content-Type': 'application/json' },
-    body: JSON.stringify(payload),
-  });
-  const data = await res.json().catch(() => ({}));
-  if (!res.ok) return { success: false, error: data.message || data.error || ('Twilio HTTP ' + res.status) };
-  return { success: true, sid: data.sid, friendly_name: data.friendly_name };
 }
 
 // ── WHATSAPP TEMPLATE LIST + APPROVAL STATUS (Twilio Content API) ───────────

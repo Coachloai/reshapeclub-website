@@ -92,7 +92,9 @@
 
   <div class="narrow">
     <p class="result-closer fade-up" id="result-closer"></p>
-    <div class="booking">
+
+    <!-- OPEN MODE: booking calendar (hidden until waitlist check completes) -->
+    <div class="booking" id="booking-open" style="display:none">
       <div class="booking-grid">
         <div>
           <div class="eyebrow" style="color: var(--terracotta);">Your free in-person consult</div>
@@ -122,6 +124,22 @@
           <div class="cal-times" id="cal-times"></div>
           <button class="cal-confirm" id="cal-confirm" disabled>Pick a time first</button>
         </div>
+      </div>
+    </div>
+
+    <!-- WAITLIST MODE: join waitlist CTA instead of calendar -->
+    <div class="booking" id="booking-waitlist" style="display:none">
+      <div id="wl-cta-view" style="text-align:center;padding:20px 0">
+        <div class="eyebrow" style="color:var(--terracotta);margin-bottom:12px">Currently at capacity</div>
+        <h3 style="font-family:'Fraunces',serif;font-size:1.5rem;color:var(--charcoal);font-weight:400;margin-bottom:8px">We're full right now</h3>
+        <p style="color:var(--body);font-size:.95rem;max-width:400px;margin:0 auto 24px">Spots open up regularly. Join the waitlist and we'll be in touch as soon as there's space for you.</p>
+        <button onclick="joinWaitlistDirect()" id="wl-join-btn" style="padding:14px 36px;background:var(--terracotta);color:#fff;border:none;border-radius:999px;font-weight:700;font-size:1rem;cursor:pointer;transition:opacity .2s">Join the waitlist</button>
+      </div>
+      <div id="wl-done-view" style="display:none;text-align:center;padding:20px 0">
+        <div style="width:56px;height:56px;border-radius:50%;background:rgba(237,92,37,0.1);display:inline-flex;align-items:center;justify-content:center;margin-bottom:16px;font-size:28px;color:var(--terracotta)">&#10003;</div>
+        <h3 style="font-family:'Fraunces',serif;font-size:1.5rem;color:var(--charcoal);font-weight:400;margin-bottom:8px">You're on the waitlist!</h3>
+        <p style="color:var(--body);font-size:.95rem;max-width:400px;margin:0 auto 16px">We've added you to the queue and will be in touch as soon as a spot opens. Keep an eye on your WhatsApp and email.</p>
+        <p style="font-size:13px;color:var(--muted)">Redirecting you to our Instagram in <span id="wl-countdown">5</span>s…</p>
       </div>
     </div>
   </div>
@@ -162,7 +180,70 @@
 
 <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
 <script src="../api/config.js?v=2"></script>
-<script src="../api/automations.js?v=14"></script>
+<script src="../api/automations.js?v=16"></script>
 <script src="./result.js?v=6"></script>
+<script>
+// Waitlist mode: hide calendar, show waitlist CTA, direct join
+(function() {
+  var SB_URL = 'https://lvizldmdficsfpgegehp.supabase.co';
+  var SB_KEY = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6Imx2aXpsZG1kZmljc2ZwZ2VnZWhwIiwicm9sZSI6ImFub24iLCJpYXQiOjE3NzM2OTk4NDQsImV4cCI6MjA4OTI3NTg0NH0.72wHbZaTvqNzW6DTb6Ae1vi9QpOg_-KiEO-Jjm9mn0k';
+  var client = window.__supabaseClient || (typeof supabase !== 'undefined' ? supabase.createClient(SB_URL, SB_KEY) : null);
+  if (!client) return;
+  window.__supabaseClient = client;
+  window.__wlClient = client;
+  var decided = false;
+  function showWaitlist() {
+    decided = true;
+    var open = document.getElementById('booking-open');
+    var wl = document.getElementById('booking-waitlist');
+    if (open) open.style.display = 'none';
+    if (wl) wl.style.display = '';
+  }
+  function showCalendar() {
+    if (decided) return;
+    var open = document.getElementById('booking-open');
+    if (open) open.style.display = '';
+  }
+
+  // 1. Global waitlist toggle
+  client.from('site_settings').select('waitlist_enabled').eq('id', 'global').maybeSingle()
+    .then(function(res) {
+      if (res.data && res.data.waitlist_enabled) { showWaitlist(); return; }
+      // 2. Per-lead check
+      var leadEmail = sessionStorage.getItem('reshape_hormonal_email') || '';
+      if (leadEmail) {
+        client.from('leads').select('form_name').eq('email', leadEmail.toLowerCase())
+          .ilike('form_name', '%Waitlist%').limit(1).maybeSingle()
+          .then(function(r2) {
+            if (r2.data) showWaitlist(); else showCalendar();
+          }).catch(function() { showCalendar(); });
+      } else {
+        showCalendar();
+      }
+    }).catch(function() { showCalendar(); });
+})();
+
+async function joinWaitlistDirect() {
+  var btn = document.getElementById('wl-join-btn');
+  btn.disabled = true; btn.textContent = 'Joining...';
+  var sb = window.__wlClient;
+  var name = sessionStorage.getItem('reshape_hormonal_name') || '';
+  var email = sessionStorage.getItem('reshape_hormonal_email') || '';
+  var phone = sessionStorage.getItem('reshape_hormonal_phone') || '';
+  var firstName = name.split(' ')[0] || name;
+  var lastName = name.split(' ').slice(1).join(' ') || '';
+  try {
+    if (email) {
+      var leadData = { form_name: 'Waitlist — Hormonal Assessment', gender: 'Female', first_name: firstName, last_name: lastName, email: email, phone: phone };
+      await sb.from('leads').insert([leadData]);
+      if (typeof queueSequence === 'function') queueSequence('waitlist_joined', leadData, null, sb);
+    }
+  } catch(e) {}
+  document.getElementById('wl-cta-view').style.display = 'none';
+  document.getElementById('wl-done-view').style.display = '';
+  var seconds = 5; var cdEl = document.getElementById('wl-countdown');
+  var iv = setInterval(function() { seconds--; cdEl.textContent = seconds; if (seconds <= 0) { clearInterval(iv); window.location.href = 'https://www.instagram.com/reshape.club'; } }, 1000);
+}
+</script>
 </body>
 </html>

@@ -1,0 +1,21 @@
+-- Add hormone score columns and raw answers to nutrition_forms
+ALTER TABLE public.nutrition_forms
+  ADD COLUMN IF NOT EXISTS gender TEXT,
+  ADD COLUMN IF NOT EXISTS h_insulin INTEGER CHECK (h_insulin BETWEEN 0 AND 100),
+  ADD COLUMN IF NOT EXISTS h_glucagon INTEGER CHECK (h_glucagon BETWEEN 0 AND 100),
+  ADD COLUMN IF NOT EXISTS h_leptin INTEGER CHECK (h_leptin BETWEEN 0 AND 100),
+  ADD COLUMN IF NOT EXISTS h_adiponectin INTEGER CHECK (h_adiponectin BETWEEN 0 AND 100),
+  ADD COLUMN IF NOT EXISTS h_shbg INTEGER CHECK (h_shbg BETWEEN 0 AND 100),
+  ADD COLUMN IF NOT EXISTS h_cortisol INTEGER CHECK (h_cortisol BETWEEN 0 AND 100),
+  ADD COLUMN IF NOT EXISTS h_adrenaline INTEGER CHECK (h_adrenaline BETWEEN 0 AND 100),
+  ADD COLUMN IF NOT EXISTS h_gh INTEGER CHECK (h_gh BETWEEN 0 AND 100),
+  ADD COLUMN IF NOT EXISTS h_testosterone INTEGER CHECK (h_testosterone BETWEEN 0 AND 100),
+  ADD COLUMN IF NOT EXISTS h_thyroid INTEGER CHECK (h_thyroid BETWEEN 0 AND 100),
+  ADD COLUMN IF NOT EXISTS h_ghrelin INTEGER CHECK (h_ghrelin BETWEEN 0 AND 100),
+  ADD COLUMN IF NOT EXISTS h_estrogen INTEGER CHECK (h_estrogen BETWEEN 0 AND 100),
+  ADD COLUMN IF NOT EXISTS h_progesterone INTEGER CHECK (h_progesterone BETWEEN 0 AND 100),
+  ADD COLUMN IF NOT EXISTS h_aldosterone INTEGER CHECK (h_aldosterone BETWEEN 0 AND 100),
+  ADD COLUMN IF NOT EXISTS hormonal_answers JSONB,
+  ADD COLUMN IF NOT EXISTS h_phase TEXT;
+
+NOTIFY pgrst, 'reload schema';

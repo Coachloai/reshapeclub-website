@@ -14,7 +14,7 @@ var AUTOMATION_CONFIG = window.__AUTOMATION_CONFIG || {
   icloud_enabled: true,
   from_email: 'coach@reshape.fit',
   from_name: 'Jaime | ReShape',
-  booking_url: 'https://reshapeclub.com/booking',
+  booking_url: 'https://reshape.fit/booking',
 };
 
 // Edge Function URL
@@ -34,6 +34,13 @@ async function verifyPhone(phone, inputEl) {
     cleaned = '+' + cleaned;
     if (inputEl) inputEl.value = cleaned;
   }
+  // Handle UK numbers entered with a plus before the leading zero (+07... → +447...)
+  if (/^\+0[1-9]\d{8,10}$/.test(cleaned)) {
+    cleaned = '+44' + cleaned.substring(2);
+    if (inputEl) inputEl.value = cleaned;
+  }
+  // No international number starts with +0
+  if (/^\+0/.test(cleaned)) return { valid: false, error: 'Enter a valid phone number (e.g. 07700 000000 or +44 7700 000000)' };
   if (!/^\+\d{10,15}$/.test(cleaned)) return { valid: false, error: 'Enter a valid phone number (e.g. 07700 000000 or +44 7700 000000)' };
   // Country-specific length validation
   var rules = {
@@ -118,7 +125,7 @@ async function sendWhatsApp(to, body) {
 function generateICS(booking, leadName, opts) {
   var o = opts || {};
   var dt = new Date(booking.datetime);
-  var endDt = new Date(dt.getTime() + 3600000); // 1 hour duration
+  var endDt = new Date(dt.getTime() + 2700000); // 45 minutes // 1 hour duration
   function icsDate(d) {
     return d.toISOString().replace(/[-:]/g, '').replace(/\.\d{3}/, '');
   }
@@ -169,7 +176,7 @@ async function addToGoogleCalendar(lead, booking, calendarIdOverride) {
   var calendarId = calendarIdOverride || AUTOMATION_CONFIG.google_calendar_id || 'primary';
   var leadName = ((lead.first_name || '') + ' ' + (lead.last_name || '')).trim();
   var dt = new Date(booking.datetime);
-  var endDt = new Date(dt.getTime() + 3600000);
+  var endDt = new Date(dt.getTime() + 2700000); // 45 minutes
   var location = booking.location === 'Ipswich' ? 'ReShape, Ipswich' : booking.location === 'Colchester' ? 'ReShape, Colchester' : 'ReShape, ' + (booking.location || '');
   var event = {
     summary: 'Consult: ' + (leadName || 'New Lead'),
@@ -226,7 +233,25 @@ async function deleteCalendarEvent(booking) {
     } else if (booking.calendar_provider === 'google' && booking.calendar_event_id) {
       await deleteFromGoogleCalendar(booking.calendar_event_id);
     }
-  } catch (e) { console.warn('Calendar event delete failed:', e); }
+  } catch (e) { console.error('[Calendar] Event delete FAILED for booking', booking.id || 'unknown', ':', e); }
+}
+
+/* ── DELETE CALENDAR EVENT AND CLEAR REF ── */
+async function deleteCalendarEventAndClearRef(booking) {
+  await deleteCalendarEvent(booking);
+  // Clear the ref columns so we know the event is gone
+  if (booking.id) {
+    var sbClient = (typeof window !== 'undefined' && window.__supabaseClient) || null;
+    if (sbClient) {
+      try {
+        await sbClient.from('bookings').update({
+          calendar_event_id: null,
+          calendar_event_url: null,
+          calendar_provider: null
+        }).eq('id', booking.id);
+      } catch (e) { console.warn('[Calendar] Failed to clear ref on booking', booking.id); }
+    }
+  }
 }
 
 // Supabase anon key (public — safe to include) for hitting the edge functions
@@ -283,8 +308,26 @@ async function loadApptTypeTarget(booking) {
 }
 
 /* ── SEND COACH CALENDAR INVITE ── */
+var _calendarInFlight = {};
 async function sendCoachCalendarInvite(lead, booking) {
   if (!booking || !booking.datetime) return;
+
+  // Prevent duplicate events for the same booking
+  if (booking.id) {
+    if (_calendarInFlight[booking.id]) return;
+    _calendarInFlight[booking.id] = true;
+    // Also check if this booking already has a calendar event
+    var sbCheck = (typeof window !== 'undefined' && window.__supabaseClient) || null;
+    if (sbCheck) {
+      try {
+        var existing = await sbCheck.from('bookings').select('calendar_event_id').eq('id', booking.id).maybeSingle();
+        if (existing.data && existing.data.calendar_event_id) {
+          console.log('[Calendar] Booking ' + booking.id + ' already has event ' + existing.data.calendar_event_id + ', skipping');
+          return;
+        }
+      } catch (e) { /* proceed if check fails */ }
+    }
+  }
 
   // Resolve where to write the event: per-type override first, then
   // location-based iCloud calendar, then global default.
@@ -348,17 +391,27 @@ async function sendCoachCalendarInvite(lead, booking) {
         console.log(o.name + ' calendar event created:', o.result.id);
         anySuccess = true;
         // Save calendar event reference back to the booking row for future delete/update
-        if (booking.id) {
-          var sbClient = (typeof window !== 'undefined' && window.__supabaseClient) || null;
-          if (sbClient) {
+        var sbClient = (typeof window !== 'undefined' && window.__supabaseClient) || null;
+        if (sbClient) {
+          var bookingId = booking.id;
+          // If booking.id isn't set yet (insert still in flight), try to look it up by email
+          if (!bookingId && booking.email) {
+            try {
+              var lookup = await sbClient.from('bookings').select('id').eq('email', booking.email).order('created_at', { ascending: false }).limit(1).maybeSingle();
+              if (lookup.data) bookingId = lookup.data.id;
+            } catch (_) {}
+          }
+          if (bookingId) {
             try {
               await sbClient.from('bookings').update({
                 calendar_event_id: o.result.id || null,
                 calendar_event_url: o.result.url || null,
                 calendar_provider: o.provider
-              }).eq('id', booking.id);
-              console.log('[Calendar] Saved ref to booking ' + booking.id + ' | url: ' + (o.result.url || 'n/a'));
+              }).eq('id', bookingId);
+              console.log('[Calendar] Saved ref to booking ' + bookingId + ' | url: ' + (o.result.url || 'n/a'));
             } catch (saveErr) { console.warn('Failed to save calendar event ref:', saveErr); }
+          } else {
+            console.warn('[Calendar] Event created but no booking.id to save ref — potential orphan:', o.result.id);
           }
         }
       } else {
@@ -530,6 +583,30 @@ var SEQUENCES = {
     },
   ],
 
+  // After joining the waitlist
+  waitlist_joined: [
+    { delay: 0,        channel: 'email',    subject: 'You\'re on the waitlist \u2014 we\'ll be in touch',
+      body: function(lead) { return emailTemplate(
+        'Hey ' + lead.first_name + ', you\'re on the list! \uD83D\uDC4A',
+        '<p>Thanks for joining the ReShape waitlist. We\'re at capacity right now, but spots open up regularly.</p><p>We\'ll reach out via WhatsApp and email as soon as there\'s space for you. In the meantime, follow us on Instagram to see what our members are up to.</p>',
+        'Follow us on Instagram', 'https://www.instagram.com/reshape.club'
+      ); }
+    },
+    { delay: 3600,     channel: 'whatsapp',
+      body: function(lead) { return 'Hey ' + lead.first_name + '! \uD83D\uDC4B It\'s Jaime from ReShape. Just to confirm you\'re on our waitlist \u2014 we\'ll message you as soon as a spot opens up. Shouldn\'t be too long! In the meantime, give us a follow: https://www.instagram.com/reshape.club'; }
+    },
+    { delay: 259200,   channel: 'email',    subject: 'Still on the list \u2014 here\'s what\'s happening at ReShape',
+      body: function(lead) { return emailTemplate(
+        lead.first_name + ', you\'re still in the queue',
+        '<p>Just a quick update \u2014 you\'re still on the waitlist and we haven\'t forgotten about you.</p><p>We\'re working through the current intake now. As soon as a spot opens, you\'ll be the first to know.</p><p>In the meantime, check out some of our recent transformations on Instagram \u2014 this could be you in 12 weeks.</p>',
+        'See transformations', 'https://www.instagram.com/reshape.club'
+      ); }
+    },
+    { delay: 604800,   channel: 'whatsapp',
+      body: function(lead) { return 'Hey ' + lead.first_name + ', quick update from Jaime \uD83D\uDCAA You\'re still on our waitlist and spots are opening up soon. I\'ll message you the moment we have space. Hang tight!'; }
+    },
+  ],
+
   // After booking confirmed
   booking_confirmed: [
     { delay: 0,        channel: 'email',    subject: 'You\'re booked! \uD83C\uDF89 See you soon',
@@ -543,7 +620,7 @@ var SEQUENCES = {
         '<p style="margin:4px 0"><strong>Location:</strong> ' + (booking.location || '') + '</p></div>' +
         '<p>Wear something comfortable. We\'ll handle the rest.</p>' +
         '<p style="margin-top:16px;font-size:14px;color:rgba(255,255,255,0.5)">A calendar invite (.ics) is attached to this email.</p>' +
-        (booking.id && booking.confirm_token ? '<p style="margin-top:12px;font-size:12px;color:rgba(255,255,255,0.3)">Need to cancel? <a href="https://reshapeclub.com/cancel?id=' + encodeURIComponent(booking.id) + '&token=' + encodeURIComponent(booking.confirm_token) + '" style="color:rgba(255,255,255,0.4);text-decoration:underline">Cancel booking</a></p>' : ''),
+        (booking.id && booking.confirm_token ? '<p style="margin-top:12px;font-size:12px;color:rgba(255,255,255,0.3)">Need to cancel? <a href="https://reshape.fit/cancel?id=' + encodeURIComponent(booking.id) + '&token=' + encodeURIComponent(booking.confirm_token) + '" style="color:rgba(255,255,255,0.4);text-decoration:underline">Cancel booking</a></p>' : ''),
         '', ''
       ); }
     },
@@ -557,8 +634,8 @@ var SEQUENCES = {
       body: function(lead, booking) {
         var m = studioMeta(booking);
         var confirmUrl = (booking.id && booking.confirm_token)
-          ? 'https://reshapeclub.com/confirm?id=' + encodeURIComponent(booking.id) + '&token=' + encodeURIComponent(booking.confirm_token)
-          : 'https://reshapeclub.com/confirm';
+          ? 'https://reshape.fit/confirm?id=' + encodeURIComponent(booking.id) + '&token=' + encodeURIComponent(booking.confirm_token)
+          : 'https://reshape.fit/confirm';
         return 'Hey ' + (lead.first_name || '') + '\n\n' +
           'It\'s ' + m.coach + ' from ReShape :)\n\n' +
           'Just got your booking through for ' + (booking.date || '') + ' at ' + (booking.time || '') + '. I\'ve had a look at your application and I think this will be a great fit for you.\n\n' +
@@ -571,12 +648,27 @@ var SEQUENCES = {
           m.coach;
       }
     },
+    // Nutrition assessment form — sent 1 hour after booking
+    { delay: 3600,     channel: 'email',    subject: 'One more thing before your visit \uD83E\uDD66',
+      body: function(lead) { return emailTemplate(
+        'Complete your Nutrition Assessment',
+        '<p>Hey ' + (lead.first_name || '') + ',</p>' +
+        '<p>Before your visit, we\'d love to learn a bit more about your current nutrition, health and lifestyle. This helps your Coach prepare a personalised plan from day one.</p>' +
+        '<p>It takes about 10 minutes:</p>' +
+        '<div style="text-align:center;margin:24px 0"><a href="https://reshape.fit/assessment?email=' + encodeURIComponent(lead.email || '') + '&name=' + encodeURIComponent((lead.first_name || '') + ' ' + (lead.last_name || '')) + '" style="display:inline-block;padding:14px 32px;background:#ed5c25;color:#fff;text-decoration:none;border-radius:10px;font-weight:700;font-size:15px">Complete Your Assessment</a></div>' +
+        '<p style="font-size:13px;color:rgba(255,255,255,0.5)">All information is confidential and used only by your coaching team.</p>',
+        '', ''
+      ); }
+    },
+    { delay: 3600,     channel: 'sms',
+      body: function(lead) { return 'Hey ' + (lead.first_name || '') + ', before your visit please complete your health assessment (5 mins): https://reshape.fit/assessment?email=' + encodeURIComponent(lead.email || '') + '&name=' + encodeURIComponent((lead.first_name || '') + ' ' + (lead.last_name || '')); }
+    },
     { delay: -86400,   channel: 'whatsapp', is_reminder: true,
       body: function(lead, booking) {
         var m = studioMeta(booking);
         var resultsUrl = (booking.id && booking.confirm_token)
-          ? 'https://reshapeclub.com/confirm?id=' + encodeURIComponent(booking.id) + '&token=' + encodeURIComponent(booking.confirm_token)
-          : 'https://reshapeclub.com/confirm';
+          ? 'https://reshape.fit/confirm?id=' + encodeURIComponent(booking.id) + '&token=' + encodeURIComponent(booking.confirm_token)
+          : 'https://reshape.fit/confirm';
         return 'Hey ' + (lead.first_name || '') + '\n\n' +
           'It\'s ' + m.coach + ' from Re-Shape :)\n\n' +
           'Just a quick message to let you know your consult tomorrow at ' + (booking.time || '') + ' will be with me. I\'ve looked through your application and I think this will be a great fit for you!\n\n' +
@@ -616,8 +708,8 @@ function replaceVars(text, lead, booking) {
   var meta = studioMeta(b);
   var hp = lead && lead.hormonal_pattern;
   var resultsUrl = (b.id && b.confirm_token)
-    ? 'https://reshapeclub.com/results/?id=' + encodeURIComponent(b.id) + '&token=' + encodeURIComponent(b.confirm_token)
-    : 'https://reshapeclub.com/results';
+    ? 'https://reshape.fit/results/?id=' + encodeURIComponent(b.id) + '&token=' + encodeURIComponent(b.confirm_token)
+    : 'https://reshape.fit/results';
   var vars = {
     first_name:    (lead && lead.first_name) || '',
     pattern:       hp ? 'your ' + hp + ' results' : 'the goals you shared with us',
@@ -634,7 +726,7 @@ function replaceVars(text, lead, booking) {
     confirm_url:   resultsUrl,                    // legacy alias (was /confirm — renamed to /results)
     confirm_id:    b.id || '',
     confirm_token: b.confirm_token || '',
-    cancel_url:    (b.id && b.confirm_token) ? 'https://reshapeclub.com/cancel?id=' + encodeURIComponent(b.id) + '&token=' + encodeURIComponent(b.confirm_token) : '',
+    cancel_url:    (b.id && b.confirm_token) ? 'https://reshape.fit/cancel?id=' + encodeURIComponent(b.id) + '&token=' + encodeURIComponent(b.confirm_token) : '',
     address:       meta.address || '',
     maps_url:      meta.mapsUrl || ''
   };
@@ -676,7 +768,7 @@ async function queueSequenceFromDB(sequenceName, lead, booking, supabaseClient) 
   // 2. Fetch all active steps ordered by step_order
   var stepsRes = await supabaseClient
     .from('automation_steps')
-    .select('id, step_order, channel, delay_seconds, subject, body, is_active')
+    .select('id, step_order, channel, delay_seconds, subject, body, is_active, skip_if_confirmed, skip_if_not_confirmed, template_sid, template_vars')
     .eq('sequence_id', sequenceId)
     .eq('is_active', true)
     .order('step_order', { ascending: true });
@@ -731,7 +823,38 @@ async function queueSequenceFromDB(sequenceName, lead, booking, supabaseClient) 
       finalBody = bodyText;
     }
 
-    messages.push({
+    // Build template_vars for WhatsApp Content Templates.
+    // The template uses numbered variables ({{1}}, {{2}}, etc.) which map
+    // to the vars defined when the template was created in Twilio.
+    var resolvedTemplateVars = null;
+    if (step.template_sid && step.channel === 'whatsapp') {
+      var b = booking || {};
+      var meta = studioMeta(b);
+      var resultsUrl = (b.id && b.confirm_token)
+        ? 'https://reshape.fit/results/?id=' + encodeURIComponent(b.id) + '&token=' + encodeURIComponent(b.confirm_token)
+        : 'https://reshape.fit/results';
+      // Use the template_vars from DB if present, otherwise build from known templates
+      if (step.template_vars) {
+        resolvedTemplateVars = {};
+        var keys = Object.keys(step.template_vars);
+        for (var k = 0; k < keys.length; k++) {
+          var varName = step.template_vars[keys[k]];
+          var varMap = {
+            first_name: (lead && lead.first_name) || '',
+            coach_name: meta.coach,
+            booking_date: b.date || '',
+            booking_time: b.time || '',
+            location: b.location || '',
+            confirm_url: resultsUrl,
+            address: meta.address || '',
+            maps_url: meta.mapsUrl || ''
+          };
+          resolvedTemplateVars[keys[k]] = varMap[varName] || varName;
+        }
+      }
+    }
+
+    var msg = {
       lead_email: lead.email,
       lead_phone: lead.phone || null,
       lead_name: lead.first_name + ' ' + (lead.last_name || ''),
@@ -742,7 +865,14 @@ async function queueSequenceFromDB(sequenceName, lead, booking, supabaseClient) 
       body: finalBody,
       send_at: sendAt,
       status: step.delay_seconds === 0 ? 'sending' : 'queued',
-    });
+      booking_id: (booking && booking.id) || null,
+      skip_if_confirmed: step.skip_if_confirmed || false,
+      skip_if_not_confirmed: step.skip_if_not_confirmed || false,
+    };
+    if (step.template_sid) msg.template_sid = step.template_sid;
+    if (resolvedTemplateVars) msg.template_vars = resolvedTemplateVars;
+
+    messages.push(msg);
   }
 
   // 5. Insert into message_queue
@@ -768,13 +898,28 @@ async function queueSequenceFromDB(sequenceName, lead, booking, supabaseClient) 
 // Queue a full nurture sequence for a lead
 // Tries the database first, then falls back to hardcoded SEQUENCES
 async function queueSequence(sequenceName, lead, booking, supabaseClient) {
+  // Joining the waitlist supersedes any pending "book your visit" nurture —
+  // cancel queued booking-CTA messages so leads don't get conflicting emails.
+  if (sequenceName === 'waitlist_joined' && supabaseClient && lead && lead.email) {
+    try {
+      await supabaseClient
+        .from('message_queue')
+        .update({ status: 'cancelled' })
+        .eq('lead_email', lead.email)
+        .in('sequence', ['form_submitted', 'hormonal_stress_driven', 'hormonal_shift_pattern', 'hormonal_metabolic', 'hormonal_compound', 'waitlist_joined'])
+        .in('status', ['queued', 'sending']);
+    } catch (e) {
+      console.warn('Failed to cancel pending nurture before waitlist_joined:', e.message);
+    }
+  }
+
   // Try database-driven sequences first
   try {
     var dbResult = await queueSequenceFromDB(sequenceName, lead, booking, supabaseClient);
     if (dbResult) {
       // Successfully queued from DB — still send coach calendar invite if needed
       if (sequenceName === 'booking_confirmed' && booking && booking.datetime) {
-        sendCoachCalendarInvite(lead, booking);
+        await sendCoachCalendarInvite(lead, booking);
       }
       return;
     }
@@ -836,7 +981,7 @@ async function queueSequence(sequenceName, lead, booking, supabaseClient) {
 
   // Send coach calendar invite for new bookings
   if (sequenceName === 'booking_confirmed' && booking && booking.datetime) {
-    sendCoachCalendarInvite(lead, booking);
+    await sendCoachCalendarInvite(lead, booking);
   }
 }
 
@@ -870,25 +1015,22 @@ async function processMessage(msg, supabaseClient, icsContent) {
   return result;
 }
 
-// Process all pending messages that are due
-async function processQueue(supabaseClient) {
-  var now = new Date().toISOString();
-  var res = await supabaseClient.from('message_queue')
-    .select('*')
-    .eq('status', 'queued')
-    .lte('send_at', now)
-    .order('send_at', { ascending: true })
-    .limit(20);
-
-  var messages = res.data || [];
-  var processed = 0;
-
-  for (var i = 0; i < messages.length; i++) {
-    await processMessage(messages[i], supabaseClient);
-    processed++;
-    // Small delay between messages to avoid rate limits
-    await new Promise(function(r) { setTimeout(r, 500); });
+// Process all pending messages that are due.
+// Delegates to the Edge Function which has atomic row-level locking
+// (claims each message with status='sending' before dispatching).
+// The previous client-side implementation had no locking and raced with
+// the pg_cron Edge Function invocation, causing duplicate sends.
+async function processQueue() {
+  try {
+    var res = await fetch(EDGE_FUNCTION_URL, {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({ action: 'process_queue' })
+    });
+    var data = await res.json().catch(function() { return {}; });
+    return data.processed || 0;
+  } catch (e) {
+    console.warn('processQueue edge call failed:', e.message);
+    return 0;
   }
-
-  return processed;
 }

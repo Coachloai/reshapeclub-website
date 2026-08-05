@@ -122,8 +122,8 @@ Deno.serve(async (req: Request) => {
     if (cals.length === 0) throw new Error('No VEVENT-capable calendars found');
     const preferredName = body.calendarName || Deno.env.get('ICLOUD_CALENDAR_NAME') || null;
     const target = (preferredName
-      ? cals.find(c => c.displayName.trim().toLowerCase() === preferredName.trim().toLowerCase())
-      : null) ?? cals.find(c => c.href.includes('/calendars/') && !c.href.endsWith('/calendars/')) ?? cals[0];
+      ? cals.find(c => c.displayName.toLowerCase() === preferredName.toLowerCase())
+      : null) ?? cals[0];
 
     const uid = crypto.randomUUID();
     const ics = buildICS({
@@ -211,11 +211,7 @@ async function discoverCalendars(auth: string): Promise<CalendarInfo[]> {
     href: resolveUrl(listRes.finalUrl, c.href).replace(/\/?$/, '/'),
     displayName: c.displayName,
     supportsVEvent: c.supportsVEvent,
-  })).filter(c => {
-    // Exclude the calendar home set itself — it has the same path as homeUrl
-    // and iCloud rejects PUTs to it. Real calendars have a UUID sub-path.
-    return c.href !== homeUrl.replace(/\/?$/, '/');
-  });
+  }));
 }
 
 // ─── Busy time fetch (CalDAV calendar-query REPORT) ──────────────────────

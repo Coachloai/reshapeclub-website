@@ -10,8 +10,8 @@
 <link rel="apple-touch-icon" href="/apple-touch-icon.png">
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-<link href="https://fonts.googleapis.com/css2?family=Fraunces:opsz,wght@9..144,300;9..144,400;9..144,500;9..144,600;9..144,700&family=Inter:wght@300;400;500;600&display=swap" rel="stylesheet">
-<link rel="stylesheet" href="./styles.css?v=2">
+<link href="https://fonts.googleapis.com/css2?family=DM+Sans:wght@400;500;600&family=Inter:wght@300;400;500;600&family=JetBrains+Mono:wght@400;500&display=swap" rel="stylesheet">
+<link rel="stylesheet" href="./styles.css?v=3">
 <!-- Meta Pixel -->
 <script>
   !function(f,b,e,v,n,t,s){if(f.fbq)return;n=f.fbq=function(){n.callMethod?
@@ -33,11 +33,10 @@
     <a href="./" class="logo"><span class="logo-mark"></span>ReShape</a>
     <div class="assess-progress-text" id="progress-text"><strong>Question 1</strong> of 15</div>
   </div>
-  <div class="assess-bar"><div class="assess-bar-fill" id="bar-fill"></div></div>
+  <div class="assess-progress-bar" id="progress-bar"></div>
 </nav>
 
 <section class="assess-screen" id="screen-root">
-  <!-- Question card injected here by quiz.js -->
   <div class="loading-state">
     <div class="loading-spinner"></div>
     <h3>Starting your assessment…</h3>
@@ -46,7 +45,7 @@
 </section>
 
 <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
-<script src="./questions.js?v=2"></script>
-<script src="./quiz.js?v=2"></script>
+<script src="./questions.js?v=3"></script>
+<script src="./quiz.js?v=3"></script>
 </body>
 </html>

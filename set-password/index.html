@@ -91,13 +91,16 @@
     var res = await sb.auth.getSession();
     if (res.data && res.data.session) { gotSession(); return; }
 
-    // Give detectSessionInUrl a beat to exchange the token, then decide.
-    setTimeout(async function(){
-      if (settled) return;
+    // Give detectSessionInUrl time to exchange the token, then decide.
+    // Use longer timeout + retry for slow connections.
+    var attempts = 0;
+    var check = setInterval(async function(){
+      if (settled) { clearInterval(check); return; }
+      attempts++;
       var r = await sb.auth.getSession();
-      if (r.data && r.data.session) gotSession();
-      else show('bad');
-    }, 1200);
+      if (r.data && r.data.session) { clearInterval(check); gotSession(); }
+      else if (attempts >= 5) { clearInterval(check); show('bad'); }
+    }, 800);
   })();
 
   async function savePassword(){

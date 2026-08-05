@@ -1,0 +1,484 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>ReShape — Onboarding</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Bricolage+Grotesque:opsz,wght@12..96,500;12..96,700;12..96,800&family=Spline+Sans:wght@400;500;600&display=swap" rel="stylesheet">
+<script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+<style>
+  :root{
+    --bg:#0d0e11; --surface:#16181d; --surface-2:#1d2027; --line:#2a2e37;
+    --text:#f2f3f5; --muted:#8b909b; --faint:#5b606b;
+    --accent:#ed5c25; --accent-dim:rgba(237,92,37,.13); --accent-line:rgba(237,92,37,.35);
+    --green:#ed5c25; --green-dim:rgba(237,92,37,.13);
+    --warn:#f5a93b; --warn-dim:rgba(245,169,59,.14);
+    --pink:#ff7eb6; --pink-dim:rgba(255,126,182,.13);
+    --exit:#ff7a7a; --exit-dim:rgba(255,122,122,.12);
+    --disp:'Bricolage Grotesque',sans-serif; --body:'Spline Sans',sans-serif;
+  }
+  [data-theme="light"]{
+    --bg:#FAF7F2; --surface:#FFFFFF; --surface-2:#F0EBE3; --line:#E5DFD5;
+    --text:#2A2724; --muted:#5A5550; --faint:rgba(42,39,36,0.5);
+    --accent:#d4481a; --accent-dim:rgba(212,72,26,.10); --accent-line:rgba(212,72,26,.30);
+    --green:#d4481a; --green-dim:rgba(212,72,26,.10);
+    --warn:#D97706; --warn-dim:rgba(217,119,6,.10);
+    --pink:#DB2777; --pink-dim:rgba(219,39,119,.10);
+    --exit:#DC2626; --exit-dim:rgba(220,38,38,.10);
+  }
+  [data-theme="light"] body{color-scheme:light;background:var(--bg)}
+  [data-theme="light"] .step-no{color:#fff}
+  [data-theme="light"] .ask .opt.on{color:#fff}
+  [data-theme="light"] .next{color:#fff}
+  *{box-sizing:border-box;margin:0;padding:0}
+  html,body{height:100%}
+  body{background:radial-gradient(900px 500px at 88% -10%, rgba(194,242,63,.06), transparent 60%), var(--bg);
+    color:var(--text); font-family:var(--body); line-height:1.5; -webkit-font-smoothing:antialiased;}
+  .app{max-width:1080px; margin:0 auto; padding:22px 22px 150px;}
+  button{font-family:var(--body); cursor:pointer; border:none; background:none; color:inherit;}
+
+  header{display:flex; align-items:center; justify-content:space-between; gap:16px; flex-wrap:wrap; padding-bottom:14px;}
+  .brand{display:flex; align-items:baseline; gap:12px;}
+  .brand .dot{width:8px;height:8px;border-radius:50%;background:var(--accent);box-shadow:0 0 12px var(--accent);align-self:center;}
+  .brand h1{font-family:var(--disp); font-weight:800; font-size:22px; letter-spacing:-.02em;}
+  .brand .tag{color:var(--muted); font-size:12px; text-transform:uppercase; letter-spacing:.14em;}
+  .head-tools{display:flex; align-items:center; gap:10px;}
+  .btn{border:1px solid var(--line); background:var(--surface); color:var(--text); padding:9px 14px; border-radius:10px; font-size:13.5px; font-weight:500; transition:.15s;}
+  .btn:hover{border-color:var(--faint); background:var(--surface-2);}
+
+  .rail{display:flex; gap:6px; margin:8px 0 14px; flex-wrap:wrap;}
+  .rail .seg{flex:1 1 56px; min-width:42px; height:5px; border-radius:3px; background:var(--surface-2); cursor:pointer; transition:.2s;}
+  .rail .seg.done{background:var(--accent-line);}
+  .rail .seg.active{background:var(--accent); box-shadow:0 0 10px var(--accent-dim);}
+
+  .signals{display:flex; gap:10px; margin-bottom:20px; flex-wrap:wrap;}
+  .sig-badge{display:flex; align-items:center; gap:9px; background:var(--surface); border:1px solid var(--line); border-radius:10px; padding:8px 14px;}
+  .sig-badge span{color:var(--muted); text-transform:uppercase; letter-spacing:.1em; font-size:10.5px;}
+  .sig-badge b{font-family:var(--disp); font-weight:800; font-size:15px;}
+  .sig-badge.done b{color:var(--green);}
+
+  .stage{background:var(--surface); border:1px solid var(--line); border-radius:16px; overflow:hidden;}
+  .stage-head{display:flex; align-items:flex-start; justify-content:space-between; gap:16px; padding:20px 22px 16px; border-bottom:1px solid var(--line); background:linear-gradient(180deg, rgba(255,255,255,.015), transparent);}
+  .step-no{font-family:var(--disp); font-weight:800; font-size:13px; color:var(--bg); background:var(--accent); border-radius:7px; padding:3px 9px;}
+  .meta{display:flex; align-items:center; gap:12px; flex-wrap:wrap;}
+  .stage-head h2{font-family:var(--disp); font-weight:700; font-size:24px; letter-spacing:-.02em; line-height:1.1;}
+  .goal{color:var(--muted); font-size:13.5px; margin-top:6px; max-width:64ch;}
+  .stage-body{padding:20px 22px 24px; display:flex; flex-direction:column; gap:12px;}
+
+  .check-item{display:flex; align-items:center; gap:12px; padding:12px 14px; border:1px solid var(--line); border-radius:12px; background:var(--surface-2); transition:.15s; cursor:pointer;}
+  .check-item:hover{border-color:var(--faint);}
+  .check-item.checked{border-color:var(--accent-line); background:var(--accent-dim);}
+  .check-item.checked .ci-text{color:var(--muted); text-decoration:line-through;}
+  .check-item input[type=checkbox]{display:none;}
+  .ci-box{width:22px; height:22px; border-radius:6px; border:2px solid var(--line); display:flex; align-items:center; justify-content:center; flex-shrink:0; transition:.15s;}
+  .check-item.checked .ci-box{border-color:var(--accent); background:var(--accent);}
+  .ci-box svg{width:14px; height:14px; stroke:var(--bg); stroke-width:3; fill:none; opacity:0; transition:.1s;}
+  .check-item.checked .ci-box svg{opacity:1;}
+  .ci-text{font-size:14px; color:var(--text); line-height:1.4;}
+  .ci-num{font-family:var(--disp); font-weight:700; font-size:11px; color:var(--faint); min-width:20px;}
+
+  /* Footage form */
+  .footage-card{border:1px solid var(--line); border-radius:13px; padding:20px 22px; background:var(--surface-2);}
+  .footage-card h3{font-family:var(--disp); font-weight:700; font-size:18px; margin-bottom:6px;}
+  .footage-card p{font-size:14px; color:var(--muted); line-height:1.6; margin-bottom:16px;}
+  .footage-card .legal{font-size:12.5px; color:var(--faint); line-height:1.55; margin-bottom:16px; border-left:3px solid var(--line); padding-left:14px;}
+  .sig-area{display:flex; align-items:flex-start; gap:16px; flex-wrap:wrap;}
+  .sig-area canvas{border:1px solid var(--line); border-radius:10px; background:var(--bg); cursor:crosshair;}
+  .sig-actions{display:flex; flex-direction:column; gap:8px;}
+  .sig-actions .btn-sign{background:var(--accent); color:var(--bg); font-weight:700; padding:11px 20px; border-radius:10px; font-size:14px; border:none;}
+  .sig-actions .btn-sign:hover{filter:brightness(1.06);}
+  .sig-actions .btn-clear{font-size:12px; color:var(--faint);}
+  .signed-badge{display:flex; align-items:center; gap:14px; background:var(--green-dim); border:1px solid rgba(237,92,37,.3); border-radius:12px; padding:14px 18px;}
+  .signed-badge .s-text{font-weight:700; color:var(--green); font-size:14px;}
+  .signed-badge .s-date{font-size:12px; color:var(--muted); margin-top:2px;}
+  .signed-badge img{height:56px; border-radius:8px; border:1px solid var(--line); background:var(--surface); padding:4px;}
+
+  /* Member info */
+  .info-grid{display:grid; grid-template-columns:repeat(auto-fill, minmax(180px,1fr)); gap:10px; margin-bottom:6px;}
+  .info-tile{background:var(--surface-2); border:1px solid var(--line); border-radius:10px; padding:10px 14px;}
+  .info-tile .il{font-size:10px; text-transform:uppercase; letter-spacing:.12em; color:var(--faint); margin-bottom:2px;}
+  .info-tile .iv{font-family:var(--disp); font-weight:700; font-size:15px; color:var(--text);}
+
+  /* Nav */
+  .nav{position:fixed; left:0; right:0; bottom:0; background:linear-gradient(180deg, transparent, var(--bg) 28%); padding:18px 22px 22px; z-index:10;}
+  .nav-inner{max-width:1080px; margin:0 auto; display:flex; align-items:center; justify-content:space-between; gap:12px;}
+  .nav .stage-name{color:var(--muted); font-size:13px; overflow:hidden; text-overflow:ellipsis; white-space:nowrap;}
+  .nav-btns{display:flex; gap:10px;}
+  .big{padding:13px 26px; border-radius:12px; font-size:15px; font-weight:600; font-family:var(--disp); letter-spacing:.01em;}
+  .next{background:var(--accent); color:var(--bg); border:none;}
+  .next:hover{filter:brightness(1.06);}
+  .next:disabled{opacity:.4; cursor:default; filter:none;}
+  .back{border:1px solid var(--line); background:var(--surface); color:var(--text);}
+  .back:hover{background:var(--surface-2);}
+
+  /* Complete screen */
+  .complete-screen{text-align:center; padding:60px 20px;}
+  .complete-screen .cs-icon{font-size:60px; margin-bottom:16px;}
+  .complete-screen h2{font-family:var(--disp); font-weight:800; font-size:28px; margin-bottom:8px;}
+  .complete-screen p{color:var(--muted); font-size:15px; max-width:400px; margin:0 auto 24px;}
+  .complete-screen .btn-done{background:var(--accent); color:var(--bg); font-weight:700; padding:14px 32px; border-radius:12px; font-size:16px; font-family:var(--disp); border:none;}
+
+  @media print{
+    .nav,.head-tools,.rail{display:none!important}
+    .app{padding:10px!important}
+    .stage{break-inside:avoid}
+    body{background:#fff!important;color:#000!important}
+    .stage,.check-item,.footage-card,.info-tile{background:#fff!important;border-color:#ddd!important}
+    .ci-text,.info-tile .iv,.footage-card h3{color:#000!important}
+    .stage-head h2{color:#000!important}
+  }
+</style>
+</head>
+<body>
+<div class="app">
+  <header>
+    <div class="brand">
+      <div class="dot"></div>
+      <h1 id="brandTitle">Onboarding</h1>
+      <span class="tag" id="memberTag">Loading...</span>
+    </div>
+    <div class="head-tools">
+      <button class="btn" onclick="window.print()">Print</button>
+      <button class="btn" id="themeBtn" onclick="toggleTheme()">Light</button>
+    </div>
+  </header>
+  <div class="rail" id="rail"></div>
+  <div class="signals" id="signals"></div>
+  <div id="stageContainer"></div>
+</div>
+<div class="nav">
+  <div class="nav-inner">
+    <div class="stage-name" id="navLabel"></div>
+    <div class="nav-btns">
+      <button class="big back" id="backBtn" onclick="go(idx-1)">Back</button>
+      <button class="big next" id="nextBtn" onclick="go(idx+1)">Next</button>
+    </div>
+  </div>
+</div>
+
+<script>
+var SUPABASE_URL = 'https://lvizldmdficsfpgegehp.supabase.co';
+var SUPABASE_ANON_KEY = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6Imx2aXpsZG1kZmljc2ZwZ2VnZWhwIiwicm9sZSI6ImFub24iLCJpYXQiOjE3NzM2OTk4NDQsImV4cCI6MjA4OTI3NTg0NH0.72wHbZaTvqNzW6DTb6Ae1vi9QpOg_-KiEO-Jjm9mn0k';
+var _sb = supabase.createClient(SUPABASE_URL, SUPABASE_ANON_KEY);
+
+var onbId = new URLSearchParams(location.search).get('id');
+var rec = null;
+var idx = 0;
+
+var CHECKLIST_TKO = [
+  'Log into the app \u2014 email & password',
+  'Add profile photo',
+  'Show documents \u2014 where their contract is and where other documents go',
+  'Show how to complete daily tracker and explain its importance',
+  'Book sessions \u2014 explain each session type, arrive 10 mins early to warm up and start on time',
+  'Note any session issues to feedback to Sara',
+  'Vivo shoes link for weight training (converse or vans also fine)',
+  'Reshape shop link & discount code (reshape20) \u2014 sell items needed (especially boxing gloves & wraps for Beat)',
+  'Follow socials \u2014 Instagram (both Reshape & Coach Loai), Facebook + Family Group on FB',
+  'Ensure they have body scales, cooking scales and dressmakers tape',
+  'Add to group \u2014 profile pic with injuries and start date for coaches',
+  'Steps tracker \u2014 must have before starting, need 10,000 steps per day',
+  'Set up on Styku \u2014 WhatsApp Jaime to add to their folder, go through with them',
+  'Set up Evolt and do first scans \u2014 go through with them',
+  'Pics & videos \u2014 men do mens, ladies do ladies. Start video with script shared on group, then Spin & Jump video',
+  'Show how to do 3 measurements \u2014 explain importance + booking monthly review when Jaime sends link (NOT after a session or during/near period for ladies)',
+  'DRESS CODE \u2014 no crops, no short shorts, no short tops. Keep it loose and modest so all members feel comfortable',
+  'Build nutrition plan with them \u2014 add all PDFs to their app (Carbs, Protein, Rules & Recipes)'
+];
+
+var STAGES_TKO = [
+  { title: 'Member Details', goal: 'Review the new member\u2019s information from their consult before starting the onboarding process.' },
+  { title: 'Training Setup', goal: 'Get them logged in, set up on the system, booked into sessions, and equipped with everything they need.', startItem: 0, endItem: 11 },
+  { title: 'Body Screening', goal: 'Complete baseline scans, before photos & videos, measurements, and dress code.', startItem: 12, endItem: 16 },
+  { title: 'Nutrition Plan', goal: 'Build their nutrition plan and add all PDFs to their app.', startItem: 17, endItem: 17 },
+  { title: 'Sign Off', goal: 'Review everything completed, sign the footage release, and get the coach\u2019s signature to confirm onboarding is done.' },
+  { title: 'Complete', goal: '' }
+];
+
+var CHECKLIST_NUTRITION = [
+  'Go through plan rules \u2014 show where recipes and sheets are to download in app',
+  'Get them to download Google Sheets and email plan to them and their coach',
+  'Show them round the gym \u2014 where they go for their session and where things are',
+  'Leave them with their coach for their \u201Caccountability meet\u201D'
+];
+
+var STAGES_NUTRITION = [
+  { title: 'Member Details', goal: 'Review the member\u2019s information before the nutrition handover.' },
+  { title: 'Nutrition Handover', goal: 'Walk through rules & recipes, show them the gym, and hand over to their coach.', startItem: 0, endItem: 3 },
+  { title: 'Sign Off', goal: 'Confirm nutrition handover is complete and hand over to their coach.' },
+  { title: 'Complete', goal: '' }
+];
+
+var meetingType = new URLSearchParams(location.search).get('type') || 'tko';
+var loggedInCoach = decodeURIComponent(new URLSearchParams(location.search).get('coach') || '');
+var CHECKLIST = meetingType === 'nutrition' ? CHECKLIST_NUTRITION : CHECKLIST_TKO;
+var STAGES = meetingType === 'nutrition' ? STAGES_NUTRITION : STAGES_TKO;
+
+function esc(s){ var d=document.createElement('div'); d.textContent=s; return d.innerHTML; }
+
+async function init(){
+  if(!onbId){ document.querySelector('.app').innerHTML='<div style="text-align:center;padding:80px;color:var(--muted)">No onboarding ID provided.</div>'; return; }
+  var { data } = await _sb.from('onboarding').select('*').eq('id', onbId).single();
+  if(!data){ document.querySelector('.app').innerHTML='<div style="text-align:center;padding:80px;color:var(--muted)">Onboarding record not found.</div>'; return; }
+  rec = data;
+  if(!rec.checklist) rec.checklist = {};
+  // Override meeting type from record if available
+  if(rec.meeting_type) meetingType = rec.meeting_type;
+  CHECKLIST = meetingType === 'nutrition' ? CHECKLIST_NUTRITION : CHECKLIST_TKO;
+  STAGES = meetingType === 'nutrition' ? STAGES_NUTRITION : STAGES_TKO;
+  document.getElementById('brandTitle').textContent = meetingType === 'nutrition' ? 'Nutrition Handover' : 'TKO Onboarding';
+  document.getElementById('memberTag').textContent = rec.member_name;
+  // Build rail
+  var railEl = document.getElementById('rail');
+  STAGES.forEach(function(_,i){ var d=document.createElement('div'); d.className='seg'; d.onclick=function(){ go(i); }; railEl.appendChild(d); });
+  render();
+}
+
+function countDone(start, end){
+  var c = 0;
+  for(var i = start; i <= end; i++) if(rec.checklist[CHECKLIST[i]]) c++;
+  return c;
+}
+
+function stageComplete(i){
+  var s = STAGES[i];
+  if(s.startItem !== undefined){
+    return countDone(s.startItem, s.endItem) === (s.endItem - s.startItem + 1);
+  }
+  if(s.title === 'Sign Off') return !!(rec.footage_signature && rec.coach_signature);
+  return true;
+}
+
+function totalDone(){
+  var c = 0;
+  CHECKLIST.forEach(function(item){ if(rec.checklist[item]) c++; });
+  return c;
+}
+
+function render(){
+  // Rail
+  var segs = document.querySelectorAll('.rail .seg');
+  segs.forEach(function(s,i){
+    s.className = 'seg';
+    if(i < idx) s.classList.add('done');
+    if(i === idx) s.classList.add('active');
+  });
+  // Signals
+  var done = totalDone();
+  var pct = Math.round(done / CHECKLIST.length * 100);
+  document.getElementById('signals').innerHTML =
+    '<div class="sig-badge"><span>Progress</span><b>' + pct + '%</b></div>' +
+    '<div class="sig-badge' + (rec.footage_signature ? ' done' : '') + '"><span>Footage</span><b>' + (rec.footage_signature ? 'Signed' : 'Pending') + '</b></div>' +
+    '<div class="sig-badge"><span>Checklist</span><b>' + done + '/' + CHECKLIST.length + '</b></div>';
+  // Stage
+  var s = STAGES[idx];
+  var html = '';
+  if(idx === STAGES.length - 1){
+    // Complete screen
+    var completeTitle = meetingType === 'nutrition' ? 'Nutrition Handover Complete' : 'TKO Complete';
+    var completeMsg = meetingType === 'nutrition'
+      ? esc(rec.member_name) + ' has been handed over to their coach for their accountability meet.'
+      : esc(rec.member_name) + ' is all set and ready for their nutrition handover.';
+    html = '<div class="complete-screen"><div class="cs-icon">&#10003;</div><h2>' + completeTitle + '</h2><p>' + completeMsg + '</p><button class="btn-done" onclick="finishOnboarding()">Done</button></div>';
+  } else {
+    html = '<div class="stage"><div class="stage-head"><div><div class="meta"><span class="step-no">' + String(idx+1).padStart(2,'0') + '</span></div><h2>' + esc(s.title) + '</h2><div class="goal">' + esc(s.goal) + '</div></div></div><div class="stage-body">';
+    if(s.title === 'Member Details') html += renderInfo();
+    else if(s.title === 'Sign Off') html += renderSignOff();
+    else if(s.startItem !== undefined) html += renderChecklist(s.startItem, s.endItem);
+    html += '</div></div>';
+  }
+  document.getElementById('stageContainer').innerHTML = html;
+  // Nav
+  document.getElementById('navLabel').textContent = (idx+1) + ' / ' + STAGES.length + ' \u00b7 ' + s.title;
+  document.getElementById('backBtn').disabled = idx === 0;
+  var isLast = idx === STAGES.length - 1;
+  document.getElementById('nextBtn').textContent = isLast ? 'Done' : 'Next';
+  document.getElementById('nextBtn').style.display = isLast ? 'none' : '';
+  // Init canvas
+  if(s.title === 'Sign Off') setTimeout(function(){ if(!rec.footage_signature) initCanvas('sigCanvas'); if(!rec.coach_signature) initCanvas('coachCanvas'); }, 50);
+}
+
+function go(i){
+  if(i < 0 || i >= STAGES.length) return;
+  idx = i;
+  render();
+  window.scrollTo({top:0, behavior:'smooth'});
+}
+
+function renderInfo(){
+  var mixParts = [];
+  if(rec.mix_one_to_one) mixParts.push(rec.mix_one_to_one + '\u00d7 1:1');
+  if(rec.mix_elite) mixParts.push(rec.mix_elite + '\u00d7 Elite');
+  if(rec.mix_octave) mixParts.push(rec.mix_octave + '\u00d7 Octave');
+  if(rec.mix_group) mixParts.push(rec.mix_group + '\u00d7 Group');
+  var nutLabel = rec.nutrition_plan ? rec.nutrition_plan.charAt(0).toUpperCase() + rec.nutrition_plan.slice(1) : 'None';
+  return '<div class="info-grid">'
+    + tile('Member', rec.member_name)
+    + tile('Coach', loggedInCoach || rec.coach || '\u2014')
+    + tile('Location', rec.location || '\u2014')
+    + tile('Consult date', rec.consult_date || '\u2014')
+    + tile('Programme', (rec.programme_duration || '12') + ' weeks')
+    + tile('Weekly mix', mixParts.join(' + ') || '\u2014')
+    + tile('Nutrition', nutLabel)
+    + '</div>';
+}
+
+function tile(label, val){
+  return '<div class="info-tile"><div class="il">' + esc(label) + '</div><div class="iv">' + esc(val) + '</div></div>';
+}
+
+function renderSignOff(){
+  var html = '';
+  // Completed items report
+  html += '<div class="footage-card"><h3>Onboarding Report</h3>';
+  html += '<div class="legal" style="border-left-color:var(--accent)">';
+  var completedCount = 0;
+  CHECKLIST.forEach(function(item, i){
+    if(rec.checklist[item]){
+      completedCount++;
+      html += '<div style="display:flex;align-items:center;gap:8px;padding:4px 0;color:var(--text);font-size:13px"><span style="color:var(--accent);font-weight:700">\u2713</span> ' + esc(item) + '</div>';
+    }
+  });
+  if(completedCount === 0) html += '<div style="color:var(--muted);font-size:13px">No items completed yet.</div>';
+  html += '</div>';
+  var skipped = CHECKLIST.length - completedCount;
+  if(skipped > 0){
+    html += '<div style="margin-top:12px;font-size:12px;color:var(--muted)"><b>' + skipped + '</b> item' + (skipped > 1 ? 's' : '') + ' not completed:</div>';
+    html += '<div style="margin-top:6px">';
+    CHECKLIST.forEach(function(item){
+      if(!rec.checklist[item]) html += '<div style="display:flex;align-items:center;gap:8px;padding:3px 0;color:var(--faint);font-size:12px"><span>\u2717</span> ' + esc(item) + '</div>';
+    });
+    html += '</div>';
+  }
+  html += '</div>';
+
+  // Footage & Image Release
+  html += '<div class="footage-card"><h3>Footage & Image Release</h3>'
+    + '<div class="legal">I, <b>' + esc(rec.member_name) + '</b>, grant ReShape Transformations Ltd full and unrestricted permission to use any photographs, video recordings, and audio recordings taken of me during my membership \u2014 including but not limited to training sessions, events, body transformation progress, and testimonials \u2014 for promotional purposes on social media platforms, the company website, marketing materials, and any other media, without further notice or compensation. I waive any right to inspect or approve the finished materials. This release is perpetual and worldwide.</div>';
+
+  // Member signature
+  html += '<div style="margin-top:16px"><div style="font-size:11px;text-transform:uppercase;letter-spacing:.12em;color:var(--faint);margin-bottom:6px">Member signature</div>';
+  if(rec.footage_signature){
+    var d = rec.footage_signed_at ? new Date(rec.footage_signed_at).toLocaleDateString('en-GB',{day:'numeric',month:'short',year:'numeric'}) : '';
+    html += '<div class="signed-badge"><div><div class="s-text">Signed</div><div class="s-date">' + d + '</div></div><img src="' + rec.footage_signature + '"></div>';
+  } else {
+    html += '<div class="sig-area"><canvas id="sigCanvas" width="320" height="110"></canvas>'
+      + '<div class="sig-actions"><button class="btn-sign" onclick="submitSig(\'sigCanvas\',\'footage_signature\',\'footage_signed_at\')">Sign</button><button class="btn-clear" onclick="clearSigCanvas(\'sigCanvas\')">Clear</button></div></div>';
+  }
+  html += '</div>';
+
+  // Coach signature (on behalf of ReShape)
+  html += '<div style="margin-top:20px"><div style="font-size:11px;text-transform:uppercase;letter-spacing:.12em;color:var(--faint);margin-bottom:6px">On behalf of ReShape Transformations Ltd</div>';
+  if(rec.coach_signature){
+    var cd = rec.coach_signed_at ? new Date(rec.coach_signed_at).toLocaleDateString('en-GB',{day:'numeric',month:'short',year:'numeric'}) : '';
+    html += '<div class="signed-badge"><div><div class="s-text">Signed — ' + esc(loggedInCoach || rec.coach || '') + '</div><div class="s-date">' + cd + '</div></div><img src="' + rec.coach_signature + '"></div>';
+  } else {
+    html += '<div class="sig-area"><canvas id="coachCanvas" width="320" height="110"></canvas>'
+      + '<div class="sig-actions"><button class="btn-sign" onclick="submitSig(\'coachCanvas\',\'coach_signature\',\'coach_signed_at\')">Sign</button><button class="btn-clear" onclick="clearSigCanvas(\'coachCanvas\')">Clear</button></div></div>';
+  }
+  html += '</div></div>';
+  return html;
+}
+
+function renderChecklist(start, end){
+  var html = '';
+  for(var i = start; i <= end; i++){
+    var item = CHECKLIST[i];
+    var done = rec.checklist[item] ? true : false;
+    html += '<div class="check-item' + (done ? ' checked' : '') + '" onclick="toggleItem(this,' + i + ')">'
+      + '<input type="checkbox"' + (done ? ' checked' : '') + '>'
+      + '<div class="ci-box"><svg viewBox="0 0 24 24"><polyline points="20 6 9 17 4 12"/></svg></div>'
+      + '<span class="ci-num">' + (i+1) + '</span>'
+      + '<span class="ci-text">' + esc(item) + '</span></div>';
+  }
+  return html;
+}
+
+async function toggleItem(el, i){
+  var item = CHECKLIST[i];
+  rec.checklist[item] = !rec.checklist[item];
+  el.classList.toggle('checked');
+  el.querySelector('input').checked = rec.checklist[item];
+  // Save to DB
+  await _sb.from('onboarding').update({ checklist: rec.checklist, updated_at: new Date().toISOString() }).eq('id', rec.id);
+  // Update signals
+  var done = totalDone();
+  var pct = Math.round(done / CHECKLIST.length * 100);
+  var sigs = document.getElementById('signals');
+  if(sigs) sigs.innerHTML =
+    '<div class="sig-badge"><span>Progress</span><b>' + pct + '%</b></div>' +
+    '<div class="sig-badge' + (rec.footage_signature ? ' done' : '') + '"><span>Footage</span><b>' + (rec.footage_signature ? 'Signed' : 'Pending') + '</b></div>' +
+    '<div class="sig-badge"><span>Checklist</span><b>' + done + '/' + CHECKLIST.length + '</b></div>';
+  // Update rail
+  var segs = document.querySelectorAll('.rail .seg');
+  segs.forEach(function(s,si){ s.className='seg'; if(si<idx) s.classList.add('done'); if(si===idx) s.classList.add('active'); });
+}
+
+/* Signature canvases */
+var _canvases = {};
+function initCanvas(canvasId){
+  var c=document.getElementById(canvasId); if(!c) return;
+  var ctx=c.getContext('2d');
+  ctx.strokeStyle=getComputedStyle(document.documentElement).getPropertyValue('--text').trim()||'#f2f3f5';
+  ctx.lineWidth=2; ctx.lineCap='round';
+  _canvases[canvasId] = ctx;
+  var drawing=false;
+  function pos(e){ var r=c.getBoundingClientRect(); var t=e.touches?e.touches[0]:e; return{x:t.clientX-r.left,y:t.clientY-r.top}; }
+  c.onmousedown=function(e){drawing=true;var p=pos(e);ctx.beginPath();ctx.moveTo(p.x,p.y);};
+  c.onmousemove=function(e){if(!drawing)return;var p=pos(e);ctx.lineTo(p.x,p.y);ctx.stroke();};
+  c.onmouseup=function(){drawing=false;};
+  c.onmouseleave=function(){drawing=false;};
+  c.addEventListener('touchstart',function(e){e.preventDefault();drawing=true;var p=pos(e);ctx.beginPath();ctx.moveTo(p.x,p.y);},{passive:false});
+  c.addEventListener('touchmove',function(e){e.preventDefault();if(!drawing)return;var p=pos(e);ctx.lineTo(p.x,p.y);ctx.stroke();},{passive:false});
+  c.addEventListener('touchend',function(){drawing=false;});
+}
+function clearSigCanvas(canvasId){
+  var c=document.getElementById(canvasId);
+  var ctx=_canvases[canvasId];
+  if(c&&ctx) ctx.clearRect(0,0,c.width,c.height);
+}
+async function submitSig(canvasId, sigField, dateField){
+  var c=document.getElementById(canvasId); if(!c) return;
+  var blank=document.createElement('canvas'); blank.width=c.width; blank.height=c.height;
+  if(c.toDataURL()===blank.toDataURL()){alert('Please sign before submitting.');return;}
+  var url=c.toDataURL('image/png');
+  var update = {}; update[sigField]=url; update[dateField]=new Date().toISOString();
+  if(sigField === 'coach_signature' && loggedInCoach) update.coach = loggedInCoach;
+  var {error}=await _sb.from('onboarding').update(update).eq('id',rec.id);
+  if(error){alert('Failed: '+error.message);return;}
+  rec[sigField]=url;
+  rec[dateField]=new Date().toISOString();
+  render();
+}
+
+async function finishOnboarding(){
+  await _sb.from('onboarding').update({status:'complete',checklist:rec.checklist,updated_at:new Date().toISOString()}).eq('id',rec.id);
+  if(window.parent && window.parent !== window){
+    window.parent.postMessage({type:'onboarding-complete',id:rec.id,meetingType:meetingType},'*');
+  }
+}
+
+function toggleTheme(){
+  var html=document.documentElement;
+  var cur=html.getAttribute('data-theme')||'dark';
+  var next=cur==='dark'?'light':'dark';
+  html.setAttribute('data-theme',next);
+  document.getElementById('themeBtn').textContent=next==='dark'?'Light':'Dark';
+}
+
+// Inherit theme from parent
+(function(){
+  var t=localStorage.getItem('rs-theme')||'dark';
+  document.documentElement.setAttribute('data-theme',t);
+  document.getElementById('themeBtn').textContent=t==='dark'?'Light':'Dark';
+})();
+window.addEventListener('message',function(e){
+  if(e.data&&e.data.type==='theme-change') document.documentElement.setAttribute('data-theme',e.data.theme);
+});
+
+init();
+</script>
+</body>
+</html>

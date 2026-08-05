@@ -12,6 +12,19 @@
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
 <link href="https://fonts.googleapis.com/css2?family=Fraunces:opsz,wght@9..144,300;9..144,400;9..144,500;9..144,600;9..144,700&family=Inter:wght@300;400;500;600&display=swap" rel="stylesheet">
 <link rel="stylesheet" href="./styles.css?v=4">
+<!-- Meta Pixel -->
+<script>
+  !function(f,b,e,v,n,t,s){if(f.fbq)return;n=f.fbq=function(){n.callMethod?
+  n.callMethod.apply(n,arguments):n.queue.push(arguments)};if(!f._fbq)f._fbq=n;
+  n.push=n;n.loaded=!0;n.version='2.0';n.queue=[];t=b.createElement(e);t.async=!0;
+  t.src=v;s=b.getElementsByTagName(e)[0];s.parentNode.insertBefore(t,s)}
+  (window,document,'script','https://connect.facebook.net/en_US/fbevents.js');
+  fbq('init', '571423748258941');
+  fbq('track', 'PageView');
+  fbq('trackCustom', 'ViewContent', { content_name: 'Seminar Application Landing', content_category: 'seminar_jun5_2026' });
+</script>
+<noscript><img height="1" width="1" style="display:none" src="https://www.facebook.com/tr?id=571423748258941&ev=PageView&noscript=1"/></noscript>
+<!-- End Tracking -->
 </head>
 <body>
 
@@ -250,6 +263,14 @@
             <label for="phone">Phone</label>
             <input type="tel" id="phone" name="phone" autocomplete="tel" placeholder="07700 000000">
             <div class="field-error" data-error-for="phone"></div>
+          </div>
+        </div>
+
+        <div class="form-row">
+          <div class="field">
+            <label for="age">Age <span class="req">*</span></label>
+            <input type="number" id="age" name="age" placeholder="28" min="20" max="99" inputmode="numeric" required>
+            <div class="field-error" data-error-for="age"></div>
           </div>
         </div>
       </div>
@@ -523,7 +544,15 @@
     var phone = document.getElementById('phone').value.trim();
     var consent = document.getElementById('consent').checked;
 
+    var ageStr = document.getElementById('age').value.trim();
+    var ageVal = parseInt(ageStr, 10);
+
     if (!first) { setError('first_name', 'Please enter your first name.'); ok = false; } else clearError('first_name');
+
+    if (!ageStr || isNaN(ageVal) || ageVal < 20 || ageVal > 99) {
+      setError('age', 'Please enter a valid age.');
+      ok = false;
+    } else clearError('age');
 
     if (!email) { setError('email', 'Email is required.'); ok = false; }
     else if (!/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(email)) { setError('email', 'That email doesn\u2019t look right.'); ok = false; }
@@ -578,6 +607,7 @@
       last_name: document.getElementById('last_name').value.trim(),
       email: document.getElementById('email').value.trim(),
       phone: document.getElementById('phone').value.trim(),
+      age: parseInt(document.getElementById('age').value) || null,
       life_stage: selections.life_stage,
       top_struggle: selections.top_struggle,
       tried: document.getElementById('tried').value.trim(),

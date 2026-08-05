@@ -1,0 +1,447 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1.0" />
+<title>Support — ReShape Method</title>
+<meta name="description" content="Get help with the ReShape Method app. Find answers to common questions or contact our support team." />
+<link rel="icon" type="image/png" sizes="32x32" href="../favicon-32.png">
+<link rel="icon" type="image/png" href="../favicon.png">
+<link rel="apple-touch-icon" href="../apple-touch-icon.png">
+<link rel="preconnect" href="https://fonts.googleapis.com" />
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+<link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800&display=swap" rel="stylesheet" />
+<style>
+  *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+  :root {
+    --cream: #FAF7F2;
+    --cream-2: #F0EBE3;
+    --cream-3: #E5DFD5;
+    --ink: #2A2724;
+    --ink-2: #5A5550;
+    --accent: #ED5C25;
+    --accent-deep: #C84A18;
+    --line: #E5DFD5;
+    --mute: #B8B2A8;
+  }
+  html { scroll-behavior: smooth; }
+  body {
+    font-family: 'Inter', -apple-system, BlinkMacSystemFont, sans-serif;
+    background: var(--cream);
+    color: var(--ink);
+    line-height: 1.6;
+    -webkit-font-smoothing: antialiased;
+  }
+  a { color: var(--accent); text-decoration: none; }
+  a:hover { color: var(--accent-deep); }
+
+  /* Header */
+  .header {
+    padding: 20px 24px;
+    border-bottom: 1px solid var(--line);
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    max-width: 800px;
+    margin: 0 auto;
+  }
+  .logo {
+    font-size: 18px;
+    font-weight: 700;
+    color: var(--ink);
+    letter-spacing: -0.02em;
+  }
+  .logo span { color: var(--accent); }
+  .back-link {
+    font-size: 14px;
+    font-weight: 500;
+    color: var(--ink-2);
+  }
+
+  /* Hero */
+  .hero {
+    text-align: center;
+    padding: 64px 24px 48px;
+    max-width: 600px;
+    margin: 0 auto;
+  }
+  .hero h1 {
+    font-size: 36px;
+    font-weight: 800;
+    letter-spacing: -0.03em;
+    margin-bottom: 12px;
+  }
+  .hero p {
+    font-size: 17px;
+    color: var(--ink-2);
+    max-width: 480px;
+    margin: 0 auto;
+  }
+
+  /* Content */
+  .content {
+    max-width: 680px;
+    margin: 0 auto;
+    padding: 0 24px 80px;
+  }
+
+  /* Section */
+  .section-title {
+    font-size: 13px;
+    font-weight: 600;
+    text-transform: uppercase;
+    letter-spacing: 0.08em;
+    color: var(--accent);
+    margin-bottom: 24px;
+    padding-top: 48px;
+  }
+
+  /* FAQ */
+  .faq-item {
+    border-bottom: 1px solid var(--line);
+  }
+  .faq-question {
+    width: 100%;
+    background: none;
+    border: none;
+    text-align: left;
+    padding: 20px 0;
+    font-family: inherit;
+    font-size: 16px;
+    font-weight: 600;
+    color: var(--ink);
+    cursor: pointer;
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    gap: 16px;
+    line-height: 1.4;
+  }
+  .faq-question:hover { color: var(--accent); }
+  .faq-icon {
+    flex-shrink: 0;
+    width: 20px;
+    height: 20px;
+    position: relative;
+    transition: transform 0.2s ease;
+  }
+  .faq-icon::before, .faq-icon::after {
+    content: '';
+    position: absolute;
+    background: var(--mute);
+    border-radius: 1px;
+  }
+  .faq-icon::before {
+    top: 50%; left: 4px; right: 4px;
+    height: 2px; transform: translateY(-50%);
+  }
+  .faq-icon::after {
+    left: 50%; top: 4px; bottom: 4px;
+    width: 2px; transform: translateX(-50%);
+    transition: transform 0.2s ease, opacity 0.2s ease;
+  }
+  .faq-item.open .faq-icon::after {
+    transform: translateX(-50%) scaleY(0);
+    opacity: 0;
+  }
+  .faq-answer {
+    max-height: 0;
+    overflow: hidden;
+    transition: max-height 0.3s ease, padding 0.3s ease;
+  }
+  .faq-item.open .faq-answer {
+    max-height: 400px;
+    padding-bottom: 20px;
+  }
+  .faq-answer p {
+    font-size: 15px;
+    color: var(--ink-2);
+    line-height: 1.7;
+  }
+
+  /* Contact */
+  .contact-card {
+    background: white;
+    border-radius: 16px;
+    padding: 36px;
+    margin-top: 8px;
+    border: 1px solid var(--line);
+  }
+  .contact-card h3 {
+    font-size: 20px;
+    font-weight: 700;
+    margin-bottom: 6px;
+  }
+  .contact-card p {
+    font-size: 15px;
+    color: var(--ink-2);
+    margin-bottom: 24px;
+  }
+  .contact-methods {
+    display: flex;
+    flex-direction: column;
+    gap: 16px;
+  }
+  .contact-method {
+    display: flex;
+    align-items: center;
+    gap: 14px;
+    padding: 16px;
+    background: var(--cream);
+    border-radius: 12px;
+    transition: background 0.15s;
+  }
+  .contact-method:hover { background: var(--cream-2); }
+  .contact-method .icon {
+    width: 40px;
+    height: 40px;
+    border-radius: 10px;
+    background: var(--accent);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    flex-shrink: 0;
+  }
+  .contact-method .icon svg {
+    width: 20px;
+    height: 20px;
+    fill: white;
+  }
+  .contact-method .info { flex: 1; }
+  .contact-method .label {
+    font-size: 14px;
+    font-weight: 600;
+    color: var(--ink);
+  }
+  .contact-method .detail {
+    font-size: 13px;
+    color: var(--ink-2);
+  }
+
+  /* Privacy & Legal */
+  .legal {
+    margin-top: 48px;
+    padding: 32px;
+    background: var(--cream-2);
+    border-radius: 16px;
+  }
+  .legal h3 {
+    font-size: 16px;
+    font-weight: 700;
+    margin-bottom: 12px;
+  }
+  .legal p, .legal li {
+    font-size: 14px;
+    color: var(--ink-2);
+    line-height: 1.7;
+  }
+  .legal ul {
+    list-style: none;
+    margin-top: 12px;
+  }
+  .legal li {
+    padding: 4px 0;
+  }
+  .legal li a {
+    font-weight: 500;
+  }
+
+  /* Footer */
+  .footer {
+    text-align: center;
+    padding: 32px 24px;
+    font-size: 13px;
+    color: var(--mute);
+    border-top: 1px solid var(--line);
+    max-width: 680px;
+    margin: 0 auto;
+  }
+
+  @media (max-width: 480px) {
+    .hero { padding: 48px 20px 36px; }
+    .hero h1 { font-size: 28px; }
+    .content { padding: 0 20px 60px; }
+    .contact-card { padding: 24px; }
+  }
+</style>
+</head>
+<body>
+
+<div class="header">
+  <div class="logo">Re<span>Shape</span></div>
+  <a href="https://reshape.fit" class="back-link">← Back to site</a>
+</div>
+
+<div class="hero">
+  <h1>How can we help?</h1>
+  <p>Find answers to common questions about the ReShape Method app, or get in touch with our team.</p>
+</div>
+
+<div class="content">
+
+  <div class="section-title">Frequently Asked Questions</div>
+
+  <div class="faq-item">
+    <button class="faq-question" onclick="this.parentElement.classList.toggle('open')">
+      What is the ReShape Method app?
+      <span class="faq-icon"></span>
+    </button>
+    <div class="faq-answer">
+      <p>ReShape Method is a personalised coaching app that combines hormone-aware nutrition planning, daily tracking, session booking, and direct communication with your coach — all in one place. It's designed for members of ReShape Club in Suffolk and Essex.</p>
+    </div>
+  </div>
+
+  <div class="faq-item">
+    <button class="faq-question" onclick="this.parentElement.classList.toggle('open')">
+      How do I create an account?
+      <span class="faq-icon"></span>
+    </button>
+    <div class="faq-answer">
+      <p>Accounts are created by your coach during onboarding. You'll receive an email with your login details once your membership is activated. If you haven't received your credentials, contact your coach or email us at support@reshape.fit.</p>
+    </div>
+  </div>
+
+  <div class="faq-item">
+    <button class="faq-question" onclick="this.parentElement.classList.toggle('open')">
+      How do I book a training session?
+      <span class="faq-icon"></span>
+    </button>
+    <div class="faq-answer">
+      <p>Open the Train tab in the app, browse available sessions for the week, and tap "Book" on the session you'd like to attend. Your booking uses a session token from your membership allocation. You can cancel up to 24 hours before the session for a token refund.</p>
+    </div>
+  </div>
+
+  <div class="faq-item">
+    <button class="faq-question" onclick="this.parentElement.classList.toggle('open')">
+      How does the meal plan work?
+      <span class="faq-icon"></span>
+    </button>
+    <div class="faq-answer">
+      <p>Your coach sets personalised macros based on your body composition, goals, and hormonal profile. The Eat tab shows your daily meal plan with specific macro targets that adjust based on training and rest days. Some plans use carb cycling, where carb targets vary by day type.</p>
+    </div>
+  </div>
+
+  <div class="faq-item">
+    <button class="faq-question" onclick="this.parentElement.classList.toggle('open')">
+      What is the daily tracker?
+      <span class="faq-icon"></span>
+    </button>
+    <div class="faq-answer">
+      <p>The daily tracker lets you log key health metrics each morning and evening — sleep quality, water intake, meals eaten, steps, supplements, and mood. Your coach uses this data to monitor your progress and adjust your plan. Consistent tracking is required to unlock plan progression.</p>
+    </div>
+  </div>
+
+  <div class="faq-item">
+    <button class="faq-question" onclick="this.parentElement.classList.toggle('open')">
+      How do I message my coach?
+      <span class="faq-icon"></span>
+    </button>
+    <div class="faq-answer">
+      <p>Tap the Chat tab to access your direct messaging channel with your coach. You can send text, voice notes, images, and documents. Your coach typically responds within a few hours during business hours.</p>
+    </div>
+  </div>
+
+  <div class="faq-item">
+    <button class="faq-question" onclick="this.parentElement.classList.toggle('open')">
+      Can I cancel or change my booking?
+      <span class="faq-icon"></span>
+    </button>
+    <div class="faq-answer">
+      <p>You can cancel a booking up to 24 hours before the session starts and your token will be refunded automatically. There's also a 5-minute grace window after booking if you need to change your mind immediately. Cancellations within 24 hours of the session are non-refundable.</p>
+    </div>
+  </div>
+
+  <div class="faq-item">
+    <button class="faq-question" onclick="this.parentElement.classList.toggle('open')">
+      I forgot my password. How do I reset it?
+      <span class="faq-icon"></span>
+    </button>
+    <div class="faq-answer">
+      <p>Tap "Forgot password?" on the login screen and enter your registered email address. You'll receive a password reset link. If you don't receive the email within a few minutes, check your spam folder or contact support@reshape.fit.</p>
+    </div>
+  </div>
+
+  <div class="faq-item">
+    <button class="faq-question" onclick="this.parentElement.classList.toggle('open')">
+      The app isn't loading or I'm seeing an error. What should I do?
+      <span class="faq-icon"></span>
+    </button>
+    <div class="faq-answer">
+      <p>Try closing and reopening the app. If the issue persists, check your internet connection, then try logging out and back in. If you're still experiencing problems, email support@reshape.fit with a description of the issue and a screenshot if possible.</p>
+    </div>
+  </div>
+
+  <div class="faq-item">
+    <button class="faq-question" onclick="this.parentElement.classList.toggle('open')">
+      How do I manage my subscription?
+      <span class="faq-icon"></span>
+    </button>
+    <div class="faq-answer">
+      <p>Your membership is managed directly by your coach. To make changes to your plan, pause your membership, or discuss cancellation, message your coach through the app or contact us at support@reshape.fit. Billing is handled through our secure payment system.</p>
+    </div>
+  </div>
+
+  <div class="faq-item">
+    <button class="faq-question" onclick="this.parentElement.classList.toggle('open')">
+      How do I delete my account and data?
+      <span class="faq-icon"></span>
+    </button>
+    <div class="faq-answer">
+      <p>You can request full account deletion by emailing support@reshape.fit. We will delete all your personal data, tracking history, and account information within 30 days of your request, in accordance with GDPR and applicable data protection regulations.</p>
+    </div>
+  </div>
+
+  <div class="section-title">Contact Us</div>
+
+  <div class="contact-card">
+    <h3>Get in touch</h3>
+    <p>Our team typically responds within 24 hours on business days.</p>
+    <div class="contact-methods">
+      <a href="mailto:support@reshape.fit" class="contact-method">
+        <div class="icon">
+          <svg viewBox="0 0 24 24"><path d="M20 4H4c-1.1 0-2 .9-2 2v12c0 1.1.9 2 2 2h16c1.1 0 2-.9 2-2V6c0-1.1-.9-2-2-2zm0 4l-8 5-8-5V6l8 5 8-5v2z"/></svg>
+        </div>
+        <div class="info">
+          <div class="label">Email Support</div>
+          <div class="detail">support@reshape.fit</div>
+        </div>
+      </a>
+      <a href="https://www.instagram.com/reshape.club/" target="_blank" rel="noopener" class="contact-method">
+        <div class="icon">
+          <svg viewBox="0 0 24 24"><path d="M12 2.163c3.204 0 3.584.012 4.85.07 3.252.148 4.771 1.691 4.919 4.919.058 1.265.069 1.645.069 4.849 0 3.205-.012 3.584-.069 4.849-.149 3.225-1.664 4.771-4.919 4.919-1.266.058-1.644.07-4.85.07-3.204 0-3.584-.012-4.849-.07-3.26-.149-4.771-1.699-4.919-4.92-.058-1.265-.07-1.644-.07-4.849 0-3.204.013-3.583.07-4.849.149-3.227 1.664-4.771 4.919-4.919 1.266-.057 1.645-.069 4.849-.069zM12 0C8.741 0 8.333.014 7.053.072 2.695.272.273 2.69.073 7.052.014 8.333 0 8.741 0 12c0 3.259.014 3.668.072 4.948.2 4.358 2.618 6.78 6.98 6.98C8.333 23.986 8.741 24 12 24c3.259 0 3.668-.014 4.948-.072 4.354-.2 6.782-2.618 6.979-6.98.059-1.28.073-1.689.073-4.948 0-3.259-.014-3.667-.072-4.947-.196-4.354-2.617-6.78-6.979-6.98C15.668.014 15.259 0 12 0zm0 5.838a6.162 6.162 0 100 12.324 6.162 6.162 0 000-12.324zM12 16a4 4 0 110-8 4 4 0 010 8zm6.406-11.845a1.44 1.44 0 100 2.881 1.44 1.44 0 000-2.881z"/></svg>
+        </div>
+        <div class="info">
+          <div class="label">Instagram</div>
+          <div class="detail">@reshape.club</div>
+        </div>
+      </a>
+      <div class="contact-method">
+        <div class="icon">
+          <svg viewBox="0 0 24 24"><path d="M12 2C8.13 2 5 5.13 5 9c0 5.25 7 13 7 13s7-7.75 7-13c0-3.87-3.13-7-7-7zm0 9.5c-1.38 0-2.5-1.12-2.5-2.5s1.12-2.5 2.5-2.5 2.5 1.12 2.5 2.5-1.12 2.5-2.5 2.5z"/></svg>
+        </div>
+        <div class="info">
+          <div class="label">Visit Us</div>
+          <div class="detail">ReShape Club, Suffolk, United Kingdom</div>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <div class="legal">
+    <h3>Privacy &amp; Data</h3>
+    <p>Fittek Ltd is committed to protecting your privacy and personal data. We collect only what's necessary to deliver your coaching experience and never sell your information to third parties.</p>
+    <ul>
+      <li><a href="https://reshape.fit/privacy">Privacy Policy</a></li>
+      <li><a href="https://reshape.fit/terms">Terms of Service</a></li>
+      <li>To request data export or deletion, email <a href="mailto:support@reshape.fit">support@reshape.fit</a></li>
+    </ul>
+  </div>
+
+</div>
+
+<div class="footer">
+  &copy; 2026 Fittek Ltd. All rights reserved.
+</div>
+
+</body>
+</html>

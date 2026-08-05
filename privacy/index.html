@@ -1,74 +1,227 @@
 <!DOCTYPE html>
 <html lang="en">
 <head>
-<meta charset="UTF-8">
-<meta name="viewport" content="width=device-width, initial-scale=1.0">
-<title>Privacy Policy — ReShape</title>
-<meta name="description" content="How ReShape collects, uses, and protects your personal data.">
-<link rel="icon" type="image/png" sizes="32x32" href="/favicon-32.png">
-<link rel="icon" type="image/png" href="/favicon.png">
-<link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800&family=DM+Sans:opsz,wght@9..40,300;9..40,400;9..40,500;9..40,600&display=swap" rel="stylesheet">
+<meta charset="UTF-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1.0" />
+<title>Privacy Policy — ReShape Method</title>
+<meta name="description" content="Privacy Policy for the ReShape Method app and services by Fittek Ltd." />
+<link rel="icon" type="image/png" sizes="32x32" href="../favicon-32.png">
+<link rel="icon" type="image/png" href="../favicon.png">
+<link rel="apple-touch-icon" href="../apple-touch-icon.png">
+<link rel="preconnect" href="https://fonts.googleapis.com" />
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+<link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800&display=swap" rel="stylesheet" />
 <style>
-  *,*::before,*::after{box-sizing:border-box;margin:0;padding:0}
-  :root{--bg:#1E2023;--s1:#262A2D;--border:rgba(255,255,255,0.12);--text:#F8F7F5;--text2:rgba(248,247,245,0.82);--text3:rgba(248,247,245,0.58);--orange:#ED5C25;--head:'Inter',sans-serif;--body:'DM Sans',sans-serif}
-  body{background:var(--bg);color:var(--text2);font-family:var(--body);font-size:16px;line-height:1.7;-webkit-font-smoothing:antialiased}
-  .nav{height:64px;display:flex;align-items:center;padding:0 24px;background:rgba(30,32,35,0.92);border-bottom:1px solid var(--border)}
-  .nav a{font-family:var(--head);font-size:20px;font-weight:900;color:var(--text);text-decoration:none}
-  .nav a span{color:var(--orange)}
-  .wrap{max-width:760px;margin:0 auto;padding:48px 24px 80px}
-  h1{font-family:var(--head);font-size:34px;font-weight:800;color:var(--text);margin-bottom:8px}
-  .updated{color:var(--text3);font-size:14px;margin-bottom:36px}
-  h2{font-family:var(--head);font-size:20px;font-weight:700;color:var(--text);margin:32px 0 12px}
-  p{margin-bottom:14px}
-  ul{margin:0 0 14px 22px}
-  li{margin-bottom:8px}
-  a{color:var(--orange)}
-  .foot{margin-top:48px;padding-top:24px;border-top:1px solid var(--border);color:var(--text3);font-size:14px}
+  *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+  :root {
+    --cream: #FAF7F2;
+    --cream-2: #F0EBE3;
+    --ink: #2A2724;
+    --ink-2: #5A5550;
+    --accent: #ED5C25;
+    --accent-deep: #C84A18;
+    --line: #E5DFD5;
+    --mute: #B8B2A8;
+  }
+  html { scroll-behavior: smooth; }
+  body {
+    font-family: 'Inter', -apple-system, BlinkMacSystemFont, sans-serif;
+    background: var(--cream);
+    color: var(--ink);
+    line-height: 1.7;
+    -webkit-font-smoothing: antialiased;
+  }
+  a { color: var(--accent); text-decoration: none; }
+  a:hover { color: var(--accent-deep); }
+  .header {
+    padding: 20px 24px;
+    border-bottom: 1px solid var(--line);
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    max-width: 800px;
+    margin: 0 auto;
+  }
+  .logo { font-size: 18px; font-weight: 700; color: var(--ink); letter-spacing: -0.02em; }
+  .logo span { color: var(--accent); }
+  .back-link { font-size: 14px; font-weight: 500; color: var(--ink-2); }
+  .content {
+    max-width: 680px;
+    margin: 0 auto;
+    padding: 48px 24px 80px;
+  }
+  h1 {
+    font-size: 32px;
+    font-weight: 800;
+    letter-spacing: -0.03em;
+    margin-bottom: 8px;
+  }
+  .updated {
+    font-size: 14px;
+    color: var(--mute);
+    margin-bottom: 40px;
+  }
+  h2 {
+    font-size: 20px;
+    font-weight: 700;
+    margin-top: 40px;
+    margin-bottom: 12px;
+    letter-spacing: -0.01em;
+  }
+  p { font-size: 15px; color: var(--ink-2); margin-bottom: 16px; }
+  ul, ol { font-size: 15px; color: var(--ink-2); margin-bottom: 16px; padding-left: 24px; }
+  li { margin-bottom: 6px; }
+  .footer {
+    text-align: center;
+    padding: 32px 24px;
+    font-size: 13px;
+    color: var(--mute);
+    border-top: 1px solid var(--line);
+    max-width: 680px;
+    margin: 0 auto;
+  }
+  @media (max-width: 480px) {
+    .content { padding: 36px 20px 60px; }
+    h1 { font-size: 26px; }
+  }
 </style>
 </head>
 <body>
-<nav class="nav"><a href="/">Re<span>Shape</span></a></nav>
-<div class="wrap">
-  <h1>Privacy Policy</h1>
-  <div class="updated">Last updated: 21 May 2026</div>
 
-  <p>ReShape ("we", "us", "our") is committed to protecting your privacy. This policy explains what personal data we collect, why we collect it, how we use it, and your rights under the UK GDPR and Data Protection Act 2018.</p>
-
-  <h2>Who we are</h2>
-  <p>ReShape is a nutrition and health coaching business operating in Ipswich and Colchester, England. For any privacy questions or requests, contact us at <a href="mailto:coach@reshape.fit">coach@reshape.fit</a>.</p>
-
-  <h2>What we collect</h2>
-  <ul>
-    <li><strong>Contact details</strong> you provide — name, email address, phone number, and age.</li>
-    <li><strong>Assessment responses</strong> — answers you give in our hormonal pattern assessment and related questionnaires.</li>
-    <li><strong>Booking information</strong> — appointment date, time, and location when you book a consultation.</li>
-    <li><strong>Usage data</strong> — pages visited, device and browser type, and interactions with our site, collected via cookies and similar technologies.</li>
-  </ul>
-
-  <h2>How we use it</h2>
-  <ul>
-    <li>To generate your personalised assessment results and send your report.</li>
-    <li>To contact you about your enquiry, booking, or coaching.</li>
-    <li>To send you follow-up emails and messages you have consented to receive (you can unsubscribe at any time).</li>
-    <li>To measure and improve our marketing, including advertising on Meta (Facebook and Instagram).</li>
-  </ul>
-
-  <h2>Advertising &amp; analytics</h2>
-  <p>We use the Meta Pixel and Conversions API to understand how our advertising performs and to show relevant ads. These tools may set cookies and share limited, hashed information with Meta. We also use Google Analytics to measure site usage. You can control cookies through your browser settings and our cookie banner.</p>
-
-  <h2>Legal basis</h2>
-  <p>We process your data on the basis of your <strong>consent</strong> (which you may withdraw at any time), to take steps at your request before entering a contract, and for our <strong>legitimate interests</strong> in operating and marketing our services.</p>
-
-  <h2>Sharing</h2>
-  <p>We never sell your data. We share it only with service providers who help us operate — for example email/SMS delivery, scheduling, and advertising platforms — and only to the extent necessary. These providers are bound to protect your data.</p>
-
-  <h2>Retention</h2>
-  <p>We keep your data only as long as needed for the purposes above, or as required by law. You can ask us to delete it at any time.</p>
-
-  <h2>Your rights</h2>
-  <p>Under UK GDPR you have the right to access, correct, delete, or restrict the processing of your data, to object to processing, and to data portability. To exercise any of these, email <a href="mailto:coach@reshape.fit">coach@reshape.fit</a>. You also have the right to complain to the Information Commissioner's Office (ICO) at <a href="https://ico.org.uk" target="_blank" rel="noopener">ico.org.uk</a>.</p>
-
-  <div class="foot">© 2026 ReShape. All rights reserved.</div>
+<div class="header">
+  <div class="logo">Re<span>Shape</span></div>
+  <a href="https://reshape.fit/support" class="back-link">← Support</a>
 </div>
+
+<div class="content">
+
+<h1>Privacy Policy</h1>
+<p class="updated">Last updated: 31 July 2026</p>
+
+<p>Fittek Ltd ("we", "us", "our") operates the ReShape Method mobile application and related services (collectively, the "Service"). This Privacy Policy explains how we collect, use, disclose, and protect your personal information when you use our Service.</p>
+
+<p>By using the Service, you agree to the collection and use of information in accordance with this policy.</p>
+
+<h2>1. Information We Collect</h2>
+
+<p><strong>Account Information:</strong> When your coach creates your account, we collect your name, email address, phone number, date of birth, and gender.</p>
+
+<p><strong>Health &amp; Fitness Data:</strong> To deliver personalised coaching, we collect:</p>
+<ul>
+  <li>Body composition measurements (weight, body fat percentage, muscle mass)</li>
+  <li>Daily tracker data (sleep, water intake, meals, steps, mood, digestion, supplements)</li>
+  <li>Training session attendance and booking history</li>
+  <li>Hormonal assessment responses</li>
+  <li>Session ratings and feedback</li>
+  <li>Injury and medical notes shared with your coach</li>
+</ul>
+
+<p><strong>Communications:</strong> Messages, voice notes, images, and documents sent through the in-app chat system between you and your coach.</p>
+
+<p><strong>Device Information:</strong> We collect push notification tokens to send you notifications. We may receive step count data from Apple Health or Google Fit if you grant permission.</p>
+
+<p><strong>Payment Information:</strong> Payment processing is handled by Stripe. We do not store your full card details. Stripe's privacy policy applies to payment data.</p>
+
+<h2>2. How We Use Your Information</h2>
+
+<ul>
+  <li>To provide and personalise your coaching experience, including nutrition plans and training programmes</li>
+  <li>To enable communication between you and your coach</li>
+  <li>To track your progress and adherence for plan adjustments</li>
+  <li>To manage session bookings and membership tokens</li>
+  <li>To send push notifications about sessions, ratings, and plan updates</li>
+  <li>To process payments and manage your membership</li>
+  <li>To improve our Service and resolve technical issues</li>
+</ul>
+
+<h2>3. Data Sharing</h2>
+
+<p>We do not sell, rent, or trade your personal information to third parties. We share data only in these circumstances:</p>
+
+<ul>
+  <li><strong>Your Coaching Team:</strong> Your coach and authorised staff members can access your health data, tracker entries, and chat messages to deliver your programme</li>
+  <li><strong>Service Providers:</strong> We use Supabase (database hosting), Stripe (payments), Expo and Firebase (push notifications), and Amazon Web Services (infrastructure). These providers process data on our behalf under contractual obligations</li>
+  <li><strong>Legal Requirements:</strong> We may disclose information if required by law, regulation, or legal process</li>
+</ul>
+
+<h2>4. Data Storage &amp; Security</h2>
+
+<p>Your data is stored on servers located in the EU (London, UK — AWS eu-west-2 region). We use industry-standard security measures including:</p>
+
+<ul>
+  <li>Encrypted connections (TLS/HTTPS) for all data in transit</li>
+  <li>Row-level security policies on our database</li>
+  <li>JWT-based authentication with secure password hashing (bcrypt)</li>
+  <li>Role-based access controls limiting staff access to relevant data</li>
+</ul>
+
+<h2>5. Data Retention</h2>
+
+<p>We retain your personal data for as long as your account is active and your membership is in effect. After your membership ends, we retain your data for up to 12 months to allow for reactivation. After this period, or upon your deletion request, we delete your personal data within 30 days.</p>
+
+<p>Anonymised, aggregated data (e.g., overall attendance statistics) may be retained indefinitely for service improvement.</p>
+
+<h2>6. Your Rights</h2>
+
+<p>Under UK GDPR and applicable data protection laws, you have the right to:</p>
+
+<ul>
+  <li><strong>Access:</strong> Request a copy of the personal data we hold about you</li>
+  <li><strong>Rectification:</strong> Request correction of inaccurate or incomplete data</li>
+  <li><strong>Erasure:</strong> Request deletion of your personal data ("right to be forgotten")</li>
+  <li><strong>Portability:</strong> Request your data in a structured, machine-readable format</li>
+  <li><strong>Restriction:</strong> Request that we limit processing of your data</li>
+  <li><strong>Objection:</strong> Object to processing based on legitimate interests</li>
+  <li><strong>Withdraw Consent:</strong> Where processing is based on consent, withdraw it at any time</li>
+</ul>
+
+<p>To exercise any of these rights, email <a href="mailto:support@reshape.fit">support@reshape.fit</a>. We will respond within 30 days.</p>
+
+<h2>7. Account Deletion</h2>
+
+<p>You can request complete deletion of your account and all associated data by emailing <a href="mailto:support@reshape.fit">support@reshape.fit</a>. Upon receiving your request, we will:</p>
+
+<ul>
+  <li>Delete your account, profile, and login credentials</li>
+  <li>Delete all health and fitness data, tracker entries, and body composition records</li>
+  <li>Delete all chat messages, voice notes, and shared media</li>
+  <li>Delete booking history, session records, and ratings</li>
+  <li>Cancel any active membership and cease billing</li>
+</ul>
+
+<p>Deletion is completed within 30 days and is irreversible.</p>
+
+<h2>8. Children's Privacy</h2>
+
+<p>Our Service is not intended for anyone under the age of 16. We do not knowingly collect personal information from children. If we become aware that a child under 16 has provided us with personal data, we will delete it promptly.</p>
+
+<h2>9. Push Notifications</h2>
+
+<p>We send push notifications for session reminders, attendance confirmations, rating prompts, chat messages, and plan updates. You can disable push notifications at any time through your device settings.</p>
+
+<h2>10. Third-Party Links</h2>
+
+<p>Our Service may contain links to third-party websites or services. We are not responsible for the privacy practices of these external sites. We encourage you to review their privacy policies.</p>
+
+<h2>11. Changes to This Policy</h2>
+
+<p>We may update this Privacy Policy from time to time. We will notify you of material changes by posting the updated policy in the app or by email. Your continued use of the Service after changes constitutes acceptance of the revised policy.</p>
+
+<h2>12. Contact Us</h2>
+
+<p>If you have questions about this Privacy Policy or our data practices, contact us:</p>
+
+<p>
+  <strong>Fittek Ltd</strong><br>
+  Email: <a href="mailto:support@reshape.fit">support@reshape.fit</a><br>
+  Website: <a href="https://reshape.fit">reshape.fit</a>
+</p>
+
+</div>
+
+<div class="footer">
+  &copy; 2026 Fittek Ltd. All rights reserved.
+</div>
+
 </body>
 </html>

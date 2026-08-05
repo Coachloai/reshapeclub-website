@@ -1,0 +1,693 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>ReShape Men — Hormonal Performance for Men Who Lead</title>
+<meta name="description" content="Performance-driven hormone optimisation for men 30+. Take the 3-minute assessment to find the pattern behind your fatigue, fat gain, and fading drive.">
+<link rel="icon" type="image/png" sizes="32x32" href="/favicon-32.png">
+<link rel="icon" type="image/png" href="/favicon.png">
+<link rel="apple-touch-icon" href="/apple-touch-icon.png">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Sora:wght@400;500;600;700&family=Manrope:wght@400;500;600;700&family=JetBrains+Mono:wght@400;500&display=swap" rel="stylesheet">
+<!-- Meta Pixel -->
+<script>
+  !function(f,b,e,v,n,t,s){if(f.fbq)return;n=f.fbq=function(){n.callMethod?
+  n.callMethod.apply(n,arguments):n.queue.push(arguments)};if(!f._fbq)f._fbq=n;
+  n.push=n;n.loaded=!0;n.version='2.0';n.queue=[];t=b.createElement(e);t.async=!0;
+  t.src=v;s=b.getElementsByTagName(e)[0];s.parentNode.insertBefore(t,s)}
+  (window,document,'script','https://connect.facebook.net/en_US/fbevents.js');
+  fbq('init', '571423748258941');
+  fbq('track', 'PageView');
+  fbq('trackCustom', 'ViewContent', { content_name: 'Men Performance Assessment Landing', content_category: 'mens_assessment' });
+</script>
+<noscript><img height="1" width="1" style="display:none" src="https://www.facebook.com/tr?id=571423748258941&ev=PageView&noscript=1"/></noscript>
+<style>
+:root{
+  --bg:#08090C;
+  --surface:rgba(255,255,255,.045);
+  --surface-2:rgba(255,255,255,.07);
+  --stroke:rgba(255,255,255,.09);
+  --stroke-bright:rgba(255,255,255,.16);
+  --text:#F2F3F5;
+  --text-2:rgba(242,243,245,.74);
+  --text-3:rgba(242,243,245,.52);
+  --ember:#F0824F;
+  --ember-2:#E8A05C;
+  --ember-grad:linear-gradient(120deg,#F3B267 0%,#EE7B4A 55%,#D95B3A 100%);
+  --cool:#6FB2CF;
+  --r-lg:28px;
+  --r-md:20px;
+  --r-pill:999px;
+}
+*{margin:0;padding:0;box-sizing:border-box}
+html{scroll-behavior:smooth}
+body{
+  background:var(--bg);
+  color:var(--text);
+  font-family:'Manrope',sans-serif;
+  font-size:17px;line-height:1.65;
+  -webkit-font-smoothing:antialiased;
+  overflow-x:hidden;
+}
+::selection{background:var(--ember);color:#0A0908}
+.wrap{max-width:1180px;margin:0 auto;padding:0 24px}
+.mono{font-family:'JetBrains Mono',monospace;font-size:.7rem;letter-spacing:.14em;text-transform:uppercase}
+
+/* ambient background */
+.ambient{position:fixed;inset:0;z-index:-1;pointer-events:none}
+.ambient::before{
+  content:"";position:absolute;width:900px;height:900px;border-radius:50%;
+  top:-380px;right:-260px;
+  background:radial-gradient(circle,rgba(238,123,74,.13),transparent 62%);
+  filter:blur(40px);
+}
+.ambient::after{
+  content:"";position:absolute;width:700px;height:700px;border-radius:50%;
+  bottom:-320px;left:-240px;
+  background:radial-gradient(circle,rgba(111,178,207,.07),transparent 62%);
+  filter:blur(40px);
+}
+
+/* NAV */
+nav{position:fixed;top:18px;left:0;right:0;z-index:100;display:flex;justify-content:center;padding:0 20px}
+.nav-pill{
+  display:flex;align-items:center;gap:34px;
+  background:rgba(14,16,20,.72);backdrop-filter:blur(20px);
+  border:1px solid var(--stroke);border-radius:var(--r-pill);
+  padding:10px 12px 10px 26px;
+  box-shadow:0 8px 32px rgba(0,0,0,.45);
+}
+.logo{font-family:'Sora',sans-serif;font-weight:700;font-size:.92rem;letter-spacing:.06em;color:var(--text);text-decoration:none}
+.logo span{background:var(--ember-grad);-webkit-background-clip:text;background-clip:text;color:transparent}
+.nav-cta{
+  font-family:'Manrope',sans-serif;font-weight:700;font-size:.85rem;
+  color:#141009;background:var(--ember-grad);
+  padding:11px 24px;border-radius:var(--r-pill);text-decoration:none;
+  box-shadow:0 4px 20px rgba(238,123,74,.35);
+  transition:transform .25s ease,box-shadow .25s ease;
+}
+.nav-cta:hover{transform:translateY(-1px);box-shadow:0 6px 26px rgba(238,123,74,.5)}
+
+/* HERO */
+.hero{padding:150px 0 60px;position:relative}
+.hero-grid{display:grid;grid-template-columns:1fr 1fr;gap:50px;align-items:center}
+.badge{
+  display:inline-flex;align-items:center;gap:10px;
+  border:1px solid var(--stroke-bright);border-radius:var(--r-pill);
+  padding:8px 18px;color:var(--text-2);
+  background:var(--surface);
+  font-family:'JetBrains Mono',monospace;font-size:.68rem;letter-spacing:.14em;text-transform:uppercase;
+}
+.badge i{width:7px;height:7px;border-radius:50%;background:var(--ember);box-shadow:0 0 10px var(--ember);display:inline-block;animation:pulse 2.4s ease infinite}
+@keyframes pulse{0%,100%{opacity:1}50%{opacity:.35}}
+h1{
+  font-family:'Sora',sans-serif;font-weight:600;
+  font-size:clamp(2.5rem,5.4vw,4.2rem);
+  line-height:1.07;letter-spacing:-.028em;
+  margin-top:30px;
+}
+h1 .grad{background:var(--ember-grad);-webkit-background-clip:text;background-clip:text;color:transparent}
+.hero-sub{margin-top:26px;font-size:1.12rem;color:var(--text-2);max-width:50ch}
+.hero-actions{margin-top:40px;display:flex;align-items:center;gap:22px;flex-wrap:wrap}
+.btn{
+  display:inline-flex;align-items:center;gap:12px;
+  font-family:'Manrope',sans-serif;font-weight:700;font-size:.98rem;
+  padding:17px 34px;border-radius:var(--r-pill);text-decoration:none;
+  transition:transform .25s ease,box-shadow .25s ease,background .25s ease;
+}
+.btn-fill{color:#141009;background:var(--ember-grad);box-shadow:0 8px 30px rgba(238,123,74,.35)}
+.btn-fill:hover{transform:translateY(-2px);box-shadow:0 12px 38px rgba(238,123,74,.5)}
+.btn-ghost{color:var(--text);border:1px solid var(--stroke-bright);background:var(--surface)}
+.btn-ghost:hover{background:var(--surface-2)}
+.hero-meta{margin-top:26px;color:var(--text-3);font-size:.85rem;display:flex;gap:22px;flex-wrap:wrap}
+
+/* HERO VISUAL — transformation photo + floating gauges */
+.hero-visual{position:relative}
+.hero-photo-wrap{
+  position:relative;overflow:hidden;
+  background:var(--bg);
+}
+.hero-photo-wrap img{
+  width:100%;display:block;
+  mix-blend-mode:lighten;
+  filter:brightness(.55) contrast(1.2) saturate(1.15);
+}
+.hero-photo-wrap::after{
+  content:"";position:absolute;inset:0;
+  background:
+    linear-gradient(180deg,transparent 45%,var(--bg) 100%),
+    linear-gradient(90deg,var(--bg) 0%,transparent 28%,transparent 80%,var(--bg) 100%),
+    linear-gradient(180deg,var(--bg) 0%,transparent 14%);
+  pointer-events:none;
+}
+
+/* Floating gauge strip */
+.gauge-strip{
+  position:absolute;bottom:0;left:50%;transform:translateX(-50%);
+  z-index:2;width:calc(100% - 24px);
+  display:grid;grid-template-columns:repeat(4,1fr);gap:8px;
+  padding:12px;
+}
+.gauge-card{
+  background:rgba(8,9,12,.75);
+  backdrop-filter:blur(16px);-webkit-backdrop-filter:blur(16px);
+  border:1px solid var(--stroke-bright);border-radius:16px;
+  padding:14px 10px;text-align:center;
+  transition:transform .3s ease;
+}
+.gauge-card:hover{transform:translateY(-3px)}
+.ring{width:56px;height:56px;margin:0 auto 10px;border-radius:50%;position:relative;display:grid;place-items:center}
+.ring::before{content:"";position:absolute;inset:0;border-radius:50%;background:var(--ring-bg);mask:radial-gradient(farthest-side,transparent calc(100% - 5px),#000 calc(100% - 4px))}
+.ring b{font-family:'Sora',sans-serif;font-weight:600;font-size:.85rem}
+.ring.t{--ring-bg:conic-gradient(#EE7B4A 0 62%,rgba(255,255,255,.1) 62%)}
+.ring.gh{--ring-bg:conic-gradient(#E8A05C 0 41%,rgba(255,255,255,.1) 41%)}
+.ring.c{--ring-bg:conic-gradient(#6FB2CF 0 78%,rgba(255,255,255,.1) 78%)}
+.ring.i{--ring-bg:conic-gradient(#84C98F 0 55%,rgba(255,255,255,.1) 55%)}
+.gauge-card h4{font-family:'JetBrains Mono',monospace;font-weight:500;font-size:.55rem;letter-spacing:.1em;text-transform:uppercase;color:var(--text-2)}
+.gauge-card p{font-size:.68rem;margin-top:4px}
+.g-low{color:var(--ember)}
+.g-high{color:var(--cool)}
+
+/* Hero tag line under photo */
+.hero-proof{
+  margin-top:16px;padding:14px 20px;border-radius:var(--r-md);
+  background:rgba(238,123,74,.07);border:1px solid rgba(238,123,74,.2);
+  font-size:.82rem;color:var(--text-2);text-align:center;
+}
+.hero-proof b{color:var(--text)}
+
+/* SECTIONS */
+section{padding:110px 0;position:relative}
+.kicker{
+  display:inline-block;border-radius:var(--r-pill);padding:7px 16px;
+  background:var(--surface);border:1px solid var(--stroke);
+  color:var(--ember-2);
+  font-family:'JetBrains Mono',monospace;font-size:.66rem;letter-spacing:.16em;text-transform:uppercase;
+}
+h2{
+  font-family:'Sora',sans-serif;font-weight:600;
+  font-size:clamp(1.85rem,3.6vw,2.75rem);line-height:1.13;letter-spacing:-.02em;
+  margin-top:22px;
+}
+h2 .grad{background:var(--ember-grad);-webkit-background-clip:text;background-clip:text;color:transparent}
+.lede{margin-top:20px;color:var(--text-2);font-size:1.05rem;max-width:56ch}
+.section-head{max-width:780px;margin-bottom:58px}
+
+/* BENTO */
+.bento{display:grid;grid-template-columns:repeat(3,1fr);gap:18px}
+.tile{
+  border-radius:var(--r-lg);padding:36px 32px;
+  background:linear-gradient(165deg,rgba(255,255,255,.06),rgba(255,255,255,.02));
+  border:1px solid var(--stroke);
+  transition:transform .3s ease,border-color .3s ease;
+}
+.tile:hover{transform:translateY(-4px);border-color:var(--stroke-bright)}
+.tile.wide{grid-column:span 2}
+.tile-icon{
+  width:52px;height:52px;border-radius:14px;display:grid;place-items:center;
+  margin-bottom:22px;
+}
+.tile-icon svg{width:28px;height:28px}
+.tile-icon.ic-father{background:rgba(56,189,248,.10);border:1px solid rgba(56,189,248,.25)}
+.tile-icon.ic-father svg{color:#38bdf8}
+.tile-icon.ic-husband{background:rgba(244,114,182,.10);border:1px solid rgba(244,114,182,.25)}
+.tile-icon.ic-husband svg{color:#f472b6}
+.tile-icon.ic-work{background:rgba(251,191,36,.10);border:1px solid rgba(251,191,36,.25)}
+.tile-icon.ic-work svg{color:#fbbf24}
+.tile-icon.ic-man{background:rgba(238,123,74,.10);border:1px solid rgba(238,123,74,.25)}
+.tile-icon.ic-man svg{color:#EE7B4A}
+.tile h3{font-family:'Sora',sans-serif;font-weight:600;font-size:1.22rem;margin-bottom:12px;letter-spacing:-.01em}
+.tile h3.c-blue{color:#38bdf8}
+.tile h3.c-pink{color:#f472b6}
+.tile h3.c-amber{color:#fbbf24}
+.tile h3.c-orange{color:#EE7B4A}
+.tile p{color:var(--text-2);font-size:.96rem;line-height:1.7}
+.tile p em{font-style:normal;color:#fff;font-weight:500}
+.tile .mono{color:var(--text-3);display:block;margin-bottom:14px}
+
+/* LEVERS */
+.levers{display:grid;grid-template-columns:repeat(2,1fr);gap:18px}
+.lever{
+  border-radius:var(--r-lg);padding:38px 32px;position:relative;overflow:hidden;
+  background:linear-gradient(165deg,rgba(255,255,255,.06),rgba(255,255,255,.02));
+  border:1px solid var(--stroke);
+}
+.lever::after{
+  content:"";position:absolute;top:0;left:32px;right:32px;height:1px;
+  background:linear-gradient(90deg,transparent,var(--lever-c),transparent);
+}
+.lever.t{--lever-c:#EE7B4A}
+.lever.gh{--lever-c:#E8A05C}
+.lever.c{--lever-c:#6FB2CF}
+.lever.i{--lever-c:#84C98F}
+.lever-top{display:flex;align-items:center;gap:14px;margin-bottom:22px}
+.lever-icon{
+  width:50px;height:50px;border-radius:14px;display:grid;place-items:center;flex-shrink:0;
+  background:color-mix(in srgb,var(--lever-c) 12%,transparent);
+  border:1px solid color-mix(in srgb,var(--lever-c) 30%,transparent);
+}
+.lever-icon svg{width:26px;height:26px;color:var(--lever-c)}
+.lever-chip{
+  display:inline-flex;align-items:center;gap:6px;
+  border-radius:var(--r-pill);padding:8px 16px;
+  font-family:'JetBrains Mono',monospace;font-size:.72rem;font-weight:700;letter-spacing:.13em;text-transform:uppercase;
+  color:var(--lever-c);border:1px solid color-mix(in srgb,var(--lever-c) 45%,transparent);
+  background:color-mix(in srgb,var(--lever-c) 12%,transparent);
+}
+.lever-chip .arrow{font-size:1rem;line-height:1}
+.lever h3{font-family:'Sora',sans-serif;font-weight:600;font-size:1.4rem;margin-bottom:12px;letter-spacing:-.01em;color:var(--lever-c)}
+.lever p{color:var(--text-2);font-size:.95rem;line-height:1.7}
+.lever p em{font-style:normal;color:#fff;font-weight:500}
+
+/* PROCESS */
+.steps{display:grid;grid-template-columns:repeat(5,1fr);gap:2px;counter-reset:step;border-radius:var(--r-lg);overflow:hidden;border:1px solid var(--stroke)}
+.step{
+  padding:32px 24px;position:relative;
+  background:linear-gradient(180deg,rgba(255,255,255,.04),rgba(255,255,255,.01));
+}
+.step::before{
+  content:"";position:absolute;top:0;left:0;right:0;height:2px;
+  background:linear-gradient(90deg,transparent,var(--step-c,#EE7B4A),transparent);opacity:.6;
+}
+.step-head{display:flex;align-items:center;gap:12px;margin-bottom:20px}
+.step-num{
+  width:36px;height:36px;border-radius:10px;display:grid;place-items:center;flex-shrink:0;
+  background:color-mix(in srgb,var(--step-c,#EE7B4A) 12%,transparent);
+  border:1px solid color-mix(in srgb,var(--step-c,#EE7B4A) 30%,transparent);
+  color:var(--step-c,#EE7B4A);
+  font-family:'JetBrains Mono',monospace;font-weight:700;font-size:.85rem;
+}
+.step-label{
+  font-family:'JetBrains Mono',monospace;font-size:.6rem;font-weight:600;
+  letter-spacing:.14em;text-transform:uppercase;color:var(--step-c,#EE7B4A);
+}
+.step-icon{margin-bottom:16px;color:var(--step-c,#EE7B4A);opacity:.7}
+.step-icon svg{width:32px;height:32px}
+.step h3{font-family:'Sora',sans-serif;font-weight:600;font-size:1.05rem;margin-bottom:10px;line-height:1.35}
+.step p{color:var(--text-2);font-size:.88rem;line-height:1.65}
+.step p em{font-style:normal;color:#fff;font-weight:500}
+.step:nth-child(1){--step-c:#38bdf8}
+.step:nth-child(2){--step-c:#a78bfa}
+.step:nth-child(3){--step-c:#EE7B4A}
+.step:nth-child(4){--step-c:#4ade80}
+.step:nth-child(5){--step-c:#f472b6}
+.step-connector{display:none}
+
+/* FIT */
+.fit-cols{display:grid;grid-template-columns:1fr 1fr;gap:18px}
+.fit-panel{border-radius:var(--r-lg);padding:40px 36px;border:1px solid var(--stroke)}
+.fit-panel.yes{background:linear-gradient(165deg,rgba(238,123,74,.10),rgba(238,123,74,.03));border-color:rgba(238,123,74,.3)}
+.fit-panel.no{background:linear-gradient(165deg,rgba(255,255,255,.05),rgba(255,255,255,.02))}
+.fit-panel h3{font-family:'Sora',sans-serif;font-weight:600;font-size:1.2rem;margin-bottom:24px}
+.fit-panel ul{list-style:none}
+.fit-panel li{display:flex;gap:14px;padding:13px 0;color:var(--text-2);font-size:.97rem;align-items:flex-start}
+.fit-panel li .dot{
+  flex-shrink:0;width:22px;height:22px;border-radius:50%;display:grid;place-items:center;
+  font-size:.7rem;margin-top:2px;
+}
+.yes .dot{background:rgba(238,123,74,.18);color:var(--ember)}
+.no .dot{background:rgba(255,255,255,.08);color:var(--text-3)}
+
+/* COMMUNITY IMAGE */
+.community-img{
+  position:relative;border-radius:var(--r-lg);overflow:hidden;
+  border:1px solid var(--stroke);
+}
+.community-img img{
+  width:100%;height:100%;object-fit:cover;display:block;
+  filter:brightness(.7) contrast(1.1) saturate(.85);
+  transition:transform 4s ease;
+}
+.community-img:hover img{transform:scale(1.03)}
+
+/* Horizontal scrolling mosaic */
+.mosaic-h-wrap{
+  position:relative;overflow:hidden;margin-top:70px;
+  mask-image:linear-gradient(90deg,transparent,#000 6%,#000 94%,transparent);
+  -webkit-mask-image:linear-gradient(90deg,transparent,#000 6%,#000 94%,transparent);
+}
+.mosaic-h-track{
+  display:flex;gap:14px;width:max-content;
+  animation:scrollLeft 50s linear infinite;
+}
+@keyframes scrollLeft{0%{transform:translateX(0)}100%{transform:translateX(-50%)}}
+.mh-card{
+  flex-shrink:0;width:220px;height:280px;border-radius:var(--r-md);overflow:hidden;
+  position:relative;background:rgba(255,255,255,.04);border:1px solid var(--stroke);
+}
+.mh-card img{width:100%;height:100%;object-fit:cover;display:block;transition:transform 4s ease}
+.mh-card:hover img{transform:scale(1.05)}
+.mh-label{
+  position:absolute;bottom:10px;right:10px;
+  background:var(--ember-grad);color:#141009;
+  font-family:'Sora',sans-serif;font-weight:700;font-size:.7rem;
+  padding:5px 12px;border-radius:var(--r-pill);
+  box-shadow:0 4px 12px rgba(238,123,74,.4);
+}
+@media(max-width:768px){.mh-card{width:160px;height:210px}.mosaic-h-track{gap:10px}}
+.coach-grid{display:grid;grid-template-columns:.85fr 1.15fr;gap:60px;align-items:center}
+.coach-grid h2{margin-top:20px}
+.coach-quote{
+  margin-top:28px;padding:24px 28px;border-radius:var(--r-md);
+  background:rgba(238,123,74,.08);border:1px solid rgba(238,123,74,.22);
+  color:var(--text-2);font-size:1rem;font-style:italic;
+}
+@media (max-width:960px){
+  .coach-grid{grid-template-columns:1fr;gap:40px}
+  .ph.band{aspect-ratio:16/9}
+}
+
+/* FINAL */
+.final-card{
+  border-radius:36px;padding:90px 40px;text-align:center;position:relative;overflow:hidden;
+  background:linear-gradient(165deg,rgba(255,255,255,.07),rgba(255,255,255,.02));
+  border:1px solid var(--stroke-bright);
+}
+.final-card::before{
+  content:"";position:absolute;width:640px;height:640px;border-radius:50%;
+  top:-380px;left:50%;transform:translateX(-50%);
+  background:radial-gradient(circle,rgba(238,123,74,.22),transparent 62%);
+  filter:blur(30px);
+}
+.final-card>*{position:relative}
+.final-card h2{max-width:19ch;margin-left:auto;margin-right:auto}
+.final-card .lede{margin-left:auto;margin-right:auto}
+.final-card .btn{margin-top:38px}
+.final-note{display:block;margin-top:22px;color:var(--text-3);font-size:.85rem}
+
+footer{padding:44px 0;display:flex;justify-content:center}
+footer .wrap{display:flex;justify-content:space-between;flex-wrap:wrap;gap:14px;width:100%}
+footer span{color:var(--text-3);font-size:.85rem}
+
+/* reveal */
+.reveal{opacity:0;transform:translateY(24px);transition:opacity .7s ease,transform .7s ease}
+.reveal.in{opacity:1;transform:none}
+@media (prefers-reduced-motion:reduce){
+  .reveal{opacity:1;transform:none;transition:none}
+  .badge i{animation:none}
+  html{scroll-behavior:auto}
+}
+
+@media (max-width:960px){
+  .hero{padding-top:140px}
+  .hero-grid{grid-template-columns:1fr;gap:50px}
+  .bento{grid-template-columns:1fr}
+  .tile.wide{grid-column:span 1}
+  .levers{grid-template-columns:1fr}
+  .steps{grid-template-columns:1fr;gap:0;border-radius:var(--r-lg)}
+  .fit-cols{grid-template-columns:1fr}
+  section{padding:80px 0}
+  .nav-pill{gap:18px}
+  .gauge-strip{grid-template-columns:repeat(4,1fr);gap:6px;padding:8px}
+}
+@media (max-width:520px){
+  .gauge-strip{grid-template-columns:repeat(2,1fr);gap:6px}
+  .gauge-card{padding:10px 6px}
+  .ring{width:44px;height:44px;margin-bottom:6px}
+  .ring b{font-size:.72rem}
+  .gauge-card h4{font-size:.5rem}
+  .gauge-card p{font-size:.6rem}
+}
+</style>
+</head>
+<body>
+
+<div class="ambient"></div>
+
+<nav>
+  <div class="nav-pill">
+    <a class="logo" href="/">Re<span>Shape</span></a>
+    <a class="nav-cta" href="./quiz.html">Take the assessment</a>
+  </div>
+</nav>
+
+<header class="hero">
+  <div class="wrap hero-grid">
+    <div>
+      <span class="badge"><i></i>For men 30+</span>
+      <h1>You handle everything in your life. <span class="grad">Except yourself.</span></h1>
+      <p class="hero-sub">You show up for work, for your family, for everyone else. But the energy, the physique, and the edge you used to have are slipping — and no amount of willpower is bringing them back. The cause isn't effort. It's hormonal.</p>
+      <div class="hero-actions">
+        <a class="btn btn-fill" href="./quiz.html">Take the hormonal assessment &#8594;</a>
+        <a class="btn btn-ghost" href="#thesis">How it works</a>
+      </div>
+      <div class="hero-meta">
+        <span>3-minute diagnostic</span><span>Completely private</span><span>No obligation</span>
+      </div>
+    </div>
+
+    <div class="hero-visual reveal">
+      <div class="hero-photo-wrap">
+        <img src="./images/hero-transformation.png" alt="Real client transformation — before and after" loading="eager">
+        <div class="gauge-strip">
+          <div class="gauge-card">
+            <div class="ring t"><b>62%</b></div>
+            <h4>Testosterone</h4>
+            <p class="g-low">Below optimal</p>
+          </div>
+          <div class="gauge-card">
+            <div class="ring gh"><b>41%</b></div>
+            <h4>Growth H.</h4>
+            <p class="g-low">Suppressed</p>
+          </div>
+          <div class="gauge-card">
+            <div class="ring c"><b>78%</b></div>
+            <h4>Cortisol</h4>
+            <p class="g-high">Elevated</p>
+          </div>
+          <div class="gauge-card">
+            <div class="ring i"><b>55%</b></div>
+            <h4>Insulin</h4>
+            <p class="g-low">Reduced</p>
+          </div>
+        </div>
+      </div>
+      <div class="hero-proof"><b>Real client.</b> Same hormonal pattern you're about to discover.</div>
+    </div>
+  </div>
+</header>
+
+<section>
+  <div class="wrap">
+    <div class="section-head reveal">
+      <span class="kicker">The real cost</span>
+      <h2>Being out of shape isn't a fitness problem. It's a <span class="grad">performance leak</span> in every area of your life.</h2>
+    </div>
+    <div class="bento reveal">
+      <div class="tile wide">
+        <span class="mono">As a father</span>
+        <div class="tile-icon ic-father"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="4" r="2.5"/><path d="M12 6.5v4"/><path d="M8 21v-5a2 2 0 0 1 2-2h4a2 2 0 0 1 2 2v5"/><circle cx="18" cy="9" r="1.8"/><path d="M18 10.8v2.2"/><path d="M16 19v-3a1.5 1.5 0 0 1 1.5-1.5h1A1.5 1.5 0 0 1 20 16v3"/></svg></div>
+        <h3 class="c-blue">Watching from the sidelines</h3>
+        <p>Your kids don't need a provider on the couch. They need a father with the <em>energy to keep up</em>, coach, and lead by example — for <em>decades, not years</em>. Every season you stay depleted is a season they remember differently.</p>
+      </div>
+      <div class="tile">
+        <span class="mono">As a husband</span>
+        <div class="tile-icon ic-husband"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M20.84 4.61a5.5 5.5 0 0 0-7.78 0L12 5.67l-1.06-1.06a5.5 5.5 0 1 0-7.78 7.78L12 21.23l8.84-8.84a5.5 5.5 0 0 0 0-7.78z"/></svg></div>
+        <h3 class="c-pink">Presence without vitality</h3>
+        <p><em>Low testosterone</em> doesn't just soften your body. It flattens your <em>drive, mood, and presence</em> with the woman who chose you at your best.</p>
+      </div>
+      <div class="tile">
+        <span class="mono">At work</span>
+        <div class="tile-icon ic-work"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M13 2L3 14h9l-1 8 10-12h-9l1-8z"/></svg></div>
+        <h3 class="c-amber">The 3pm collapse</h3>
+        <p>You're running on <em>caffeine and adrenaline</em> by mid-afternoon. The focus, the sharpness, the stamina you used to have — gone. That's not ageing. <em>That's cortisol.</em></p>
+      </div>
+      <div class="tile wide">
+        <span class="mono">As a man</span>
+        <div class="tile-icon ic-man"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="9"/><path d="M12 8v4l3 3"/></svg></div>
+        <h3 class="c-orange">The mirror doesn't negotiate</h3>
+        <p>You used to look in the mirror and <em>recognise yourself</em>. Now there's a gap between who you are and what you see. That <em>quiet erosion</em> hits harder than any number on a scale.</p>
+      </div>
+    </div>
+
+    <div class="mosaic-h-wrap reveal">
+      <div class="mosaic-h-track">
+        <div class="mh-card"><img src="https://lvizldmdficsfpgegehp.supabase.co/storage/v1/object/public/images/men/mark.jpg" alt="Mark transformation" loading="lazy"><div class="mh-label">-14kg</div></div>
+        <div class="mh-card"><img src="https://lvizldmdficsfpgegehp.supabase.co/storage/v1/object/public/images/men/paul.jpg" alt="Paul transformation" loading="lazy"><div class="mh-label">-12kg</div></div>
+        <div class="mh-card"><img src="https://lvizldmdficsfpgegehp.supabase.co/storage/v1/object/public/images/men/richard.jpg" alt="Richard transformation" loading="lazy"></div>
+        <div class="mh-card"><img src="https://lvizldmdficsfpgegehp.supabase.co/storage/v1/object/public/images/men/partha.jpg" alt="Partha transformation" loading="lazy"><div class="mh-label">-15kg</div></div>
+        <div class="mh-card"><img src="https://lvizldmdficsfpgegehp.supabase.co/storage/v1/object/public/images/men/sam.jpg" alt="Sam transformation" loading="lazy"><div class="mh-label">-11kg</div></div>
+        <div class="mh-card"><img src="https://lvizldmdficsfpgegehp.supabase.co/storage/v1/object/public/images/men/client1.jpg" alt="Client transformation" loading="lazy"><div class="mh-label">-9kg</div></div>
+        <div class="mh-card"><img src="https://lvizldmdficsfpgegehp.supabase.co/storage/v1/object/public/images/men/client4.jpg" alt="Client transformation" loading="lazy"><div class="mh-label">-14kg</div></div>
+        <div class="mh-card"><img src="https://lvizldmdficsfpgegehp.supabase.co/storage/v1/object/public/images/men/client6.jpg" alt="Client transformation" loading="lazy"><div class="mh-label">-13kg</div></div>
+        <div class="mh-card"><img src="https://lvizldmdficsfpgegehp.supabase.co/storage/v1/object/public/images/men/stephen.jpg" alt="Stephen transformation" loading="lazy"></div>
+        <div class="mh-card"><img src="https://lvizldmdficsfpgegehp.supabase.co/storage/v1/object/public/images/men/client2.jpg" alt="Client transformation" loading="lazy"></div>
+        <div class="mh-card"><img src="https://lvizldmdficsfpgegehp.supabase.co/storage/v1/object/public/images/men/client3.jpg" alt="Client transformation" loading="lazy"></div>
+        <div class="mh-card"><img src="https://lvizldmdficsfpgegehp.supabase.co/storage/v1/object/public/images/men/client5.jpg" alt="Client transformation" loading="lazy"></div>
+        <!-- duplicate for seamless loop -->
+        <div class="mh-card"><img src="https://lvizldmdficsfpgegehp.supabase.co/storage/v1/object/public/images/men/mark.jpg" alt="Mark transformation" loading="lazy"><div class="mh-label">-14kg</div></div>
+        <div class="mh-card"><img src="https://lvizldmdficsfpgegehp.supabase.co/storage/v1/object/public/images/men/paul.jpg" alt="Paul transformation" loading="lazy"><div class="mh-label">-12kg</div></div>
+        <div class="mh-card"><img src="https://lvizldmdficsfpgegehp.supabase.co/storage/v1/object/public/images/men/richard.jpg" alt="Richard transformation" loading="lazy"></div>
+        <div class="mh-card"><img src="https://lvizldmdficsfpgegehp.supabase.co/storage/v1/object/public/images/men/partha.jpg" alt="Partha transformation" loading="lazy"><div class="mh-label">-15kg</div></div>
+        <div class="mh-card"><img src="https://lvizldmdficsfpgegehp.supabase.co/storage/v1/object/public/images/men/sam.jpg" alt="Sam transformation" loading="lazy"><div class="mh-label">-11kg</div></div>
+        <div class="mh-card"><img src="https://lvizldmdficsfpgegehp.supabase.co/storage/v1/object/public/images/men/client1.jpg" alt="Client transformation" loading="lazy"><div class="mh-label">-9kg</div></div>
+        <div class="mh-card"><img src="https://lvizldmdficsfpgegehp.supabase.co/storage/v1/object/public/images/men/client4.jpg" alt="Client transformation" loading="lazy"><div class="mh-label">-14kg</div></div>
+        <div class="mh-card"><img src="https://lvizldmdficsfpgegehp.supabase.co/storage/v1/object/public/images/men/client6.jpg" alt="Client transformation" loading="lazy"><div class="mh-label">-13kg</div></div>
+        <div class="mh-card"><img src="https://lvizldmdficsfpgegehp.supabase.co/storage/v1/object/public/images/men/stephen.jpg" alt="Stephen transformation" loading="lazy"></div>
+        <div class="mh-card"><img src="https://lvizldmdficsfpgegehp.supabase.co/storage/v1/object/public/images/men/client2.jpg" alt="Client transformation" loading="lazy"></div>
+        <div class="mh-card"><img src="https://lvizldmdficsfpgegehp.supabase.co/storage/v1/object/public/images/men/client3.jpg" alt="Client transformation" loading="lazy"></div>
+        <div class="mh-card"><img src="https://lvizldmdficsfpgegehp.supabase.co/storage/v1/object/public/images/men/client5.jpg" alt="Client transformation" loading="lazy"></div>
+      </div>
+    </div>
+  </div>
+</section>
+
+<section id="thesis">
+  <div class="wrap">
+    <div class="section-head reveal">
+      <span class="kicker">The thesis</span>
+      <h2>Fat loss after 35 is <span class="grad">hormonal</span> — not motivational.</h2>
+      <p class="lede">You don't lack willpower. You lack the endocrine environment that made results easy in your twenties. We rebuild it around four levers.</p>
+    </div>
+    <div class="levers reveal">
+      <div class="lever t">
+        <div class="lever-top">
+          <div class="lever-icon"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="10.5" cy="15.5" r="5.5"/><line x1="14.5" y1="11.5" x2="21" y2="5"/><polyline points="17 5 21 5 21 9"/></svg></div>
+          <span class="lever-chip"><span class="arrow">&#9650;</span> Raise</span>
+        </div>
+        <h3>Testosterone</h3>
+        <p>The <em>master hormone</em> of drive, muscle, and confidence. Restored naturally through training, nutrition, and lifestyle architecture — <em>measured, not guessed</em>.</p>
+      </div>
+      <div class="lever gh">
+        <div class="lever-top">
+          <div class="lever-icon"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M12 3v18"/><path d="M8 7l4-4 4 4"/><circle cx="12" cy="14" r="4"/><path d="M8 14h-4m16 0h-4"/></svg></div>
+          <span class="lever-chip"><span class="arrow">&#9650;</span> Raise</span>
+        </div>
+        <h3>Growth hormone</h3>
+        <p>Your body's <em>recovery and fat-mobilisation</em> signal. Optimised through sleep protocols, fasting windows, and training intensity built for <em>full calendars</em>.</p>
+      </div>
+      <div class="lever c">
+        <div class="lever-top">
+          <div class="lever-icon"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M12 21V3"/><path d="M8 17l4 4 4-4"/><path d="M4 10c1-2 3-3 5-3s3 2 6 2 5-2 5-2"/></svg></div>
+          <span class="lever-chip"><span class="arrow">&#9660;</span> Lower</span>
+        </div>
+        <h3>Cortisol</h3>
+        <p>The <em>silent tax</em> on every man under pressure. Chronic stress <em>locks fat around your midsection</em> and blunts every other hormone. We bring it down without asking you to do less.</p>
+      </div>
+      <div class="lever i">
+        <div class="lever-top">
+          <div class="lever-icon"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M4 12h4l3-9 2 18 3-9h4"/><circle cx="12" cy="12" r="1"/></svg></div>
+          <span class="lever-chip"><span class="arrow">&#9672;</span> Stabilise</span>
+        </div>
+        <h3>Insulin</h3>
+        <p>The <em>gatekeeper of fat storage</em>. Convenience food, late dinners, and constant grazing keep it <em>chronically spiked</em>. We restore sensitivity so your body burns fat instead of banking it.</p>
+      </div>
+    </div>
+  </div>
+</section>
+
+<section>
+  <div class="wrap">
+    <div class="section-head reveal">
+      <span class="kicker">The clinical process</span>
+      <h2>Five diagnostic layers. <span class="grad">Zero guesswork.</span></h2>
+      <p class="lede">Every protocol starts with precision data — not assumptions. We measure before we prescribe, and we track every variable that matters.</p>
+    </div>
+    <div class="steps reveal">
+      <div class="step">
+        <div class="step-head"><div class="step-num">1</div><span class="step-label">Assess</span></div>
+        <div class="step-icon"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M9 5H7a2 2 0 0 0-2 2v12a2 2 0 0 0 2 2h10a2 2 0 0 0 2-2V7a2 2 0 0 0-2-2h-2"/><rect x="9" y="3" width="6" height="4" rx="1"/><path d="M9 14l2 2 4-4"/></svg></div>
+        <h3>Hormonal pattern assessment</h3>
+        <p>A structured diagnostic of your <em>testosterone, cortisol, growth hormone, and insulin</em> profile — mapped from 40+ symptom and lifestyle markers. Not a generic quiz. A clinical-grade signal map.</p>
+      </div>
+      <div class="step">
+        <div class="step-head"><div class="step-num">2</div><span class="step-label">Measure</span></div>
+        <div class="step-icon"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M3 3v18h18"/><path d="M7 16l4-8 4 4 4-10"/><circle cx="7" cy="16" r="1.5" fill="currentColor"/><circle cx="11" cy="8" r="1.5" fill="currentColor"/><circle cx="15" cy="12" r="1.5" fill="currentColor"/><circle cx="19" cy="6" r="1.5" fill="currentColor"/></svg></div>
+        <h3>Body composition analysis</h3>
+        <p>Baseline <em>body fat %, visceral fat, lean mass, and key circumferences</em> — tracked at every checkpoint. We don't use scales. We measure what actually changes when hormones shift.</p>
+      </div>
+      <div class="step">
+        <div class="step-head"><div class="step-num">3</div><span class="step-label">Screen</span></div>
+        <div class="step-icon"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="5" r="2"/><path d="M12 7v5"/><path d="M9 12l-2 5 5-2 5 2-2-5"/><path d="M7 20h10"/><path d="M10 20l2-3 2 3"/></svg></div>
+        <h3>Movement screening</h3>
+        <p><em>Functional movement assessment</em> to identify restrictions, imbalances, and injury risk before training begins. Your protocol is built around how <em>your body actually moves</em> — not a template.</p>
+      </div>
+      <div class="step">
+        <div class="step-head"><div class="step-num">4</div><span class="step-label">Engineer</span></div>
+        <div class="step-icon"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="3"/><path d="M19.4 15a1.65 1.65 0 0 0 .33 1.82l.06.06a2 2 0 1 1-2.83 2.83l-.06-.06a1.65 1.65 0 0 0-1.82-.33 1.65 1.65 0 0 0-1 1.51V21a2 2 0 0 1-4 0v-.09A1.65 1.65 0 0 0 9 19.4a1.65 1.65 0 0 0-1.82.33l-.06.06a2 2 0 1 1-2.83-2.83l.06-.06A1.65 1.65 0 0 0 4.68 15a1.65 1.65 0 0 0-1.51-1H3a2 2 0 0 1 0-4h.09A1.65 1.65 0 0 0 4.6 9a1.65 1.65 0 0 0-.33-1.82l-.06-.06a2 2 0 1 1 2.83-2.83l.06.06A1.65 1.65 0 0 0 9 4.68a1.65 1.65 0 0 0 1-1.51V3a2 2 0 0 1 4 0v.09a1.65 1.65 0 0 0 1 1.51 1.65 1.65 0 0 0 1.82-.33l.06-.06a2 2 0 1 1 2.83 2.83l-.06.06A1.65 1.65 0 0 0 19.4 9a1.65 1.65 0 0 0 1.51 1H21a2 2 0 0 1 0 4h-.09a1.65 1.65 0 0 0-1.51 1z"/></svg></div>
+        <h3>Precision protocol</h3>
+        <p>Training, nutrition, sleep, and stress management — <em>engineered around your data</em>. No two-hour sessions. No chicken and broccoli. <em>Minimum effective dose</em>, maximum hormonal return.</p>
+      </div>
+      <div class="step">
+        <div class="step-head"><div class="step-num">5</div><span class="step-label">Track</span></div>
+        <div class="step-icon"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M22 12h-4l-3 9L9 3l-3 9H2"/></svg></div>
+        <h3>Biometric accountability</h3>
+        <p>Weekly reviews, <em>body composition checkpoints</em>, and direct coaching. Progress measured on <em>data, not feelings</em>. If a variable isn't moving, we adjust the protocol — not the effort.</p>
+      </div>
+    </div>
+  </div>
+</section>
+
+<section>
+  <div class="wrap coach-grid">
+    <div class="community-img reveal">
+      <img src="./images/community.jpg" alt="Two members training together at ReShape" loading="lazy">
+    </div>
+    <div class="reveal">
+      <span class="kicker">The room matters</span>
+      <h2>Train alongside men who <span class="grad">hold the same standard.</span></h2>
+      <p class="lede">This isn't a gym membership. It's a room full of men 30+ who are done making excuses and started making progress. The accountability, the energy, and the standard of the group will pull you forward on the days your motivation won't.</p>
+      <div class="coach-quote">"The lads in this room push each other. You walk in tired, you leave better. Every single session."</div>
+    </div>
+  </div>
+</section>
+
+<section>
+  <div class="wrap">
+    <div class="section-head reveal">
+      <span class="kicker">Fit</span>
+      <h2>This is not for everyone. <span class="grad">Deliberately.</span></h2>
+    </div>
+    <div class="fit-cols reveal">
+      <div class="fit-panel yes">
+        <h3>This is for you if</h3>
+        <ul>
+          <li><span class="dot">&#10003;</span>You've been putting everyone else first and let your own health slide</li>
+          <li><span class="dot">&#10003;</span>You're 35+ and feel the decline in energy, drive, and physique</li>
+          <li><span class="dot">&#10003;</span>You want to lead your family from the front for the next 30 years</li>
+          <li><span class="dot">&#10003;</span>You're ready to invest in yourself the way you invest in everything else that matters</li>
+        </ul>
+      </div>
+      <div class="fit-panel no">
+        <h3>This is not for you if</h3>
+        <ul>
+          <li><span class="dot">&#10005;</span>You want a quick fix, a detox, or a 30-day shred</li>
+          <li><span class="dot">&#10005;</span>You're looking for the cheapest option on the market</li>
+          <li><span class="dot">&#10005;</span>You expect results without changing anything</li>
+          <li><span class="dot">&#10005;</span>You'd rather manage symptoms than fix the system</li>
+        </ul>
+      </div>
+    </div>
+  </div>
+</section>
+
+<section id="assessment">
+  <div class="wrap">
+    <div class="final-card reveal">
+      <span class="kicker">Begin the audit</span>
+      <h2>Find out what your hormones are <span class="grad">costing you.</span></h2>
+      <p class="lede" style="text-align:center">Three minutes. A clear picture of your testosterone, growth hormone, cortisol, and insulin profile — and the single biggest lever holding your performance back.</p>
+      <a class="btn btn-fill" href="./quiz.html">Take the hormonal assessment &#8594;</a>
+      <span class="final-note">Confidential &middot; Results reviewed personally &middot; No spam, ever</span>
+    </div>
+  </div>
+</section>
+
+<footer>
+  <div class="wrap">
+    <span><b style="color:var(--text)">Re</b>Shape</span>
+    <span>&copy; 2026 ReShape. All rights reserved.</span>
+  </div>
+</footer>
+
+<script>
+const io = new IntersectionObserver(entries=>{
+  entries.forEach(e=>{ if(e.isIntersecting){ e.target.classList.add('in'); io.unobserve(e.target);} });
+},{threshold:.12});
+document.querySelectorAll('.reveal').forEach(el=>io.observe(el));
+</script>
+
+</body>
+</html>

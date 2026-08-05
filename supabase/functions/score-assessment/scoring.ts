@@ -8,7 +8,8 @@ export type Hormone =
   | "progesterone"
   | "testosterone"
   | "insulin"
-  | "leptin";
+  | "leptin"
+  | "gh";
 
 export type Weights = Partial<Record<Hormone, number>>;
 
@@ -20,6 +21,7 @@ export const HORMONES: readonly Hormone[] = [
   "testosterone",
   "insulin",
   "leptin",
+  "gh",
 ];
 
 // Single source of truth for the 14-question weight table.
@@ -127,9 +129,91 @@ export const WEIGHTS: Record<string, Record<string, Weights>> = {
     build_muscle: {},
     sustainable_habits: {},
   },
+
+  // ── Men's Assessment (MQ1–MQ12) ──
+  MQ1: {
+    "30_35":  { testosterone: 1 },
+    "36_40":  { testosterone: 1, gh: 1 },
+    "41_45":  { testosterone: 2, gh: 2 },
+    "46_50":  { testosterone: 3, gh: 2, cortisol: 1 },
+    "50_plus": { testosterone: 3, gh: 3, cortisol: 1 },
+  },
+  MQ2: {
+    crashed_by_2pm: { cortisol: 3, testosterone: 1 },
+    afternoon_dip:  { cortisol: 2 },
+    variable:       { cortisol: 1 },
+    solid:          {},
+  },
+  MQ3: {
+    belly:    { cortisol: 3, insulin: 2 },
+    chest:    { testosterone: 3 },
+    all_over: { insulin: 2, testosterone: 1 },
+    nowhere:  {},
+  },
+  MQ4: {
+    wired_cant_sleep:  { cortisol: 3 },
+    wake_3am:          { cortisol: 3, gh: 2 },
+    light_unrefreshed: { gh: 3, cortisol: 1 },
+    sleep_fine:        {},
+  },
+  MQ5: {
+    relentless:   { cortisol: 3, testosterone: 1 },
+    high_managed: { cortisol: 2 },
+    moderate:     { cortisol: 1 },
+    low:          {},
+  },
+  MQ6: {
+    not_training:     { testosterone: 1, gh: 1 },
+    going_no_results: { testosterone: 2, gh: 2 },
+    regressing:       { testosterone: 3, gh: 3 },
+    progressing:      {},
+  },
+  MQ7: {
+    gone:         { testosterone: 3 },
+    dulled:       { testosterone: 2 },
+    inconsistent: { testosterone: 1, cortisol: 1 },
+    strong:       {},
+  },
+  MQ8: {
+    days:   { gh: 3, cortisol: 1 },
+    slow:   { gh: 2 },
+    normal: {},
+    fast:   {},
+  },
+  MQ9: {
+    nonexistent:      { testosterone: 3 },
+    noticeably_lower: { testosterone: 2 },
+    fluctuating:      { testosterone: 1, cortisol: 1 },
+    fine:             {},
+  },
+  MQ10: {
+    food_coma:  { insulin: 3 },
+    slight_dip: { insulin: 1 },
+    steady:     {},
+    wired:      { insulin: 2, cortisol: 1 },
+  },
+  // MQ11 multi-select: recorded for the coach, not scored.
+  MQ11: {
+    gym_more: {},
+    calorie_cutting: {},
+    supplements: {},
+    trt: {},
+    keto_carnivore: {},
+    fasting: {},
+    personal_trainer: {},
+    nothing: {},
+  },
+  // MQ12: emotional anchor for the result page, not scored.
+  MQ12: {
+    lose_gut: {},
+    energy_back: {},
+    build_strength: {},
+    sleep_recover: {},
+    all_of_it: {},
+  },
 };
 
-const REQUIRED_QUESTIONS = [
+const REQUIRED_QUESTIONS_WOMEN = [
   // Q1b is intentionally NOT required — the quiz UI always asks it,
   // but old in-flight sessions (taken before Q1b existed) should still
   // score. When Q1b is missing the engine treats it as "none".
@@ -138,16 +222,30 @@ const REQUIRED_QUESTIONS = [
   "Q11", "Q12", "Q14",
 ];
 
+const REQUIRED_QUESTIONS_MEN = [
+  "MQ1", "MQ2", "MQ3", "MQ4", "MQ5",
+  "MQ6", "MQ7", "MQ8", "MQ9", "MQ10",
+  "MQ12",
+];
+
 export type ArchetypePrimary =
   | "stress_driven_plateau"
   | "hormonal_shift"
   | "metabolic_resistance"
-  | "compound_pattern";
+  | "compound_pattern"
+  // Men's archetypes
+  | "cortisol_dominant_decline"
+  | "testosterone_decline"
+  | "metabolic_resistance_men"
+  | "compound_pattern_men";
 
 export type ArchetypeSecondary =
   | "stress_driven_plateau"
   | "hormonal_shift"
   | "metabolic_resistance"
+  | "cortisol_dominant_decline"
+  | "testosterone_decline"
+  | "metabolic_resistance_men"
   | null;
 
 export type ScoringResult = {
@@ -168,15 +266,21 @@ export function isScoringError(r: ScoringResult | ScoringError): r is ScoringErr
   return (r as ScoringError).error !== undefined;
 }
 
+export function isMensAssessment(answers: Record<string, string>): boolean {
+  return Object.keys(answers).some((k) => k.startsWith("MQ"));
+}
+
 export function validateAnswers(answers: Record<string, string>): ScoringError | null {
   const invalid: string[] = [];
+  const mens = isMensAssessment(answers);
+  const multiSelectQ = mens ? "MQ11" : "Q13";
 
   for (const [qid, val] of Object.entries(answers)) {
     if (!(qid in WEIGHTS)) { invalid.push(`unknown question ${qid}`); continue; }
-    if (qid === "Q13") {
+    if (qid === multiSelectQ) {
       const keys = val.split(",").map((s) => s.trim()).filter(Boolean);
       for (const k of keys) {
-        if (!(k in WEIGHTS.Q13)) invalid.push(`Q13 unknown answer ${k}`);
+        if (!(k in WEIGHTS[multiSelectQ])) invalid.push(`${multiSelectQ} unknown answer ${k}`);
       }
     } else {
       if (!(val in WEIGHTS[qid])) invalid.push(`${qid} unknown answer ${val}`);
@@ -185,7 +289,8 @@ export function validateAnswers(answers: Record<string, string>): ScoringError |
 
   if (invalid.length) return { error: "invalid", invalid };
 
-  const missing = REQUIRED_QUESTIONS.filter((q) => !(q in answers));
+  const required = mens ? REQUIRED_QUESTIONS_MEN : REQUIRED_QUESTIONS_WOMEN;
+  const missing = required.filter((q) => !(q in answers));
   if (missing.length) return { error: "incomplete", missing };
 
   return null;
@@ -197,12 +302,75 @@ export function scoreAssessment(
   const validation = validateAnswers(answers);
   if (validation) return validation;
 
+  const mens = isMensAssessment(answers);
+
   const scores: Record<Hormone, number> = {
     cortisol: 0, ghrelin: 0, estrogen: 0, progesterone: 0,
-    testosterone: 0, insulin: 0, leptin: 0,
+    testosterone: 0, insulin: 0, leptin: 0, gh: 0,
   };
   const flags: string[] = [];
 
+  if (mens) {
+    // Men's scoring path
+    const skipQs = ["MQ11", "MQ12"];
+    if (answers.MQ1 === "46_50" || answers.MQ1 === "50_plus") flags.push("andropause_risk");
+    if (answers.MQ6 === "regressing") flags.push("anabolic_decline");
+
+    for (const [qid, val] of Object.entries(answers)) {
+      if (skipQs.includes(qid)) continue;
+      const weights = WEIGHTS[qid]?.[val] || {};
+      for (const [h, w] of Object.entries(weights) as [Hormone, number][]) {
+        scores[h] += w;
+      }
+    }
+
+    for (const h of HORMONES) {
+      scores[h] = Math.min(10, Math.max(0, scores[h]));
+    }
+
+    // Men's clusters: cortisol-dominant, testosterone/GH decline, metabolic
+    const cortisol_cluster    = scores.cortisol;
+    const anabolic_cluster    = (scores.testosterone + scores.gh) / 2;
+    const metabolic_cluster   = scores.insulin;
+    const clusters = { cortisol: cortisol_cluster, anabolic: anabolic_cluster, metabolic: metabolic_cluster };
+
+    const sorted = (Object.entries(clusters) as [keyof typeof clusters, number][])
+      .sort((a, b) => b[1] - a[1]);
+    const [topKey, topVal]       = sorted[0];
+    const [secondKey, secondVal] = sorted[1];
+    const minVal                 = sorted[2][1];
+
+    let primary: ArchetypePrimary;
+    let secondary: ArchetypeSecondary = null;
+
+    if (topVal > 0 && (topVal - minVal) / topVal < 0.20) {
+      primary = "compound_pattern_men";
+    } else {
+      const map: Record<keyof typeof clusters, ArchetypePrimary> = {
+        cortisol: "cortisol_dominant_decline",
+        anabolic: "testosterone_decline",
+        metabolic: "metabolic_resistance_men",
+      };
+      primary = map[topKey];
+      if (topVal > 0 && (topVal - secondVal) / topVal < 0.30) {
+        secondary = map[secondKey] as ArchetypeSecondary;
+      }
+    }
+
+    return {
+      primary_archetype: primary,
+      secondary_archetype: secondary,
+      hormone_scores: scores,
+      cluster_scores: {
+        stress: round1(cortisol_cluster),
+        hormonal_shift: round1(anabolic_cluster),
+        metabolic: round1(metabolic_cluster),
+      },
+      flags,
+    };
+  }
+
+  // ── Women's scoring path (unchanged) ──
   // Q1b is the new home for hormonal contraception / HRT. Old sessions
   // may still carry Q1 === "on_hbc" — accept both for back-compat.
   const onHbc       = answers.Q1b === "hbc" || answers.Q1b === "hrt" || answers.Q1 === "on_hbc";

@@ -1,0 +1,1085 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8"/>
+<meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no"/>
+<title>Health Assessment | ReShape Club</title>
+<link rel="icon" type="image/png" href="favicon-32.png">
+<link rel="preconnect" href="https://fonts.googleapis.com"/>
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin/>
+<link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800&family=DM+Sans:ital,opsz,wght@0,9..40,300;0,9..40,400;0,9..40,500;0,9..40,600;1,9..40,400&display=swap" rel="stylesheet"/>
+<style>
+:root{
+  --cream:#FAF7F2;--cream-2:#F0EBE3;--cream-3:#E5DFD5;
+  --ink:#2A2724;--ink-2:#5A5550;
+  --accent:#ED5C25;--accent-deep:#C84A18;
+  --green:#22C55E;--amber:#F59E0B;--red:#EF4444;
+  --line:#E5DFD5;--mute:#B8B2A8;
+  --radius:8px;--radius-lg:16px;
+  --ease:cubic-bezier(.2,.7,.2,1);
+}
+*{box-sizing:border-box;margin:0;padding:0;}
+html{scroll-behavior:smooth;}
+body{
+  font-family:'DM Sans',-apple-system,sans-serif;
+  background:var(--cream);color:var(--ink);
+  -webkit-font-smoothing:antialiased;line-height:1.55;
+  overflow-x:hidden;min-height:100dvh;
+}
+
+/* Header */
+.header{
+  position:sticky;top:0;z-index:50;
+  background:rgba(250,247,242,.92);
+  backdrop-filter:blur(16px);-webkit-backdrop-filter:blur(16px);
+  border-bottom:1px solid var(--line);
+  padding:14px 20px;
+  display:flex;align-items:center;justify-content:space-between;
+}
+.logo{font-family:'Inter',sans-serif;font-weight:600;font-size:1.25rem;letter-spacing:-.02em;}
+.logo span{color:var(--accent);}
+.step-label{font-size:12px;color:var(--mute);font-weight:500;letter-spacing:.05em;text-transform:uppercase;}
+
+/* Progress */
+.progress-wrap{padding:0 20px;margin-top:-1px;}
+.progress-bar{height:3px;background:var(--cream-3);border-radius:2px;overflow:hidden;}
+.progress-fill{height:100%;background:var(--accent);border-radius:2px;transition:width .5s var(--ease);width:0%;}
+
+/* Container */
+.form-shell{
+  max-width:640px;margin:0 auto;padding:24px 20px 120px;
+  position:relative;overflow:hidden;
+}
+
+/* Steps */
+.step{display:none;animation:stepIn .4s var(--ease);}
+.step.active{display:block;}
+@keyframes stepIn{from{opacity:0;transform:translateY(16px);}to{opacity:1;transform:translateY(0);}}
+
+.step-title{
+  font-family:'Inter',sans-serif;font-weight:600;font-size:1.5rem;
+  letter-spacing:-.02em;margin-bottom:4px;
+}
+.step-sub{color:var(--ink-2);font-size:14px;margin-bottom:28px;line-height:1.5;}
+
+/* Form fields */
+.field{margin-bottom:20px;}
+.field label{display:block;font-size:13px;font-weight:500;margin-bottom:6px;color:var(--ink);}
+.field input,.field select,.field textarea{
+  width:100%;padding:13px 14px;
+  border:1.5px solid var(--line);border-radius:var(--radius);
+  font-family:inherit;font-size:15px;color:var(--ink);
+  background:white;transition:border-color .2s;
+  -webkit-appearance:none;appearance:none;
+}
+.field input:focus,.field select:focus,.field textarea:focus{
+  outline:none;border-color:var(--accent);
+}
+.field textarea{resize:vertical;min-height:72px;}
+.field select{
+  background-image:url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='12' height='12' fill='%235A5550'%3E%3Cpath d='M6 8L1 3h10z'/%3E%3C/svg%3E");
+  background-repeat:no-repeat;background-position:right 14px center;
+  padding-right:36px;
+}
+.field-row{display:flex;gap:12px;}
+.field-row .field{flex:1;}
+.field .hint{font-size:11px;color:var(--mute);margin-top:4px;}
+.field.error input,.field.error select{border-color:var(--red);}
+.field .err-msg{font-size:11px;color:var(--red);margin-top:4px;display:none;}
+.field.error .err-msg{display:block;}
+
+/* Gender toggle */
+.gender-toggle{display:flex;gap:8px;margin-bottom:20px;}
+.gender-btn{
+  flex:1;padding:14px;border:1.5px solid var(--line);border-radius:var(--radius);
+  text-align:center;font-size:14px;font-weight:500;cursor:pointer;
+  transition:all .2s;background:white;
+}
+.gender-btn.selected{border-color:var(--accent);background:rgba(237,92,37,.06);color:var(--accent);}
+
+/* Checkbox grid for medical */
+.check-grid{display:grid;grid-template-columns:1fr 1fr;gap:8px;margin-bottom:20px;}
+.check-item{
+  display:flex;align-items:center;gap:10px;
+  padding:12px 14px;border:1.5px solid var(--line);border-radius:var(--radius);
+  cursor:pointer;font-size:13px;transition:all .2s;background:white;
+}
+.check-item.checked{border-color:var(--red);background:rgba(239,68,68,.05);color:var(--red);}
+.check-box{
+  width:20px;height:20px;border:1.5px solid var(--line);border-radius:4px;
+  display:flex;align-items:center;justify-content:center;flex-shrink:0;
+  transition:all .2s;
+}
+.check-item.checked .check-box{background:var(--red);border-color:var(--red);}
+.check-item.checked .check-box::after{content:"\2713";color:white;font-size:12px;font-weight:700;}
+
+/* Consent checkboxes */
+.consent-item{
+  display:flex;gap:12px;align-items:flex-start;
+  padding:14px;border:1.5px solid var(--line);border-radius:var(--radius);
+  margin-bottom:10px;cursor:pointer;font-size:13px;line-height:1.5;
+  transition:all .2s;background:white;
+}
+.consent-item.checked{border-color:var(--green);background:rgba(34,197,94,.04);}
+.consent-item.checked .check-box{background:var(--green);border-color:var(--green);}
+
+/* ================================================
+   HORMONAL SECTION — Quick-tap question cards
+   ================================================ */
+.hq-group-title{
+  font-family:'Inter',sans-serif;font-weight:600;font-size:15px;
+  color:var(--accent);margin:28px 0 6px;
+  display:flex;align-items:center;gap:8px;
+}
+.hq-group-title:first-child{margin-top:0;}
+.hq-group-sub{font-size:12px;color:var(--mute);margin-bottom:16px;}
+
+.hq-card{
+  margin-bottom:20px;padding:18px;
+  background:white;border:1.5px solid var(--line);border-radius:var(--radius-lg);
+  transition:border-color .3s;
+}
+.hq-card.answered{border-color:var(--green);}
+.hq-q{font-size:14px;font-weight:500;margin-bottom:14px;line-height:1.5;}
+.hq-opts{display:flex;flex-direction:column;gap:6px;}
+.hq-opt{
+  padding:11px 14px;border:1.5px solid var(--cream-3);border-radius:var(--radius);
+  font-size:13px;cursor:pointer;transition:all .15s;
+  display:flex;align-items:center;gap:10px;background:var(--cream);
+}
+.hq-opt:hover{border-color:var(--accent);background:rgba(237,92,37,.03);}
+.hq-opt.selected{border-color:var(--accent);background:rgba(237,92,37,.08);font-weight:500;color:var(--accent);}
+.hq-dot{
+  width:18px;height:18px;border-radius:50%;border:2px solid var(--cream-3);
+  flex-shrink:0;transition:all .15s;display:flex;align-items:center;justify-content:center;
+}
+.hq-opt.selected .hq-dot{border-color:var(--accent);background:var(--accent);}
+.hq-opt.selected .hq-dot::after{content:"";width:6px;height:6px;border-radius:50%;background:white;}
+.hq-progress-mini{font-size:11px;color:var(--mute);text-align:right;margin-top:8px;}
+
+/* Navigation */
+.nav-bar{
+  position:fixed;bottom:0;left:0;right:0;z-index:40;
+  background:rgba(250,247,242,.95);backdrop-filter:blur(12px);
+  border-top:1px solid var(--line);
+  padding:14px 20px;display:flex;gap:10px;justify-content:flex-end;
+  max-width:640px;margin:0 auto;
+}
+@media(min-width:641px){.nav-bar{left:50%;transform:translateX(-50%);}}
+.nav-btn{
+  padding:14px 28px;border-radius:var(--radius);font-size:13px;font-weight:600;
+  letter-spacing:.04em;cursor:pointer;transition:all .25s var(--ease);border:none;
+}
+.nav-btn.secondary{background:var(--cream-2);color:var(--ink);}
+.nav-btn.secondary:hover{background:var(--cream-3);}
+.nav-btn.primary{background:var(--ink);color:var(--cream);flex:1;max-width:200px;text-align:center;}
+.nav-btn.primary:hover{background:var(--accent);box-shadow:0 8px 20px -8px rgba(237,92,37,.4);}
+.nav-btn:disabled{opacity:.4;pointer-events:none;}
+
+/* ================================================
+   RESULTS PAGE
+   ================================================ */
+.results-wrap{text-align:center;padding:20px 0;}
+.results-overall{margin:20px auto;position:relative;width:160px;height:160px;}
+.results-overall svg{transform:rotate(-90deg);}
+.results-overall .score-num{
+  position:absolute;top:50%;left:50%;transform:translate(-50%,-50%);
+  font-family:'Inter',sans-serif;font-weight:700;font-size:2.2rem;letter-spacing:-.03em;
+}
+.results-overall .score-label{
+  position:absolute;top:62%;left:50%;transform:translate(-50%,12px);
+  font-size:11px;color:var(--mute);text-transform:uppercase;letter-spacing:.1em;
+}
+.results-phase{
+  display:inline-block;padding:8px 20px;border-radius:20px;
+  font-size:13px;font-weight:600;letter-spacing:.06em;text-transform:uppercase;
+  margin:16px 0 28px;
+}
+.phase-unlock{background:rgba(239,68,68,.1);color:var(--red);}
+.phase-stabilise{background:rgba(245,158,11,.1);color:var(--amber);}
+.phase-accelerate{background:rgba(34,197,94,.1);color:var(--green);}
+.phase-optimise{background:rgba(34,197,94,.15);color:#16A34A;}
+
+.hormone-grid{
+  display:grid;grid-template-columns:1fr 1fr;gap:10px;
+  text-align:left;margin:0 auto;max-width:480px;
+}
+.h-card{
+  padding:14px;background:white;border-radius:var(--radius-lg);
+  border:1.5px solid var(--line);
+}
+.h-card-name{font-size:11px;font-weight:600;text-transform:uppercase;letter-spacing:.08em;color:var(--ink-2);margin-bottom:8px;}
+.h-card-bar{height:6px;border-radius:3px;background:var(--cream-3);overflow:hidden;margin-bottom:4px;}
+.h-card-fill{height:100%;border-radius:3px;transition:width 1s var(--ease);width:0%;}
+.h-card-score{font-size:12px;font-weight:600;}
+.h-card.red .h-card-fill{background:var(--red);}.h-card.red .h-card-score{color:var(--red);}
+.h-card.amber .h-card-fill{background:var(--amber);}.h-card.amber .h-card-score{color:var(--amber);}
+.h-card.green .h-card-fill{background:var(--green);}.h-card.green .h-card-score{color:var(--green);}
+
+.results-cta{
+  margin-top:32px;padding:20px;background:var(--ink);color:var(--cream);
+  border-radius:var(--radius-lg);text-align:center;
+}
+.results-cta h3{font-family:'Inter',sans-serif;font-size:1.1rem;margin-bottom:6px;}
+.results-cta p{font-size:13px;opacity:.7;margin-bottom:14px;}
+.results-cta a{
+  display:inline-block;padding:12px 24px;background:var(--accent);color:white;
+  border-radius:var(--radius);font-weight:600;font-size:13px;text-decoration:none;
+  transition:background .2s;
+}
+.results-cta a:hover{background:var(--accent-deep);}
+
+/* Submitting state */
+.submitting .nav-btn.primary{pointer-events:none;opacity:.6;}
+@keyframes spin{to{transform:rotate(360deg);}}
+.spinner{display:inline-block;width:16px;height:16px;border:2px solid rgba(255,255,255,.3);border-top-color:white;border-radius:50%;animation:spin .6s linear infinite;vertical-align:middle;margin-right:6px;}
+
+/* Responsive */
+@media(max-width:480px){
+  .step-title{font-size:1.25rem;}
+  .hormone-grid{grid-template-columns:1fr;}
+  .field-row{flex-direction:column;gap:0;}
+  .check-grid{grid-template-columns:1fr;}
+}
+</style>
+</head>
+<body>
+
+<div class="header">
+  <div class="logo">Re<span>Shape</span></div>
+  <div class="step-label" id="stepLabel">Step 1 of 7</div>
+</div>
+<div class="progress-wrap"><div class="progress-bar"><div class="progress-fill" id="progressFill"></div></div></div>
+
+<div class="form-shell">
+
+<!-- ==================== STEP 1: ABOUT YOU ==================== -->
+<div class="step active" data-step="1">
+  <div class="step-title">About You</div>
+  <div class="step-sub">Let's start with the basics so we can personalise your assessment.</div>
+
+  <div class="field"><label>Full Name *</label><input type="text" id="f_full_name" autocomplete="name" required><div class="err-msg">Please enter your name</div></div>
+  <div class="field"><label>Email *</label><input type="email" id="f_email" autocomplete="email" required><div class="err-msg">Please enter a valid email</div></div>
+  <div class="field-row">
+    <div class="field"><label>Phone</label><input type="tel" id="f_phone" autocomplete="tel"></div>
+    <div class="field"><label>Date of Birth</label><input type="date" id="f_dob"></div>
+  </div>
+  <div class="field"><label>Gender *</label></div>
+  <div class="gender-toggle">
+    <div class="gender-btn" data-val="male" onclick="pickGender(this)">Male</div>
+    <div class="gender-btn" data-val="female" onclick="pickGender(this)">Female</div>
+  </div>
+</div>
+
+<!-- ==================== STEP 2: YOUR GOALS ==================== -->
+<div class="step" data-step="2">
+  <div class="step-title">Your Goals</div>
+  <div class="step-sub">Understanding where you are and where you want to be.</div>
+
+  <div class="field"><label>How would you describe your current body?</label><textarea id="f_current_size" rows="2" placeholder="e.g. Carrying extra weight around the middle, size 16..."></textarea></div>
+  <div class="field"><label>What's your next goal?</label><textarea id="f_next_goal" rows="2" placeholder="e.g. Drop 10kg, tone up, feel more energised..."></textarea></div>
+  <div class="field"><label>What's your main motivation?</label><textarea id="f_motivation" rows="2" placeholder="e.g. My kids, a holiday, health scare, confidence..."></textarea></div>
+</div>
+
+<!-- ==================== STEP 3: DIET & NUTRITION ==================== -->
+<div class="step" data-step="3">
+  <div class="step-title">Diet & Nutrition</div>
+  <div class="step-sub">A snapshot of what you currently eat — no judgement, just honesty.</div>
+
+  <div class="field-row">
+    <div class="field"><label>Diet Preference</label>
+      <select id="f_diet_preference"><option value="">Select...</option><option>No preference</option><option>Vegetarian</option><option>Vegan</option><option>Pescatarian</option><option>Halal</option><option>Gluten-free</option><option>Dairy-free</option><option>Keto</option><option>Other</option></select>
+    </div>
+    <div class="field"><label>Meals Per Day</label>
+      <select id="f_meals_per_day"><option value="">Select...</option><option>1-2</option><option>3</option><option>4</option><option>5+</option><option>I graze all day</option></select>
+    </div>
+  </div>
+  <div class="field"><label>Typical Breakfast</label><input type="text" id="f_breakfast" placeholder="e.g. Toast and coffee, skip it, porridge..."></div>
+  <div class="field"><label>Typical Lunch</label><input type="text" id="f_lunch" placeholder="e.g. Sandwich from the shop, leftovers..."></div>
+  <div class="field"><label>Typical Dinner</label><input type="text" id="f_dinner" placeholder="e.g. Chicken stir fry, takeaway, ready meal..."></div>
+  <div class="field"><label>Main Food Weakness</label><input type="text" id="f_food_weaknesses" placeholder="e.g. Chocolate, crisps, bread, cheese..."></div>
+  <div class="field-row">
+    <div class="field"><label>How Often Do You Cook?</label>
+      <select id="f_cooking_frequency"><option value="">Select...</option><option>Every day</option><option>Most days</option><option>A few times a week</option><option>Rarely</option><option>Never</option></select>
+    </div>
+    <div class="field"><label>Eating Out / Takeaways</label>
+      <select id="f_eating_out_frequency"><option value="">Select...</option><option>Rarely</option><option>Once a week</option><option>2-3 times a week</option><option>Most days</option><option>Daily</option></select>
+    </div>
+  </div>
+  <div class="field"><label>Alcohol</label>
+    <select id="f_alcohol"><option value="">Select...</option><option>None</option><option>Rarely (social only)</option><option>1-2 times per week</option><option>3-4 times per week</option><option>Daily</option></select>
+  </div>
+</div>
+
+<!-- ==================== STEP 4: LIFESTYLE ==================== -->
+<div class="step" data-step="4">
+  <div class="step-title">Lifestyle & Habits</div>
+  <div class="step-sub">Sleep, stress and daily activity all affect your hormones and results.</div>
+
+  <div class="field-row">
+    <div class="field"><label>Hours of Sleep</label>
+      <select id="f_sleep_hours"><option value="">Select...</option><option>Less than 5</option><option>5-6</option><option>6-7</option><option>7-8</option><option>8+</option></select>
+    </div>
+    <div class="field"><label>Daily Steps (estimate)</label>
+      <select id="f_daily_steps"><option value="">Select...</option><option>Under 3,000</option><option>3,000-5,000</option><option>5,000-8,000</option><option>8,000-10,000</option><option>10,000+</option></select>
+    </div>
+  </div>
+  <div class="field-row">
+    <div class="field"><label>Smoking</label>
+      <select id="f_smoking"><option value="">Select...</option><option>No</option><option>Occasionally</option><option>Yes</option><option>Vape</option></select>
+    </div>
+    <div class="field"><label>Training Preference</label>
+      <select id="f_training_time"><option value="">Select...</option><option>Morning</option><option>Lunchtime</option><option>Afternoon</option><option>Evening</option><option>Flexible</option></select>
+    </div>
+  </div>
+  <div class="field"><label>How Do You Manage Stress?</label><input type="text" id="f_stress_management" placeholder="e.g. Exercise, walks, music, nothing..."></div>
+  <div class="field"><label>Current Supplements</label><input type="text" id="f_supplements" placeholder="e.g. Protein, creatine, multivitamin, none..."></div>
+</div>
+
+<!-- ==================== STEP 5: HORMONAL HEALTH CHECK ==================== -->
+<div class="step" data-step="5">
+  <div class="step-title">Hormonal Health Check</div>
+  <div class="step-sub">28 quick questions about how your body behaves day-to-day. Just tap the answer that fits best — there are no wrong answers.</div>
+  <div id="hqContainer"></div>
+  <div class="hq-progress-mini" id="hqProgress">0 / 28 answered</div>
+</div>
+
+<!-- ==================== STEP 6: MEDICAL & SAFETY ==================== -->
+<div class="step" data-step="6">
+  <div class="step-title">Medical & Safety</div>
+  <div class="step-sub">This helps us keep you safe. Tap any conditions that apply to you.</div>
+
+  <div class="check-grid" id="medGrid"></div>
+
+  <div class="field"><label>Current Medications</label><input type="text" id="f_medications" placeholder="e.g. Blood pressure tablets, inhalers, none..."></div>
+  <div class="field"><label>Injuries or Physical Limitations</label><input type="text" id="f_injuries" placeholder="e.g. Bad knee, shoulder surgery, back pain..."></div>
+  <div class="field-row">
+    <div class="field"><label>Emergency Contact Name</label><input type="text" id="f_ec_name"></div>
+    <div class="field"><label>Emergency Contact Number</label><input type="tel" id="f_ec_number"></div>
+  </div>
+
+  <div style="margin-top:20px;">
+    <div class="consent-item" onclick="toggleConsent(this)" data-key="allergies">
+      <div class="check-box"></div>
+      <div>I confirm that I have disclosed all known allergies, medical conditions, and medications that could affect my ability to exercise or follow a nutrition plan.</div>
+    </div>
+    <div class="consent-item" onclick="toggleConsent(this)" data-key="liability">
+      <div class="check-box"></div>
+      <div>I understand that ReShape Transformations Ltd provides coaching, not medical advice, and I take full responsibility for my health decisions. I agree to the terms of service.</div>
+    </div>
+  </div>
+</div>
+
+<!-- ==================== STEP 7: RESULTS ==================== -->
+<div class="step" data-step="7">
+  <div class="results-wrap" id="resultsContent">
+    <!-- Populated by JS after submission -->
+  </div>
+</div>
+
+</div><!-- /form-shell -->
+
+<div class="nav-bar" id="navBar">
+  <button class="nav-btn secondary" id="btnBack" onclick="prevStep()" style="display:none">Back</button>
+  <button class="nav-btn primary" id="btnNext" onclick="nextStep()">Continue</button>
+</div>
+
+<script>
+// ============================================================
+// CONFIG
+// ============================================================
+var SUPABASE_URL = 'https://lvizldmdficsfpgegehp.supabase.co';
+var SUPABASE_ANON_KEY = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6Imx2aXpsZG1kZmljc2ZwZ2VnZWhwIiwicm9sZSI6ImFub24iLCJpYXQiOjE3NzM2OTk4NDQsImV4cCI6MjA4OTI3NTg0NH0.72wHbZaTvqNzW6DTb6Ae1vi9QpOg_-KiEO-Jjm9mn0k';
+var WEBHOOK_SECRET = 'reshape-nutrition-2026';
+var TOTAL_STEPS = 7;
+var currentStep = 1;
+var gender = '';
+var consents = {};
+
+// ============================================================
+// HORMONAL QUESTIONS — 2 per hormone, 14 hormones = 28 Qs
+// [id, hormoneKey, question, [opt1..opt5]]
+// Answer index 0 = best (no deduction), 4 = worst (50 pt deduction)
+// ============================================================
+var HQ = [
+  // --- Blood Sugar & Energy ---
+  ['hq1','insulin','After eating bread, rice, pasta or sweets, how do you usually feel?',
+    ['Energised and clear','Mostly fine','A bit tired','Very tired','Completely drained']],
+  ['hq2','insulin','How steady is your energy between meals?',
+    ['Very steady','Mostly steady','Up and down','Big crashes','Constant crashes']],
+  ['hq3','glucagon','How do you cope if a meal is delayed by a few hours?',
+    ['Totally fine','Slightly hungry','Quite hungry','Weak or irritable','Shaky or light-headed']],
+  ['hq4','glucagon','How often do you feel shaky or irritable when you haven\'t eaten?',
+    ['Never','Rarely','Sometimes','Often','Always']],
+
+  // --- Fat-Loss & Metabolism ---
+  ['hq5','leptin','After dieting, what usually happens to your weight?',
+    ['Stays off','Slightly returns','Gradually returns','Quickly returns','Immediately returns']],
+  ['hq6','leptin','How hard is it to keep fat off once you lose it?',
+    ['Very easy','Easy','Moderate','Hard','Almost impossible']],
+  ['hq7','adiponectin','When you start eating better, how quickly do you notice changes?',
+    ['Straight away','Within 1\u20132 weeks','Slowly','Very slowly','Hardly at all']],
+  ['hq8','adiponectin','How often do you feel bloated or inflamed?',
+    ['Never','Occasionally','Sometimes','Often','Almost always']],
+  ['hq9','shbg','How easily do you gain fat without overeating?',
+    ['Very hard','Hard','Average','Easy','Very easy']],
+  ['hq10','shbg','How stubborn is your fat loss even with training?',
+    ['Not stubborn','Slightly','Moderately','Very stubborn','Extremely stubborn']],
+
+  // --- Stress & Recovery ---
+  ['hq11','cortisol','How stressed do you feel most days?',
+    ['Very relaxed','Mostly relaxed','Somewhat stressed','Very stressed','Constantly stressed']],
+  ['hq12','cortisol','When you\'re stressed, what happens to your body fat?',
+    ['No change','Small change','Gradual gain','Fast gain','Always gain']],
+  ['hq13','adrenaline','How much do you rely on caffeine to get through the day?',
+    ['Not at all','A little','Moderately','A lot','Completely']],
+  ['hq14','adrenaline','How often do you feel wired but exhausted?',
+    ['Never','Rarely','Sometimes','Often','All the time']],
+
+  // --- Muscle & Repair ---
+  ['hq15','gh','How good is your sleep most nights?',
+    ['Very good','Good','Average','Poor','Very poor']],
+  ['hq16','gh','How does your body handle calorie cuts?',
+    ['Very well','Well','Average','Poorly','Very poorly']],
+  ['hq17','testosterone','How strong and driven do you feel day to day?',
+    ['Very strong','Strong','Average','Low','Very low']],
+  ['hq18','testosterone','How would you describe your sex drive recently?',
+    ['Very high','High','Average','Low','Very low']],
+
+  // --- Metabolic Speed ---
+  ['hq19','thyroid','Compared to others, how often do you feel cold?',
+    ['Never','Rarely','Sometimes','Often','Always']],
+  ['hq20','thyroid','How well do you cope with eating less?',
+    ['Very well','Well','Average','Poorly','Very poorly']],
+
+  // --- Hunger Control ---
+  ['hq21','ghrelin','How hungry do you feel soon after meals?',
+    ['Not hungry','Slightly','Moderately','Very hungry','Extremely hungry']],
+  ['hq22','ghrelin','How often do you snack between meals?',
+    ['Never','Rarely','Sometimes','Often','Constantly']],
+
+  // --- Water Retention & Balance ---
+  ['hq23','estrogen','How often do you feel bloated or puffy?',
+    ['Never','Rarely','Sometimes','Often','Almost always']],
+  ['hq24','estrogen','How stable is your body weight week to week?',
+    ['Very stable','Mostly stable','Up and down','Unstable','Very unstable']],
+
+  // --- Female Cycle (shown only for females) ---
+  ['hq25','progesterone','How stable is your mood across the month?',
+    ['Very stable','Mostly stable','Some swings','Big swings','Extreme swings']],
+  ['hq26','progesterone','How much do cravings rise before your period?',
+    ['Not at all','Slightly','Moderately','A lot','Extremely']],
+
+  // --- Fluid Balance ---
+  ['hq27','aldosterone','How much can your weight change overnight?',
+    ['Less than 0.5 kg','0.5\u20131 kg','1\u20131.5 kg','1.5\u20132 kg','Over 2 kg']],
+  ['hq28','aldosterone','What usually happens after eating something salty?',
+    ['No noticeable change','Slight puffiness','Clear water retention','Very puffy or bloated','Big jump on the scale']],
+];
+
+var HORMONE_META = {
+  insulin:     {name:'Insulin',       group:'Blood Sugar & Energy'},
+  glucagon:    {name:'Glucagon',      group:'Blood Sugar & Energy'},
+  leptin:      {name:'Leptin',        group:'Fat-Loss Permission'},
+  adiponectin: {name:'Adiponectin',   group:'Fat-Loss Permission'},
+  shbg:        {name:'SHBG',          group:'Fat-Loss Permission'},
+  cortisol:    {name:'Cortisol',      group:'Stress & Recovery'},
+  adrenaline:  {name:'Adrenaline',    group:'Stress & Recovery'},
+  gh:          {name:'Growth Hormone',group:'Muscle & Repair'},
+  testosterone:{name:'Testosterone',  group:'Muscle & Repair'},
+  thyroid:     {name:'Thyroid',       group:'Metabolic Speed'},
+  ghrelin:     {name:'Ghrelin',       group:'Hunger Control'},
+  estrogen:    {name:'Estrogen',      group:'Water Retention'},
+  progesterone:{name:'Progesterone',  group:'Cycle Balance'},
+  aldosterone: {name:'Aldosterone',   group:'Fluid Balance'},
+};
+
+var GROUP_ICONS = {
+  'Blood Sugar & Energy':'\u26A1',
+  'Fat-Loss Permission':'\uD83D\uDD25',
+  'Stress & Recovery':'\uD83E\uDDD8',
+  'Muscle & Repair':'\uD83D\uDCAA',
+  'Metabolic Speed':'\u2699\uFE0F',
+  'Hunger Control':'\uD83C\uDF7D\uFE0F',
+  'Water Retention':'\uD83D\uDCA7',
+  'Cycle Balance':'\uD83C\uDF19',
+  'Fluid Balance':'\uD83C\uDF0A',
+};
+
+var hqAnswers = {};
+
+// ============================================================
+// MEDICAL CONDITIONS
+// ============================================================
+var MEDICAL = [
+  ['heart_condition','Heart condition'],
+  ['chest_pain','Chest pain'],
+  ['diabetes','Diabetes'],
+  ['epilepsy','Epilepsy'],
+  ['asthma','Asthma'],
+  ['musculoskeletal','Joint / bone issues'],
+  ['bp_medication','Blood pressure meds'],
+  ['dizziness','Dizziness / fainting'],
+  ['growth_hypermobility','Hypermobility'],
+];
+
+// ============================================================
+// INIT
+// ============================================================
+var existingRecordId = null;
+
+(function init() {
+  buildHormoneQuestions();
+  buildMedicalGrid();
+  updateProgress();
+  prefillFromUrl();
+})();
+
+function prefillFromUrl() {
+  var params = new URLSearchParams(window.location.search);
+  var email = params.get('email') || '';
+  var name = params.get('name') || '';
+  if (email) document.getElementById('f_email').value = email;
+  if (name) document.getElementById('f_full_name').value = name;
+  // Pre-fill fields passed via URL params
+  if (params.get('phone')) setVal('f_phone', params.get('phone'));
+  if (params.get('dob')) setVal('f_dob', params.get('dob'));
+  if (params.get('size')) setVal('f_current_size', params.get('size'));
+  if (params.get('motivation')) setVal('f_motivation', params.get('motivation'));
+  if (params.get('injuries')) setVal('f_injuries', params.get('injuries'));
+  if (params.get('alcohol')) setVal('f_alcohol', params.get('alcohol'));
+  if (params.get('smoking') === '1') setVal('f_smoking', 'Yes');
+  if (params.get('gender')) {
+    gender = params.get('gender');
+    document.querySelectorAll('.gender-btn').forEach(function(b) {
+      b.classList.toggle('selected', b.dataset.val === gender);
+    });
+    buildHormoneQuestions();
+  }
+  // Fetch existing record to auto-populate (overrides URL params with DB data)
+  if (email) fetchExisting(email);
+}
+
+async function fetchExisting(email) {
+  try {
+    var res = await fetch(SUPABASE_URL + '/functions/v1/nutrition-form-webhook', {
+      headers: { 'Authorization': 'Bearer ' + SUPABASE_ANON_KEY }
+    });
+    if (!res.ok) return;
+    var rows = await res.json();
+    var match = rows.find(function(r) { return (r.email || '').toLowerCase() === email.toLowerCase(); });
+    if (!match) return;
+    existingRecordId = match.id;
+    populateFromRecord(match);
+  } catch(e) { console.log('Prefill fetch error:', e); }
+}
+
+function populateFromRecord(r) {
+  // Step 1 — About You
+  setVal('f_full_name', r.full_name);
+  setVal('f_email', r.email);
+  setVal('f_phone', r.phone);
+  if (r.date_of_birth) setVal('f_dob', r.date_of_birth);
+  if (r.gender) {
+    gender = r.gender;
+    document.querySelectorAll('.gender-btn').forEach(function(b) {
+      b.classList.toggle('selected', b.dataset.val === gender);
+    });
+    buildHormoneQuestions();
+  }
+
+  // Step 2 — Goals
+  setVal('f_current_size', r.current_size);
+  setVal('f_next_goal', r.next_goal);
+  setVal('f_motivation', r.motivation);
+
+  // Step 3 — Diet
+  setVal('f_diet_preference', r.diet_preference);
+  setVal('f_meals_per_day', r.meals_per_day);
+  setVal('f_breakfast', r.breakfast);
+  setVal('f_lunch', r.lunch);
+  setVal('f_dinner', r.dinner);
+  setVal('f_food_weaknesses', r.food_weaknesses);
+  setVal('f_cooking_frequency', r.cooking_frequency);
+  setVal('f_eating_out_frequency', r.eating_out_frequency);
+  setVal('f_alcohol', r.alcohol);
+
+  // Step 4 — Lifestyle
+  setVal('f_sleep_hours', r.sleep_hours);
+  setVal('f_daily_steps', r.daily_steps);
+  if (r.smoking === true) setVal('f_smoking', 'Yes');
+  else if (r.smoking === false) setVal('f_smoking', 'No');
+  setVal('f_training_time', r.training_time);
+  setVal('f_stress_management', r.stress_management);
+  setVal('f_supplements', r.supplements);
+
+  // Step 5 — Hormonal (if previously answered)
+  if (r.hormonal_answers) {
+    hqAnswers = r.hormonal_answers;
+    buildHormoneQuestions();
+  }
+
+  // Step 6 — Medical
+  setVal('f_medications', r.medications);
+  setVal('f_injuries', r.injuries);
+  setVal('f_ec_name', r.emergency_contact_name);
+  setVal('f_ec_number', r.emergency_contact_number);
+  // Medical checkboxes
+  MEDICAL.forEach(function(m) {
+    if (r[m[0]] === true) {
+      var el = document.querySelector('#medGrid .check-item[data-key="' + m[0] + '"]');
+      if (el) el.classList.add('checked');
+    }
+  });
+  // Consents
+  if (r.allergies_acknowledged) { consents.allergies = true; document.querySelector('.consent-item[data-key="allergies"]').classList.add('checked'); }
+  if (r.liability_agreed) { consents.liability = true; document.querySelector('.consent-item[data-key="liability"]').classList.add('checked'); }
+
+  // Show a notice that data was pre-filled
+  var notice = document.createElement('div');
+  notice.style.cssText = 'background:rgba(34,197,94,.1);border:1px solid rgba(34,197,94,.3);border-radius:8px;padding:10px 14px;margin-bottom:16px;font-size:13px;color:#16a34a;font-weight:500';
+  notice.textContent = 'Some fields have been pre-filled from your consultation. Just review and complete the rest.';
+  var firstStep = document.querySelector('.step[data-step="1"]');
+  firstStep.insertBefore(notice, firstStep.querySelector('.field'));
+}
+
+function setVal(id, v) {
+  if (v === null || v === undefined || v === '') return;
+  var el = document.getElementById(id);
+  if (el) el.value = v;
+}
+
+// ============================================================
+// STEP NAVIGATION
+// ============================================================
+function updateProgress() {
+  var pct = ((currentStep - 1) / (TOTAL_STEPS - 1)) * 100;
+  document.getElementById('progressFill').style.width = pct + '%';
+  document.getElementById('stepLabel').textContent = currentStep === TOTAL_STEPS
+    ? 'Your Results' : 'Step ' + currentStep + ' of ' + (TOTAL_STEPS - 1);
+  document.getElementById('btnBack').style.display = currentStep > 1 && currentStep < TOTAL_STEPS ? '' : 'none';
+  if (currentStep === TOTAL_STEPS) {
+    document.getElementById('navBar').style.display = 'none';
+  } else if (currentStep === TOTAL_STEPS - 1) {
+    document.getElementById('btnNext').textContent = 'Submit Assessment';
+  } else {
+    document.getElementById('btnNext').textContent = 'Continue';
+  }
+}
+
+function showStep(n) {
+  document.querySelectorAll('.step').forEach(function(s) { s.classList.remove('active'); });
+  var el = document.querySelector('.step[data-step="' + n + '"]');
+  if (el) el.classList.add('active');
+  currentStep = n;
+  updateProgress();
+  window.scrollTo({ top: 0, behavior: 'smooth' });
+}
+
+function nextStep() {
+  if (!validateStep(currentStep)) return;
+  if (currentStep === TOTAL_STEPS - 1) {
+    submitForm();
+    return;
+  }
+  showStep(currentStep + 1);
+}
+
+function prevStep() {
+  if (currentStep > 1) showStep(currentStep - 1);
+}
+
+// ============================================================
+// VALIDATION
+// ============================================================
+function validateStep(step) {
+  clearErrors();
+  if (step === 1) {
+    var ok = true;
+    if (!val('f_full_name')) { markErr('f_full_name'); ok = false; }
+    if (!val('f_email') || !/\S+@\S+\.\S+/.test(val('f_email'))) { markErr('f_email'); ok = false; }
+    if (!val('f_phone')) { markErr('f_phone'); ok = false; }
+    if (!gender) { alert('Please select your gender'); ok = false; }
+    if (!ok) alert('Please complete all fields before continuing.');
+    return ok;
+  }
+  if (step === 2) {
+    var ok = true;
+    ['f_current_size','f_next_goal','f_motivation'].forEach(function(id) { if (!val(id)) { markErr(id); ok = false; } });
+    if (!ok) alert('Please complete all fields before continuing.');
+    return ok;
+  }
+  if (step === 3) {
+    var ok = true;
+    ['f_diet_preference','f_meals_per_day','f_breakfast','f_lunch','f_dinner','f_food_weaknesses','f_cooking_frequency','f_eating_out_frequency','f_alcohol'].forEach(function(id) { if (!val(id)) { markErr(id); ok = false; } });
+    if (!ok) alert('Please complete all fields before continuing.');
+    return ok;
+  }
+  if (step === 4) {
+    var ok = true;
+    ['f_sleep_hours','f_daily_steps','f_smoking','f_training_time','f_stress_management'].forEach(function(id) { if (!val(id)) { markErr(id); ok = false; } });
+    if (!ok) alert('Please complete all fields before continuing.');
+    return ok;
+  }
+  if (step === 5) {
+    var active = getActiveHQ();
+    var answered = 0;
+    active.forEach(function(q) { if (hqAnswers[q[0]] !== undefined) answered++; });
+    if (answered < active.length) {
+      alert('Please answer all ' + active.length + ' health questions before continuing.');
+      var first = active.find(function(q) { return hqAnswers[q[0]] === undefined; });
+      if (first) {
+        var el = document.getElementById('card_' + first[0]);
+        if (el) el.scrollIntoView({ behavior: 'smooth', block: 'center' });
+      }
+      return false;
+    }
+  }
+  if (step === 6) {
+    var ok = true;
+    ['f_ec_name','f_ec_number'].forEach(function(id) { if (!val(id)) { markErr(id); ok = false; } });
+    if (!consents.allergies || !consents.liability) { ok = false; }
+    if (!ok) { alert('Please complete all fields and confirm both consent statements.'); return false; }
+  }
+  return true;
+}
+
+function val(id) { return (document.getElementById(id).value || '').trim(); }
+function markErr(id) { document.getElementById(id).closest('.field').classList.add('error'); }
+function clearErrors() { document.querySelectorAll('.field.error').forEach(function(f) { f.classList.remove('error'); }); }
+
+// ============================================================
+// GENDER
+// ============================================================
+function pickGender(el) {
+  document.querySelectorAll('.gender-btn').forEach(function(b) { b.classList.remove('selected'); });
+  el.classList.add('selected');
+  gender = el.dataset.val;
+  // Rebuild hormone questions to show/hide progesterone
+  buildHormoneQuestions();
+}
+
+// ============================================================
+// HORMONAL QUESTIONS BUILDER
+// ============================================================
+function getActiveHQ() {
+  return HQ.filter(function(q) {
+    if (q[1] === 'progesterone' && gender !== 'female') return false;
+    return true;
+  });
+}
+
+function buildHormoneQuestions() {
+  var c = document.getElementById('hqContainer');
+  c.innerHTML = '';
+  var active = getActiveHQ();
+  var lastGroup = '';
+
+  active.forEach(function(q) {
+    var meta = HORMONE_META[q[1]];
+    if (meta.group !== lastGroup) {
+      lastGroup = meta.group;
+      var gt = document.createElement('div');
+      gt.className = 'hq-group-title';
+      gt.textContent = (GROUP_ICONS[lastGroup] || '') + '  ' + lastGroup;
+      c.appendChild(gt);
+    }
+
+    var card = document.createElement('div');
+    card.className = 'hq-card' + (hqAnswers[q[0]] !== undefined ? ' answered' : '');
+    card.id = 'card_' + q[0];
+
+    var qText = document.createElement('div');
+    qText.className = 'hq-q';
+    qText.textContent = q[2];
+    card.appendChild(qText);
+
+    var opts = document.createElement('div');
+    opts.className = 'hq-opts';
+    q[3].forEach(function(label, idx) {
+      var opt = document.createElement('div');
+      opt.className = 'hq-opt' + (hqAnswers[q[0]] === idx ? ' selected' : '');
+      opt.innerHTML = '<div class="hq-dot"></div>' + escHtml(label);
+      opt.onclick = function() { pickHQ(q[0], idx, card); };
+      opts.appendChild(opt);
+    });
+    card.appendChild(opts);
+    c.appendChild(card);
+  });
+
+  updateHqProgress();
+}
+
+function pickHQ(qid, idx, card) {
+  hqAnswers[qid] = idx;
+  // Update UI
+  card.classList.add('answered');
+  var opts = card.querySelectorAll('.hq-opt');
+  opts.forEach(function(o, i) { o.classList.toggle('selected', i === idx); });
+  // Auto-scroll to next unanswered question
+  setTimeout(function() {
+    var active = getActiveHQ();
+    var next = active.find(function(q) { return hqAnswers[q[0]] === undefined; });
+    if (next) {
+      var el = document.getElementById('card_' + next[0]);
+      if (el) el.scrollIntoView({ behavior: 'smooth', block: 'center' });
+    }
+  }, 250);
+  updateHqProgress();
+}
+
+function updateHqProgress() {
+  var active = getActiveHQ();
+  var answered = 0;
+  active.forEach(function(q) { if (hqAnswers[q[0]] !== undefined) answered++; });
+  var el = document.getElementById('hqProgress');
+  if (el) el.textContent = answered + ' / ' + active.length + ' answered';
+}
+
+// ============================================================
+// MEDICAL GRID
+// ============================================================
+function buildMedicalGrid() {
+  var g = document.getElementById('medGrid');
+  MEDICAL.forEach(function(m) {
+    var item = document.createElement('div');
+    item.className = 'check-item';
+    item.dataset.key = m[0];
+    item.innerHTML = '<div class="check-box"></div>' + escHtml(m[1]);
+    item.onclick = function() {
+      item.classList.toggle('checked');
+    };
+    g.appendChild(item);
+  });
+}
+
+function toggleConsent(el) {
+  el.classList.toggle('checked');
+  consents[el.dataset.key] = el.classList.contains('checked');
+}
+
+// ============================================================
+// SCORING ENGINE
+// ============================================================
+var DEDUCTIONS = [0, 12, 25, 37, 50];
+
+function scoreHormones() {
+  var scores = {};
+  for (var key in HORMONE_META) scores[key] = 100;
+
+  HQ.forEach(function(q) {
+    var ans = hqAnswers[q[0]];
+    if (ans !== undefined && scores[q[1]] !== undefined) {
+      scores[q[1]] -= DEDUCTIONS[ans];
+    }
+  });
+
+  // Clamp
+  for (var k in scores) scores[k] = Math.max(0, Math.min(100, scores[k]));
+
+  // Skip progesterone for males
+  if (gender !== 'female') delete scores.progesterone;
+
+  return scores;
+}
+
+function computePhase(scores) {
+  var vals = Object.values(scores);
+  var avg = vals.reduce(function(a, b) { return a + b; }, 0) / vals.length;
+  var reds = vals.filter(function(v) { return v < 69; }).length;
+
+  if (reds >= 4 || avg < 55) return 'Unlock';
+  if (reds >= 2 || avg < 70) return 'Stabilise';
+  if (avg < 85) return 'Accelerate';
+  return 'Optimise';
+}
+
+function scoreColor(v) { return v < 69 ? 'red' : v < 85 ? 'amber' : 'green'; }
+
+// ============================================================
+// SUBMIT
+// ============================================================
+async function submitForm() {
+  var btn = document.getElementById('btnNext');
+  btn.innerHTML = '<span class="spinner"></span>Submitting...';
+  btn.disabled = true;
+  document.querySelector('.form-shell').classList.add('submitting');
+
+  var scores = scoreHormones();
+  var phase = computePhase(scores);
+
+  // Gather medical flags
+  var medFlags = 0;
+  document.querySelectorAll('#medGrid .check-item.checked').forEach(function() { medFlags++; });
+
+  var payload = {
+    secret: WEBHOOK_SECRET,
+    update_id: existingRecordId || undefined,
+    full_name: val('f_full_name'),
+    email: val('f_email'),
+    phone: val('f_phone'),
+    date_of_birth: val('f_dob') || null,
+    gender: gender,
+    current_size: val('f_current_size'),
+    next_goal: val('f_next_goal'),
+    motivation: val('f_motivation'),
+    diet_preference: val('f_diet_preference'),
+    meals_per_day: val('f_meals_per_day'),
+    breakfast: val('f_breakfast'),
+    lunch: val('f_lunch'),
+    dinner: val('f_dinner'),
+    food_weaknesses: val('f_food_weaknesses'),
+    cooking_frequency: val('f_cooking_frequency'),
+    eating_out_frequency: val('f_eating_out_frequency'),
+    alcohol: val('f_alcohol'),
+    sleep_hours: val('f_sleep_hours'),
+    daily_steps: val('f_daily_steps'),
+    smoking: val('f_smoking') === 'Yes',
+    training_time: val('f_training_time'),
+    stress_management: val('f_stress_management'),
+    supplements: val('f_supplements'),
+    medications: val('f_medications'),
+    injuries: val('f_injuries'),
+    emergency_contact_name: val('f_ec_name'),
+    emergency_contact_number: val('f_ec_number'),
+    allergies_acknowledged: !!consents.allergies,
+    liability_agreed: !!consents.liability,
+
+    // Medical conditions
+    heart_condition: isChecked('heart_condition'),
+    chest_pain: isChecked('chest_pain'),
+    diabetes: isChecked('diabetes'),
+    epilepsy: isChecked('epilepsy'),
+    asthma: isChecked('asthma'),
+    musculoskeletal: isChecked('musculoskeletal'),
+    bp_medication: isChecked('bp_medication'),
+    dizziness: isChecked('dizziness'),
+    growth_hypermobility: isChecked('growth_hypermobility'),
+
+    // Hormone scores
+    h_insulin: scores.insulin,
+    h_glucagon: scores.glucagon,
+    h_leptin: scores.leptin,
+    h_adiponectin: scores.adiponectin,
+    h_shbg: scores.shbg,
+    h_cortisol: scores.cortisol,
+    h_adrenaline: scores.adrenaline,
+    h_gh: scores.gh,
+    h_testosterone: scores.testosterone,
+    h_thyroid: scores.thyroid,
+    h_ghrelin: scores.ghrelin,
+    h_estrogen: scores.estrogen,
+    h_progesterone: scores.progesterone || null,
+    h_aldosterone: scores.aldosterone,
+    hormonal_answers: hqAnswers,
+    h_phase: phase,
+    medical_flags: medFlags,
+  };
+
+  try {
+    var res = await fetch(SUPABASE_URL + '/functions/v1/nutrition-form-webhook', {
+      method: 'POST',
+      headers: {
+        'Content-Type': 'application/json',
+        'Authorization': 'Bearer ' + SUPABASE_ANON_KEY,
+      },
+      body: JSON.stringify(payload),
+    });
+    var data = await res.json();
+    if (!res.ok) throw new Error(data.error || 'Submission failed');
+    showResults(scores, phase);
+  } catch (e) {
+    alert('Error submitting: ' + e.message + '. Please try again.');
+    btn.textContent = 'Submit Assessment';
+    btn.disabled = false;
+    document.querySelector('.form-shell').classList.remove('submitting');
+  }
+}
+
+function isChecked(key) {
+  var el = document.querySelector('#medGrid .check-item[data-key="' + key + '"]');
+  return el ? el.classList.contains('checked') : false;
+}
+
+// ============================================================
+// RESULTS PAGE
+// ============================================================
+function showResults(scores, phase) {
+  showStep(TOTAL_STEPS);
+
+  var vals = Object.values(scores);
+  var avg = Math.round(vals.reduce(function(a, b) { return a + b; }, 0) / vals.length);
+  var col = scoreColor(avg);
+  var colHex = col === 'red' ? '#EF4444' : col === 'amber' ? '#F59E0B' : '#22C55E';
+
+  var circ = 2 * Math.PI * 68;
+  var offset = circ - (avg / 100) * circ;
+
+  var html = '<div class="step-title" style="text-align:center">Your Health Profile</div>';
+  html += '<div class="step-sub" style="text-align:center">' + escHtml(val('f_full_name')) + ', here\'s your hormonal health snapshot.</div>';
+
+  // Overall ring
+  html += '<div class="results-overall">';
+  html += '<svg width="160" height="160"><circle cx="80" cy="80" r="68" fill="none" stroke="#E5DFD5" stroke-width="10"/>';
+  html += '<circle cx="80" cy="80" r="68" fill="none" stroke="' + colHex + '" stroke-width="10" ';
+  html += 'stroke-dasharray="' + circ + '" stroke-dashoffset="' + circ + '" stroke-linecap="round" data-target="' + offset + '"/>';
+  html += '</svg>';
+  html += '<div class="score-num" style="color:' + colHex + '">' + avg + '</div>';
+  html += '<div class="score-label">Overall</div>';
+  html += '</div>';
+
+  // Phase badge
+  var phaseClass = 'phase-' + phase.toLowerCase();
+  html += '<div class="results-phase ' + phaseClass + '">Phase: ' + phase + '</div>';
+
+  // Hormone cards
+  html += '<div class="hormone-grid">';
+  var sorted = Object.entries(scores).sort(function(a, b) { return a[1] - b[1]; });
+  sorted.forEach(function(entry) {
+    var key = entry[0], score = entry[1];
+    var c = scoreColor(score);
+    var meta = HORMONE_META[key];
+    html += '<div class="h-card ' + c + '">';
+    html += '<div class="h-card-name">' + escHtml(meta.name) + '</div>';
+    html += '<div class="h-card-bar"><div class="h-card-fill" data-w="' + score + '"></div></div>';
+    html += '<div class="h-card-score">' + score + ' / 100</div>';
+    html += '</div>';
+  });
+  html += '</div>';
+
+  // Completion message
+  html += '<div class="results-cta">';
+  html += '<h3>Assessment Complete</h3>';
+  html += '<p>Your coach will review your results and build a personalised nutrition and training plan around your hormonal profile. You\'ll hear from them shortly.</p>';
+  html += '</div>';
+
+  document.getElementById('resultsContent').innerHTML = html;
+
+  // Animate after paint
+  requestAnimationFrame(function() { setTimeout(animateResults, 50); });
+}
+
+function animateResults() {
+  // Animate overall ring
+  var ring = document.querySelector('.results-overall circle:nth-child(2)');
+  if (ring) ring.style.strokeDashoffset = ring.dataset.target;
+  ring.style.transition = 'stroke-dashoffset 1.2s cubic-bezier(.2,.7,.2,1)';
+
+  // Animate bars
+  document.querySelectorAll('.h-card-fill').forEach(function(bar, i) {
+    setTimeout(function() {
+      bar.style.width = bar.dataset.w + '%';
+    }, 100 + i * 60);
+  });
+}
+
+// ============================================================
+// HELPERS
+// ============================================================
+function escHtml(s) {
+  if (!s) return '';
+  return s.replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;').replace(/"/g,'&quot;');
+}
+</script>
+</body>
+</html>

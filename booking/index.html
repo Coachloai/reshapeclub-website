@@ -98,6 +98,15 @@ a{text-decoration:none;color:inherit}
 .booking-cal-btn{display:inline-flex;align-items:center;gap:8px;margin-top:20px;padding:12px 24px;background:var(--orange);color:#fff;border:none;border-radius:12px;font-size:14px;font-weight:700;cursor:pointer;text-decoration:none;transition:opacity .2s}
 .booking-cal-btn:hover{opacity:.85}
 .booking-cal-btn svg{width:18px;height:18px}
+/* Existing booking banner */
+.existing-booking{animation:formFadeIn .5s ease;text-align:center}
+.existing-booking h3{font-family:var(--head);font-size:22px;font-weight:800;margin-bottom:8px}
+.existing-booking p{font-size:14px;color:var(--text3);line-height:1.6;max-width:380px;margin:0 auto 20px}
+.existing-booking .booking-done-detail{margin:0 auto 20px}
+.existing-booking-actions{display:flex;flex-direction:column;gap:10px;max-width:320px;margin:0 auto}
+.existing-booking-actions .booking-confirm-btn{font-size:14px;padding:14px}
+.existing-booking-actions .btn-secondary{width:100%;padding:14px;background:transparent;color:var(--text);border:2px solid var(--border);border-radius:14px;font-family:var(--body);font-size:14px;font-weight:700;cursor:pointer;transition:all .2s}
+.existing-booking-actions .btn-secondary:hover{border-color:var(--orange);color:var(--orange)}
 /* Footer */
 footer{padding:20px;text-align:center;font-size:12px;color:var(--text4);border-top:1px solid var(--border)}
 </style>
@@ -105,8 +114,8 @@ footer{padding:20px;text-align:center;font-size:12px;color:var(--text4);border-t
 <body>
 
 <nav class="nav">
-  <a href="https://reshapeclub.com" class="nav-logo">Re<span>Shape</span></a>
-  <a href="https://reshapeclub.com/#apply" class="nav-link">Apply Now</a>
+  <a href="https://reshape.fit" class="nav-logo">Re<span>Shape</span></a>
+  <a href="https://reshape.fit/#apply" class="nav-link">Apply Now</a>
 </nav>
 
 <div class="page">
@@ -139,6 +148,17 @@ footer{padding:20px;text-align:center;font-size:12px;color:var(--text4);border-t
       <div class="booking-times" id="bookingTimes"><div class="booking-empty">Select a date to see available times</div></div>
       <button class="booking-confirm-btn" id="bookingConfirmBtn" disabled onclick="confirmBooking()">Book My Visit</button>
     </div>
+    <!-- EXISTING BOOKING -->
+    <div class="existing-booking" id="existingBooking" style="display:none">
+      <div class="booking-done-icon">📅</div>
+      <h3>You're Already Booked!</h3>
+      <p>You already have a consult scheduled. Here are your details:</p>
+      <div class="booking-done-detail" id="existingBookingDetail"></div>
+      <div class="existing-booking-actions">
+        <button class="booking-confirm-btn" onclick="startReschedule()">Reschedule My Visit</button>
+        <button class="btn-secondary" onclick="window.location.href='https://reshape.fit'">Back to Home</button>
+      </div>
+    </div>
     <!-- DONE -->
     <div class="booking-done" id="bookingDone" style="display:none">
       <div class="booking-done-icon">&#127881;</div>
@@ -150,17 +170,51 @@ footer{padding:20px;text-align:center;font-size:12px;color:var(--text4);border-t
   </div>
 </div>
 
+<!-- WAITLIST MODE: shown when bookings are closed -->
+<div class="page" id="waitlist-view" style="display:none">
+  <div class="booking-card" style="text-align:center;padding:48px 32px">
+    <div style="width:56px;height:56px;border-radius:50%;background:var(--odim);display:inline-flex;align-items:center;justify-content:center;margin-bottom:20px;font-size:28px;color:var(--orange)">&#128274;</div>
+    <h3 style="font-family:var(--head);font-size:22px;font-weight:800;margin-bottom:8px">We're currently at capacity</h3>
+    <p style="font-size:15px;color:var(--text2);max-width:380px;margin:0 auto 24px;line-height:1.7">Spots open up regularly. If you've already applied, we'll be in touch as soon as there's space for you.</p>
+    <a href="https://reshape.fit/#apply" style="display:inline-block;padding:14px 36px;background:var(--orange);color:#fff;border:none;border-radius:14px;font-weight:700;font-size:15px;text-decoration:none;box-shadow:0 8px 28px rgba(237,92,37,0.28);transition:opacity .2s">Apply Now</a>
+  </div>
+</div>
+
 <footer>ReShape Body Transformation &middot; Ipswich &amp; Colchester</footer>
 
 <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
 <script src="../api/config.js?v=2"></script>
-<script src="../api/automations.js?v=14"></script>
+<script src="../api/automations.js?v=16"></script>
 <script>
 /* ── Supabase ── */
 (function(){
   var U='https://lvizldmdficsfpgegehp.supabase.co';
   var K='eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6Imx2aXpsZG1kZmljc2ZwZ2VnZWhwIiwicm9sZSI6ImFub24iLCJpYXQiOjE3NzM2OTk4NDQsImV4cCI6MjA4OTI3NTg0NH0.72wHbZaTvqNzW6DTb6Ae1vi9QpOg_-KiEO-Jjm9mn0k';
   window.__supabaseClient = supabase.createClient(U, K);
+})();
+
+/* ── Waitlist gate ── */
+(function(){
+  var sb = window.__supabaseClient;
+  function activateWaitlist() {
+    var pg = document.querySelectorAll('.page');
+    // Hide the booking page (first .page), show the waitlist view
+    if (pg[0]) pg[0].style.display = 'none';
+    document.getElementById('waitlist-view').style.display = '';
+  }
+  // 1. Global toggle
+  sb.from('site_settings').select('waitlist_enabled').eq('id','global').maybeSingle()
+    .then(function(r){ if(r.data && r.data.waitlist_enabled) activateWaitlist(); })
+    .catch(function(){});
+  // 2. Per-lead: if URL has email param or assessment stored one, check if they're waitlisted
+  var qs = new URLSearchParams(window.location.search);
+  var em = qs.get('email') || sessionStorage.getItem('reshape_hormonal_email') || sessionStorage.getItem('reshape_mens_email') || '';
+  if (em) {
+    sb.from('leads').select('form_name').eq('email', em.toLowerCase())
+      .ilike('form_name','%Waitlist%').limit(1).maybeSingle()
+      .then(function(r){ if(r.data) activateWaitlist(); })
+      .catch(function(){});
+  }
 })();
 
 /* ── Booking Calendar ── */
@@ -171,19 +225,6 @@ var __selectedDate = null;
 var __bookingWeekOffset = 0;
 var __rescheduleCtx = null; // populated if we're on a /booking/?reschedule=...&token=... URL
 function __localDate(dt) { return dt.getFullYear() + '-' + String(dt.getMonth()+1).padStart(2,'0') + '-' + String(dt.getDate()).padStart(2,'0'); }
-// Parse a slot date+time as Europe/London wall-clock (handles BST correctly).
-function __slotToMs(date, time) {
-  // Build a UTC Date from the wall-clock components, then subtract London's offset.
-  var parts = date.split('-');
-  var tp = time.split(':');
-  var guess = new Date(Date.UTC(+parts[0], +parts[1]-1, +parts[2], +tp[0], +tp[1], tp[2] ? +tp[2] : 0));
-  // Determine London's UTC offset at that instant via Intl
-  var fmt = new Intl.DateTimeFormat('en-GB', { timeZone:'Europe/London', hour12:false, year:'numeric', month:'2-digit', day:'2-digit', hour:'2-digit', minute:'2-digit', second:'2-digit' });
-  var p = {}; fmt.formatToParts(guess).forEach(function(x){ p[x.type]=x.value; });
-  var asLondon = Date.UTC(+p.year, +p.month-1, +p.day, +p.hour, +p.minute, +p.second);
-  var offsetMs = asLondon - guess.getTime();
-  return guess.getTime() - offsetMs;
-}
 function __escAttr(s){ return String(s||'').replace(/[&<>"']/g, function(c){ return ({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c]); }); }
 
 // Init: handle reschedule URL params, then auto-select location.
@@ -203,8 +244,70 @@ function __escAttr(s){ return String(s||'').replace(/[&<>"']/g, function(c){ ret
       }
     } catch (e) { console.warn('Reschedule lookup failed:', e); }
   }
+  // Pre-fill from /apply page params
+  if (!__rescheduleCtx) {
+    var pfn = qs.get('fn'), pln = qs.get('ln'), pem = qs.get('email'), pph = qs.get('phone');
+    if (pfn) document.getElementById('bk-fname').value = pfn;
+    if (pln) document.getElementById('bk-lname').value = pln;
+    if (pem) document.getElementById('bk-email').value = pem;
+    if (pph) document.getElementById('bk-phone').value = pph;
+  }
+  // Check for existing booking if email was pre-filled
+  if (!__rescheduleCtx) {
+    var prefillEmail = document.getElementById('bk-email').value.trim();
+    if (prefillEmail) await checkExistingBooking(prefillEmail);
+  }
+  // Email blur check for manually-typed emails
+  document.getElementById('bk-email').addEventListener('blur', async function() {
+    if (__rescheduleCtx) return; // already in reschedule mode
+    var em = this.value.trim();
+    if (em && /^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(em)) await checkExistingBooking(em);
+  });
   selectBookingLoc((__rescheduleCtx && __rescheduleCtx.location) || 'Ipswich');
 })();
+
+var __existingBooking = null;
+async function checkExistingBooking(email) {
+  try {
+    var today = __localDate(new Date());
+    var res = await window.__supabaseClient.from('bookings')
+      .select('id, confirm_token, first_name, last_name, email, phone, location, slot_id, status, booking_slots(date, start_time, end_time)')
+      .eq('email', email.toLowerCase())
+      .neq('status', 'cancelled')
+      .order('created_at', { ascending: false })
+      .limit(1)
+      .maybeSingle();
+    var b = res && res.data;
+    if (!b) return;
+    var slot = b.booking_slots || {};
+    // Only block if the booking is for a future date
+    if (slot.date && slot.date >= today) {
+      __existingBooking = b;
+      showExistingBooking(b);
+    }
+  } catch (e) { console.warn('Existing booking check failed:', e); }
+}
+
+function showExistingBooking(b) {
+  var slot = b.booking_slots || {};
+  var dateLabel = slot.date ? new Date(slot.date + 'T00:00:00').toLocaleDateString('en-GB', { weekday:'long', day:'numeric', month:'long' }) : '';
+  var timeLabel = slot.start_time ? slot.start_time.substring(0,5) + ' - ' + (slot.end_time ? slot.end_time.substring(0,5) : '') : '';
+  document.getElementById('existingBookingDetail').innerHTML =
+    '<div class="booking-done-row"><span>Date</span><span>' + __escAttr(dateLabel) + '</span></div>' +
+    '<div class="booking-done-row"><span>Time</span><span>' + __escAttr(timeLabel) + '</span></div>' +
+    '<div class="booking-done-row"><span>Location</span><span>' + __escAttr(b.location || '') + '</span></div>';
+  document.getElementById('bookingWrap').style.display = 'none';
+  document.getElementById('existingBooking').style.display = '';
+}
+
+function startReschedule() {
+  if (!__existingBooking) return;
+  __rescheduleCtx = __existingBooking;
+  document.getElementById('existingBooking').style.display = 'none';
+  document.getElementById('bookingWrap').style.display = '';
+  prefillRescheduleForm(__existingBooking);
+  selectBookingLoc(__existingBooking.location || 'Ipswich');
+}
 
 function prefillRescheduleForm(b) {
   document.getElementById('bk-fname').value = b.first_name || '';
@@ -248,21 +351,57 @@ async function loadBookingSlots(loc) {
 }
 
 // Hide slots that overlap busy events on the conflict calendars.
-// Only applies to the currently selected location's slots.
+// Reads conflict_calendars from each slot's appointment_type first,
+// then falls back to the global calendar_settings row.
 async function applyConflictCalendarFiltering() {
   if (!__bookingSlots || __bookingSlots.length === 0) return;
   try {
-    // Location-specific conflict calendars (prefixed for calendar-freebusy edge function)
-    var locConflicts = {
-      'Colchester': ['icloud:Colchester consults ', 'icloud:Sean'],
-      'Ipswich':    ['icloud:Ipswich consults ', 'icloud:Sara ']
-    };
-    var cals = locConflicts[__selectedLoc];
-    if (!cals || cals.length === 0) return; // no conflict calendars for this location
+    var sb = window.__supabaseClient;
+    var __anon = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6Imx2aXpsZG1kZmljc2ZwZ2VnZWhwIiwicm9sZSI6ImFub24iLCJpYXQiOjE3NzM2OTk4NDQsImV4cCI6MjA4OTI3NTg0NH0.72wHbZaTvqNzW6DTb6Ae1vi9QpOg_-KiEO-Jjm9mn0k';
+
+    // Collect unique appointment_type_ids from current slots
+    var apptIds = [];
+    __bookingSlots.forEach(function(s) {
+      if (s.appointment_type_id && apptIds.indexOf(s.appointment_type_id) === -1)
+        apptIds.push(s.appointment_type_id);
+    });
+
+    // Fetch per-type conflict_calendars from appointment_types table
+    var apptConflicts = {}; // { apptTypeId: string[] }
+    if (apptIds.length > 0) {
+      var apptRes = await sb.from('appointment_types')
+        .select('id, conflict_calendars')
+        .in('id', apptIds);
+      (apptRes.data || []).forEach(function(a) {
+        if (Array.isArray(a.conflict_calendars) && a.conflict_calendars.length > 0)
+          apptConflicts[a.id] = a.conflict_calendars;
+      });
+    }
+
+    // Fetch global conflict_calendars as fallback
+    var globalConflicts = [];
+    try {
+      var calRes = await sb.from('calendar_settings').select('conflict_calendars').eq('id', 'global').maybeSingle();
+      if (calRes.data && Array.isArray(calRes.data.conflict_calendars))
+        globalConflicts = calRes.data.conflict_calendars;
+    } catch (e) { /* ignore — use empty */ }
+
+    // Build the union of all calendars we need to check
+    var allCals = new Set();
+    apptIds.forEach(function(id) {
+      (apptConflicts[id] || globalConflicts).forEach(function(c) { allCals.add(c); });
+    });
+    // If no appointment types, use global
+    if (apptIds.length === 0) {
+      globalConflicts.forEach(function(c) { allCals.add(c); });
+    }
+    var cals = Array.from(allCals);
+    if (cals.length === 0) return; // no conflict calendars configured
+
     var fromIso = new Date().toISOString();
     var lastSlot = __bookingSlots[__bookingSlots.length - 1];
     var toIso = new Date(lastSlot.date + 'T23:59:59').toISOString();
-    var __anon = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6Imx2aXpsZG1kZmljc2ZwZ2VnZWhwIiwicm9sZSI6ImFub24iLCJpYXQiOjE3NzM2OTk4NDQsImV4cCI6MjA4OTI3NTg0NH0.72wHbZaTvqNzW6DTb6Ae1vi9QpOg_-KiEO-Jjm9mn0k';
+
     var fb = await fetch('https://lvizldmdficsfpgegehp.supabase.co/functions/v1/calendar-freebusy', {
       method: 'POST',
       headers: {
@@ -274,12 +413,26 @@ async function applyConflictCalendarFiltering() {
     });
     var fbData = await fb.json().catch(function() { return {}; });
     if (!fbData.success || !Array.isArray(fbData.busy) || fbData.busy.length === 0) return;
-    var busy = fbData.busy.map(function(w) { return { start: new Date(w.start).getTime(), end: new Date(w.end).getTime() }; });
+
+    // Build a flat list with the prefixed calendar key (icloud:Name / google:id)
+    // to match the format stored in conflict_calendars
+    var allBusy = fbData.busy.map(function(w) {
+      var prefixed = (w.provider || '') + ':' + (w.calendar || '');
+      return { start: new Date(w.start).getTime(), end: new Date(w.end).getTime(), calendar: prefixed };
+    });
+
     __bookingSlots = __bookingSlots.filter(function(s) {
-      var slotStart = __slotToMs(s.date, s.start_time);
-      var slotEnd = __slotToMs(s.date, s.end_time);
-      for (var i = 0; i < busy.length; i++) {
-        if (slotStart < busy[i].end && slotEnd > busy[i].start) return false; // overlap
+      var slotStart = new Date(s.date + 'T' + s.start_time).getTime();
+      var slotEnd = new Date(s.date + 'T' + s.end_time).getTime();
+      // Determine which calendars apply to this slot
+      var slotCals = (s.appointment_type_id && apptConflicts[s.appointment_type_id])
+        ? apptConflicts[s.appointment_type_id]
+        : globalConflicts;
+      if (!slotCals || slotCals.length === 0) return true; // no conflicts configured
+      var slotCalSet = new Set(slotCals);
+      for (var i = 0; i < allBusy.length; i++) {
+        if (!slotCalSet.has(allBusy[i].calendar)) continue; // busy window from a different calendar
+        if (slotStart < allBusy[i].end && slotEnd > allBusy[i].start) return false; // overlap
       }
       return true;
     });
@@ -347,7 +500,7 @@ function renderBookingTimes() {
   var minLeadMs = 2 * 60 * 60 * 1000;
   var nowMs = Date.now();
   slots = slots.filter(function(s) {
-    var slotStartMs = __slotToMs(s.date, s.start_time);
+    var slotStartMs = new Date(s.date + 'T' + s.start_time).getTime();
     return slotStartMs >= nowMs + minLeadMs;
   });
   if (slots.length === 0) { container.innerHTML = '<div class="booking-empty">No available slots for this date</div>'; return; }
@@ -408,7 +561,25 @@ async function confirmBooking() {
   }
   // Clear error highlights
   ['bk-fname','bk-lname','bk-email','bk-phone'].forEach(function(id) { document.getElementById(id).style.borderColor = ''; });
-  btn.disabled = true; btn.textContent = 'Booking...';
+  btn.disabled = true; btn.textContent = 'Checking...';
+  // Safety net: block duplicate booking at confirmation time (unless reschedule mode)
+  if (!__rescheduleCtx) {
+    try {
+      var today = __localDate(new Date());
+      var dupRes = await window.__supabaseClient.from('bookings')
+        .select('id, confirm_token, first_name, last_name, email, phone, location, slot_id, status, booking_slots(date, start_time, end_time)')
+        .eq('email', email.toLowerCase()).neq('status', 'cancelled')
+        .order('created_at', { ascending: false }).limit(1).maybeSingle();
+      var dup = dupRes && dupRes.data;
+      if (dup && dup.booking_slots && dup.booking_slots.date >= today) {
+        __existingBooking = dup;
+        showExistingBooking(dup);
+        btn.disabled = false; btn.textContent = 'Book My Visit';
+        return;
+      }
+    } catch (e) { /* proceed if check fails */ }
+  }
+  btn.textContent = 'Booking...';
   // Re-read phone after verifyPhone may have cleaned it (e.g. 07... → +44...)
   phone = document.getElementById('bk-phone').value.trim();
   var lead = { first_name: fname, last_name: lname, email: email, phone: phone };
@@ -417,16 +588,16 @@ async function confirmBooking() {
     var __bookRow;
     var slot = __bookingSlots.find(function(s) { return s.id === __selectedSlotId; });
 
-    // Fresh slot availability check — prevent double-booking
-    var __freshSlot = await window.__supabaseClient.from('booking_slots').select('booked_count, max_attendees').eq('id', __selectedSlotId).single();
-    var __fs = __freshSlot && __freshSlot.data;
-    if (__fs && __fs.booked_count >= __fs.max_attendees) {
+    // Atomic slot claim — prevents double-booking race conditions.
+    // The DB function increments booked_count only if still under capacity.
+    var __claimRes = await window.__supabaseClient.rpc('claim_booking_slot', { p_slot_id: __selectedSlotId });
+    var __claimed = __claimRes && __claimRes.data === true;
+    if (!__claimed) {
       alert('Sorry, this slot was just taken. Please pick another time.');
       btn.disabled = false; btn.textContent = __rescheduleCtx ? 'Reschedule My Visit' : 'Book My Visit';
       await loadBookingSlots(__selectedLoc);
       return;
     }
-    var __freshCount = (__fs && __fs.booked_count) || 0;
 
     if (__rescheduleCtx) {
       // Re-fetch calendar fields fresh (the page-load snapshot may be stale/null
@@ -452,14 +623,10 @@ async function confirmBooking() {
         .select('id, confirm_token').single();
       __bookRow = (__updRes && __updRes.data) || {};
       if (__rescheduleCtx.slot_id && __rescheduleCtx.slot_id !== __selectedSlotId) {
+        // Release old slot atomically (claim for the new slot already happened above)
         try {
-          var oldSlotRes = await window.__supabaseClient.from('booking_slots').select('booked_count').eq('id', __rescheduleCtx.slot_id).single();
-          var oldCount = oldSlotRes && oldSlotRes.data && oldSlotRes.data.booked_count;
-          if (typeof oldCount === 'number') {
-            await window.__supabaseClient.from('booking_slots').update({ booked_count: Math.max(0, oldCount - 1) }).eq('id', __rescheduleCtx.slot_id);
-          }
-        } catch (e) { console.warn('Old slot decrement failed:', e); }
-        if (slot) await window.__supabaseClient.from('booking_slots').update({ booked_count: __freshCount + 1 }).eq('id', __selectedSlotId);
+          await window.__supabaseClient.rpc('release_booking_slot', { p_slot_id: __rescheduleCtx.slot_id });
+        } catch (e) { console.warn('Old slot release failed:', e); }
       }
       // Cancel any pending booking_confirmed messages for this lead — fresh queue happens below.
       await window.__supabaseClient.from('message_queue')
@@ -472,10 +639,12 @@ async function confirmBooking() {
         email: email, phone: phone, location: __selectedLoc
       }]).select('id, confirm_token').single();
       __bookRow = (__bookRes && __bookRes.data) || {};
-      if (slot) {
-        await window.__supabaseClient.from('booking_slots').update({ booked_count: __freshCount + 1 }).eq('id', __selectedSlotId);
-      }
+      // Slot already claimed atomically above — no manual increment needed.
     }
+    // Backfill location on the lead row (hormonal/waitlist leads have null location)
+    try {
+      await window.__supabaseClient.from('leads').update({ location: __selectedLoc }).eq('email', email).is('location', null);
+    } catch (e) { console.warn('Lead location backfill failed:', e); }
     // Show confirmation
     var dateObj = new Date(__selectedDate + 'T12:00:00');
     var dateStr = dateObj.toLocaleDateString('en-GB', { weekday: 'long', day: 'numeric', month: 'long' });
@@ -516,7 +685,9 @@ async function confirmBooking() {
     }
   } catch (e) {
     console.error('Booking error:', e);
-    btn.disabled = false; btn.textContent = 'Book My Visit';
+    // Release the slot we claimed since the booking failed
+    try { await window.__supabaseClient.rpc('release_booking_slot', { p_slot_id: __selectedSlotId }); } catch (_) {}
+    btn.disabled = false; btn.textContent = __rescheduleCtx ? 'Reschedule My Visit' : 'Book My Visit';
   }
 }
 </script>

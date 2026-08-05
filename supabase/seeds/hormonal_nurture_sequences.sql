@@ -66,7 +66,7 @@ The single biggest shift you can make this week isn''t in your kitchen. It''s in
 
 When you''re ready, the free 45-minute in-person consult is where we map your full protocol — sleep, training, eating — to your specific score:
 
-https://reshapeclub.com/hormonal-assessment/result.html
+https://reshape.fit/hormonal-assessment/result.html
 
 — The ReShape team',
      0, true),
@@ -100,7 +100,7 @@ This is the protocol shape. Your version of it gets dialled in in the consult.
 
 Book your free 45-minute in-person consult here — we''ll go through your full pattern, agree the first 3 shifts, and tell you straight whether we''re a fit:
 
-https://reshapeclub.com/hormonal-assessment/result.html
+https://reshape.fit/hormonal-assessment/result.html
 
 — Loai',
      432000, true);
@@ -132,7 +132,7 @@ The first lever is muscle. Not cardio, not fasting, not a smaller plate. Strengt
 
 When you''re ready, the free 45-minute in-person consult is where we map your full pattern + protocol:
 
-https://reshapeclub.com/hormonal-assessment/result.html
+https://reshape.fit/hormonal-assessment/result.html
 
 — The ReShape team',
      0, true),
@@ -166,7 +166,7 @@ That''s the shape. Your version gets dialled to your scores in the consult.
 
 Book your free 45-minute in-person consult here:
 
-https://reshapeclub.com/hormonal-assessment/result.html
+https://reshape.fit/hormonal-assessment/result.html
 
 — Loai',
      432000, true);
@@ -198,7 +198,7 @@ The first shift is to stop dieting harder. We need to feed the system back into 
 
 When you''re ready, the free 45-minute in-person consult is where we map your specific way out:
 
-https://reshapeclub.com/hormonal-assessment/result.html
+https://reshape.fit/hormonal-assessment/result.html
 
 — The ReShape team',
      0, true),
@@ -232,7 +232,7 @@ This is the protocol shape. Your version gets dialled in the consult.
 
 Book your free 45-minute in-person consult here:
 
-https://reshapeclub.com/hormonal-assessment/result.html
+https://reshape.fit/hormonal-assessment/result.html
 
 — Loai',
      432000, true);
@@ -264,7 +264,7 @@ This is also the one pattern where a basic bloodwork panel almost always pays fo
 
 When you''re ready, book your free 45-minute in-person consult here:
 
-https://reshapeclub.com/hormonal-assessment/result.html
+https://reshape.fit/hormonal-assessment/result.html
 
 — The ReShape team',
      0, true),
@@ -302,7 +302,7 @@ That''s the shape. The order, dialled to your scores, is what gets agreed in the
 
 Book your free 45-minute in-person consult here — we''ll review your assessment + any panel together:
 
-https://reshapeclub.com/hormonal-assessment/result.html
+https://reshape.fit/hormonal-assessment/result.html
 
 — Loai',
      432000, true);
