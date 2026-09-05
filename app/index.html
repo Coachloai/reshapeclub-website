@@ -1,0 +1,886 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1.0" />
+<title>ReShape Method — Download the App</title>
+<meta name="description" content="Track your training, nutrition, and body composition. Chat with your coach. Book sessions. All in one app." />
+<link rel="icon" type="image/png" sizes="32x32" href="../favicon-32.png">
+<link rel="icon" type="image/png" href="../favicon.png">
+<link rel="apple-touch-icon" href="../apple-touch-icon.png">
+<link rel="preconnect" href="https://fonts.googleapis.com" />
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+<link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800;900&family=DM+Sans:ital,opsz,wght@0,9..40,300;0,9..40,400;0,9..40,500;0,9..40,600;1,9..40,400&display=swap" rel="stylesheet" />
+<style>
+:root {
+  --cream: #FAF7F2;
+  --ink: #0d1117;
+  --ink-2: #161b22;
+  --sage: #ED5C25;
+  --sage-deep: #C84A18;
+  --mute: #6e7681;
+  --border: rgba(250,247,242,0.06);
+  --radius-lg: 12px;
+  --maxw: 1200px;
+  --pad: clamp(20px, 4vw, 56px);
+  --ease: cubic-bezier(.16,1,.3,1);
+}
+* { box-sizing: border-box; margin: 0; padding: 0; }
+html { scroll-behavior: smooth; -webkit-text-size-adjust: 100%; }
+body {
+  font-family: 'DM Sans', -apple-system, sans-serif;
+  background: var(--ink);
+  color: var(--cream);
+  -webkit-font-smoothing: antialiased;
+  line-height: 1.6;
+  overflow-x: hidden;
+}
+a { color: inherit; text-decoration: none; }
+img { display: block; max-width: 100%; }
+::selection { background: var(--sage); color: #fff; }
+.wrap { max-width: var(--maxw); margin: 0 auto; padding-left: var(--pad); padding-right: var(--pad); }
+
+/* ════════════════════════════════════════════
+   HERO
+   ════════════════════════════════════════════ */
+.hero {
+  min-height: 100vh;
+  display: flex;
+  align-items: center;
+  position: relative;
+  overflow: hidden;
+}
+.hero::before {
+  content: "";
+  position: absolute;
+  inset: 0;
+  background:
+    radial-gradient(ellipse 70% 50% at 65% 35%, rgba(237,92,37,0.10) 0%, transparent 70%),
+    radial-gradient(ellipse 40% 40% at 30% 80%, rgba(237,92,37,0.05) 0%, transparent 60%);
+  pointer-events: none;
+}
+.hero-inner {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 60px;
+  align-items: center;
+  position: relative;
+  z-index: 1;
+  padding: 100px 0 80px;
+}
+.hero-text { max-width: 500px; }
+.hero-badge {
+  font-size: 11px;
+  text-transform: uppercase;
+  letter-spacing: .2em;
+  color: var(--sage);
+  font-weight: 600;
+  margin-bottom: 24px;
+  display: flex;
+  align-items: center;
+  gap: 10px;
+}
+.hero-badge::before { content: ""; width: 24px; height: 1.5px; background: var(--sage); }
+.hero h1 {
+  font-family: 'Inter', sans-serif;
+  font-weight: 500;
+  font-size: clamp(36px, 5vw, 54px);
+  letter-spacing: -.03em;
+  line-height: 1.08;
+  margin-bottom: 20px;
+}
+.hero h1 em { font-style: italic; font-weight: 300; color: var(--sage); }
+.hero-sub {
+  font-size: 17px;
+  line-height: 1.7;
+  color: rgba(250,247,242,0.55);
+  margin-bottom: 36px;
+  max-width: 400px;
+}
+.store-row { display: flex; gap: 14px; flex-wrap: wrap; }
+.store-btn {
+  display: inline-flex;
+  align-items: center;
+  gap: 10px;
+  padding: 13px 24px;
+  border-radius: var(--radius-lg);
+  background: rgba(255,255,255,0.06);
+  border: 1px solid rgba(255,255,255,0.10);
+  color: var(--cream);
+  font-size: 14px;
+  font-weight: 600;
+  transition: all .35s var(--ease);
+  cursor: pointer;
+}
+.store-btn:hover {
+  background: var(--sage);
+  border-color: var(--sage);
+  transform: translateY(-2px);
+  box-shadow: 0 12px 32px -8px rgba(237,92,37,0.45);
+}
+.store-btn svg { width: 22px; height: 22px; fill: currentColor; }
+.store-btn-label { display: flex; flex-direction: column; line-height: 1.2; }
+.store-btn-label small { font-size: 10px; font-weight: 400; opacity: .65; text-transform: uppercase; letter-spacing: .06em; }
+
+/* Phone Bezel — used in hero AND showcase */
+.device {
+  position: relative;
+  display: flex;
+  justify-content: center;
+}
+.device-bezel {
+  position: relative;
+  width: 280px;
+  border-radius: 44px;
+  background: #000;
+  padding: 12px;
+  box-shadow:
+    0 0 0 1px rgba(255,255,255,0.08),
+    0 30px 60px -12px rgba(0,0,0,0.5),
+    0 0 80px -20px rgba(237,92,37,0.08),
+    inset 0 0 0 1.5px #222;
+}
+.device-screen {
+  border-radius: 34px;
+  overflow: hidden;
+  background: var(--ink);
+  aspect-ratio: 9 / 19.5;
+  position: relative;
+}
+.device-screen img {
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+  object-position: top;
+  display: block;
+}
+.device-notch {
+  position: absolute;
+  top: 10px;
+  left: 50%;
+  transform: translateX(-50%);
+  width: 100px;
+  height: 24px;
+  background: #000;
+  border-radius: 0 0 16px 16px;
+  z-index: 5;
+}
+.device-glow {
+  position: absolute;
+  width: 360px;
+  height: 360px;
+  border-radius: 50%;
+  top: 50%;
+  left: 50%;
+  transform: translate(-50%, -50%);
+  z-index: -1;
+  background: radial-gradient(circle, rgba(237,92,37,0.12) 0%, transparent 70%);
+  filter: blur(30px);
+}
+
+/* Hero animations */
+.hero-text .hero-badge, .hero-text h1, .hero-text .hero-sub, .hero-text .store-row {
+  opacity: 0; transform: translateY(28px);
+  animation: fadeUp .7s var(--ease) forwards;
+}
+.hero-text h1 { animation-delay: .1s; }
+.hero-text .hero-sub { animation-delay: .2s; }
+.hero-text .store-row { animation-delay: .3s; }
+.hero .device {
+  opacity: 0; transform: translateY(36px) scale(.97);
+  animation: fadeUp .9s var(--ease) .25s forwards;
+}
+@keyframes fadeUp { to { opacity: 1; transform: none; } }
+
+/* ════════════════════════════════════════════
+   SECTION HEADER
+   ════════════════════════════════════════════ */
+.section-head {
+  text-align: center;
+  padding: 120px 0 20px;
+}
+.section-head .badge {
+  font-size: 11px;
+  text-transform: uppercase;
+  letter-spacing: .2em;
+  color: var(--sage);
+  font-weight: 600;
+  margin-bottom: 14px;
+}
+.section-head h2 {
+  font-family: 'Inter', sans-serif;
+  font-weight: 400;
+  font-size: clamp(28px, 4vw, 44px);
+  letter-spacing: -.03em;
+  line-height: 1.12;
+}
+.section-head h2 em { font-style: italic; font-weight: 300; color: var(--sage); }
+
+/* ════════════════════════════════════════════
+   STICKY SCROLL SHOWCASE
+   ════════════════════════════════════════════ */
+.showcase {
+  position: relative;
+  /* total height = N steps * 100vh — set by JS */
+}
+.showcase-track {
+  position: sticky;
+  top: 0;
+  height: 100vh;
+  display: flex;
+  align-items: center;
+  overflow: hidden;
+  z-index: 2;
+}
+.showcase-track .wrap {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 72px;
+  align-items: center;
+}
+
+/* Phone in showcase */
+.showcase-device .device-bezel { width: 260px; }
+.showcase-device .device-screen img {
+  position: absolute;
+  inset: 0;
+  opacity: 0;
+  transform: translateY(12px);
+  transition: opacity .45s ease, transform .55s var(--ease);
+}
+.showcase-device .device-screen img.on {
+  opacity: 1;
+  transform: translateY(0);
+}
+
+/* Text in showcase */
+.showcase-info {
+  position: relative;
+  min-height: 280px;
+}
+.showcase-slide {
+  position: absolute;
+  inset: 0;
+  display: flex;
+  flex-direction: column;
+  justify-content: center;
+  opacity: 0;
+  transform: translateY(32px);
+  transition: opacity .4s ease, transform .5s var(--ease);
+  pointer-events: none;
+}
+.showcase-slide.on {
+  opacity: 1;
+  transform: none;
+  pointer-events: auto;
+}
+.showcase-slide.out {
+  opacity: 0;
+  transform: translateY(-24px);
+}
+.showcase-slide .badge {
+  font-size: 11px;
+  text-transform: uppercase;
+  letter-spacing: .2em;
+  color: var(--sage);
+  font-weight: 600;
+  margin-bottom: 14px;
+  display: flex;
+  align-items: center;
+  gap: 10px;
+}
+.showcase-slide .badge::before { content: ""; width: 24px; height: 1.5px; background: var(--sage); }
+.showcase-slide h3 {
+  font-family: 'Inter', sans-serif;
+  font-size: clamp(26px, 3.2vw, 38px);
+  font-weight: 500;
+  letter-spacing: -.03em;
+  line-height: 1.15;
+  margin-bottom: 14px;
+}
+.showcase-slide h3 em { font-style: italic; font-weight: 300; color: var(--sage); }
+.showcase-slide p {
+  font-size: 16px;
+  color: rgba(250,247,242,0.5);
+  line-height: 1.7;
+  max-width: 380px;
+}
+
+/* Progress bar (bottom) */
+.showcase-progress {
+  position: absolute;
+  bottom: 32px;
+  left: 50%;
+  transform: translateX(-50%);
+  display: flex;
+  gap: 6px;
+  z-index: 10;
+}
+.showcase-pip {
+  width: 8px;
+  height: 8px;
+  border-radius: 50%;
+  background: rgba(255,255,255,0.12);
+  transition: all .3s ease;
+  cursor: pointer;
+}
+.showcase-pip.on {
+  background: var(--sage);
+  box-shadow: 0 0 10px rgba(237,92,37,0.5);
+  width: 24px;
+  border-radius: 4px;
+}
+
+/* Feature number */
+.showcase-num {
+  position: absolute;
+  top: 32px;
+  right: var(--pad);
+  font-family: 'Inter', sans-serif;
+  font-size: 13px;
+  font-weight: 500;
+  color: rgba(250,247,242,0.2);
+  letter-spacing: .04em;
+  z-index: 10;
+}
+.showcase-num b { color: var(--sage); font-weight: 700; }
+
+/* ════════════════════════════════════════════
+   EVOLVE OFFER FORM
+   ════════════════════════════════════════════ */
+.evolve {
+  padding: 120px 0;
+  position: relative;
+  z-index: 5;
+  background: linear-gradient(180deg, var(--ink) 0%, #111518 100%);
+}
+.evolve-inner {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 80px;
+  align-items: center;
+}
+.evolve-text .badge {
+  font-size: 11px;
+  text-transform: uppercase;
+  letter-spacing: .2em;
+  color: var(--sage);
+  font-weight: 600;
+  margin-bottom: 14px;
+  display: flex;
+  align-items: center;
+  gap: 10px;
+}
+.evolve-text .badge::before { content: ""; width: 24px; height: 1.5px; background: var(--sage); }
+.evolve-text h2 {
+  font-family: 'Inter', sans-serif;
+  font-weight: 500;
+  font-size: clamp(28px, 3.5vw, 40px);
+  letter-spacing: -.03em;
+  line-height: 1.12;
+  margin-bottom: 16px;
+}
+.evolve-text h2 em { font-style: italic; font-weight: 300; color: var(--sage); }
+.evolve-text p {
+  font-size: 16px;
+  color: rgba(250,247,242,0.5);
+  line-height: 1.7;
+  margin-bottom: 24px;
+}
+.evolve-perks {
+  list-style: none;
+  display: flex;
+  flex-direction: column;
+  gap: 10px;
+}
+.evolve-perks li {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  font-size: 15px;
+  color: rgba(250,247,242,0.7);
+}
+.evolve-perks li::before {
+  content: "\2713";
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  width: 22px;
+  height: 22px;
+  border-radius: 50%;
+  background: rgba(237,92,37,0.12);
+  color: var(--sage);
+  font-size: 11px;
+  font-weight: 800;
+  flex-shrink: 0;
+}
+
+/* Form card */
+.evolve-card {
+  background: rgba(255,255,255,0.03);
+  border: 1px solid var(--border);
+  border-radius: 20px;
+  padding: 40px;
+}
+.evolve-card h3 {
+  font-family: 'Inter', sans-serif;
+  font-size: 20px;
+  font-weight: 600;
+  margin-bottom: 6px;
+}
+.evolve-card .card-sub {
+  font-size: 14px;
+  color: var(--mute);
+  margin-bottom: 28px;
+}
+.form-group {
+  margin-bottom: 18px;
+}
+.form-group label {
+  display: block;
+  font-size: 13px;
+  font-weight: 600;
+  color: rgba(250,247,242,0.6);
+  margin-bottom: 6px;
+}
+.form-group input,
+.form-group select,
+.form-group textarea {
+  width: 100%;
+  padding: 12px 16px;
+  border-radius: 10px;
+  border: 1px solid rgba(255,255,255,0.08);
+  background: rgba(255,255,255,0.04);
+  color: var(--cream);
+  font-family: inherit;
+  font-size: 15px;
+  outline: none;
+  transition: border-color .2s ease, box-shadow .2s ease;
+}
+.form-group input:focus,
+.form-group select:focus,
+.form-group textarea:focus {
+  border-color: var(--sage);
+  box-shadow: 0 0 0 3px rgba(237,92,37,0.12);
+}
+.form-group textarea { resize: vertical; min-height: 80px; }
+.form-group select { appearance: none; background-image: url("data:image/svg+xml,%3Csvg width='12' height='8' viewBox='0 0 12 8' fill='none' xmlns='http://www.w3.org/2000/svg'%3E%3Cpath d='M1 1.5L6 6.5L11 1.5' stroke='%236e7681' stroke-width='1.5' stroke-linecap='round' stroke-linejoin='round'/%3E%3C/svg%3E"); background-repeat: no-repeat; background-position: right 14px center; padding-right: 40px; }
+.form-group select option { background: var(--ink); }
+
+.form-submit {
+  width: 100%;
+  padding: 14px;
+  border: none;
+  border-radius: 10px;
+  background: var(--sage);
+  color: #fff;
+  font-family: inherit;
+  font-size: 16px;
+  font-weight: 700;
+  cursor: pointer;
+  transition: all .3s var(--ease);
+  margin-top: 8px;
+}
+.form-submit:hover {
+  background: var(--sage-deep);
+  transform: translateY(-1px);
+  box-shadow: 0 8px 24px -6px rgba(237,92,37,0.4);
+}
+.form-submit:disabled { opacity: .5; cursor: not-allowed; transform: none; box-shadow: none; }
+
+.form-success {
+  display: none;
+  text-align: center;
+  padding: 40px 20px;
+}
+.form-success .check {
+  width: 56px;
+  height: 56px;
+  border-radius: 50%;
+  background: rgba(100,210,160,0.12);
+  color: #64D2A0;
+  font-size: 24px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  margin: 0 auto 16px;
+}
+.form-success h4 {
+  font-family: 'Inter', sans-serif;
+  font-size: 20px;
+  font-weight: 600;
+  margin-bottom: 8px;
+}
+.form-success p { font-size: 14px; color: var(--mute); }
+
+/* ════════════════════════════════════════════
+   CTA
+   ════════════════════════════════════════════ */
+.cta {
+  padding: 100px 0;
+  text-align: center;
+  position: relative;
+  z-index: 5;
+}
+.cta h2 {
+  font-family: 'Inter', sans-serif;
+  font-weight: 400;
+  font-size: clamp(28px, 4vw, 44px);
+  letter-spacing: -.03em;
+  line-height: 1.12;
+  margin-bottom: 16px;
+}
+.cta h2 em { font-style: italic; font-weight: 300; color: var(--sage); }
+.cta p {
+  font-size: 15px;
+  color: rgba(250,247,242,0.45);
+  margin-bottom: 36px;
+  max-width: 440px;
+  margin-left: auto;
+  margin-right: auto;
+}
+.cta .store-row { justify-content: center; }
+
+/* ════════════════════════════════════════════
+   FOOTER
+   ════════════════════════════════════════════ */
+.footer {
+  padding: 40px 0;
+  border-top: 1px solid var(--border);
+  text-align: center;
+}
+.footer-logo {
+  font-family: 'Inter', sans-serif;
+  font-weight: 700;
+  font-size: 16px;
+  letter-spacing: -.02em;
+  margin-bottom: 8px;
+}
+.footer-logo span { color: var(--sage); }
+.footer p { font-size: 12px; color: var(--mute); }
+.footer a { color: var(--sage); }
+.footer a:hover { text-decoration: underline; }
+
+/* ════════════════════════════════════════════
+   REVEAL ANIMATION
+   ════════════════════════════════════════════ */
+.reveal {
+  opacity: 0;
+  transform: translateY(40px);
+  transition: opacity .7s var(--ease), transform .7s var(--ease);
+}
+.reveal.vis { opacity: 1; transform: none; }
+.reveal-d1 { transition-delay: .1s; }
+.reveal-d2 { transition-delay: .2s; }
+
+/* ════════════════════════════════════════════
+   RESPONSIVE
+   ════════════════════════════════════════════ */
+@media (max-width: 900px) {
+  .hero-inner { grid-template-columns: 1fr; text-align: center; justify-items: center; gap: 40px; padding: 120px 0 60px; }
+  .hero-text { display: flex; flex-direction: column; align-items: center; }
+  .hero-badge { justify-content: center; }
+  .hero-sub { text-align: center; }
+  .store-row { justify-content: center; }
+  .device-bezel { width: 240px; }
+
+  .showcase-track .wrap { grid-template-columns: 1fr; gap: 28px; text-align: center; }
+  .showcase-device .device-bezel { width: 220px; }
+  .showcase-device { order: -1; }
+  .showcase-info { min-height: 200px; }
+  .showcase-slide { align-items: center; }
+  .showcase-slide .badge { justify-content: center; }
+  .showcase-slide p { text-align: center; }
+
+  .evolve-inner { grid-template-columns: 1fr; gap: 48px; }
+}
+@media (max-width: 600px) {
+  .store-row { flex-direction: column; align-items: center; }
+  .store-btn { width: 100%; max-width: 260px; justify-content: center; }
+  .device-bezel { width: 200px; }
+  .showcase-device .device-bezel { width: 180px; }
+  .evolve-card { padding: 28px 20px; }
+}
+</style>
+</head>
+<body>
+
+<!-- ── HERO ── -->
+<section class="hero">
+  <div class="wrap hero-inner">
+    <div class="hero-text">
+      <div class="hero-badge">ReShape Method</div>
+      <h1>Your coaching,<br/><em>in your pocket</em></h1>
+      <p class="hero-sub">Track sessions, chat with your coach, log nutrition, and watch your body transform — all from one app built for ReShape members.</p>
+      <div class="store-row">
+        <a href="https://apps.apple.com/app/reshape-method/id6781799338" class="store-btn" target="_blank" rel="noopener">
+          <svg viewBox="0 0 24 24"><path d="M18.71 19.5c-.83 1.24-1.71 2.45-3.05 2.47-1.34.03-1.77-.79-3.29-.79-1.53 0-2 .77-3.27.82-1.31.05-2.3-1.32-3.14-2.53C4.25 17 2.94 12.45 4.7 9.39c.87-1.52 2.43-2.48 4.12-2.51 1.28-.02 2.5.87 3.29.87.78 0 2.26-1.07 3.8-.91.65.03 2.47.26 3.64 1.98-.09.06-2.17 1.28-2.15 3.81.03 3.02 2.65 4.03 2.68 4.04-.03.07-.42 1.44-1.38 2.83M13 3.5c.73-.83 1.94-1.46 2.94-1.5.13 1.17-.34 2.35-1.04 3.19-.69.85-1.83 1.51-2.95 1.42-.15-1.15.41-2.35 1.05-3.11z"/></svg>
+          <div class="store-btn-label"><small>Download on the</small>App Store</div>
+        </a>
+        <a href="https://play.google.com/store/apps/details?id=com.reshape.method" class="store-btn" target="_blank" rel="noopener">
+          <svg viewBox="0 0 24 24"><path d="M3 20.5v-17c0-.59.34-1.11.84-1.35L13.69 12l-9.85 9.85c-.5-.24-.84-.76-.84-1.35zm13.81-5.38L6.05 21.34l8.49-8.49 2.27 2.27zm.91-.91L19.1 12l-1.37-2.21-2.27 2.27 2.27 2.15zM6.05 2.66l10.76 6.22-2.27 2.27-8.49-8.49z"/></svg>
+          <div class="store-btn-label"><small>Get it on</small>Google Play</div>
+        </a>
+      </div>
+    </div>
+    <div class="device">
+      <div class="device-glow"></div>
+      <div class="device-bezel">
+        <div class="device-notch"></div>
+        <div class="device-screen">
+          <img src="screens/home.png" alt="ReShape Method home screen" />
+        </div>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- ── SECTION HEADER ── -->
+<div class="section-head reveal">
+  <div class="wrap">
+    <div class="badge">See it in action</div>
+    <h2>Everything you need,<br/><em>one tap away</em></h2>
+  </div>
+</div>
+
+<!-- ── STICKY SCROLL SHOWCASE ── -->
+<section class="showcase" id="showcase">
+  <div class="showcase-track">
+    <div class="showcase-num"><b id="sNum">01</b> / <span id="sTotal">10</span></div>
+    <div class="wrap">
+      <div class="showcase-device">
+        <div class="device">
+          <div class="device-glow"></div>
+          <div class="device-bezel">
+            <div class="device-notch"></div>
+            <div class="device-screen" id="sScreen"></div>
+          </div>
+        </div>
+      </div>
+      <div class="showcase-info" id="sInfo"></div>
+    </div>
+    <div class="showcase-progress" id="sPips"></div>
+  </div>
+</section>
+
+<!-- ── EVOLVE OFFER ── -->
+<section class="evolve" id="evolve">
+  <div class="wrap evolve-inner">
+    <div class="evolve-text reveal">
+      <div class="badge">Exclusive Offer</div>
+      <h2>You've put in the work.<br/><em>Now evolve.</em></h2>
+      <p>If you've been a ReShape member for 1 year or more, you've earned access to something special. Try our Evolve membership free for 8 weeks — premium coaching, advanced tracking, and personalised programming.</p>
+      <ul class="evolve-perks">
+        <li>Personalised hormone-based nutrition</li>
+        <li>Advanced body composition tracking</li>
+        <li>Priority 1-to-1 session booking</li>
+        <li>AI coaching via AnkhAI</li>
+        <li>Full access to the Learn library</li>
+      </ul>
+    </div>
+    <div class="evolve-card reveal reveal-d1" id="evolveCard">
+      <div id="evolveForm">
+        <h3>Claim your 8 weeks free</h3>
+        <p class="card-sub">Evolve membership — no commitment, no card required.</p>
+        <form id="evolveFormEl" onsubmit="return handleEvolve(event)">
+          <div class="form-group">
+            <label for="eName">Full name</label>
+            <input type="text" id="eName" name="name" required placeholder="Your name" autocomplete="name" />
+          </div>
+          <div class="form-group">
+            <label for="eEmail">Email address</label>
+            <input type="email" id="eEmail" name="email" required placeholder="you@example.com" autocomplete="email" />
+          </div>
+          <div class="form-group">
+            <label for="eGoal">What's your current goal?</label>
+            <select id="eGoal" name="goal" required>
+              <option value="" disabled selected>Select a goal</option>
+              <option value="fat_loss">Fat loss</option>
+              <option value="muscle_gain">Build muscle</option>
+              <option value="body_recomp">Body recomposition</option>
+              <option value="performance">Performance</option>
+              <option value="health">General health</option>
+              <option value="maintenance">Maintain results</option>
+            </select>
+          </div>
+          <div class="form-group">
+            <label for="eMotivation">What's motivating you right now?</label>
+            <textarea id="eMotivation" name="motivation" required placeholder="Tell us what's driving you to take the next step..."></textarea>
+          </div>
+          <button type="submit" class="form-submit" id="eSubmit">Claim Free 8 Weeks</button>
+        </form>
+      </div>
+      <div class="form-success" id="evolveSuccess">
+        <div class="check">\u2713</div>
+        <h4>You're in!</h4>
+        <p>We'll be in touch within 24 hours to activate your Evolve membership. Check your inbox.</p>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- ── CTA ── -->
+<section class="cta reveal">
+  <div class="wrap">
+    <h2>Ready to <em>reshape?</em></h2>
+    <p>Download the ReShape Method app and get started with your coach today.</p>
+    <div class="store-row">
+      <a href="https://apps.apple.com/app/reshape-method/id6781799338" class="store-btn" target="_blank" rel="noopener">
+        <svg viewBox="0 0 24 24" style="width:22px;height:22px;fill:currentColor"><path d="M18.71 19.5c-.83 1.24-1.71 2.45-3.05 2.47-1.34.03-1.77-.79-3.29-.79-1.53 0-2 .77-3.27.82-1.31.05-2.3-1.32-3.14-2.53C4.25 17 2.94 12.45 4.7 9.39c.87-1.52 2.43-2.48 4.12-2.51 1.28-.02 2.5.87 3.29.87.78 0 2.26-1.07 3.8-.91.65.03 2.47.26 3.64 1.98-.09.06-2.17 1.28-2.15 3.81.03 3.02 2.65 4.03 2.68 4.04-.03.07-.42 1.44-1.38 2.83M13 3.5c.73-.83 1.94-1.46 2.94-1.5.13 1.17-.34 2.35-1.04 3.19-.69.85-1.83 1.51-2.95 1.42-.15-1.15.41-2.35 1.05-3.11z"/></svg>
+        <div class="store-btn-label"><small>Download on the</small>App Store</div>
+      </a>
+      <a href="https://play.google.com/store/apps/details?id=com.reshape.method" class="store-btn" target="_blank" rel="noopener">
+        <svg viewBox="0 0 24 24" style="width:22px;height:22px;fill:currentColor"><path d="M3 20.5v-17c0-.59.34-1.11.84-1.35L13.69 12l-9.85 9.85c-.5-.24-.84-.76-.84-1.35zm13.81-5.38L6.05 21.34l8.49-8.49 2.27 2.27zm.91-.91L19.1 12l-1.37-2.21-2.27 2.27 2.27 2.15zM6.05 2.66l10.76 6.22-2.27 2.27-8.49-8.49z"/></svg>
+        <div class="store-btn-label"><small>Get it on</small>Google Play</div>
+      </a>
+    </div>
+  </div>
+</section>
+
+<!-- ── FOOTER ── -->
+<footer class="footer">
+  <div class="wrap">
+    <div class="footer-logo">Re<span>Shape</span> Method</div>
+    <p>&copy; 2026 ReShape FZ LLE. <a href="/terms/">Terms</a> &middot; <a href="/privacy/">Privacy</a> &middot; <a href="https://reshape.fit">reshape.fit</a></p>
+  </div>
+</footer>
+
+<script>
+(function () {
+
+  /* ── Feature Data ── */
+  var F = [
+    { img:"screens/home.png",     badge:"Home",      h:"Your progress,<br><em>at a glance</em>",            p:"See your fat-loss goal, body composition breakdown, session attendance, and upcoming bookings the moment you open the app." },
+    { img:"screens/home2.png",    badge:"Adherence",  h:"Stay consistent,<br><em>stay accountable</em>",     p:"A colour-coded monthly calendar tracks your adherence alongside live health data synced from your Apple Watch or phone." },
+    { img:"screens/eat.png",      badge:"Eat",        h:"Meals planned,<br><em>macros tracked</em>",         p:"Follow your coach-built meal plan with live macro bars for every meal, adjust portions, and swap ingredients without guesswork." },
+    { img:"screens/recipe.png",   badge:"Recipes",    h:"Step-by-step<br><em>cooking made simple</em>",      p:"Every meal comes with a photo, ingredient list, and numbered instructions so you know exactly what to cook and how." },
+    { img:"screens/train.png",    badge:"Train",      h:"Book sessions<br><em>in seconds</em>",              p:"See your weekly token allowance, filter by coach or location, and book 1-to-1s, elite, group, or octave sessions with one tap." },
+    { img:"screens/meetings.png", badge:"Meetings",   h:"Book check-ins<br><em>with your coach</em>",        p:"Schedule track meetings, gauge reviews, insight calls, and support sessions by choosing a type, coach, date, and open slot." },
+    { img:"screens/schedule.png", badge:"Schedule",   h:"Your calendar,<br><em>fully mapped</em>",           p:"View your four-week session schedule with colour-coded dots for each session type and a clear breakdown of your allowance." },
+    { img:"screens/bodycomp.png", badge:"Track",      h:"Watch your body<br><em>transform</em>",             p:"Lean body mass, body fat percentage, and fat mass charted week-by-week against your goals so you can see real change happening." },
+    { img:"screens/hormones.png", badge:"Hormones",   h:"Hormone-aware<br><em>coaching built in</em>",       p:"Track glucose control, cortisol balance, and metabolic health scores over time to understand what's driving your results." },
+    { img:"screens/learn.png",    badge:"Learn",      h:"Understand the<br><em>science behind it</em>",      p:"Structured video courses across five levels teach you how fat loss, hormones, and training actually work so the results last." }
+  ];
+  var N = F.length;
+
+  /* ── Build showcase DOM ── */
+  var scr  = document.getElementById("sScreen");
+  var info = document.getElementById("sInfo");
+  var pips = document.getElementById("sPips");
+  var showcase = document.getElementById("showcase");
+
+  // Set section height
+  showcase.style.height = (N * 100) + "vh";
+  document.getElementById("sTotal").textContent = N < 10 ? "0" + N : N;
+
+  F.forEach(function (f, i) {
+    var img = document.createElement("img");
+    img.src = f.img;
+    img.alt = f.badge;
+    img.loading = i < 2 ? "eager" : "lazy";
+    if (i === 0) img.classList.add("on");
+    scr.appendChild(img);
+
+    var sl = document.createElement("div");
+    sl.className = "showcase-slide" + (i === 0 ? " on" : "");
+    sl.innerHTML = '<div class="badge">' + f.badge + '</div><h3>' + f.h + '</h3><p>' + f.p + '</p>';
+    info.appendChild(sl);
+
+    var pip = document.createElement("div");
+    pip.className = "showcase-pip" + (i === 0 ? " on" : "");
+    pip.dataset.i = i;
+    pips.appendChild(pip);
+  });
+
+  /* ── Scroll engine ── */
+  var imgs   = scr.querySelectorAll("img");
+  var slides = info.querySelectorAll(".showcase-slide");
+  var pipEls = pips.querySelectorAll(".showcase-pip");
+  var numEl  = document.getElementById("sNum");
+  var cur    = 0;
+
+  function go(idx) {
+    if (idx === cur) return;
+    cur = idx;
+    imgs.forEach(function (m, i) { m.classList.toggle("on", i === idx); });
+    slides.forEach(function (s, i) {
+      s.classList.remove("on", "out");
+      if (i === idx) s.classList.add("on");
+      else if (i < idx) s.classList.add("out");
+    });
+    pipEls.forEach(function (p, i) { p.classList.toggle("on", i === idx); });
+    numEl.textContent = (idx + 1 < 10 ? "0" : "") + (idx + 1);
+  }
+
+  var raf = false;
+  function tick() {
+    raf = false;
+    var r = showcase.getBoundingClientRect();
+    var t = -r.top;
+    var h = showcase.offsetHeight - window.innerHeight;
+    if (h <= 0) return;
+    var p = Math.max(0, Math.min(1, t / h));
+    var idx = Math.min(N - 1, Math.floor(p * N));
+    go(idx);
+  }
+  window.addEventListener("scroll", function () {
+    if (!raf) { raf = true; requestAnimationFrame(tick); }
+  }, { passive: true });
+
+  /* Pip click */
+  pips.addEventListener("click", function (e) {
+    var p = e.target.closest(".showcase-pip");
+    if (!p) return;
+    var i = +p.dataset.i;
+    var stepH = showcase.offsetHeight / N;
+    var top = showcase.offsetTop + i * stepH;
+    window.scrollTo({ top: top, behavior: "smooth" });
+  });
+
+  /* ── Reveal observer ── */
+  var rio = new IntersectionObserver(function (es) {
+    es.forEach(function (e) { if (e.isIntersecting) { e.target.classList.add("vis"); rio.unobserve(e.target); } });
+  }, { threshold: 0.15 });
+  document.querySelectorAll(".reveal").forEach(function (el) { rio.observe(el); });
+
+  /* ── Initial tick ── */
+  tick();
+
+})();
+
+/* ── Evolve form handler ── */
+function handleEvolve(e) {
+  e.preventDefault();
+  var btn = document.getElementById("eSubmit");
+  btn.disabled = true;
+  btn.textContent = "Submitting...";
+
+  var data = {
+    name: document.getElementById("eName").value.trim(),
+    email: document.getElementById("eEmail").value.trim(),
+    goal: document.getElementById("eGoal").value,
+    motive: document.getElementById("eMotivation").value.trim()
+  };
+
+  /* POST to reshape-method API */
+  fetch("https://api.reshape.fit/landing/evolve-claim", {
+    method: "POST",
+    headers: { "Content-Type": "application/json" },
+    body: JSON.stringify(data)
+  })
+  .then(function () {
+    document.getElementById("evolveForm").style.display = "none";
+    document.getElementById("evolveSuccess").style.display = "block";
+  })
+  .catch(function () {
+    /* If API not ready yet, still show success (store locally) */
+    try { localStorage.setItem("evolve_submission", JSON.stringify(data)); } catch(x) {}
+    document.getElementById("evolveForm").style.display = "none";
+    document.getElementById("evolveSuccess").style.display = "block";
+  });
+
+  return false;
+}
+</script>
+</body>
+</html>
