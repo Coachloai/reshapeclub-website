@@ -65,15 +65,18 @@ body{background:var(--bg);color:var(--text);font-family:var(--body);font-size:17
   </div>
 </div>
 
-<script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+<script>
+window.__apiBase = 'https://api.reshape.fit/website';
+window.__api = async function(path, opts) {
+  var url = window.__apiBase + path;
+  var res = await fetch(url, Object.assign({ headers: { 'Content-Type': 'application/json' } }, opts || {}));
+  return res.json();
+};
+</script>
+<script src="../api/supabase-shim.js?v=1"></script>
 <script src="../api/config.js?v=2"></script>
 <script src="../api/automations.js?v=16"></script>
 <script>
-var sb = supabase.createClient(
-  'https://lvizldmdficsfpgegehp.supabase.co',
-  'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6Imx2aXpsZG1kZmljc2ZwZ2VnZWhwIiwicm9sZSI6ImFub24iLCJpYXQiOjE3NzM2OTk4NDQsImV4cCI6MjA4OTI3NTg0NH0.72wHbZaTvqNzW6DTb6Ae1vi9QpOg_-KiEO-Jjm9mn0k'
-);
-window.__supabaseClient = sb;
 
 var __booking = null;
 
@@ -84,11 +87,9 @@ var __booking = null;
   if (!id || !token) { showError(); return; }
 
   try {
-    var res = await sb.from('bookings')
-      .select('id, confirm_token, first_name, last_name, email, phone, location, status, calendar_event_id, calendar_event_url, calendar_provider, booking_slots(date, start_time, end_time)')
-      .eq('id', id).maybeSingle();
-    var b = res && res.data;
-    if (!b || b.confirm_token !== token) { showError(); return; }
+    var res = await window.__api('/bookings/' + id + '?token=' + encodeURIComponent(token));
+    if (!res || !res.booking) { showError(); return; }
+    var b = res.booking;
     if (b.status === 'cancelled') {
       document.getElementById('loading').style.display = 'none';
       document.getElementById('cancelled-view').style.display = 'block';
@@ -123,39 +124,17 @@ async function cancelBooking() {
   btn.textContent = 'Cancelling...';
 
   try {
-    // Update booking status
-    var upd = await sb.from('bookings').update({ status: 'cancelled' }).eq('id', __booking.id);
-    if (upd.error) throw new Error(upd.error.message);
+    // Cancel via API (handles status update, slot release, and message cancellation)
+    var res = await window.__api('/bookings/' + __booking.id + '/cancel', {
+      method: 'POST',
+      body: JSON.stringify({ confirm_token: __booking.confirm_token })
+    });
+    if (res.error) throw new Error(res.error);
 
-    // Free the slot
-    if (__booking.booking_slots) {
-      var slotRes = await sb.from('booking_slots').select('id, booked_count').eq('date', __booking.booking_slots.date).eq('start_time', __booking.booking_slots.start_time).eq('location', __booking.location).maybeSingle();
-      if (slotRes && slotRes.data && slotRes.data.booked_count > 0) {
-        await sb.from('booking_slots').update({ booked_count: slotRes.data.booked_count - 1 }).eq('id', slotRes.data.id);
-      }
-    }
-
-    // Cancel pending messages
-    await sb.from('message_queue')
-      .update({ status: 'cancelled' })
-      .eq('lead_email', __booking.email)
-      .eq('sequence', 'booking_confirmed')
-      .eq('status', 'queued');
-
-    // Re-fetch calendar fields fresh (page-load snapshot may be stale/null)
-    try {
-      var __freshCal = await sb.from('bookings')
-        .select('calendar_event_id, calendar_event_url, calendar_provider')
-        .eq('id', __booking.id).maybeSingle();
-      if (__freshCal && __freshCal.data) {
-        __booking.calendar_event_id = __freshCal.data.calendar_event_id;
-        __booking.calendar_event_url = __freshCal.data.calendar_event_url;
-        __booking.calendar_provider = __freshCal.data.calendar_provider;
-      }
-    } catch (e) { console.warn('Fresh calendar ref fetch failed:', e); }
-    // Delete calendar event
-    if (typeof deleteCalendarEvent === 'function' && (__booking.calendar_event_id || __booking.calendar_event_url)) {
-      try { await deleteCalendarEvent(__booking); } catch (e) { console.warn('Calendar delete failed:', e); }
+    // Delete calendar event (browser-side via automations.js)
+    var cancelledBooking = res.booking || __booking;
+    if (typeof deleteCalendarEvent === 'function' && (cancelledBooking.calendar_event_id || cancelledBooking.calendar_event_url)) {
+      try { await deleteCalendarEvent(cancelledBooking); } catch (e) { console.warn('Calendar delete failed:', e); }
     }
 
     // Queue cancellation sequence
@@ -163,7 +142,7 @@ async function cancelBooking() {
     var slot = __booking.booking_slots || {};
     var bookingCtx = { location: __booking.location, date: slot.date, time: slot.start_time ? slot.start_time.substring(0, 5) : '' };
     if (typeof queueSequence === 'function') {
-      try { await queueSequence('consultation_cancelled', lead, bookingCtx, sb); } catch (e) { console.warn('Cancel sequence failed:', e); }
+      try { await queueSequence('consultation_cancelled', lead, bookingCtx, window.__supabaseClient); } catch (e) { console.warn('Cancel sequence failed:', e); }
     }
 
     // Team notification
