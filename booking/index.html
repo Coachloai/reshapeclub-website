@@ -150,7 +150,7 @@ footer{padding:20px;text-align:center;font-size:12px;color:var(--text4);border-t
     </div>
     <!-- EXISTING BOOKING -->
     <div class="existing-booking" id="existingBooking" style="display:none">
-      <div class="booking-done-icon">📅</div>
+      <div class="booking-done-icon">&#128197;</div>
       <h3>You're Already Booked!</h3>
       <p>You already have a consult scheduled. Here are your details:</p>
       <div class="booking-done-detail" id="existingBookingDetail"></div>
@@ -170,52 +170,20 @@ footer{padding:20px;text-align:center;font-size:12px;color:var(--text4);border-t
   </div>
 </div>
 
-<!-- WAITLIST MODE: shown when bookings are closed -->
-<div class="page" id="waitlist-view" style="display:none">
-  <div class="booking-card" style="text-align:center;padding:48px 32px">
-    <div style="width:56px;height:56px;border-radius:50%;background:var(--odim);display:inline-flex;align-items:center;justify-content:center;margin-bottom:20px;font-size:28px;color:var(--orange)">&#128274;</div>
-    <h3 style="font-family:var(--head);font-size:22px;font-weight:800;margin-bottom:8px">We're currently at capacity</h3>
-    <p style="font-size:15px;color:var(--text2);max-width:380px;margin:0 auto 24px;line-height:1.7">Spots open up regularly. If you've already applied, we'll be in touch as soon as there's space for you.</p>
-    <a href="https://reshape.fit/#apply" style="display:inline-block;padding:14px 36px;background:var(--orange);color:#fff;border:none;border-radius:14px;font-weight:700;font-size:15px;text-decoration:none;box-shadow:0 8px 28px rgba(237,92,37,0.28);transition:opacity .2s">Apply Now</a>
-  </div>
-</div>
-
 <footer>ReShape Body Transformation &middot; Ipswich &amp; Colchester</footer>
 
-<script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+<script>
+window.__apiBase = 'https://api.reshape.fit/website';
+window.__api = async function(path, opts) {
+  var url = window.__apiBase + path;
+  var res = await fetch(url, Object.assign({ headers: { 'Content-Type': 'application/json' } }, opts || {}));
+  return res.json();
+};
+</script>
+<script src="../api/supabase-shim.js?v=1"></script>
 <script src="../api/config.js?v=2"></script>
 <script src="../api/automations.js?v=16"></script>
 <script>
-/* ── Supabase ── */
-(function(){
-  var U='https://lvizldmdficsfpgegehp.supabase.co';
-  var K='eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6Imx2aXpsZG1kZmljc2ZwZ2VnZWhwIiwicm9sZSI6ImFub24iLCJpYXQiOjE3NzM2OTk4NDQsImV4cCI6MjA4OTI3NTg0NH0.72wHbZaTvqNzW6DTb6Ae1vi9QpOg_-KiEO-Jjm9mn0k';
-  window.__supabaseClient = supabase.createClient(U, K);
-})();
-
-/* ── Waitlist gate ── */
-(function(){
-  var sb = window.__supabaseClient;
-  function activateWaitlist() {
-    var pg = document.querySelectorAll('.page');
-    // Hide the booking page (first .page), show the waitlist view
-    if (pg[0]) pg[0].style.display = 'none';
-    document.getElementById('waitlist-view').style.display = '';
-  }
-  // 1. Global toggle
-  sb.from('site_settings').select('waitlist_enabled').eq('id','global').maybeSingle()
-    .then(function(r){ if(r.data && r.data.waitlist_enabled) activateWaitlist(); })
-    .catch(function(){});
-  // 2. Per-lead: if URL has email param or assessment stored one, check if they're waitlisted
-  var qs = new URLSearchParams(window.location.search);
-  var em = qs.get('email') || sessionStorage.getItem('reshape_hormonal_email') || sessionStorage.getItem('reshape_mens_email') || '';
-  if (em) {
-    sb.from('leads').select('form_name').eq('email', em.toLowerCase())
-      .ilike('form_name','%Waitlist%').limit(1).maybeSingle()
-      .then(function(r){ if(r.data) activateWaitlist(); })
-      .catch(function(){});
-  }
-})();
 
 /* ── Booking Calendar ── */
 var __bookingSlots = [];
@@ -234,15 +202,16 @@ function __escAttr(s){ return String(s||'').replace(/[&<>"']/g, function(c){ ret
   var rTok = qs.get('token');
   if (rId && rTok) {
     try {
-      var bRes = await window.__supabaseClient.from('bookings')
-        .select('id, confirm_token, first_name, last_name, email, phone, location, slot_id, calendar_event_id, calendar_event_url, calendar_provider, booking_slots(date, start_time, end_time)')
-        .eq('id', rId).maybeSingle();
-      var b = bRes && bRes.data;
-      if (b && b.confirm_token === rTok) {
+      var bRes = await window.__api('/bookings/' + rId + '?token=' + encodeURIComponent(rTok));
+      var b = bRes && bRes.booking;
+      if (b) {
         __rescheduleCtx = b;
+        // Flatten the slot join — API returns booking_slots as the joined object
+        if (b.booking_slots) __rescheduleCtx.booking_slots = b.booking_slots;
         prefillRescheduleForm(b);
       }
     } catch (e) { console.warn('Reschedule lookup failed:', e); }
+    if (__rescheduleCtx && __rescheduleCtx.locked_location) __applyLocationLock(__rescheduleCtx.locked_location);
   }
   // Pre-fill from /apply page params
   if (!__rescheduleCtx) {
@@ -263,28 +232,21 @@ function __escAttr(s){ return String(s||'').replace(/[&<>"']/g, function(c){ ret
     var em = this.value.trim();
     if (em && /^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(em)) await checkExistingBooking(em);
   });
-  selectBookingLoc((__rescheduleCtx && __rescheduleCtx.location) || 'Ipswich');
+  var qsLoc = qs.get('loc');
+  selectBookingLoc((__rescheduleCtx && (__rescheduleCtx.locked_location || __rescheduleCtx.location)) || qsLoc || 'Ipswich');
+  // If loc param passed, hide location toggle (single-location funnel)
+  if (qsLoc) document.getElementById('bookingLocToggle').style.display = 'none';
+  if (__rescheduleCtx && __rescheduleCtx.locked_location) __applyLocationLock(__rescheduleCtx.locked_location);
 })();
 
 var __existingBooking = null;
 async function checkExistingBooking(email) {
   try {
-    var today = __localDate(new Date());
-    var res = await window.__supabaseClient.from('bookings')
-      .select('id, confirm_token, first_name, last_name, email, phone, location, slot_id, status, booking_slots(date, start_time, end_time)')
-      .eq('email', email.toLowerCase())
-      .neq('status', 'cancelled')
-      .order('created_at', { ascending: false })
-      .limit(1)
-      .maybeSingle();
-    var b = res && res.data;
+    var res = await window.__api('/bookings/check-existing?email=' + encodeURIComponent(email.toLowerCase()));
+    var b = res && res.booking;
     if (!b) return;
-    var slot = b.booking_slots || {};
-    // Only block if the booking is for a future date
-    if (slot.date && slot.date >= today) {
-      __existingBooking = b;
-      showExistingBooking(b);
-    }
+    __existingBooking = b;
+    showExistingBooking(b);
   } catch (e) { console.warn('Existing booking check failed:', e); }
 }
 
@@ -306,7 +268,22 @@ function startReschedule() {
   document.getElementById('existingBooking').style.display = 'none';
   document.getElementById('bookingWrap').style.display = '';
   prefillRescheduleForm(__existingBooking);
-  selectBookingLoc(__existingBooking.location || 'Ipswich');
+  selectBookingLoc(__existingBooking.locked_location || __existingBooking.location || 'Ipswich');
+  if (__existingBooking.locked_location) __applyLocationLock(__existingBooking.locked_location);
+}
+
+// Some offers (the Metabolic Reset) run at one studio only. The API tells us via
+// booking.locked_location and refuses any other studio server-side; here we just
+// remove the choice so nobody is offered a time they cannot take.
+function __applyLocationLock(loc) {
+  var toggle = document.getElementById('bookingLocToggle');
+  if (toggle) {
+    toggle.style.display = 'none';
+    var note = document.getElementById('bookingLocLockNote');
+    if (!note) { note = document.createElement('div'); note.id = 'bookingLocLockNote'; note.style.cssText = 'font-size:13px;color:var(--muted,#888);margin:0 0 14px'; toggle.parentNode.insertBefore(note, toggle.nextSibling); }
+    note.textContent = 'This booking is at ReShape ' + loc + '.';
+  }
+  if (typeof selectBookingLoc === 'function' && __selectedLoc !== loc) selectBookingLoc(loc);
 }
 
 function prefillRescheduleForm(b) {
@@ -343,8 +320,8 @@ async function selectBookingLoc(loc) {
 async function loadBookingSlots(loc) {
   var today = __localDate(new Date());
   try {
-    var res = await window.__supabaseClient.from('booking_slots').select('*').eq('location', loc).eq('is_active', true).gte('date', today).order('date', { ascending: true }).order('start_time', { ascending: true });
-    __bookingSlots = (res.data || []).filter(function(s) { return s.booked_count < s.max_attendees; });
+    var res = await window.__api('/slots?location=' + encodeURIComponent(loc));
+    __bookingSlots = (res.slots || []).filter(function(s) { return s.booked_count < s.max_attendees; });
   } catch (e) { __bookingSlots = []; }
   await applyConflictCalendarFiltering();
   renderBookingDates();
@@ -356,66 +333,43 @@ async function loadBookingSlots(loc) {
 async function applyConflictCalendarFiltering() {
   if (!__bookingSlots || __bookingSlots.length === 0) return;
   try {
-    var sb = window.__supabaseClient;
-    var __anon = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6Imx2aXpsZG1kZmljc2ZwZ2VnZWhwIiwicm9sZSI6ImFub24iLCJpYXQiOjE3NzM2OTk4NDQsImV4cCI6MjA4OTI3NTg0NH0.72wHbZaTvqNzW6DTb6Ae1vi9QpOg_-KiEO-Jjm9mn0k';
-
-    // Collect unique appointment_type_ids from current slots
-    var apptIds = [];
+    // Collect per-type conflict_calendars from slot's joined appointment_type
+    var apptConflicts = {};
     __bookingSlots.forEach(function(s) {
-      if (s.appointment_type_id && apptIds.indexOf(s.appointment_type_id) === -1)
-        apptIds.push(s.appointment_type_id);
+      if (s.appointment_type && s.appointment_type.conflict_calendars && s.appointment_type.conflict_calendars.length > 0)
+        apptConflicts[s.appointment_type_id] = s.appointment_type.conflict_calendars;
     });
-
-    // Fetch per-type conflict_calendars from appointment_types table
-    var apptConflicts = {}; // { apptTypeId: string[] }
-    if (apptIds.length > 0) {
-      var apptRes = await sb.from('appointment_types')
-        .select('id, conflict_calendars')
-        .in('id', apptIds);
-      (apptRes.data || []).forEach(function(a) {
-        if (Array.isArray(a.conflict_calendars) && a.conflict_calendars.length > 0)
-          apptConflicts[a.id] = a.conflict_calendars;
-      });
-    }
 
     // Fetch global conflict_calendars as fallback
     var globalConflicts = [];
     try {
-      var calRes = await sb.from('calendar_settings').select('conflict_calendars').eq('id', 'global').maybeSingle();
-      if (calRes.data && Array.isArray(calRes.data.conflict_calendars))
-        globalConflicts = calRes.data.conflict_calendars;
-    } catch (e) { /* ignore — use empty */ }
+      var calRes = await window.__api('/calendar-settings');
+      if (Array.isArray(calRes.conflict_calendars)) globalConflicts = calRes.conflict_calendars;
+    } catch (e) {}
 
-    // Build the union of all calendars we need to check
+    // Build union of calendars to check
+    var apptIds = [];
+    __bookingSlots.forEach(function(s) {
+      if (s.appointment_type_id && apptIds.indexOf(s.appointment_type_id) === -1) apptIds.push(s.appointment_type_id);
+    });
     var allCals = new Set();
     apptIds.forEach(function(id) {
       (apptConflicts[id] || globalConflicts).forEach(function(c) { allCals.add(c); });
     });
-    // If no appointment types, use global
-    if (apptIds.length === 0) {
-      globalConflicts.forEach(function(c) { allCals.add(c); });
-    }
+    if (apptIds.length === 0) globalConflicts.forEach(function(c) { allCals.add(c); });
     var cals = Array.from(allCals);
-    if (cals.length === 0) return; // no conflict calendars configured
+    if (cals.length === 0) return;
 
     var fromIso = new Date().toISOString();
     var lastSlot = __bookingSlots[__bookingSlots.length - 1];
     var toIso = new Date(lastSlot.date + 'T23:59:59').toISOString();
 
-    var fb = await fetch('https://lvizldmdficsfpgegehp.supabase.co/functions/v1/calendar-freebusy', {
+    var fbData = await window.__api('/calendar/freebusy', {
       method: 'POST',
-      headers: {
-        'Content-Type': 'application/json',
-        'Authorization': 'Bearer ' + __anon,
-        'apikey': __anon,
-      },
-      body: JSON.stringify({ calendars: cals, from: fromIso, to: toIso }),
+      body: JSON.stringify({ calendars: cals, from: fromIso, to: toIso })
     });
-    var fbData = await fb.json().catch(function() { return {}; });
     if (!fbData.success || !Array.isArray(fbData.busy) || fbData.busy.length === 0) return;
 
-    // Build a flat list with the prefixed calendar key (icloud:Name / google:id)
-    // to match the format stored in conflict_calendars
     var allBusy = fbData.busy.map(function(w) {
       var prefixed = (w.provider || '') + ':' + (w.calendar || '');
       return { start: new Date(w.start).getTime(), end: new Date(w.end).getTime(), calendar: prefixed };
@@ -424,15 +378,13 @@ async function applyConflictCalendarFiltering() {
     __bookingSlots = __bookingSlots.filter(function(s) {
       var slotStart = new Date(s.date + 'T' + s.start_time).getTime();
       var slotEnd = new Date(s.date + 'T' + s.end_time).getTime();
-      // Determine which calendars apply to this slot
       var slotCals = (s.appointment_type_id && apptConflicts[s.appointment_type_id])
-        ? apptConflicts[s.appointment_type_id]
-        : globalConflicts;
-      if (!slotCals || slotCals.length === 0) return true; // no conflicts configured
+        ? apptConflicts[s.appointment_type_id] : globalConflicts;
+      if (!slotCals || slotCals.length === 0) return true;
       var slotCalSet = new Set(slotCals);
       for (var i = 0; i < allBusy.length; i++) {
-        if (!slotCalSet.has(allBusy[i].calendar)) continue; // busy window from a different calendar
-        if (slotStart < allBusy[i].end && slotEnd > allBusy[i].start) return false; // overlap
+        if (!slotCalSet.has(allBusy[i].calendar)) continue;
+        if (slotStart < allBusy[i].end && slotEnd > allBusy[i].start) return false;
       }
       return true;
     });
@@ -565,19 +517,15 @@ async function confirmBooking() {
   // Safety net: block duplicate booking at confirmation time (unless reschedule mode)
   if (!__rescheduleCtx) {
     try {
-      var today = __localDate(new Date());
-      var dupRes = await window.__supabaseClient.from('bookings')
-        .select('id, confirm_token, first_name, last_name, email, phone, location, slot_id, status, booking_slots(date, start_time, end_time)')
-        .eq('email', email.toLowerCase()).neq('status', 'cancelled')
-        .order('created_at', { ascending: false }).limit(1).maybeSingle();
-      var dup = dupRes && dupRes.data;
-      if (dup && dup.booking_slots && dup.booking_slots.date >= today) {
+      var dupRes = await window.__api('/bookings/check-existing?email=' + encodeURIComponent(email.toLowerCase()));
+      var dup = dupRes && dupRes.booking;
+      if (dup) {
         __existingBooking = dup;
         showExistingBooking(dup);
         btn.disabled = false; btn.textContent = 'Book My Visit';
         return;
       }
-    } catch (e) { /* proceed if check fails */ }
+    } catch (e) {}
   }
   btn.textContent = 'Booking...';
   // Re-read phone after verifyPhone may have cleaned it (e.g. 07... → +44...)
@@ -589,61 +537,69 @@ async function confirmBooking() {
     var slot = __bookingSlots.find(function(s) { return s.id === __selectedSlotId; });
 
     // Atomic slot claim — prevents double-booking race conditions.
-    // The DB function increments booked_count only if still under capacity.
-    var __claimRes = await window.__supabaseClient.rpc('claim_booking_slot', { p_slot_id: __selectedSlotId });
-    var __claimed = __claimRes && __claimRes.data === true;
-    if (!__claimed) {
+    var __claimRes = await window.__api('/slots/' + __selectedSlotId + '/claim', { method: 'POST' });
+    if (!__claimRes.claimed) {
       alert('Sorry, this slot was just taken. Please pick another time.');
       btn.disabled = false; btn.textContent = __rescheduleCtx ? 'Reschedule My Visit' : 'Book My Visit';
       await loadBookingSlots(__selectedLoc);
       return;
     }
+    // Use the real slot_id returned by the claim (virtual slots get materialized server-side)
+    var __realSlotId = __claimRes.slot_id || __selectedSlotId;
 
     if (__rescheduleCtx) {
-      // Re-fetch calendar fields fresh (the page-load snapshot may be stale/null
-      // if sendCoachCalendarInvite's save hadn't completed yet)
+      // Re-fetch calendar fields fresh
       try {
-        var __freshCal = await window.__supabaseClient.from('bookings')
-          .select('calendar_event_id, calendar_event_url, calendar_provider')
-          .eq('id', __rescheduleCtx.id).maybeSingle();
-        if (__freshCal && __freshCal.data) {
-          __rescheduleCtx.calendar_event_id = __freshCal.data.calendar_event_id;
-          __rescheduleCtx.calendar_event_url = __freshCal.data.calendar_event_url;
-          __rescheduleCtx.calendar_provider = __freshCal.data.calendar_provider;
+        var __freshCal = await window.__api('/bookings/' + __rescheduleCtx.id + '?token=' + encodeURIComponent(__rescheduleCtx.confirm_token));
+        if (__freshCal && __freshCal.booking) {
+          __rescheduleCtx.calendar_event_id = __freshCal.booking.calendar_event_id;
+          __rescheduleCtx.calendar_event_url = __freshCal.booking.calendar_event_url;
+          __rescheduleCtx.calendar_provider = __freshCal.booking.calendar_provider;
         }
       } catch (e) { console.warn('Fresh calendar ref fetch failed:', e); }
       // Delete old calendar event before creating new one
       if (typeof deleteCalendarEvent === 'function' && (__rescheduleCtx.calendar_event_id || __rescheduleCtx.calendar_event_url)) {
         try { await deleteCalendarEvent(__rescheduleCtx); } catch (e) { console.warn('Old calendar event delete failed:', e); }
       }
-      // RESCHEDULE: update existing booking row + adjust slot counts.
-      var __updRes = await window.__supabaseClient.from('bookings')
-        .update({ slot_id: __selectedSlotId, location: __selectedLoc, status: 'confirmed', calendar_event_id: null, calendar_event_url: null, calendar_provider: null })
-        .eq('id', __rescheduleCtx.id)
-        .select('id, confirm_token').single();
-      __bookRow = (__updRes && __updRes.data) || {};
-      if (__rescheduleCtx.slot_id && __rescheduleCtx.slot_id !== __selectedSlotId) {
-        // Release old slot atomically (claim for the new slot already happened above)
-        try {
-          await window.__supabaseClient.rpc('release_booking_slot', { p_slot_id: __rescheduleCtx.slot_id });
-        } catch (e) { console.warn('Old slot release failed:', e); }
-      }
-      // Cancel any pending booking_confirmed messages for this lead — fresh queue happens below.
-      await window.__supabaseClient.from('message_queue')
-        .update({ status: 'cancelled' })
-        .eq('lead_email', email).eq('sequence', 'booking_confirmed').eq('status', 'queued');
+      // Update booking via API
+      var __updRes = await window.__api('/bookings/' + __rescheduleCtx.id, {
+        method: 'PUT',
+        body: JSON.stringify({
+          slot_id: __realSlotId,
+          location: __selectedLoc,
+          status: 'confirmed',
+          clear_calendar: true,
+          confirm_token: __rescheduleCtx.confirm_token
+        })
+      });
+      if (__updRes && __updRes.error) throw new Error(__updRes.error);
+      __bookRow = (__updRes && __updRes.booking) || {};
+      // Old slot released by the API
+      // Cancel pending messages
+      await window.__api('/messages/cancel', {
+        method: 'POST',
+        body: JSON.stringify({ email: email, sequence: 'booking_confirmed' })
+      });
     } else {
-      // New booking — original insert flow.
-      var __bookRes = await window.__supabaseClient.from('bookings').insert([{
-        slot_id: __selectedSlotId, first_name: fname, last_name: lname,
-        email: email, phone: phone, location: __selectedLoc
-      }]).select('id, confirm_token').single();
-      __bookRow = (__bookRes && __bookRes.data) || {};
-      // Slot already claimed atomically above — no manual increment needed.
+      // New booking — insert via API.
+      var __bookRes = await window.__api('/bookings', {
+        method: 'POST',
+        body: JSON.stringify({
+          slot_id: __realSlotId, first_name: fname, last_name: lname,
+          email: email, phone: phone, location: __selectedLoc,
+          funnel: 'ReShape Club',
+          pre_claimed: true
+        })
+      });
+      if (__bookRes.error) throw new Error(__bookRes.error);
+      __bookRow = (__bookRes && __bookRes.booking) || {};
     }
-    // Backfill location on the lead row (hormonal/waitlist leads have null location)
+    // Backfill location on the lead row
     try {
-      await window.__supabaseClient.from('leads').update({ location: __selectedLoc }).eq('email', email).is('location', null);
+      await window.__api('/leads/backfill-location', {
+        method: 'PUT',
+        body: JSON.stringify({ email: email, location: __selectedLoc })
+      });
     } catch (e) { console.warn('Lead location backfill failed:', e); }
     // Show confirmation
     var dateObj = new Date(__selectedDate + 'T12:00:00');
@@ -686,7 +642,7 @@ async function confirmBooking() {
   } catch (e) {
     console.error('Booking error:', e);
     // Release the slot we claimed since the booking failed
-    try { await window.__supabaseClient.rpc('release_booking_slot', { p_slot_id: __selectedSlotId }); } catch (_) {}
+    try { await window.__api('/slots/' + __selectedSlotId + '/release', { method: 'POST' }); } catch (_) {}
     btn.disabled = false; btn.textContent = __rescheduleCtx ? 'Reschedule My Visit' : 'Book My Visit';
   }
 }

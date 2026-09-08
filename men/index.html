@@ -1488,21 +1488,21 @@ textarea.form-input{min-height:100px;resize:vertical}
 <style>
 @keyframes fadeUp{from{opacity:0;transform:translateY(24px)}to{opacity:1;transform:translateY(0)}}
 </style>
-<script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
 <script src="../api/config.js?v=2"></script>
 <script src="../api/automations.js?v=16"></script>
 <script>
-/* ── SUPABASE INIT ── */
-(function() {
-  var SUPABASE_URL = 'https://lvizldmdficsfpgegehp.supabase.co';
-  var SUPABASE_ANON_KEY = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6Imx2aXpsZG1kZmljc2ZwZ2VnZWhwIiwicm9sZSI6ImFub24iLCJpYXQiOjE3NzM2OTk4NDQsImV4cCI6MjA4OTI3NTg0NH0.72wHbZaTvqNzW6DTb6Ae1vi9QpOg_-KiEO-Jjm9mn0k';
-  if (SUPABASE_URL !== 'YOUR_SUPABASE_URL' && SUPABASE_ANON_KEY !== 'YOUR_SUPABASE_ANON_KEY') {
-    window.__supabaseClient = supabase.createClient(SUPABASE_URL, SUPABASE_ANON_KEY);
-    console.log('Supabase connected');
-  } else {
-    console.warn('Supabase not configured');
-  }
-})();
+/* ReShape API client — bookings and leads go to the Method API, which is what
+   the acquisition dashboard reads. The old project only ever fed the retired
+   leads dashboard. */
+window.__apiBase = 'https://api.reshape.fit/website';
+window.__api = async function(path, opts) {
+  var url = window.__apiBase + path;
+  var res = await fetch(url, Object.assign({ headers: { 'Content-Type': 'application/json' } }, opts || {}));
+  return res.json();
+};
+</script>
+<script src="../api/supabase-shim.js?v=1"></script>
+<script>
 
 /* ── TICKER ── */
 const TICKS=[
@@ -1771,9 +1771,9 @@ window.addEventListener('scroll',()=>{
         if (window.__leadSubmitted) { console.log('Duplicate submit blocked'); return; }
         window.__leadSubmitted = true;
         {
-          var result = await window.__supabaseClient.from('leads').insert([leadData]);
+          var result = await window.__api('/leads', { method: 'POST', body: JSON.stringify(leadData) });
           if (result.error) {
-            console.error('Supabase error:', result.error.message);
+            console.error('API error:', result.error);
             window.__leadSubmitted = false;
           } else {
             console.log('Lead saved to database successfully');
@@ -1855,19 +1855,8 @@ async function selectBookingLoc(loc) {
 async function loadBookingSlots(loc) {
   var today = __localDate(new Date());
   try {
-    if (typeof window.__supabaseClient !== 'undefined') {
-      var res = await window.__supabaseClient
-        .from('booking_slots')
-        .select('*')
-        .eq('location', loc)
-        .eq('is_active', true)
-        .gte('date', today)
-        .order('date', { ascending: true })
-        .order('start_time', { ascending: true });
-      __bookingSlots = (res.data || []).filter(function(s) { return s.booked_count < s.max_attendees; });
-    } else {
-      __bookingSlots = [];
-    }
+    var res = await window.__api('/slots?location=' + encodeURIComponent(loc));
+    __bookingSlots = res.slots || [];
   } catch (e) {
     console.error('Booking slots error:', e);
     __bookingSlots = [];
@@ -1971,45 +1960,32 @@ async function confirmBooking() {
   _bookingInFlight = true;
   var lead = window.__bookingLead || {};
   try {
-    if (typeof window.__supabaseClient !== 'undefined') {
-      // Block duplicate booking
-      var today = new Date().toISOString().slice(0,10);
-      var dupRes = await window.__supabaseClient.from('bookings')
-        .select('id, confirm_token, booking_slots(date, start_time, end_time), location')
-        .eq('email', (lead.email||'').toLowerCase()).neq('status', 'cancelled')
-        .order('created_at', { ascending: false }).limit(1).maybeSingle();
-      var dup = dupRes && dupRes.data;
-      if (dup && dup.booking_slots && dup.booking_slots.date >= today) {
-        var dSlot = dup.booking_slots;
-        var dDate = new Date(dSlot.date + 'T12:00:00').toLocaleDateString('en-GB', { weekday:'long', day:'numeric', month:'long' });
-        var dTime = dSlot.start_time ? dSlot.start_time.substring(0,5) : '';
-        btn.textContent = 'Already booked';
-        document.getElementById('bookingWrap').style.display = 'none';
-        document.getElementById('bookingDone').style.display = 'block';
-        document.getElementById('bookingDoneDetail').innerHTML =
-          '<div class="booking-done-row"><span>Existing booking</span><span>' + dDate + ' at ' + dTime + '</span></div>' +
-          '<div class="booking-done-row"><span>Location</span><span>' + (dup.location||'') + '</span></div>' +
-          '<div style="text-align:center;margin-top:12px"><a href="/booking/?reschedule=' + dup.id + '&token=' + (dup.confirm_token||'') + '" style="color:#ED5C25;font-weight:700;font-size:14px">Need to reschedule? Click here →</a></div>';
-        _bookingInFlight = false;
-        return;
-      }
+    {
       btn.textContent = 'Booking...';
       // Insert booking
-      var res = await window.__supabaseClient.from('bookings').insert([{
+      var res = await window.__api('/bookings', { method: 'POST', body: JSON.stringify({
         slot_id: __selectedSlotId,
         first_name: lead.first_name || '',
         last_name: lead.last_name || '',
         email: lead.email || '',
         phone: lead.phone || '',
-        location: __selectedLoc || ''
-      }]).select('id, confirm_token').single();
-      if (res.error) console.error('Booking error:', res.error.message);
-      var __bookRow = (res && res.data) || {};
-      // Increment booked_count
-      var slot = __bookingSlots.find(function(s) { return s.id === __selectedSlotId; });
-      if (slot) {
-        await window.__supabaseClient.from('booking_slots').update({ booked_count: slot.booked_count + 1 }).eq('id', __selectedSlotId);
+        location: __selectedLoc || '',
+        funnel: 'ReShape Club'
+      })});
+      if (res.error === 'Booking already exists') {
+        btn.textContent = 'Already booked';
+        document.getElementById('bookingWrap').style.display = 'none';
+        document.getElementById('bookingDone').style.display = 'block';
+        document.getElementById('bookingDoneDetail').innerHTML =
+          '<div class="booking-done-row"><span>You already have a booking</span></div>' +
+          '<div style="text-align:center;margin-top:12px"><a href="/booking/?reschedule=' + (res.existing_id||'') + '&token=' + (res.confirm_token||'') + '" style="color:#ED5C25;font-weight:700;font-size:14px">Need to reschedule? Click here →</a></div>';
+        _bookingInFlight = false;
+        return;
       }
+      if (res.error) console.error('Booking error:', res.error);
+      var __bookRow = (res.booking) || {};
+      // booked_count is kept by the API when the slot is claimed.
+      var slot = __bookingSlots.find(function(s) { return s.id === __selectedSlotId; });
       // GA4 + Pixel tracking
       if (typeof gtag === 'function') {
         gtag('event', 'booking_confirmed', { event_category: 'conversion', location: __selectedLoc, date: __selectedDate });
