@@ -1767,8 +1767,15 @@ window.addEventListener('scroll',()=>{
         {
           var result = await window.__api('/leads', { method: 'POST', body: JSON.stringify(leadData) });
           if (result.error) {
-            console.error('API error:', result.error);
+            // One retry: a lost lead is invisible, and the page shows success
+            // either way, so a transient blip used to cost the enquiry outright.
+            console.warn('Lead save failed, retrying once:', result.error);
+            result = await window.__api('/leads', { method: 'POST', body: JSON.stringify(leadData) });
+          }
+          if (result.error) {
+            console.error('Lead save failed after retry:', result.error);
             window.__leadSubmitted = false;
+            window.__leadSaveFailed = true;
           } else {
             console.log('Lead saved to database successfully');
           }
@@ -1778,6 +1785,8 @@ window.addEventListener('scroll',()=>{
       }
     } catch (err) {
       console.error('Submit error:', err);
+      window.__leadSubmitted = false;
+      window.__leadSaveFailed = true;
     }
     /* ── GA4 + Meta Pixel: Lead conversion ── */
     if (typeof gtag === 'function') {
@@ -1856,12 +1865,19 @@ async function selectBookingLoc(loc) {
   await loadBookingSlots(loc);
 }
 
+var __bookingSlotsFailed = false;
 async function loadBookingSlots(loc) {
   var today = __localDate(new Date());
   try {
     var res = await window.__api('/slots?location=' + encodeURIComponent(loc));
     __bookingSlots = res.slots || [];
-  } catch (e) { console.error('Booking slots error:', e); __bookingSlots = []; }
+  } catch (e) {
+    // An unreachable API used to leave an empty calendar, which reads as "we
+    // have no availability" — the visitor gives up on a fault they cannot see.
+    console.error('Booking slots error:', e);
+    __bookingSlots = [];
+    __bookingSlotsFailed = true;
+  }
   renderBookingDates();
 }
 
@@ -1898,7 +1914,9 @@ function renderBookingDates() {
     html += '</div>';
   }
   container.innerHTML = html;
-  if (!__selectedDate) timesEl.innerHTML = '<div class="booking-empty">Select a date to see available times</div>';
+  if (!__selectedDate) timesEl.innerHTML = __bookingSlotsFailed
+    ? '<div class="booking-empty">We could not load available times just now. Please refresh the page, or call us and we will book you in.</div>'
+    : '<div class="booking-empty">Select a date to see available times</div>';
 }
 
 function changeBookingWeek(dir) {
@@ -1908,7 +1926,9 @@ function changeBookingWeek(dir) {
   __selectedSlotId = null;
   setBookingBtnState(false);
   renderBookingDates();
-  document.getElementById('bookingTimes').innerHTML = '<div class="booking-empty">Select a date to see available times</div>';
+  document.getElementById('bookingTimes').innerHTML = __bookingSlotsFailed
+    ? '<div class="booking-empty">We could not load available times just now. Please refresh the page, or call us and we will book you in.</div>'
+    : '<div class="booking-empty">Select a date to see available times</div>';
 }
 
 function selectBookingDate(dateStr) {
@@ -1921,7 +1941,12 @@ function selectBookingDate(dateStr) {
 function renderBookingTimes() {
   var container = document.getElementById('bookingTimes');
   var slots = __bookingSlots.filter(function(s) { return s.date === __selectedDate; });
-  if (slots.length === 0) { container.innerHTML = '<div class="booking-empty">No available slots for this date</div>'; return; }
+  if (slots.length === 0) {
+    container.innerHTML = '<div class="booking-empty">' + (__bookingSlotsFailed
+      ? 'We could not load available times just now. Please refresh the page, or call us and we will book you in.'
+      : 'No available slots for this date') + '</div>';
+    return;
+  }
   container.innerHTML = slots.map(function(s) {
     var remaining = s.max_attendees - s.booked_count;
     var isFull = remaining <= 0;

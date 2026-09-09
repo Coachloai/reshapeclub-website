@@ -329,12 +329,19 @@ async function selectBookingLoc(loc) {
   await loadBookingSlots(loc);
 }
 
+var __bookingSlotsFailed = false;
 async function loadBookingSlots(loc) {
   var today = __localDate(new Date());
   try {
     var res = await window.__api('/slots?location=' + encodeURIComponent(loc));
     __bookingSlots = (res.slots || []).filter(function(s) { return s.booked_count < s.max_attendees; });
-  } catch (e) { __bookingSlots = []; }
+  } catch (e) {
+    // An unreachable API used to leave an empty calendar, which reads as "we
+    // have no availability" — the visitor gives up on a fault they cannot see.
+    console.error('Booking slots load failed:', e);
+    __bookingSlots = [];
+    __bookingSlotsFailed = true;
+  }
   await applyConflictCalendarFiltering();
   renderBookingDates();
 }
@@ -357,7 +364,11 @@ async function applyConflictCalendarFiltering() {
     try {
       var calRes = await window.__api('/calendar-settings');
       if (Array.isArray(calRes.conflict_calendars)) globalConflicts = calRes.conflict_calendars;
-    } catch (e) {}
+    } catch (e) {
+      // Not fatal: the API filters conflicts server-side as well. Logged so a
+      // failure here is visible rather than silently widening availability.
+      console.warn('Global conflict-calendar settings unavailable:', e);
+    }
 
     // Build union of calendars to check
     var apptIds = [];
@@ -438,7 +449,9 @@ function renderBookingDates() {
     html += '</div>';
   }
   container.innerHTML = html;
-  if (!__selectedDate) timesEl.innerHTML = '<div class="booking-empty">Select a date to see available times</div>';
+  if (!__selectedDate) timesEl.innerHTML = __bookingSlotsFailed
+    ? '<div class="booking-empty">We could not load available times just now. Please refresh the page, or call us and we will book you in.</div>'
+    : '<div class="booking-empty">Select a date to see available times</div>';
 }
 
 function changeBookingWeek(dir) {
@@ -447,7 +460,9 @@ function changeBookingWeek(dir) {
   __selectedDate = null; __selectedSlotId = null;
   setBookingBtnState(false);
   renderBookingDates();
-  document.getElementById('bookingTimes').innerHTML = '<div class="booking-empty">Select a date to see available times</div>';
+  document.getElementById('bookingTimes').innerHTML = __bookingSlotsFailed
+    ? '<div class="booking-empty">We could not load available times just now. Please refresh the page, or call us and we will book you in.</div>'
+    : '<div class="booking-empty">Select a date to see available times</div>';
 }
 
 function selectBookingDate(dateStr) {
@@ -467,7 +482,12 @@ function renderBookingTimes() {
     var slotStartMs = new Date(s.date + 'T' + s.start_time).getTime();
     return slotStartMs >= nowMs + minLeadMs;
   });
-  if (slots.length === 0) { container.innerHTML = '<div class="booking-empty">No available slots for this date</div>'; return; }
+  if (slots.length === 0) {
+    container.innerHTML = '<div class="booking-empty">' + (__bookingSlotsFailed
+      ? 'We could not load available times just now. Please refresh the page, or call us and we will book you in.'
+      : 'No available slots for this date') + '</div>';
+    return;
+  }
   container.innerHTML = slots.map(function(s) {
     var remaining = s.max_attendees - s.booked_count;
     var isFull = remaining <= 0;
