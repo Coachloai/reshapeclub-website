@@ -537,7 +537,11 @@ async function confirmBooking() {
         btn.disabled = false; btn.textContent = 'Book My Visit';
         return;
       }
-    } catch (e) {}
+    } catch (e) {
+      // Not fatal — the API refuses duplicates too, and that refusal is now
+      // surfaced below. Logged so it is visible when debugging.
+      console.warn('Duplicate pre-check failed:', e);
+    }
   }
   btn.textContent = 'Booking...';
   // Re-read phone after verifyPhone may have cleaned it (e.g. 07... → +44...)
@@ -655,7 +659,23 @@ async function confirmBooking() {
     console.error('Booking error:', e);
     // Release the slot we claimed since the booking failed
     try { await window.__api('/slots/' + __selectedSlotId + '/release', { method: 'POST' }); } catch (_) {}
-    btn.disabled = false; btn.textContent = __rescheduleCtx ? 'Reschedule My Visit' : 'Book My Visit';
+    setBookingBtnState(true);
+    // Say what went wrong. This used to log to the console and reset the button,
+    // so on a phone the visitor saw "Booking..." flick back to "Book My Visit"
+    // with no reason given — including when the API refused because they already
+    // had a booking, which is the commonest refusal of all.
+    var msg = (e && e.message) ? String(e.message) : '';
+    if (/already exists/i.test(msg)) {
+      try {
+        var again = await window.__api('/bookings/check-existing?email=' + encodeURIComponent(email.toLowerCase()));
+        if (again && again.booking) { __existingBooking = again.booking; showExistingBooking(again.booking); return; }
+      } catch (_) {}
+      alert('You already have a visit booked. Check your email for the confirmation, or use the link in it to reschedule.');
+      return;
+    }
+    alert(msg
+      ? 'We could not complete your booking: ' + msg + '\n\nPlease pick another time, or call us and we will book you in.'
+      : 'We could not complete your booking. Please pick another time, or call us and we will book you in.');
   }
 }
 </script>
