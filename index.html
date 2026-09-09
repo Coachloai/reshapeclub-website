@@ -1914,7 +1914,7 @@
             <div class="booking-empty">Select a date to see available times</div>
           </div>
           <!-- Confirm -->
-          <button class="booking-confirm-btn" id="bookingConfirmBtn" disabled onclick="confirmBooking()">Book My Visit</button>
+          <button class="booking-confirm-btn" id="bookingConfirmBtn" disabled onclick="confirmBooking()">Select a time to continue</button>
           <button class="booking-skip" onclick="skipBooking()">I'll book later</button>
         </div>
         <!-- BOOKING CONFIRMED -->
@@ -2257,11 +2257,23 @@ var __selectedDate = null;
 var __bookingWeekOffset = 0;
 function __localDate(dt) { return dt.getFullYear() + '-' + String(dt.getMonth()+1).padStart(2,'0') + '-' + String(dt.getDate()).padStart(2,'0'); }
 
+/* The confirm button is disabled until a time is picked. A disabled button
+   swallows the click silently, so the label has to say what it is waiting for
+   — otherwise pressing it looks like the page is broken. */
+function setBookingBtnState(ready) {
+  var btn = document.getElementById('bookingConfirmBtn');
+  if (!btn) return;
+  btn.disabled = !ready;
+  btn.textContent = ready
+    ? (typeof __rescheduleCtx !== 'undefined' && __rescheduleCtx ? 'Reschedule My Visit' : 'Book My Visit')
+    : 'Select a time to continue';
+}
+
 async function selectBookingLoc(loc) {
   __selectedLoc = loc;
   __selectedSlotId = null;
   __selectedDate = null;
-  document.getElementById('bookingConfirmBtn').disabled = true;
+  setBookingBtnState(false);
   document.querySelectorAll('.booking-loc-btn').forEach(function(b) {
     b.classList.toggle('active', b.dataset.loc === loc);
   });
@@ -2321,7 +2333,7 @@ function changeBookingWeek(dir) {
   if (__bookingWeekOffset < 0) __bookingWeekOffset = 0;
   __selectedDate = null;
   __selectedSlotId = null;
-  document.getElementById('bookingConfirmBtn').disabled = true;
+  setBookingBtnState(false);
   renderBookingDates();
   document.getElementById('bookingTimes').innerHTML = '<div class="booking-empty">Select a date to see available times</div>';
 }
@@ -2329,7 +2341,7 @@ function changeBookingWeek(dir) {
 function selectBookingDate(dateStr) {
   __selectedDate = dateStr;
   __selectedSlotId = null;
-  document.getElementById('bookingConfirmBtn').disabled = true;
+  setBookingBtnState(false);
   document.querySelectorAll('.booking-date').forEach(function(el) {
     el.classList.toggle('active', el.dataset.date === dateStr);
   });
@@ -2363,7 +2375,7 @@ function selectBookingTime(slotId) {
   document.querySelectorAll('.booking-time').forEach(function(el) {
     el.classList.toggle('active', el.dataset.id === slotId);
   });
-  document.getElementById('bookingConfirmBtn').disabled = false;
+  setBookingBtnState(true);
 }
 
 var _bookingInFlight = false;
