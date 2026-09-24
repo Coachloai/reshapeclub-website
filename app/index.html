@@ -715,6 +715,11 @@ img { display: block; max-width: 100%; }
         <h4>You're in!</h4>
         <p>We'll be in touch within 24 hours to activate your Evolve membership. Check your inbox.</p>
       </div>
+      <p id="evolveError" style="display:none;margin:14px 0 0;padding:12px 14px;border-radius:8px;background:#fde8e6;color:#8a1f11;font-size:14px;line-height:1.5">
+        Sorry, that didn't go through. Please try again, or message us on
+        <a href="https://www.instagram.com/reshape.fit/" target="_blank" rel="noopener" style="color:inherit;font-weight:600">Instagram</a>
+        and we'll claim it for you.
+      </p>
     </div>
   </div>
 </section>
@@ -849,11 +854,33 @@ img { display: block; max-width: 100%; }
 })();
 
 /* ── Evolve form handler ── */
+var EVOLVE_ENDPOINT = "https://api.reshape.fit/landing/evolve-claim";
+var EVOLVE_STORE = "evolve_submission";
+
+function postEvolve(data) {
+  return fetch(EVOLVE_ENDPOINT, {
+    method: "POST",
+    headers: { "Content-Type": "application/json" },
+    body: JSON.stringify(data)
+  }).then(function (res) {
+    if (!res.ok) throw new Error("HTTP " + res.status);
+    return res;
+  });
+}
+
+function showEvolveSuccess() {
+  document.getElementById("evolveForm").style.display = "none";
+  document.getElementById("evolveError").style.display = "none";
+  document.getElementById("evolveSuccess").style.display = "block";
+}
+
 function handleEvolve(e) {
   e.preventDefault();
   var btn = document.getElementById("eSubmit");
+  var err = document.getElementById("evolveError");
   btn.disabled = true;
   btn.textContent = "Submitting...";
+  err.style.display = "none";
 
   var data = {
     name: document.getElementById("eName").value.trim(),
@@ -862,25 +889,42 @@ function handleEvolve(e) {
     motive: document.getElementById("eMotivation").value.trim()
   };
 
-  /* POST to reshape-method API */
-  fetch("https://api.reshape.fit/landing/evolve-claim", {
-    method: "POST",
-    headers: { "Content-Type": "application/json" },
-    body: JSON.stringify(data)
-  })
-  .then(function () {
-    document.getElementById("evolveForm").style.display = "none";
-    document.getElementById("evolveSuccess").style.display = "block";
-  })
-  .catch(function () {
-    /* If API not ready yet, still show success (store locally) */
-    try { localStorage.setItem("evolve_submission", JSON.stringify(data)); } catch(x) {}
-    document.getElementById("evolveForm").style.display = "none";
-    document.getElementById("evolveSuccess").style.display = "block";
-  });
+  /* Keep a copy until the API confirms it, so a failed claim is retried on
+     the visitor's next visit rather than lost. Until 24 Sep 2026 this form
+     showed "You're in!" whether or not the request succeeded; CORS was
+     blocking every claim from reshapeclub.com and nobody could tell. */
+  try { localStorage.setItem(EVOLVE_STORE, JSON.stringify(data)); } catch (x) {}
+
+  postEvolve(data)
+    .then(function () {
+      try { localStorage.removeItem(EVOLVE_STORE); } catch (x) {}
+      showEvolveSuccess();
+    })
+    .catch(function () {
+      btn.disabled = false;
+      btn.textContent = "Claim Free 8 Weeks";
+      err.style.display = "block";
+    });
 
   return false;
 }
+
+/* Re-send a claim that never reached the API on an earlier visit. */
+(function retryStoredEvolve() {
+  var raw = null;
+  try { raw = localStorage.getItem(EVOLVE_STORE); } catch (x) {}
+  if (!raw) return;
+  var data;
+  try { data = JSON.parse(raw); } catch (x) { return; }
+  if (!data || !data.name || !data.motive || !data.goal) {
+    try { localStorage.removeItem(EVOLVE_STORE); } catch (x) {}
+    return;
+  }
+  postEvolve(data).then(function () {
+    try { localStorage.removeItem(EVOLVE_STORE); } catch (x) {}
+    showEvolveSuccess();
+  }).catch(function () {});
+})();
 </script>
 </body>
 </html>
