@@ -211,23 +211,31 @@ a{text-decoration:none;color:inherit}
 </div>
 
 <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+<script>
+window.__apiBase = 'https://api.reshape.fit/website';
+window.__api = async function(path, opts) {
+  var url = window.__apiBase + path;
+  var res = await fetch(url, Object.assign({ headers: { 'Content-Type': 'application/json' } }, opts || {}));
+  return res.json();
+};
+</script>
+<script src="../api/supabase-shim.js?v=1"></script>
 <script src="../api/config.js?v=2"></script>
 <script src="../api/automations.js?v=16"></script>
 <script>
 (function() {
-  var API = 'https://api.reshape.fit';
-  var SB_URL = 'https://lvizldmdficsfpgegehp.supabase.co';
-  var SB_KEY = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6Imx2aXpsZG1kZmljc2ZwZ2VnZWhwIiwicm9sZSI6ImFub24iLCJpYXQiOjE3NzM2OTk4NDQsImV4cCI6MjA4OTI3NTg0NH0.72wHbZaTvqNzW6DTb6Ae1vi9QpOg_-KiEO-Jjm9mn0k';
-  var sb = supabase.createClient(SB_URL, SB_KEY);
   var loadingView = document.getElementById('loadingView');
   var waitlistView = document.getElementById('waitlistView');
   var openView = document.getElementById('openView');
 
   // ── Check waitlist status from site_settings ──
-  sb.from('site_settings').select('waitlist_enabled').eq('id', 'global').maybeSingle()
+  // ── Check waitlist status from API ──
+  // Was reading site_settings straight from the retired website Supabase
+  // project, which the acquisition dashboard's WAITLIST toggle never writes to.
+  window.__api('/settings')
     .then(function(res) {
       loadingView.style.display = 'none';
-      if (res.data && res.data.waitlist_enabled) {
+      if (res.settings && res.settings.waitlist_enabled) {
         waitlistView.style.display = 'block';
       } else {
         openView.style.display = 'block';
@@ -285,8 +293,8 @@ a{text-decoration:none;color:inherit}
         email: em, phone: ph,
         big_goal: gl || null,
       };
-      var insertRes = await sb.from('leads').insert([leadData]).select();
-      if (insertRes.error) throw new Error(insertRes.error.message);
+      var insertRes = await window.__api('/leads', { method: 'POST', body: JSON.stringify(leadData) });
+      if (insertRes.error) throw new Error(insertRes.error);
 
       waitlistView.style.display = 'none';
       document.getElementById('waitlistDone').style.display = 'block';
@@ -294,7 +302,7 @@ a{text-decoration:none;color:inherit}
 
       // Queue waitlist nurture sequence
       if (typeof queueSequence === 'function') {
-        queueSequence('waitlist_joined', leadData, null, sb);
+        queueSequence('waitlist_joined', leadData, null, window.__supabaseClient);
       }
 
       // Auto-redirect to Instagram after 5 seconds

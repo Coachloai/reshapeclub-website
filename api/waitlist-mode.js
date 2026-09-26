@@ -1,4 +1,4 @@
-// Waitlist mode switcher — reads site_settings.waitlist_enabled from Supabase
+// Waitlist mode switcher — reads site_settings from API
 // and swaps copy/links across the page.
 //
 // Usage: add data-open="Open text" data-waitlist="Waitlist text" to any element.
@@ -8,9 +8,6 @@
 // Elements with data-waitlist-show will be shown when waitlist is ON.
 
 (function() {
-  var SB_URL = 'https://lvizldmdficsfpgegehp.supabase.co';
-  var SB_KEY = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6Imx2aXpsZG1kZmljc2ZwZ2VnZWhwIiwicm9sZSI6ImFub24iLCJpYXQiOjE3NzM2OTk4NDQsImV4cCI6MjA4OTI3NTg0NH0.72wHbZaTvqNzW6DTb6Ae1vi9QpOg_-KiEO-Jjm9mn0k';
-
   function applyMode(isWaitlist) {
     window.__waitlistEnabled = isWaitlist;
     var mode = isWaitlist ? 'waitlist' : 'open';
@@ -67,22 +64,17 @@
     }
   }
 
-  // Try using existing Supabase client, or create minimal one
   function check() {
-    var client = window.__supabaseClient;
-    if (!client && typeof supabase !== 'undefined') {
-      client = supabase.createClient(SB_URL, SB_KEY);
-    }
-    if (!client) return;
-
-    client.from('site_settings').select('waitlist_enabled').eq('id', 'global').maybeSingle()
+    var apiBase = window.__apiBase || 'https://api.reshape.fit/website';
+    fetch(apiBase + '/settings')
+      .then(function(r) { return r.json(); })
       .then(function(res) {
-        if (res.data) applyMode(res.data.waitlist_enabled);
+        if (res.settings) applyMode(res.settings.waitlist_enabled);
       })
       .catch(function() { /* default to open — no swap needed */ });
   }
 
-  // Run after DOM is ready and Supabase client may be initialised
+  // Run after DOM is ready
   if (document.readyState === 'loading') {
     document.addEventListener('DOMContentLoaded', function() { setTimeout(check, 50); });
   } else {
