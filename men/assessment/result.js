@@ -289,7 +289,7 @@
 
   function loadConflictCalendars(ctx) {
     var locFallback = {
-      'Colchester': ['icloud:Colchester consults ', 'icloud:Sean'],
+      'Colchester': ['icloud:Colchester consults '],
       'Ipswich':    ['icloud:Ipswich consults ', 'icloud:Sara ']
     };
     return ctx.sb.from('calendar_settings').select('conflict_calendars').eq('id', 'global').maybeSingle()
