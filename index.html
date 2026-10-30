@@ -2425,7 +2425,17 @@ async function confirmBooking() {
         _bookingInFlight = false;
         return;
       }
-      if (res.error) console.error('Booking error:', res.error);
+      // Any other refusal (e.g. "Slot is fully booked") means nothing was
+      // saved. Stop here: carrying on showed "booked" and sent the whole
+      // confirmation sequence for a consult that never existed.
+      if (res.error) {
+        console.error('Booking error:', res.error);
+        btn.disabled = false;
+        btn.textContent = 'Book My Visit';
+        _bookingInFlight = false;
+        alert('We could not complete your booking: ' + res.error + '\n\nPlease pick another time, or call us and we will book you in.');
+        return;
+      }
       var __bookRow = (res.booking) || {};
       var slot = __bookingSlots.find(function(s) { return s.id === __selectedSlotId; });
       // booked_count is kept by the API when the slot is claimed.
