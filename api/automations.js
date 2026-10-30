@@ -535,8 +535,10 @@ function studioMeta(booking) {
       mapsUrl: 'https://share.google/HvwtMaMqe5KoVJrSF'
     };
   }
+  // Sean left the team. Every {coach} in the consult sequences resolves
+  // through here, so this one name is the whole of it for Colchester.
   return {
-    coach:   'Sean',
+    coach:   'Jaime',
     address: 'Unit 3 Building A, Chesterwell Mews, Colchester, CO4 6EE',
     mapsUrl: 'https://share.google/ZyRUxiyJeD3Ro8isK'
   };
