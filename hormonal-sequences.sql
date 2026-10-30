@@ -74,7 +74,7 @@ VALUES (
   'email',
   3600,
   'You stopped partway through',
-  E'{first_name} — you got partway through the ReShape assessment and stopped.\n\nYour answers are saved. There''s about 90 seconds of questions left. You''ll get your hormonal pattern report at the end.\n\nThe plan that worked in your 20s isn''t supposed to work in your 40s. The pattern report is where you find out which hormones are actually driving your plateau.\n\n— Loai & Sean\nReShape · Ipswich & Colchester',
+  E'{first_name} — you got partway through the ReShape assessment and stopped.\n\nYour answers are saved. There''s about 90 seconds of questions left. You''ll get your hormonal pattern report at the end.\n\nThe plan that worked in your 20s isn''t supposed to work in your 40s. The pattern report is where you find out which hormones are actually driving your plateau.\n\n— Loai & Jaime\nReShape · Ipswich & Colchester',
   true
 );
 
@@ -100,7 +100,7 @@ VALUES (
   'whatsapp',
   129600,
   NULL,
-  E'Hey {first_name}, it''s Sean from ReShape — saw your assessment is sitting half-finished. Your answers clear in about 36 hours so wanted to flag it. 90 seconds to wrap it up: {book_link} Reply STOP if you''d rather we didn''t message.',
+  E'Hey {first_name}, it''s Jaime from ReShape — saw your assessment is sitting half-finished. Your answers clear in about 36 hours so wanted to flag it. 90 seconds to wrap it up: {book_link} Reply STOP if you''d rather we didn''t message.',
   true
 );
 
@@ -113,7 +113,7 @@ VALUES (
   'email',
   259200,
   'Last reminder — saved answers expire today',
-  E'{first_name} — your saved assessment answers clear from our system tonight.\n\nIf you want to finish it on the answers you''ve already given, today is the day. Otherwise it''s a fresh start later.\n\nNo further reminders after this one. If now isn''t the moment, no problem — we''ll be here when it is.\n\n— Loai & Sean',
+  E'{first_name} — your saved assessment answers clear from our system tonight.\n\nIf you want to finish it on the answers you''ve already given, today is the day. Otherwise it''s a fresh start later.\n\nNo further reminders after this one. If now isn''t the moment, no problem — we''ll be here when it is.\n\n— Loai & Jaime',
   true
 );
 
@@ -198,7 +198,7 @@ VALUES (
   'email',
   345600,
   '"I''m not sure this is for me"',
-  E'Three things women tell us when they hesitate to book the consultation.\n\n1. "I don''t think it''s bad enough." If you''re searching, it''s bad enough. The women who get the best outcomes are the ones who came to us before they hit crisis — not after.\n\n2. "I should try something else first." Something else is usually another diet, another supplement, another protocol. If your hormonal pattern is what''s driving the plateau, the next thing sits on top of the problem instead of resolving it. That''s why nothing''s working.\n\n3. "What if I book and it''s not for me?" About 30% of the women who take a consultation don''t end up joining the programme. We tell them so on the day, and we still send them their plan. The consultation is how we both decide if it''s a fit. It costs nothing and you leave with clarity either way.\n\n— Sean',
+  E'Three things women tell us when they hesitate to book the consultation.\n\n1. "I don''t think it''s bad enough." If you''re searching, it''s bad enough. The women who get the best outcomes are the ones who came to us before they hit crisis — not after.\n\n2. "I should try something else first." Something else is usually another diet, another supplement, another protocol. If your hormonal pattern is what''s driving the plateau, the next thing sits on top of the problem instead of resolving it. That''s why nothing''s working.\n\n3. "What if I book and it''s not for me?" About 30% of the women who take a consultation don''t end up joining the programme. We tell them so on the day, and we still send them their plan. The consultation is how we both decide if it''s a fit. It costs nothing and you leave with clarity either way.\n\n— Jaime',
   true
 );
 
@@ -224,7 +224,7 @@ VALUES (
   'email',
   604800,
   'A week ago, you completed the assessment',
-  E'A week ago, you took 3 minutes and answered 14 questions about your symptoms. That''s more than most women do — most keep googling, keep guessing, keep waiting.\n\nThe next step is 45 minutes with Loai or Sean. They''ll have read your assessment in detail before you arrive — no chatbot, no script, no junior staff.\n\nWhat you''ll leave with:\n\n• What your pattern actually means clinically\n• The 2-3 things most likely driving your specific plateau\n• Whether the 12-week ReShape programme is right for you (and if it isn''t, what is)\n• Real numbers — programme cost, structure, timing — so you can decide without surprises\n\nReply if you''d rather ask me a question first. I read every reply.\n\n— Loai',
+  E'A week ago, you took 3 minutes and answered 14 questions about your symptoms. That''s more than most women do — most keep googling, keep guessing, keep waiting.\n\nThe next step is 45 minutes with Loai or Jaime. They''ll have read your assessment in detail before you arrive — no chatbot, no script, no junior staff.\n\nWhat you''ll leave with:\n\n• What your pattern actually means clinically\n• The 2-3 things most likely driving your specific plateau\n• Whether the 12-week ReShape programme is right for you (and if it isn''t, what is)\n• Real numbers — programme cost, structure, timing — so you can decide without surprises\n\nReply if you''d rather ask me a question first. I read every reply.\n\n— Loai',
   true
 );
 
@@ -267,7 +267,7 @@ VALUES (
   'whatsapp',
   1296000,
   NULL,
-  E'Quick one {first_name} — Sean here. Working on a piece about {pattern} today and thought you might find it useful given your assessment. Want me to send when it''s done?',
+  E'Quick one {first_name} — Jaime here. Working on a piece about {pattern} today and thought you might find it useful given your assessment. Want me to send when it''s done?',
   true
 );
 
@@ -332,7 +332,7 @@ VALUES (
   'email',
   2505600,
   'Three things to do this week — book or don''t',
-  E'No pitch. No CTA at the end. Just three things that help.\n\n1. Morning sunlight in the first hour after waking. Not through a window — outside, 10-15 minutes. This resets your cortisol rhythm, which is the single biggest lever for {pattern}.\n\n2. 30g protein at breakfast within 60 minutes of getting up. This stabilises blood sugar for the morning and reduces the afternoon crash that drives evening overeating.\n\n3. No caffeine until you''ve eaten. Coffee on an empty stomach spikes cortisol and disrupts the regulation you''re trying to build.\n\nThese help. They won''t fix the underlying pattern. That''s the work we do in the 12-week programme. But they''re a good place to start regardless.\n\n— Loai & Sean',
+  E'No pitch. No CTA at the end. Just three things that help.\n\n1. Morning sunlight in the first hour after waking. Not through a window — outside, 10-15 minutes. This resets your cortisol rhythm, which is the single biggest lever for {pattern}.\n\n2. 30g protein at breakfast within 60 minutes of getting up. This stabilises blood sugar for the morning and reduces the afternoon crash that drives evening overeating.\n\n3. No caffeine until you''ve eaten. Coffee on an empty stomach spikes cortisol and disrupts the regulation you''re trying to build.\n\nThese help. They won''t fix the underlying pattern. That''s the work we do in the 12-week programme. But they''re a good place to start regardless.\n\n— Loai & Jaime',
   true
 );
 
@@ -457,7 +457,7 @@ VALUES (
   'email',
   7084800,
   'One last thing, regardless of what you decide',
-  E'The single most important habit for {pattern}.\n\nRegardless of whether you ever book a consultation, do this one thing: restructure your morning.\n\nGet outside within 60 minutes of waking. No phone first. Sunlight on your face — even on an overcast UK day, outdoor light intensity is 10-50x what you get indoors. This resets your circadian cortisol rhythm, which is the master switch for everything downstream — thyroid function, insulin sensitivity, sleep architecture, appetite regulation.\n\nThen eat. 30g protein minimum. Eggs, Greek yoghurt, whatever works. Before caffeine. Caffeine on an empty stomach spikes cortisol and undoes the reset you just did.\n\nThese two things — morning light and a protein-first breakfast — are free, evidence-based, and effective for any hormonal pattern. They won''t fix everything. But they''re the foundation that everything else sits on.\n\nIf any of this has been useful, you know where we are.\n\nBook your free consultation → {book_link}\n\n— Loai & Sean',
+  E'The single most important habit for {pattern}.\n\nRegardless of whether you ever book a consultation, do this one thing: restructure your morning.\n\nGet outside within 60 minutes of waking. No phone first. Sunlight on your face — even on an overcast UK day, outdoor light intensity is 10-50x what you get indoors. This resets your circadian cortisol rhythm, which is the master switch for everything downstream — thyroid function, insulin sensitivity, sleep architecture, appetite regulation.\n\nThen eat. 30g protein minimum. Eggs, Greek yoghurt, whatever works. Before caffeine. Caffeine on an empty stomach spikes cortisol and undoes the reset you just did.\n\nThese two things — morning light and a protein-first breakfast — are free, evidence-based, and effective for any hormonal pattern. They won''t fix everything. But they''re the foundation that everything else sits on.\n\nIf any of this has been useful, you know where we are.\n\nBook your free consultation → {book_link}\n\n— Loai & Jaime',
   true
 );
 

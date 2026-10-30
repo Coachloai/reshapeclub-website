@@ -300,7 +300,7 @@
 
   function loadConflictCalendars(ctx) {
     var locFallback = {
-      'Colchester': ['icloud:Colchester consults ', 'icloud:Sean'],
+      'Colchester': ['icloud:Colchester consults '],
       'Ipswich':    ['icloud:Ipswich consults ', 'icloud:Sara ']
     };
     // Try loading from calendar_settings global config
